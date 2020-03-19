@@ -1,0 +1,12 @@
+{
+  "name": "api文档",
+  "version": "0.0.1",
+  "description": "撮合交易平台server接口文档",
+  "title": "撮合交易平台 api 文档",
+
+
+  "template": {
+  	"withCompare": true,
+  	"withGenerator": true
+  }
+}

@@ -1,0 +1,23 @@
+server:
+  port: 85
+
+spring:
+  application:
+    name: mt-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+    zookeeper:
+      connect-string: localhost:2181
+      max-retries: 3
+
+datasource:
+  host: localhost
+  port: 5432
+  database: match_trade
+  username: postgres
+  password: admin
+

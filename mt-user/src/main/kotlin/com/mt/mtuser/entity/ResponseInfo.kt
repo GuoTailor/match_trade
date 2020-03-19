@@ -1,0 +1,71 @@
+package com.mt.mtuser.entity
+
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import java.io.Serializable
+
+/**
+ * Created by gyh on 2020/3/18.
+ */
+class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
+
+    var data: Any? = null
+
+    companion object {
+        @JvmStatic
+        fun <T> ok(monoBody: Mono<T>): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, 0, "成功")
+        }
+
+        @JvmStatic
+        fun <T> ok(monoBody: Mono<T>, msg: String): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, 0, msg)
+        }
+
+        @JvmStatic
+        fun <T> ok(monoBody: Mono<T>, code: Int, msg: String): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, code, msg)
+        }
+
+        @JvmStatic
+        fun <T> failed(monoBody: Mono<T>): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, 1, "失败")
+        }
+
+        @JvmStatic
+        fun <T> failed(monoBody: Mono<T>, msg: String): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, 1, msg)
+        }
+
+        @JvmStatic
+        fun <T> failed(monoBody: Mono<T>, code: Int, msg: String): Mono<ResponseInfo<T>> {
+            return responseBodyCreate(monoBody, code, msg)
+        }
+
+        @JvmStatic
+        fun <T> responseBodyCreate(monoData: Mono<T>, code: Int, msg: String): Mono<ResponseInfo<T>> {
+            return monoData.map { data: T ->
+                val responseInfo = ResponseInfo<T>(code, msg)
+                responseInfo.data = data
+                responseInfo
+            }
+        }
+
+        // -------------=====>>>>>>> flux <<<<<<<<<====----------------
+
+        @JvmStatic
+        fun <T> ok(monoBody: Flux<T>): Mono<ResponseInfo<Flux<T>>> {
+            return responseBodyCreate(monoBody, 0, "成功")
+        }
+
+
+        @JvmStatic
+        fun <T> responseBodyCreate(monoData: Flux<T>, code: Int, msg: String): Mono<ResponseInfo<Flux<T>>> {
+            return Mono.just(monoData).map { data ->
+                val responseInfo = ResponseInfo<Flux<T>>(code, msg)
+                responseInfo.data = data
+                responseInfo
+            }
+        }
+    }
+}

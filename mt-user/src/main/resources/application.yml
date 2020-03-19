@@ -1,0 +1,22 @@
+server:
+  port: 84
+
+spring:
+  application:
+    name: api
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      max-retries: 3
+logging:
+  group:
+    sql: com.mt.mtuser.dao, io.r2dbc.postgresql
+  level:
+    sql: DEBUG
+datasource:
+  host: localhost
+  port: 5432
+  database: match_trade
+  username: postgres
+  password: admin
+
