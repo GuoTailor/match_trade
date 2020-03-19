@@ -101,15 +101,15 @@ class CompanyController {
      * @apiDescription  获取所有公司信息
      * @apiName getAllCompany
      * @apiVersion 0.0.1
-     * @apiParamExample {json} 请求-例子:
-     * {"pageSize":30, "pageNum":1}
+     * @apiParamExample {url} 请求-例子:
+     * /company?pageSize=10&pageNum=1
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
      * @apiGroup Company
      * @apiPermission user
      */
     @GetMapping
-    fun getAllCompany(query: PageQuery): Mono<ResponseInfo<Flux<Company>>> {
+    fun getAllCompany(query: PageQuery): Mono<ResponseInfo<List<Company>>> {
         return ResponseInfo.ok(companyService.findAllByQuery(query))
     }
 }

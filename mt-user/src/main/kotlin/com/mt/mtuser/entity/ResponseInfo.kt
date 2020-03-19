@@ -4,12 +4,13 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.Serializable
 
+
 /**
  * Created by gyh on 2020/3/18.
  */
 class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
-    var data: Any? = null
+    var data: T? = null
 
     companion object {
         @JvmStatic
@@ -54,15 +55,14 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
         // -------------=====>>>>>>> flux <<<<<<<<<====----------------
 
         @JvmStatic
-        fun <T> ok(monoBody: Flux<T>): Mono<ResponseInfo<Flux<T>>> {
+        fun <T> ok(monoBody: Flux<T>): Mono<ResponseInfo<List<T>>> {
             return responseBodyCreate(monoBody, 0, "成功")
         }
 
-
         @JvmStatic
-        fun <T> responseBodyCreate(monoData: Flux<T>, code: Int, msg: String): Mono<ResponseInfo<Flux<T>>> {
-            return Mono.just(monoData).map { data ->
-                val responseInfo = ResponseInfo<Flux<T>>(code, msg)
+        fun <T> responseBodyCreate(monoData: Flux<T>, code: Int, msg: String): Mono<ResponseInfo<List<T>>> {
+            return monoData.collectList().map { data ->
+                val responseInfo = ResponseInfo<List<T>>(code, msg)
                 responseInfo.data = data
                 responseInfo
             }

@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 /**
  * Created by gyh on 2019/1/24.
+ *
  * @apiDefine PageQuery
  * @apiParam {String} [searchField] 查找字段,如'name'
  * @apiParam {String} [searchOper] 查找方式,可用参数与说明: [{'cn':包含'},{'eq':'等于'},{'nc':'不包含'},{'ne':'不等于'},{'gt':'大于'},{'gt;=':'大于等于'},{'lt':'小于'},{'lt;=':'小于等于'},{'bw':'开始于'},{'bn':'不开始于'},{'ew':'结束于'},{'en':'不结束于'}]
@@ -62,18 +63,75 @@ public class PageQuery {
         return (this.pageNum - 1) * this.pageSize;
     }
 
-    public String buildSubSql() {
-        if (StringUtils.isEmpty(searchField) || StringUtils.isEmpty(searchOper) || StringUtils.isEmpty(searchString)) {
-            return null;
-        }
-        for (String[] strings : nmka) { //判断指令是否在允许范围内
-            if (strings[0].equals(searchOper)) {
-                String subsql = " " + searchField + " " + strings[1] + " '" + String.format(strings[2], searchString) + "'";
-                loggger.info(subsql);
-                return subsql;
+    private String buildSubSql() {
+        StringBuilder sql = new StringBuilder();
+        if (!StringUtils.isEmpty(searchField) && !StringUtils.isEmpty(searchOper) && !StringUtils.isEmpty(searchString)) {
+            for (String[] strings : nmka) { //判断指令是否在允许范围内
+                if (strings[0].equals(searchOper)) {
+                    return sql
+                            .append(" ")
+                            .append(searchField).append(" ")
+                            .append(strings[1]).append(" '")
+                            .append(String.format(strings[2], searchString)).append("'")
+                            .toString();
+                }
             }
         }
-        return null;
+        loggger.info(sql.toString());
+        return sql.toString();
+    }
+
+    private String buildLimitSql() {
+        return " limit " +
+                pageSize +
+                " OFFSET " +
+                pageSize * (pageNum - 1);
+    }
+
+    public QueryBuild where() {
+        return new QueryBuild(this).where();
+    }
+
+    public QueryBuild query() {
+        return new QueryBuild(this).where();
+    }
+
+    public QueryBuild limit() {
+        return new QueryBuild(this).limit();
+    }
+
+    public static class QueryBuild {
+        private String where = " ";
+        private String query = " ";
+        private String limit = " ";
+        private PageQuery pageQuery;
+
+        public QueryBuild(PageQuery pageQuery) {
+            this.pageQuery = pageQuery;
+        }
+
+        public QueryBuild where() {
+            where = " where";
+            return this;
+        }
+
+        public QueryBuild query() {
+            query = pageQuery.buildSubSql();
+            return this;
+        }
+
+        public QueryBuild limit() {
+            limit = pageQuery.buildLimitSql();
+            return this;
+        }
+
+        public String build() {
+            String sql = StringUtils.isEmpty(query.trim())
+                    ? query + limit
+                    : where + query + limit;
+            loggger.info(sql);
+            return sql;
+        }
     }
 
     public Integer getPageNum() {
@@ -123,4 +181,6 @@ public class PageQuery {
     public void setSearchString(String searchString) {
         this.searchString = searchString;
     }
+
+
 }

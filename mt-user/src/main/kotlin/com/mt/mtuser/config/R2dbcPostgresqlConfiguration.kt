@@ -3,6 +3,7 @@ package com.mt.mtuser.config
 import io.r2dbc.postgresql.PostgresqlConnectionConfiguration
 
 import io.r2dbc.postgresql.PostgresqlConnectionFactory
+import io.r2dbc.postgresql.api.PostgresqlConnection
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -43,5 +44,10 @@ class R2dbcPostgresqlConfiguration : AbstractR2dbcConfiguration() {
                 .password(password)
                 .port(port)
                 .build())
+    }
+
+    @Bean
+    fun connect(connectionFactory: PostgresqlConnectionFactory): PostgresqlConnection {
+        return connectionFactory.create().block()!!
     }
 }

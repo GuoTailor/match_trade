@@ -9,8 +9,6 @@ import reactor.core.publisher.Flux
  * Created by gyh on 2020/3/18.
  */
 interface CompanyDao : ReactiveCrudRepository<Company, Int> {
-    @Query("select id, `name`, room_count, `mode`, create_time " +
-            "from company" +
-            "where &1")
+    @Query("select id, `name`, room_count, `mode`, create_time from mt_company $1::string")
     fun findAllByQuery(search: String): Flux<Company>
 }
