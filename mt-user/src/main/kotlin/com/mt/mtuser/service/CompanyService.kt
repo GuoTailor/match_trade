@@ -1,14 +1,18 @@
 package com.mt.mtuser.service
 
-import com.mt.mtuser.common.page.PageQuery
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.entity.Company
-import io.r2dbc.postgresql.api.PostgresqlConnection
+import com.mt.mtuser.entity.page.PageQuery
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Order.desc
+import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.query.Criteria.where
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.*
 
 /**
  * Created by gyh on 2020/3/18.
@@ -24,7 +28,7 @@ class CompanyService {
      * 故如果要代码动态生成sql语句只能使用代码形式手动拼接字符串
      */
     @Autowired
-    private lateinit var connect: PostgresqlConnection
+    private lateinit var connect: DatabaseClient
 
     fun count(): Mono<Long> {
         return companyDao.count()
@@ -43,20 +47,12 @@ class CompanyService {
     fun findAll() = companyDao.findAll()
 
     fun findAllByQuery(query: PageQuery): Flux<Company> {
-        return connect.createStatement("select id, name, room_count, mode, create_time from mt_company " +
-                        query.where().query().limit().build())
-                .execute()
-                .flatMap {
-                    it.map { t, u ->
-                        val company = Company()
-                        company.id = t.get("id", Integer::class.java)?.toInt()
-                        company.name = t.get("name", String::class.java)
-                        company.roomCount = t.get("room_count", Integer::class.java)?.toInt()
-                        company.mode = t.get("mode", String::class.java)
-                        company.createTime = t.get("create_time", Date::class.java)
-                        company
-                    }
-                }
+        return connect.select()
+                .from<Company>()
+                .matching(query.where())
+                .page(query.page())
+                .fetch()
+                .all()
     }
 
 }

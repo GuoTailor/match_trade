@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono
  */
 @Configuration
 class AuthHandler {
-    val log = LoggerFactory.getLogger(this.javaClass.simpleName)
+    val log = LoggerFactory.getLogger(this.javaClass.simpleName)!!
 
     @Autowired
     private lateinit var userRepository: MyReactiveUserDetailsService

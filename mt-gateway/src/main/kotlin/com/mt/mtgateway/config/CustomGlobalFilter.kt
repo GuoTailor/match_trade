@@ -67,7 +67,7 @@ class CustomGlobalFilter : WebFilter, Ordered {
         resp.statusCode = HttpStatus.UNAUTHORIZED
         resp.headers.add("Content-Type", "application/json;charset=UTF-8")
         val returnStr = "{" +
-                "\"code\":\"${HttpStatus.UNAUTHORIZED}\"," +
+                "\"code\":1," +
                 "\"msg\":\"$mess\"" +
                 "}"
         val buffer = resp.bufferFactory().wrap(returnStr.toByteArray(StandardCharsets.UTF_8))

@@ -9,10 +9,12 @@ spring:
       connect-string: localhost:2181
       max-retries: 3
 logging:
-  group:
-    sql: com.mt.mtuser.dao, io.r2dbc.postgresql
   level:
-    sql: DEBUG
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG
+
 datasource:
   host: localhost
   port: 5432

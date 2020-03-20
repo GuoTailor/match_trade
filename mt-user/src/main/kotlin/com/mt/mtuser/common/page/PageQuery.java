@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * Created by gyh on 2019/1/24.
  *
- * @apiDefine PageQuery
+ * @apiDefine PageQuery_Deprecated
  * @apiParam {String} [searchField] 查找字段,如'name'
  * @apiParam {String} [searchOper] 查找方式,可用参数与说明: [{'cn':包含'},{'eq':'等于'},{'nc':'不包含'},{'ne':'不等于'},{'gt':'大于'},{'gt;=':'大于等于'},{'lt':'小于'},{'lt;=':'小于等于'},{'bw':'开始于'},{'bn':'不开始于'},{'ew':'结束于'},{'en':'不结束于'}]
  * @apiParam {String} [searchString] 查找的字符,如'张'
@@ -18,13 +18,14 @@ import java.util.logging.Logger;
  * @apiParam {Int} [pageSize] 每页显示的数量,默认30条
  * @apiParam {String} [orderBy] 排序规则,如: create_time DESC,update_time ASC
  */
+@Deprecated
 public class PageQuery {
     private static final Logger loggger = Logger.getLogger(PageQuery.class.getSimpleName());
     /**
      * 按id递增排序
      */
     public static final String ORDER_BY_CREATE_TIME_DESC = "id ASC";
-
+    protected QueryBuild queryBuild = new QueryBuild(this);
     private static final Map<String, String> SearchType = new HashMap<>();
     private static final String[][] nmka = {
             {"cn", "like", "%%%s%%"}, {"eq", "=", "%s"},
@@ -88,19 +89,24 @@ public class PageQuery {
                 pageSize * (pageNum - 1);
     }
 
+    public QueryBuild sql(String sql) {
+        return queryBuild.sql(sql);
+    }
+
     public QueryBuild where() {
-        return new QueryBuild(this).where();
+        return queryBuild.where();
     }
 
     public QueryBuild query() {
-        return new QueryBuild(this).where();
+        return queryBuild.where();
     }
 
     public QueryBuild limit() {
-        return new QueryBuild(this).limit();
+        return queryBuild.limit();
     }
 
     public static class QueryBuild {
+        private String sql = " ";
         private String where = " ";
         private String query = " ";
         private String limit = " ";
@@ -110,8 +116,13 @@ public class PageQuery {
             this.pageQuery = pageQuery;
         }
 
+        public QueryBuild sql(String sql) {
+            this.sql = sql;
+            return this;
+        }
+
         public QueryBuild where() {
-            where = " where";
+            where = " where ";
             return this;
         }
 
@@ -126,11 +137,11 @@ public class PageQuery {
         }
 
         public String build() {
-            String sql = StringUtils.isEmpty(query.trim())
-                    ? query + limit
-                    : where + query + limit;
-            loggger.info(sql);
-            return sql;
+            String buildsql = sql + (StringUtils.isEmpty(query.trim())
+                    ? query + limit : where + query + limit);
+            loggger.info(buildsql);
+            new PageView<>().count(buildsql);
+            return buildsql;
         }
     }
 
@@ -181,6 +192,5 @@ public class PageQuery {
     public void setSearchString(String searchString) {
         this.searchString = searchString;
     }
-
 
 }

@@ -3,6 +3,9 @@ package com.mt.mtgateway.token;
 import com.mt.mtgateway.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -12,6 +15,7 @@ import java.util.stream.Collectors;
  */
 public class TokenMgr {
     private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    private static final ObjectMapper json = new ObjectMapper();
     /**
      * 创建SecretKey
      */
@@ -40,7 +44,7 @@ public class TokenMgr {
         return builder.compact();
     }
 
-    public static String createJWT(User user) {
+    public static String createJWT(User user) throws IOException {
         long nowMillis = System.currentTimeMillis();
         long expMillis = nowMillis + Constant.JWT_TTL;
         Date now = new Date(nowMillis);
@@ -48,7 +52,7 @@ public class TokenMgr {
         Claims claims = Jwts.claims();
         claims.put("id", user.getId());
         claims.put("username", user.getUsername());
-        claims.put("role", user.getRoles());
+        claims.put("role", json.writeValueAsString(user.getRoles()));
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(key, signatureAlgorithm)          // 签名算法以及密匙

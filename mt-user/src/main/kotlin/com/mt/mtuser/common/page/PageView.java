@@ -1,14 +1,17 @@
 package com.mt.mtuser.common.page;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
  * Created by gyh on 2018/10/19.
  * 分页对象
  */
+@Deprecated
 public class PageView<T> {
-    private static final long serialVersionUID = -4426958360243585882L;
-
+    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     // 当前页号
     private int pageNum;
 
@@ -30,6 +33,17 @@ public class PageView<T> {
     }
 
     public PageView() {
+    }
+
+    public void count(PageQuery query) {
+        String sql = query.queryBuild.build().trim();
+        String select = "select count(1) " + sql.substring(sql.lastIndexOf("from"));
+        logger.info(select);
+    }
+
+    public void count(String sql) {
+        String select = "select count(1) " + sql.substring(sql.lastIndexOf("from"));
+        logger.info(select);
     }
 
     public static int getPages(long total, int pageSize) {

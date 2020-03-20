@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono
  */
 
 class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
-    val json = jacksonObjectMapper()
+    private val json = jacksonObjectMapper()
 
     override fun convert(exchange: ServerWebExchange): Mono<Authentication> {
         return Mono.justOrEmpty(exchange).map<Authentication> {
