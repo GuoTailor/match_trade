@@ -58,4 +58,6 @@ class Role() : GrantedAuthority {
     override fun getAuthority(): String {
         return name!!
     }
+
+
 }

@@ -15,7 +15,7 @@ import java.util.stream.Collectors
  */
 abstract class BaseUser : UserDetails {
     @Transient
-    var roles: Collection<GrantedAuthority>? = null
+    open var roles: Collection<GrantedAuthority>? = null
     abstract var id: Int?
 
     /**
@@ -75,21 +75,18 @@ abstract class BaseUser : UserDetails {
          * @return 用户
         </P> */
         fun getcurrentUser(): Mono<BaseUser> {
-            return ReactiveSecurityContextHolder.getContext()
+            return ReactiveSecurityContextHolder
+                    .getContext()
                     .map { context ->
-                        context.authentication.details as? BaseUser ?: object : BaseUser() {
-                            override fun getUsername(): String {
-                                throw IllegalStateException("没有当前用户")
-                            }
-
-                            override var id: Int? = null
-                                get() = throw IllegalStateException("没有当前用户")
-
-                            override fun getPassword(): String? {
-                                return null
-                            }
-
+                        val id = context.authentication.principal?.toString()
+                        val username = context.authentication.credentials?.toString()
+                        val roles = context.authentication.authorities
+                        object: BaseUser() {
+                            override var roles = roles
+                            override var id: Int? = id?.toInt()
+                            override fun getPassword(): String? = null
                             override fun setPassword(password: String?) {}
+                            override fun getUsername() = username
                         }
                     }
         }
@@ -101,24 +98,15 @@ abstract class BaseUser : UserDetails {
          * @param role  用的角色
          * @return [BaseUser]
          */
-        fun createUser(id: Int, username: String, role: List<String>?): BaseUser {
+        fun createUser(id: Int, username: String, role: Collection<String>?): BaseUser {
             return object : BaseUser() {
-                override var id: Int? = null
-                    get() = id
-
-                override fun getUsername(): String {
-                    return username
-                }
-
+                override var id: Int? = id
+                override fun getUsername() = username
                 override fun getAuthorities(): Collection<GrantedAuthority> {
                     return role?.stream()?.map { GrantedAuthority { it } }?.collect(Collectors.toList())
                             ?: mutableListOf()
                 }
-
-                override fun getPassword(): String? {
-                    return null
-                }
-
+                override fun getPassword(): String? = null
                 override fun setPassword(password: String?) {}
             }
         }

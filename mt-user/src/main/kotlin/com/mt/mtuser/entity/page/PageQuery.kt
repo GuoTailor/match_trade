@@ -1,9 +1,11 @@
 package com.mt.mtuser.entity.page
 
+import com.mt.mtuser.common.page.PageQuery
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.r2dbc.query.Criteria
+import org.springframework.util.StringUtils
 
 /**
  * Created by gyh on 2020/3/20.
@@ -17,16 +19,18 @@ import org.springframework.data.r2dbc.query.Criteria
  * @apiParam {String} [order] 排序字段,如: id
  * @apiParam {String} [direction] 排序规则,如: DESC, ASC
  */
-class PageQuery(private val pageNum: Int = 0,
-                private val pageSize: Int = 30,
+class PageQuery(val pageNum: Int = 0,
+                val pageSize: Int = 30,
                 private val searchField: String? = null,    // 查找字段 :name
                 private val searchOper: String? = null,     // 查找方式 :"[['cn', '包含'], ['eq', '等于'], ['nc', '不包含'], ['ne', '不等于'], ['gt', '大于'], ['lt', '小于'], ['bw', '开始于'], ['bn', '不开始于'], ['ew', '结束于'], ['en', '不结束于']]")
                 private val searchString: String? = null,   // 查找的字符 :张
                 private val order: String? = null,          // 排序字段 :id
                 private val direction: String? = null       // 排序方向 :asc
 ) {
-    private val oper = arrayOf(arrayOf("cn", "like", "%%%s%%"), arrayOf("bw", "like", "%s%%"), arrayOf("ew", "like", "%%%s"))
-
+    private val oper = arrayOf(arrayOf("cn", "like", "%%%s%%"), arrayOf("eq", "=", "%s"),
+            arrayOf("nc", "not like", "%%%s%%"), arrayOf("ne", "<>", "%s"), arrayOf("gt", ">", "%s"),
+            arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
+            arrayOf("ew", "like", "%%%s"), arrayOf("en", "not like", "%%%s"))
     fun where(): Criteria {
         var criteria = Criteria.empty()
         if (searchField != null && searchOper != null && searchString != null) {
@@ -45,6 +49,17 @@ class PageQuery(private val pageNum: Int = 0,
             }
         }
         return criteria
+    }
+
+    fun getWhere(): String {
+        if (!StringUtils.isEmpty(searchField) && !StringUtils.isEmpty(searchOper) && !StringUtils.isEmpty(searchString)) {
+            for (strings in oper) { //判断指令是否在允许范围内
+                if (strings[0] == searchOper) {
+                    return " \"$searchField\" ${strings[1]} '${String.format(strings[2], searchString)}'"
+                }
+            }
+        }
+        return ""
     }
 
     fun page(): Pageable {

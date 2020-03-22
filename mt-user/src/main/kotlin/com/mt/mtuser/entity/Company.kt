@@ -1,7 +1,9 @@
 package com.mt.mtuser.entity
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import org.springframework.format.annotation.DateTimeFormat
 import java.util.*
 
 /**
@@ -27,6 +29,8 @@ data class Company(
         var mode: String? = null,
 
         /*** 注册时间*/
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
         var createTime: Date? = null
 
 )

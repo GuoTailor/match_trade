@@ -3,15 +3,12 @@ package com.mt.mtuser.service
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
+import com.mt.mtuser.entity.page.getPage
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
-import org.springframework.data.domain.Sort.Order.desc
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
-import org.springframework.data.r2dbc.query.Criteria.where
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -46,13 +43,14 @@ class CompanyService {
 
     fun findAll() = companyDao.findAll()
 
-    fun findAllByQuery(query: PageQuery): Flux<Company> {
-        return connect.select()
+    fun findAllByQuery(query: PageQuery): Mono<PageView<Company>> {
+        return getPage(connect.select()
                 .from<Company>()
                 .matching(query.where())
                 .page(query.page())
                 .fetch()
                 .all()
+                , connect, query)
     }
 
 }

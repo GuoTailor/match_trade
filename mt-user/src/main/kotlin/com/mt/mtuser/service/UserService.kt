@@ -44,4 +44,7 @@ class UserService {
         }.onErrorReturn(ResponseInfo<Unit>(1, "请正确填写用户名或密码"))
     }
 
+    fun findById(id: Int) = userDao.findById(id)
+
+    fun save(user: User) = userDao.save(user)
 }

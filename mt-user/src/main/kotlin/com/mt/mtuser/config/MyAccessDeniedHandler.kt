@@ -19,9 +19,9 @@ class MyAccessDeniedHandler : ServerAccessDeniedHandler {
     override fun handle(exchange: ServerWebExchange, denied: AccessDeniedException): Mono<Void> {
         logger.info("权限拒绝")
         val resp = exchange.response
-        resp.statusCode = HttpStatus.UNAUTHORIZED
-        resp.headers.add("Content-Type", "application/json;charset=UTF-8")
         val mono  = Mono.fromCallable{
+            resp.statusCode = HttpStatus.UNAUTHORIZED
+            resp.headers.add("Content-Type", "application/json;charset=UTF-8")
             val returnStr = jacksonObjectMapper().writeValueAsString(ResponseInfo<Unit>(1, "没有权限访问"))
             resp.bufferFactory().wrap(returnStr.toByteArray(StandardCharsets.UTF_8))
         }

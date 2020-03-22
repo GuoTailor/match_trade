@@ -27,5 +27,7 @@ class RoleService {
     fun findAll(): Flux<MtRole> {
         return roleDao.findAll()
     }
+
+    fun save(role: Role) = userRoleDao.save(role)
     
 }

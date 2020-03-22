@@ -39,6 +39,7 @@ class AuthHandler {
                     ServerResponse.ok()
                             .contentType(APPLICATION_JSON)
                             .body(BodyInserters.fromValue(RespBody<String>(0, "成功", TokenMgr.createJWT(user as User))))
+                            // TODO 包装阻塞代码
                 } else {
                     ServerResponse.badRequest()
                             .body(BodyInserters.fromValue(RespBody<Void>(1, "Invalid credentials")))

@@ -4,6 +4,7 @@ import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.CompanyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -103,12 +104,13 @@ class CompanyController {
      * @apiParamExample {url} 请求-例子:
      * /company?pageSize=10&pageNum=1
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":[]}
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup Company
      * @apiPermission user
      */
     @GetMapping
-    fun getAllCompany(query: PageQuery): Mono<ResponseInfo<List<Company>>> {
+    fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
         return ResponseInfo.ok(companyService.findAllByQuery(query))
     }
+
 }

@@ -12,6 +12,10 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     var data: T? = null
 
+    constructor(code: Int, msg: String, data: T):this (code, msg){
+        this.data = data
+    }
+
     companion object {
         @JvmStatic
         fun <T> ok(monoBody: Mono<T>): Mono<ResponseInfo<T>> {

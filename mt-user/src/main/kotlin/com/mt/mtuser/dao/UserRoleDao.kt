@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono
  */
 interface UserRoleDao: ReactiveCrudRepository<Role, Int> {
     @Query("select" +
-            " ur.id, userid, roleid, companyid, `name`, nameZh" +
+            " ur.id, userid, roleid, companyid, name, name_zh" +
             " from mt_user_role ur" +
             " left join mt_role r on ur.roleid = r.id" +
             " where userid = $1")
