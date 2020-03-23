@@ -34,7 +34,7 @@ class CompanyController {
      * @apiPermission admin
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     fun register(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
         return Mono.just(company)
                 .filter { !Util.isEmpty(it) }
@@ -43,7 +43,7 @@ class CompanyController {
     }
 
     /**
-     * @api {delete} /company 删除一个公司
+     * @api {delete} /company/{id} 删除一个公司
      * @apiDescription  删除公司
      * @apiName deleteCompany
      * @apiVersion 0.0.1
@@ -53,7 +53,7 @@ class CompanyController {
      * @apiGroup Company
      * @apiPermission admin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Int): Mono<ResponseInfo<Void>> {
         return ResponseInfo.ok(companyService.deleteById(id))
@@ -72,14 +72,14 @@ class CompanyController {
      * @apiGroup Company
      * @apiPermission admin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping
     fun update(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
         return ResponseInfo.ok(companyService.update(company))
     }
 
     /**
-     * @api {get} /company 获取一个公司信息
+     * @api {get} /company/{id} 获取一个公司信息
      * @apiDescription  获取公司信息
      * @apiName getCompany
      * @apiVersion 0.0.1

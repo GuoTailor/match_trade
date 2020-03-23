@@ -94,7 +94,7 @@ class UserController {
      * @apiPermission admin
      */
     @PutMapping("/role")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     fun changeAuthority(@RequestBody role: Role): Mono<ResponseInfo<Role>> {
         return ResponseInfo.ok(roleService.save(role), "修改成功")
     }

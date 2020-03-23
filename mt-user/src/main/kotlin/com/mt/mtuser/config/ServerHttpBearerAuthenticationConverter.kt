@@ -27,6 +27,6 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
             val role: String = request.headers.getFirst("role") ?: "[]"
             val roles: List<String> = json.readValue(role)
             UsernamePasswordAuthenticationToken(id, username, roles.map { GrantedAuthority { it } })
-        }.log()
+        }
     }
 }

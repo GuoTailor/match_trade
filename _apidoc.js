@@ -19,6 +19,12 @@
  */
 
 /**
+ * @apiDefine supperAdmin 需要传入一个token作为权限验证,且具有超级管理员角色
+ * 需要权限为admin的用户
+ * @apiVersion 0.0.1
+ */
+
+/**
  * @apiDefine none 无需登录授权
  * 无需登录授权
  */

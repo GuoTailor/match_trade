@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets
 class CustomGlobalFilter : WebFilter, Ordered {
     val log = LoggerFactory.getLogger(this.javaClass.simpleName)
     val TOKEN_PREFIX = "Bearer "
-    val skipAuthUrls = arrayOf("/login", "/user/register", "/user/login")
+    val skipAuthUrls = arrayOf("/login", "/api/register", "/api/login")
 
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {

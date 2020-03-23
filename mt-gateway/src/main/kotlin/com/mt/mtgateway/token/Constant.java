@@ -18,7 +18,7 @@ public class Constant {
     public static final String JWT_ID = "5236A";                                        //jwtid
     public static final String JWT_SECRET = "7786df7fc3a34e26a61c034d5ec8245d";            //密匙
                                     //60秒      分    小时
-    public static final long JWT_TTL = 60_000 * 60 * 24 * 2;         //超时
+    public static final long JWT_TTL = 60_000 * 60 * 24 * 7;         //超时
 
     /**
      * ================================================================
