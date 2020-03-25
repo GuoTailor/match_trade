@@ -71,7 +71,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Company
-     * @apiPermission admin
+     * @apiPermission supperAdmin
      */
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -91,7 +91,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": null}
      * @apiGroup Company
-     * @apiPermission admin
+     * @apiPermission supperAdmin
      */
     @PutMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -114,7 +114,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": null}
      * @apiGroup Company
-     * @apiPermission admin
+     * @apiPermission supperAdmin
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")

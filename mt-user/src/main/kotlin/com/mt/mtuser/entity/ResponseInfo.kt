@@ -71,5 +71,7 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 responseInfo
             }
         }
+
+        // -------------=====>>>>>>> 协程 <<<<<<<<<====----------------
     }
 }

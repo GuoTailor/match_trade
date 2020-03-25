@@ -15,7 +15,7 @@ import java.util.stream.Collectors
  */
 abstract class BaseUser : UserDetails {
     @Transient
-    open var roles: Collection<GrantedAuthority>? = null
+    open var roles: Collection<GrantedAuthority> = emptyList()
     abstract var id: Int?
 
     /**
@@ -37,7 +37,7 @@ abstract class BaseUser : UserDetails {
 
     @JsonIgnore
     override fun getAuthorities(): Collection<GrantedAuthority> {
-        return roles!!
+        return roles
     }
 
     @JsonIgnore

@@ -1,12 +1,16 @@
 package com.mt.mtuser.entity.room
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
 /**
  * Created by gyh on 2020/3/23.
  * 及时撮合
  */
+@Table("mt_room_timely")
 class TimelyMatch(
+        @Id
         var id: Int? = null,
         var roomNumber: String? = null,     // 房间号
         var companyId: Int? = null,         // 公司id

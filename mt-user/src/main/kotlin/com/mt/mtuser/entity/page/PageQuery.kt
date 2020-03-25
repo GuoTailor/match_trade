@@ -1,6 +1,5 @@
 package com.mt.mtuser.entity.page
 
-import com.mt.mtuser.common.page.PageQuery
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

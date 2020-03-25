@@ -8,6 +8,11 @@ spring:
     zookeeper:
       connect-string: localhost:2181
       max-retries: 3
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000
+
 logging:
   level:
     org:

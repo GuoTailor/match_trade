@@ -65,7 +65,7 @@ class UserController {
      * @apiPermission user
      */
     @PutMapping
-    fun alter(@RequestBody user: User): Mono<ResponseInfo<User>> {
+    fun alter(@RequestBody user: User): Mono<ResponseInfo<Int>> {
         return if (!Util.isEmpty(user)) {
             ResponseInfo.ok(BaseUser.getcurrentUser().flatMap {
                 user.id = it.id

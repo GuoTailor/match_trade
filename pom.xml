@@ -11,7 +11,7 @@
 
     <modules>
         <module>mt-gateway</module>
-        <module>mt-zookeeper</module>
+        <module>mt-user</module>
     </modules>
 
 </project>

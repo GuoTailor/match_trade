@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 /**
  * Created by gyh on 2020/3/23.
  */
-@Service
+//@Service
 class BaseRoomService {
     @Autowired lateinit var clickRoomDao : ClickRoomDao
     @Autowired lateinit var doubleRoomDao : DoubleRoomDao

@@ -170,9 +170,9 @@ public class Util {
     public static boolean isEmpty(Object obj, boolean strict) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
-            PropertyDescriptor[] proDescrtptors = beanInfo == null ? null : beanInfo.getPropertyDescriptors();
-            if (proDescrtptors != null && proDescrtptors.length > 0) {
-                for (PropertyDescriptor propDesc : proDescrtptors) {
+            PropertyDescriptor[] proDescriptors = beanInfo == null ? null : beanInfo.getPropertyDescriptors();
+            if (proDescriptors != null && proDescriptors.length > 0) {
+                for (PropertyDescriptor propDesc : proDescriptors) {
                     Object o = propDesc.getReadMethod().invoke(obj);
                     if (o == null || o.equals(obj.getClass())) {
                         continue;
