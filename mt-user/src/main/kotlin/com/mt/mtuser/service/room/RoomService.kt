@@ -5,6 +5,7 @@ import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.service.DynamicSqlService
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,20 +21,20 @@ import java.util.*
 @Service
 class RoomService {
     @Autowired
-    lateinit var clickRoomDao: ClickRoomDao
+    protected lateinit var clickRoomDao: ClickRoomDao
     @Autowired
     protected lateinit var connect: DatabaseClient
     @Autowired
-    lateinit var companyDao: CompanyDao
+    protected lateinit var companyDao: CompanyDao
     @Autowired
-    lateinit var doubleRoomDao: DoubleRoomDao
+    protected lateinit var doubleRoomDao: DoubleRoomDao
     @Autowired
-    lateinit var timelyRoomDao: TimelyRoomDao
+    protected lateinit var timelyRoomDao: TimelyRoomDao
     @Autowired
-    lateinit var dynamicSql: DynamicSqlService
+    protected lateinit var dynamicSql: DynamicSqlService
     @Autowired
-    lateinit var timingRoomDao: TimingRoomDao
-    val mutex = Mutex()
+    protected lateinit var timingRoomDao: TimingRoomDao
+    protected val mutex = Mutex()
 
     suspend fun createClickRoom(clickRoom: ClickMatch): ClickMatch {
         clickRoom.id = null
@@ -58,10 +59,12 @@ class RoomService {
             RoomEnum.TIMING.flag -> timingRoomDao
             else -> throw IllegalStateException("不支持的房间号")
         }
+        // TODO 更新启用记录
         return dao.enableRoomByRoomNumber(roomNumber, enable)
     }
 
     suspend  fun <T: BaseRoom<T>> updateRoomById(room: BaseRoom<T>): Int {
+        // TODO 不能修改房间状态
         room.roomNumber = null
         room.id ?: throw IllegalStateException("请指定id")
         return connect.update()
@@ -87,6 +90,10 @@ class RoomService {
 
 
     suspend fun checkRoomCount(companyId: Int) {
-
+        val company = companyDao.findById(companyId).awaitSingle()
+        clickRoomDao
+        doubleRoomDao
+        timelyRoomDao
+        timingRoomDao
     }
 }

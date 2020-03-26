@@ -21,4 +21,7 @@ interface DoubleRoomDao : CoroutineCrudRepository<DoubleMatch, Int>, BaseRoomDao
     @Modifying
     @Query("update mt_room_double set enable = :enable where id = :id")
     override suspend fun enableRoomById(id: Int, enable: String): Int
+
+    @Query("select count(1) from mt_room_double where company_id = :companyId")
+    suspend fun countByCompanyId(companyId: Int): Int
 }

@@ -21,4 +21,7 @@ interface TimelyRoomDao : CoroutineCrudRepository<TimelyMatch, Int>, BaseRoomDao
     @Modifying
     @Query("update mt_room_timely set enable = :enable where id = :id")
     override suspend fun enableRoomById(id: Int, enable: String): Int
+
+    @Query("select count(1) from mt_room_timely where company_id = :companyId")
+    suspend fun countByCompanyId(companyId: Int): Int
 }

@@ -21,4 +21,7 @@ interface ClickRoomDao : CoroutineCrudRepository<ClickMatch, Int>, BaseRoomDao {
     @Modifying
     @Query("update mt_room_click set enable = :enable where id = :id")
     override suspend fun enableRoomById(id: Int, enable: String): Int
+
+    @Query("select count(1) from mt_room_click where company_id = :companyId")
+    suspend fun countByCompanyId(companyId: Int): Int
 }

@@ -1,25 +1,26 @@
 package com.mt.mtuser
 
+import com.mt.mtuser.entity.User
+import com.mt.mtuser.service.UserService
 import org.junit.jupiter.api.Test
-import reactor.core.publisher.Flux
-import java.time.Duration
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
 
-//@SpringBootTest
+@SpringBootTest
 class MtUserApplicationTests {
+    @Autowired
+    private lateinit var userService: UserService
 
     @Test
     fun contextLoads() {
-        Flux.interval(Duration.ofMillis(250))
-                .map { input: Long ->
-                    if (input < 3) return@map "tick $input"
-                    throw RuntimeException("boom")
-                }
-                .elapsed()
-                .retry(1)
-                .subscribe({ x -> println(x) }) { x -> System.err.println(x) }
-
-        Thread.sleep(2100)
+        val user = User()
+        user.id = 5
+        user.nickName = "ok"
+        val requert = userService.save(user).block()
+        println(requert.toString())
+        Thread.sleep(1000)
+        println("结束")
     }
 
 }
