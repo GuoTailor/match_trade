@@ -1,5 +1,18 @@
 # match_trade 
+
+服务器返回的统一格式
+```json
+    {
+      "code": 0,
+      "msg":"成功或失败",
+      "data": ["数据"]
+    }
+```
+打包:进入到指定模块根目录运行``` mvnw clean kotlin:compile package -Dmaven.test.skip=true ``` <br>
+运行:进入到指定模块根目录运行``` mvnw spring-boot:run ```
+
 ## 注意事项：
+- 每次推代码时先拉一下调试没bug再推
 - 该工程使用kotlin + webflux + postgresql + zookeeper
 - 启动时请先启动zookeeper和postgresql
 - 访问时请统一访问mt-gateway，85端口，然后由mt-gateway转发请求，<br>
@@ -8,6 +21,7 @@
 - spring security PreAuthorize注解 与kotlin协程不兼容 [详情](https://github.com/spring-projects/spring-security/issues/8143)
 
 ## 关于学习文档：
+    
 <a style="color:red;"> 注意以下文档均需要翻墙访问，且为英文文档，可以用chrome搭配谷歌访问助手访问，chrome支持翻译网页</a>
 
 - [kotlin文档](https://www.kotlincn.net/docs/reference/)
