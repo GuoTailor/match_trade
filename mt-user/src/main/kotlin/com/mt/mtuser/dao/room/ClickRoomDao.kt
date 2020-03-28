@@ -9,7 +9,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
  * Created by gyh on 2020/3/23.
  * 点选撮合
  */
-interface ClickRoomDao : CoroutineCrudRepository<ClickMatch, Int>, BaseRoomDao {
+interface ClickRoomDao : CoroutineCrudRepository<ClickMatch, Int>, BaseRoomDao<ClickMatch> {
 
     @Query("select count(1) from mt_room_click where room_number = :roomNumber limit 1")
     override suspend fun existsByRoomNumber(roomNumber: String): Int
@@ -24,4 +24,11 @@ interface ClickRoomDao : CoroutineCrudRepository<ClickMatch, Int>, BaseRoomDao {
 
     @Query("select count(1) from mt_room_click where company_id = :companyId")
     suspend fun countByCompanyId(companyId: Int): Int
+
+    @Query("select * from mt_room_click where room_number = ：roomNumber")
+    override suspend fun findByRoomNumber(roomNumber: String): ClickMatch
+
+    @Query("select room_number from mt_room_click order by room_number desc limit 1")
+    override suspend fun findLastRoomNumber(): String
+
 }

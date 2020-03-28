@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
+import sun.misc.Regexp;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -16,6 +17,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Util {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(Util.class);
@@ -254,4 +257,30 @@ public class Util {
         return nextInt.toString();
     }
 
+    /**
+     * 构建一个把当前{@code roomNumber}加一的房间号<br>
+     * 注意可能把当前房间号加一后出现进位，如99加一后为100，长度从两位变成了三位，这是返回一个全0的字符串
+     * @param roomNumber 当前的房间号
+     * @return 一个新的房间号
+     */
+    public static String createNewNumber(String roomNumber) {
+        Matcher matcher = Pattern.compile("[1-9][\\d]*").matcher(roomNumber);
+        if (matcher.find()) {
+            int start = matcher.start();
+            int length = matcher.end() - start;
+            String ss = roomNumber.substring(0, start);
+            int num = Integer.parseInt(matcher.group()) + 1;
+            String es = Integer.toString(num);
+            if (es.length() > length) {
+                StringBuilder temp = new StringBuilder();
+                while (length-- > 0) {
+                    temp.append("0");
+                }
+                es = temp.toString();
+            }
+            return ss + es;
+        } else {
+            throw new IllegalStateException("不支持的房间号" + roomNumber);
+        }
+    }
 }

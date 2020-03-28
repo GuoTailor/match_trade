@@ -2,6 +2,7 @@ package com.mt.mtuser.entity
 
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import java.io.Serializable
 
 
@@ -12,7 +13,7 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     var data: T? = null
 
-    constructor(code: Int, msg: String, data: T):this (code, msg){
+    constructor(code: Int, msg: String, data: T) : this(code, msg) {
         this.data = data
     }
 
@@ -53,6 +54,9 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 val responseInfo = ResponseInfo<T>(code, msg)
                 responseInfo.data = data
                 responseInfo
+            }.onErrorResume {
+                val responseInfo = ResponseInfo<T>(1, it.message ?: "失败")
+                responseInfo.toMono()
             }
         }
 
@@ -69,6 +73,9 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 val responseInfo = ResponseInfo<List<T>>(code, msg)
                 responseInfo.data = data
                 responseInfo
+            }.onErrorResume {
+                val responseInfo = ResponseInfo<List<T>>(1, it.message ?: "失败")
+                responseInfo.toMono()
             }
         }
 

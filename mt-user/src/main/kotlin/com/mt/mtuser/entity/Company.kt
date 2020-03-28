@@ -12,7 +12,7 @@ import java.util.*
  * @apiParam {Integer} id 公司id
  * @apiParam {String} name 公司名字
  * @apiParam {Integer} roomCount 房间数量
- * @apiParam {String} mode 竞价模式{2：点选、3： 点选+定时、4：及时 +点选+定时}
+ * @apiParam {String} mode 竞价模式{1：点选、2： 点选+定时、3：定时 +点选+两两撮合、4：全部}
  */
 @Table("mt_company")
 data class Company(

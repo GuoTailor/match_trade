@@ -1,7 +1,7 @@
 package com.mt.mtuser.service
 
-import com.mt.mtuser.entity.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
 import org.springframework.data.r2dbc.mapping.SettableValue
 import org.springframework.data.r2dbc.query.Update
@@ -15,11 +15,13 @@ import org.springframework.stereotype.Service
 class DynamicSqlService {
     @Autowired
     lateinit var dataAccessStrategy: ReactiveDataAccessStrategy
+    @Autowired
+    protected lateinit var connect: DatabaseClient
 
-    fun dynamicUpdate(user: Any): Update {
-        val columns: MutableMap<SqlIdentifier, SettableValue> = dataAccessStrategy.getOutboundRow(user)
-        val ids = dataAccessStrategy.getIdentifierColumns(user.javaClass)
-        check(ids.isNotEmpty()) { "No identifier columns in " + user.javaClass.name + "!" }
+    fun getUpdate(data: Any): Update {
+        val columns: MutableMap<SqlIdentifier, SettableValue> = dataAccessStrategy.getOutboundRow(data)
+        val ids = dataAccessStrategy.getIdentifierColumns(data.javaClass)
+        check(ids.isNotEmpty()) { "No identifier columns in " + data.javaClass.name + "!" }
         columns.remove(ids[0]) // do not update the Id column.
         var update: Update? = null
         for (column in columns.keys) {
@@ -31,11 +33,17 @@ class DynamicSqlService {
         return update ?: throw IllegalStateException("没有可更新的字段")
     }
 
-    fun getTable(type : Class<*>): SqlIdentifier {
+    fun getTable(type: Class<*>): SqlIdentifier {
         return dataAccessStrategy
                 .converter
                 .mappingContext
                 .getRequiredPersistentEntity(type)
                 .tableName
+    }
+
+    suspend fun dynamicUpdate(data: Any): DatabaseClient.UpdateMatchingSpec {
+        return connect.update()
+                .table(getTable(data.javaClass))
+                .using(getUpdate(data))
     }
 }

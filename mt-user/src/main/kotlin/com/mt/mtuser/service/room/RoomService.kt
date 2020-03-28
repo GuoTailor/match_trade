@@ -1,19 +1,25 @@
 package com.mt.mtuser.service.room
 
+import com.mt.mtuser.common.Util
+import com.mt.mtuser.service.RedisUtil
+import com.mt.mtuser.common.toDate
 import com.mt.mtuser.dao.CompanyDao
+import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
+import com.mt.mtuser.entity.RoomRecord
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.service.DynamicSqlService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.query.Criteria.where
 import org.springframework.stereotype.Service
-import java.util.*
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Created by gyh on 2020/3/23.
@@ -21,55 +27,85 @@ import java.util.*
 @Service
 class RoomService {
     @Autowired
-    protected lateinit var clickRoomDao: ClickRoomDao
+    private lateinit var clickRoomDao: ClickRoomDao
+
     @Autowired
-    protected lateinit var connect: DatabaseClient
+    private lateinit var companyDao: CompanyDao
+
     @Autowired
-    protected lateinit var companyDao: CompanyDao
+    private lateinit var doubleRoomDao: DoubleRoomDao
+
     @Autowired
-    protected lateinit var doubleRoomDao: DoubleRoomDao
+    private lateinit var timelyRoomDao: TimelyRoomDao
+
     @Autowired
-    protected lateinit var timelyRoomDao: TimelyRoomDao
+    private lateinit var dynamicSql: DynamicSqlService
+
     @Autowired
-    protected lateinit var dynamicSql: DynamicSqlService
+    private lateinit var timingRoomDao: TimingRoomDao
+
     @Autowired
-    protected lateinit var timingRoomDao: TimingRoomDao
-    protected val mutex = Mutex()
+    private lateinit var roomRecordDao: RoomRecordDao
+
+    @Autowired
+    private lateinit var redisUtil: RedisUtil
+    private val mutex = Mutex()
 
     suspend fun createClickRoom(clickRoom: ClickMatch): ClickMatch {
-        clickRoom.id = null
-        clickRoom.startTime = Date()
-        return mutex.withLock {
-            do {
-                clickRoom.createRoomNumber()    // 可能将来会出现死循环
-            } while (clickRoomDao.existsByRoomNumber(clickRoom.roomNumber!!) > 1)
-            clickRoomDao.save(clickRoom)
+        // TODO 校验bean的数据合法性
+        val company = companyDao.findById(clickRoom.companyId!!).awaitSingle()
+        if (RoomExtend.getRoomDome(company.mode!!).contains(clickRoom.flag)) { // 判断房间模式
+            clickRoom.id = null
+            clickRoom.isEnable<ClickMatch>(false)
+            return mutex.withLock {
+                if (checkRoomCount(clickRoom.companyId!!)) {
+                    val oldNumber = clickRoomDao.findLastRoomNumber()   //TODO 检查新房间号是否存在
+                    clickRoom.roomNumber = Util.createNewNumber(oldNumber)
+                    clickRoomDao.save(clickRoom)
+                } else {
+                    throw IllegalStateException("公司房间已满")
+                }
+            }
+        } else {
+            throw IllegalStateException("不能创建该模式${clickRoom.flag}的房间")
         }
     }
 
     /**
      * 使能一个房间
-     * @param enable true：启用一个房间 else 关闭一个房间
+     * @param value 1：启用一个房间 0 关闭一个房间
      */
-    suspend fun enableRoom(roomNumber: String, enable: String): Int {
-        val dao: BaseRoomDao = when (roomNumber.substring(0, 1)) {
+    @Transactional
+    suspend fun enableRoom(roomNumber: String, value: String): Int {
+        // TODO 验证时间是否超过24点
+        val dao: BaseRoomDao<*> = when (roomNumber.substring(0, 1)) {
             RoomEnum.CLICK.flag -> clickRoomDao
             RoomEnum.DOUBLE.flag -> doubleRoomDao
             RoomEnum.TIMELY.flag -> timelyRoomDao
             RoomEnum.TIMING.flag -> timingRoomDao
             else -> throw IllegalStateException("不支持的房间号")
         }
-        // TODO 更新启用记录
-        return dao.enableRoomByRoomNumber(roomNumber, enable)
+        val rest = dao.enableRoomByRoomNumber(roomNumber, value)
+        val room: BaseRoom = dao.findByRoomNumber(roomNumber)
+        val roomRecord = RoomRecord(room)
+        if (value == "1") {
+            val startTime = System.currentTimeMillis()
+            roomRecord.startTime = startTime.toDate()
+            roomRecord.endTime = (room.time!!.toMillis() + startTime).toDate()
+            val newRecord = roomRecordDao.save(roomRecord)
+            redisUtil.saveRoomRecord(newRecord)
+        } else if (value == "0") {
+            roomRecord.endTime = System.currentTimeMillis().toDate()
+            // TODO 根据记录id更新记录的结束时间 可以考虑redis存
+        }
+        return rest
     }
 
-    suspend  fun <T: BaseRoom<T>> updateRoomById(room: BaseRoom<T>): Int {
-        // TODO 不能修改房间状态
-        room.roomNumber = null
+    suspend fun <T : BaseRoom> updateRoomById(room: BaseRoom): Int {
         room.id ?: throw IllegalStateException("请指定id")
-        return connect.update()
-                .table(dynamicSql.getTable(room.javaClass))
-                .using(dynamicSql.dynamicUpdate(room))
+        room.enable = null
+        room.roomNumber = null
+        return dynamicSql.dynamicUpdate(room)
                 .matching(where("id").`is`(room.id!!))
                 .fetch().awaitRowsUpdated()
     }
@@ -77,23 +113,25 @@ class RoomService {
     /**
      * 通过房间号更新一个房间的配置
      */
-    suspend  fun <T: BaseRoom<T>> updateRoomByRoomNumber(room: BaseRoom<T>): Int {
-        val roomNumber = room.roomNumber
-        roomNumber ?: throw IllegalStateException("请指定房间号")
+    suspend fun <T : BaseRoom> updateRoomByRoomNumber(room: T): Int {
+        val roomNumber = room.roomNumber ?: throw IllegalStateException("请指定房间号")
         room.roomNumber = null
-        return connect.update()
-                .table(dynamicSql.getTable(room.javaClass))
-                .using(dynamicSql.dynamicUpdate(room))
+        room.enable = null
+        room.id = null
+        return dynamicSql.dynamicUpdate(room)
                 .matching(where("room_number").`is`(roomNumber))
                 .fetch().awaitRowsUpdated()
     }
 
-
-    suspend fun checkRoomCount(companyId: Int) {
-        val company = companyDao.findById(companyId).awaitSingle()
-        clickRoomDao
-        doubleRoomDao
-        timelyRoomDao
-        timingRoomDao
+    /**
+     * 检查房间数量，异步同时获取四种房间的数量
+     */
+    suspend fun checkRoomCount(companyId: Int): Boolean = coroutineScope {
+        val company = async { companyDao.findById(companyId).awaitSingle() }
+        val countClick = async { clickRoomDao.countByCompanyId(companyId) }
+        val countDouble = async { doubleRoomDao.countByCompanyId(companyId) }
+        val countTimely = async { timelyRoomDao.countByCompanyId(companyId) }
+        val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
+        company.await().roomCount!! > (countClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
     }
 }

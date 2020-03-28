@@ -52,7 +52,7 @@ class UserService {
     fun save(user: User): Mono<Int> {
         return connect.update()
                 .table(dynamicSql.getTable(User::class.java))
-                .using(dynamicSql.dynamicUpdate(user))
+                .using(dynamicSql.getUpdate(user))
                 .matching(where("id").`is`(user.id!!))
                 .fetch()
                 .rowsUpdated()
