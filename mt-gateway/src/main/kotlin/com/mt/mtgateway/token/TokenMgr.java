@@ -1,9 +1,9 @@
 package com.mt.mtgateway.token;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mt.mtgateway.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.security.Key;

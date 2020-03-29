@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    # 使用 Nacos 作为配置中心
+    nacos:
+      config:
+        group: yaolong
+        server-addr: lian.yaolong.top:8848
+        file-extension: yml
+        prefix: mt-gateway
+
