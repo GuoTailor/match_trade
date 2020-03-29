@@ -8,7 +8,7 @@ import com.mt.mtuser.entity.User
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.query.Criteria.where
+import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils

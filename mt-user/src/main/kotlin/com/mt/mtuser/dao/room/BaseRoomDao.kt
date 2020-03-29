@@ -8,6 +8,9 @@ import com.mt.mtuser.entity.room.BaseRoom
 interface BaseRoomDao<T : BaseRoom> {
     suspend fun existsByRoomNumber(roomNumber: String): Int
 
+    /**
+     * 通过房间号启用/禁用房间
+     */
     suspend fun enableRoomByRoomNumber(roomNumber: String, enable:String): Int
 
     suspend fun enableRoomById(id: Int, enable: String): Int

@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity
 
+import com.mt.mtuser.common.minus
 import com.mt.mtuser.entity.room.BaseRoom
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
@@ -35,4 +36,14 @@ class RoomRecord(
     constructor(room: BaseRoom) :
             this(roomId = room.id, model = room.flag, companyId = room.companyId, duration = room.time)
 
+
+    suspend fun getDuration(): RoomRecord{
+        duration = startTime?.let {start ->
+            endTime?.let { end ->
+                Duration.ofMillis(start - end)
+            }
+        }
+        return this
+    }
 }
+

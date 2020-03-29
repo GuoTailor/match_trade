@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.util.concurrent.TimeUnit
 
 /**
  * Created by gyh on 2020/3/24.
@@ -24,6 +23,21 @@ class RedisUtil {
 
     suspend fun getRoomRecord(roomNumber: String) {
         redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
+    }
+
+    suspend fun deleteRoomRecord(roomNumber: String) {
+        redisTemplate.deleteAndAwait(roomKey + roomNumber)
+    }
+
+    /**
+     * 获取并删除一个记录<br>
+     * 注意该方法不安全
+     */
+    suspend fun deleteAndGetRoomRecord(roomNumber: String): RoomRecord {
+        // 不安全 也许有更好的办法
+        val roomRecord = redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
+        redisTemplate.deleteAndAwait(roomKey + roomNumber)
+        return roomRecord as RoomRecord
     }
 
     /**

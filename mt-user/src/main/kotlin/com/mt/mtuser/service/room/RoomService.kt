@@ -1,7 +1,6 @@
 package com.mt.mtuser.service.room
 
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.common.toDate
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
@@ -10,6 +9,7 @@ import com.mt.mtuser.entity.RoomRecord
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.service.DynamicSqlService
+import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitSingle
@@ -17,7 +17,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.query.Criteria.where
+import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -59,8 +59,11 @@ class RoomService {
             clickRoom.isEnable<ClickMatch>(false)
             return mutex.withLock {
                 if (checkRoomCount(clickRoom.companyId!!)) {
-                    val oldNumber = clickRoomDao.findLastRoomNumber()   //TODO 检查新房间号是否存在
-                    clickRoom.roomNumber = Util.createNewNumber(oldNumber)
+                    var oldNumber = clickRoomDao.findLastRoomNumber()   //TODO
+                    do {
+                        clickRoom.roomNumber = Util.createNewNumber(oldNumber)
+                        oldNumber =  clickRoom.roomNumber!!
+                    } while (clickRoomDao.existsByRoomNumber(clickRoom.roomNumber!!) > 0)
                     clickRoomDao.save(clickRoom)
                 } else {
                     throw IllegalStateException("公司房间已满")
@@ -87,7 +90,7 @@ class RoomService {
         }
         val rest = dao.enableRoomByRoomNumber(roomNumber, value)
         val room: BaseRoom = dao.findByRoomNumber(roomNumber)
-        val roomRecord = RoomRecord(room)
+        var roomRecord = RoomRecord(room)
         if (value == "1") {
             val startTime = System.currentTimeMillis()
             roomRecord.startTime = startTime.toDate()
@@ -95,8 +98,13 @@ class RoomService {
             val newRecord = roomRecordDao.save(roomRecord)
             redisUtil.saveRoomRecord(newRecord)
         } else if (value == "0") {
+            roomRecord = redisUtil.deleteAndGetRoomRecord(roomNumber)
             roomRecord.endTime = System.currentTimeMillis().toDate()
-            // TODO 根据记录id更新记录的结束时间 可以考虑redis存
+            roomRecord.getDuration()
+            dynamicSql.dynamicUpdate(roomRecord)
+                    .matching(where("id").`is`(roomRecord.id!!))
+                    .fetch().awaitRowsUpdated()
+            // TODO
         }
         return rest
     }
@@ -114,6 +122,7 @@ class RoomService {
      * 通过房间号更新一个房间的配置
      */
     suspend fun <T : BaseRoom> updateRoomByRoomNumber(room: T): Int {
+        // TODO 修改结束时间
         val roomNumber = room.roomNumber ?: throw IllegalStateException("请指定房间号")
         room.roomNumber = null
         room.enable = null

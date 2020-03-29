@@ -8,6 +8,7 @@ import kotlinx.coroutines.*
 import java.sql.Time
 import java.time.Duration
 import java.time.LocalTime
+import java.util.*
 import kotlin.system.*
 
 fun main1() = runBlocking<Unit> {
@@ -57,10 +58,9 @@ fun main2() = runBlocking<Unit> {
 fun testTime() {
     val time = Time.valueOf("08:00:00")
     println(time.toLocalTime().toSecondOfDay())
-    val duration = Duration.ofMillis(28800_000)
-    println(duration.toString())
     val localTime = LocalTime.parse("08:00:00")
     println(localTime.toSecondOfDay())
+    val date = Date()
 }
 
 fun main() = testTime()
