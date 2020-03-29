@@ -1,7 +1,9 @@
 package com.mt.mtuser.service.room
 
-import com.mt.mtuser.common.Util
-import com.mt.mtuser.entity.room.*
+import com.mt.mtuser.entity.room.ClickMatch
+import com.mt.mtuser.entity.room.DoubleMatch
+import com.mt.mtuser.entity.room.TimelyMatch
+import com.mt.mtuser.entity.room.TimingMatch
 
 /**
  * Created by gyh on 2020/3/24.
@@ -18,7 +20,7 @@ object RoomExtend {
         }
     }
 
-    suspend fun getRoomDome(mode: String): Collection<String> {
+    fun getRoomDome(mode: String): Collection<String> {
         return when (mode) {
             "1" -> listOf(RoomEnum.CLICK.flag)
             "2" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag)

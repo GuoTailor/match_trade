@@ -8,6 +8,7 @@ import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.RoomRecord
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
+import com.mt.mtuser.entity.room.DoubleMatch
 import com.mt.mtuser.service.DynamicSqlService
 import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.async
@@ -62,9 +63,32 @@ class RoomService {
                     var oldNumber = clickRoomDao.findLastRoomNumber()   //TODO
                     do {
                         clickRoom.roomNumber = Util.createNewNumber(oldNumber)
-                        oldNumber =  clickRoom.roomNumber!!
+                        oldNumber = clickRoom.roomNumber!!
                     } while (clickRoomDao.existsByRoomNumber(clickRoom.roomNumber!!) > 0)
                     clickRoomDao.save(clickRoom)
+                } else {
+                    throw IllegalStateException("公司房间已满")
+                }
+            }
+        } else {
+            throw IllegalStateException("不能创建该模式${clickRoom.flag}的房间")
+        }
+    }
+
+    suspend fun createDoubleMatch(clickRoom: DoubleMatch): DoubleMatch {
+        // TODO 校验bean的数据合法性
+        val company = companyDao.findById(clickRoom.companyId!!).awaitSingle()
+        if (RoomExtend.getRoomDome(company.mode!!).contains(clickRoom.flag)) { // 判断房间模式
+            clickRoom.id = null
+            clickRoom.isEnable<ClickMatch>(false)
+            return mutex.withLock {
+                if (checkRoomCount(clickRoom.companyId!!)) {
+                    var oldNumber = doubleRoomDao.findLastRoomNumber()   //TODO
+                    do {
+                        clickRoom.roomNumber = Util.createNewNumber(oldNumber)
+                        oldNumber = clickRoom.roomNumber!!
+                    } while (doubleRoomDao.existsByRoomNumber(clickRoom.roomNumber!!) > 0)
+                    doubleRoomDao.save(clickRoom)
                 } else {
                     throw IllegalStateException("公司房间已满")
                 }
@@ -104,7 +128,7 @@ class RoomService {
             dynamicSql.dynamicUpdate(roomRecord)
                     .matching(where("id").`is`(roomRecord.id!!))
                     .fetch().awaitRowsUpdated()
-            // TODO
+            // TODO 通知用户下线
         }
         return rest
     }
@@ -142,5 +166,16 @@ class RoomService {
         val countTimely = async { timelyRoomDao.countByCompanyId(companyId) }
         val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
         company.await().roomCount!! > (countClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
+    }
+
+    /**
+     * 获取总的房间数量
+     */
+    suspend fun getAllRoomCount(): Long = coroutineScope {
+        val countClick = async { clickRoomDao.count() }
+        val countDouble = async { doubleRoomDao.count() }
+        val countTimely = async { timelyRoomDao.count() }
+        val countTiming = async { timingRoomDao.count() }
+        countClick.await() + countDouble.await() + countTimely.await() + countTiming.await()
     }
 }

@@ -13,20 +13,29 @@ import java.time.Duration
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisOperations<String, Any>
-    private val roomKey = "ROOM:"
+    private val roomKey = "ROOM_RECORD:"
+    private val codeKey = "CODE:"
+    private val codeTime = Duration.ofMinutes(5)
 
+    /**
+     * 保存一个房间记录
+     */
     suspend fun saveRoomRecord(roomRecord: RoomRecord) {
-        redisTemplate
-                .opsForValue()
-                .setAndAwait(roomKey + roomRecord.roomNumber, roomRecord, roomRecord.duration!!)
+        redisTemplate.opsForValue().setAndAwait(roomKey + roomRecord.roomNumber, roomRecord, roomRecord.duration!!)
     }
 
+    /**
+     * 获取一个房间记录
+     */
     suspend fun getRoomRecord(roomNumber: String) {
         redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
     }
 
+    /**
+     * 删除一个房间记录
+     */
     suspend fun deleteRoomRecord(roomNumber: String) {
-        redisTemplate.deleteAndAwait(roomKey + roomNumber)
+        redisTemplate.opsForValue().deleteAndAwait(roomKey + roomNumber)
     }
 
     /**
@@ -45,5 +54,23 @@ class RedisUtil {
      */
     suspend fun updateRoomExpire(roomNumber: String, duration: Duration) {
         redisTemplate.expireAndAwait(roomKey + roomNumber, duration)
+    }
+
+    /**
+     * 保存一个验证码
+     */
+    suspend fun saveCode(phone: String, code: String) {
+        redisTemplate.opsForValue().setAndAwait(codeKey + phone, code, codeTime)
+    }
+
+    /**
+     * 获取一个验证码
+     */
+    suspend fun getCode(phone: String): String {
+        return redisTemplate.opsForValue().getAndAwait(codeKey + phone) as String
+    }
+
+    suspend fun deleteCode(phone: String) {
+        redisTemplate.opsForValue().deleteAndAwait(codeKey + phone)
     }
 }

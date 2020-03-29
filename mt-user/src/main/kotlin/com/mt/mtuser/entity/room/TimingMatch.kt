@@ -1,6 +1,7 @@
 package com.mt.mtuser.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.mt.mtuser.service.room.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.format.annotation.DateTimeFormat
@@ -32,5 +33,5 @@ class TimingMatch(
         override var createTime: Date? = null,   // 创建时间
         var quoteTime: Date? = null,    // 报价时间
         var currentCount: Int? = null,       // 创建时间
-        override var flag: String = "I"
+        override var flag: String = RoomEnum.TIMING.flag
 ) : BaseRoom

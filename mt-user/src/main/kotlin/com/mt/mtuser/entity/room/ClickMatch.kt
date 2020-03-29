@@ -1,6 +1,7 @@
 package com.mt.mtuser.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.mt.mtuser.service.room.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.format.annotation.DateTimeFormat
@@ -49,5 +50,5 @@ class ClickMatch(
         override var enable: String? = null,         // 是否开启（0：关闭，1：开启）
         override var createTime: Date? = null,       // 创建时间
         var rival: Int? = null,                 // 选择的对手上限
-        override var flag: String = "C"
+        override var flag: String = RoomEnum.CLICK.flag
 ) : BaseRoom

@@ -1,6 +1,7 @@
 package com.mt.mtuser.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.mt.mtuser.service.room.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.format.annotation.DateTimeFormat
@@ -28,5 +29,5 @@ class DoubleMatch(
         override var lowScope: Double? = null,       // 报价最低值
         override var enable: String? = null,         // 是否开启（0：关闭，1：开启）
         override var createTime: Date? = null,       // 创建时间
-        override var flag: String = "D"
+        override var flag: String = RoomEnum.DOUBLE.flag
 ) : BaseRoom

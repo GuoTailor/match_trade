@@ -58,5 +58,9 @@ class UserService {
                 .rowsUpdated()
     }
 
+    /**
+     * 判断用户是否存在，存在为true，不存在为false
+     */
+    fun existsUserByPhone(phone:String) = userDao.existsUserByPhone(phone).map { it > 0 }
 
 }
