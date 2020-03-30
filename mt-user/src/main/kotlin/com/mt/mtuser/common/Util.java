@@ -264,6 +264,10 @@ public class Util {
      * @return 一个新的房间号
      */
     public static String createNewNumber(String roomNumber) {
+        if (roomNumber == null) {
+            return "0000";
+        }
+
         Matcher matcher = Pattern.compile("[1-9][\\d]*").matcher(roomNumber);
         if (matcher.find()) {
             int start = matcher.start();

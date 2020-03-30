@@ -9,7 +9,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
  * Created by gyh on 2020/3/23.
  * 两两撮合
  */
-interface DoubleRoomDao : CoroutineCrudRepository<DoubleMatch, Int>, BaseRoomDao<DoubleMatch> {
+interface DoubleRoomDao :  BaseRoomDao<DoubleMatch> {
 
     @Query("select count(1) from mt_room_double where room_number = :roomNumber limit 1")
     override suspend fun existsByRoomNumber(roomNumber: String): Int
@@ -26,8 +26,8 @@ interface DoubleRoomDao : CoroutineCrudRepository<DoubleMatch, Int>, BaseRoomDao
     suspend fun countByCompanyId(companyId: Int): Int
 
     @Query("select * from mt_room_double where room_number = ：roomNumber")
-    override suspend fun findByRoomNumber(roomNumber: String): DoubleMatch
+    override suspend fun findByRoomNumber(roomNumber: String): DoubleMatch?
 
     @Query("select room_number from mt_room_double order by room_number desc limit 1")
-    override suspend fun findLastRoomNumber(): String
+    override suspend fun findLastRoomNumber(): String?
 }

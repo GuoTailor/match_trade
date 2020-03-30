@@ -9,7 +9,7 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
  * Created by gyh on 2020/3/23.
  * 定时撮合
  */
-interface TimingRoomDao : CoroutineCrudRepository<TimingMatch, Int>, BaseRoomDao<TimingMatch> {
+interface TimingRoomDao :  BaseRoomDao<TimingMatch> {
 
     @Query("select count(1) from mt_room_timing where room_number = :roomNumber limit 1")
     override suspend fun existsByRoomNumber(roomNumber: String): Int
@@ -26,8 +26,8 @@ interface TimingRoomDao : CoroutineCrudRepository<TimingMatch, Int>, BaseRoomDao
     suspend fun countByCompanyId(companyId: Int): Int
 
     @Query("select * from mt_room_timing where room_number = ：roomNumber")
-    override suspend fun findByRoomNumber(roomNumber: String): TimingMatch
+    override suspend fun findByRoomNumber(roomNumber: String): TimingMatch?
 
     @Query("select room_number from mt_room_timing order by room_number desc limit 1")
-    override suspend fun findLastRoomNumber(): String
+    override suspend fun findLastRoomNumber(): String?
 }

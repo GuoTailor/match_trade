@@ -20,13 +20,26 @@ object RoomExtend {
         }
     }
 
-    fun getRoomDome(mode: String): Collection<String> {
+    /**
+     * 公司能开的房间模式号对应的房间模式列表
+     */
+    fun getRoomModels(mode: String): Collection<String> {
         return when (mode) {
             "1" -> listOf(RoomEnum.CLICK.flag)
             "2" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag)
             "3" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag)
             "4" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag, RoomEnum.TIMELY.flag)
             else -> throw java.lang.IllegalStateException("错误：${mode}和已有竞价模式{1：点选、2： 点选+定时、3：及时 +点选+两两撮合、4：全部}不匹配")
+        }
+    }
+
+    fun getRoomModel(roomNumber: String): RoomEnum {
+        return when (roomNumber[0].toString()) {
+            RoomEnum.CLICK.flag -> RoomEnum.CLICK
+            RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
+            RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
+            RoomEnum.TIMING.flag -> RoomEnum.TIMING
+            else -> throw IllegalStateException("不支持的房间号模式${roomNumber}")
         }
     }
 

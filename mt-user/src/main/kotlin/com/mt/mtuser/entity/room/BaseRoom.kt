@@ -25,6 +25,8 @@ interface BaseRoom {
     var lowScope: Double?        // 报价最低值
     var enable: String?          // 是否开启（0：关闭，1：开启）
     var createTime: Date?        // 创建时间
+    @get:org.springframework.data.annotation.Transient
+    @set:org.springframework.data.annotation.Transient
     var flag: String            // 标识符
 
     @Suppress("UNCHECKED_CAST")
