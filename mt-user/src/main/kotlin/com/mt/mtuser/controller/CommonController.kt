@@ -8,24 +8,27 @@ import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.UserService
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.util.StringUtils
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import java.lang.IllegalStateException
-import java.util.*
 
 /**
  * Created by gyh on 2020/3/18.
  */
 @RestController
 class CommonController {
+    private val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+
     @Autowired
     lateinit var roleService: RoleService
+
     @Autowired
     lateinit var userService: UserService
+
     @Autowired
     lateinit var redisUtil: RedisUtil
 
@@ -34,17 +37,34 @@ class CommonController {
      * @apiDescription  注册用户
      * @apiName register
      * @apiVersion 0.0.1
+     * @apiParam {String} phone 用户的手机号
+     * @apiParam {String} password 用户密码
+     * @apiParam {String} code 短信验证码
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":[{"nameZh": "超级管理员","name": "ROLE_SUPER_ADMIN","id": 1},
-     * {"nameZh": "企业管理员","name": "ROLE_ADMIN","id": 2},{"nameZh": "股东","name": "ROLE_USER","id": 3}]}
+     * {"code":0,"msg":"成功","data":null}
      * @apiSuccessExample {json} 用户已存在:
      * {"code": 1,"msg": "用户已存在","data": null}
      * @apiGroup Common
      * @apiPermission none
      */
     @PostMapping("/register")
-    fun register(@RequestBody user: User): Mono<ResponseInfo<Unit>> {
-        return userService.register(user)
+    @Transactional  // 由于事务不支持挂起函数，所以注解只能打在普通函数上面并且一定要让报错抛出去，不然事务不会回退
+    fun register(@RequestBody map: Map<String, String>): Mono<ResponseInfo<Unit>> {
+        return mono {
+            val code = map["code"] ?: return@mono ResponseInfo<Unit>(1, "请输入验证码")
+            val user = User()
+            user.phone = map["phone"] ?: return@mono ResponseInfo<Unit>(1, "请输入手机号")
+            user.password = map["password"] ?: return@mono ResponseInfo<Unit>(1, "请输入密码")
+            logger.info(code)
+            val localCode = redisUtil.getCode(user.phone!!)
+            if (localCode != null && code == localCode) {
+                redisUtil.deleteCode(user.phone!!)
+                userService.register(user)
+                ResponseInfo<Unit>(0, "成功")
+            } else {
+                ResponseInfo<Unit>(1, "验证码错误")
+            }
+        }
     }
 
     /**
@@ -62,29 +82,20 @@ class CommonController {
      * @apiGroup Common
      * @apiPermission none
      */
-    @GetMapping("/sendCode")
-    fun sendCode(@RequestParam phone: String): Mono<ResponseInfo<Unit>> {
-        /*ResponseInfo.ok(userService.existsUserByPhone(phone)
-                .filter { it }  // 过滤是否不存在
-                .map { Util.getRandomInt(4) }   // 构建验证码
-                .flatMap { mono { SmsSample.send(phone, it) } } // 发送验证码
-                .map { (code, msg) ->
-                    if (code == 0) {
-                        redisUtil.saveCode()
-                    }
-                    msg
+    @GetMapping("/common/sendCode")
+    fun sendCode(@RequestParam phone: String): Mono<ResponseInfo<String>> {
+        return ResponseInfo.ok(mono {
+            if (userService.existsUserByPhone(phone)) {
+                val smsCode = Util.getRandomInt(4)
+                val (code, msg) = SmsSample.send(phone, smsCode)
+                if (code == 0) {
+                    redisUtil.saveCode(phone, smsCode)
                 }
-                .defaultIfEmpty(Mono.error(RuntimeException()))
-        )
-
-        userService.existsUserByPhone(phone).map {
-            if (it) {
-                val code = Util.getRandomInt(4)
-                SmsSample.send(phone, code)
+                msg
+            } else {
+                "用户已存在"
             }
-        }*/
-
-
+        })
     }
 
     /**
@@ -100,6 +111,6 @@ class CommonController {
      */
     @GetMapping("/common/getRoles")
     fun getRoles(): Mono<ResponseInfo<List<MtRole>>> {
-        return ResponseInfo.ok(roleService.findAll().collectList())
+        return ResponseInfo.ok(mono { roleService.findAll().toList() })
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 
 /**
  * Created by gyh on 2020/3/18.
@@ -27,23 +26,23 @@ class CompanyService {
     @Autowired
     private lateinit var connect: DatabaseClient
 
-    fun count(): Mono<Long> {
+    suspend fun count(): Long {
         return companyDao.count()
     }
 
-    fun save(company: Company): Mono<Company> {
+    suspend fun save(company: Company): Company {
         return companyDao.save(company)
     }
 
-    fun deleteById(id: Int) = companyDao.deleteById(id)
+    suspend fun deleteById(id: Int) = companyDao.deleteById(id)
 
-    fun update(company: Company) = companyDao.save(company)
+    suspend fun update(company: Company) = companyDao.save(company)
 
-    fun findById(id: Int) = companyDao.findById(id)
+    suspend fun findById(id: Int) = companyDao.findById(id)
 
-    fun findAll() = companyDao.findAll()
+    suspend fun findAll() = companyDao.findAll()
 
-    fun findAllByQuery(query: PageQuery): Mono<PageView<Company>> {
+    suspend fun findAllByQuery(query: PageQuery): PageView<Company> {
         return getPage(connect.select()
                 .from<Company>()
                 .matching(query.where())

@@ -1,5 +1,8 @@
 package com.mt.mtuser.entity.page
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.relational.core.mapping.Table
 import reactor.core.publisher.Flux
@@ -21,19 +24,17 @@ class PageView<T : Any> {
     var item: List<T>? = null
 }
 
-inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery): Mono<PageView<T>> {
+suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery): PageView<T> {
     val pageView = PageView<T>()
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName
     ?: throw IllegalStateException("不支持的匿名类")
     val where = pageQuery.getWhere().let { if (it.isBlank()) "" else " where $it" }
     val count = connect.execute("select count(1) from $tableName $where")
-            .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one()
-    return Mono.zip(count, data.collectList()) { total, items ->
-        pageView.total = total?.toLong()
-        pageView.item = items
-        pageView.pageNum = pageQuery.pageNum
-        pageView.pageSize = pageQuery.pageSize
-        pageView
-    }
+            .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one().awaitSingle()
+    pageView.total = count?.toLong()
+    pageView.item = data.collectList().awaitSingle()
+    pageView.pageNum = pageQuery.pageNum
+    pageView.pageSize = pageQuery.pageSize
+    return pageView
 }
 

@@ -4,6 +4,7 @@ import com.mt.mtuser.dao.RoleDao
 import com.mt.mtuser.dao.UserRoleDao
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.Role
+import kotlinx.coroutines.flow.Flow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -20,14 +21,14 @@ class RoleService {
     @Autowired
     private lateinit var roleDao: RoleDao
 
-    fun selectRolesByUserId(userId: Int): Mono<Role> {
+    suspend fun selectRolesByUserId(userId: Int): Role {
         return userRoleDao.selectRolesByUserId(userId)
     }
 
-    fun findAll(): Flux<MtRole> {
+    suspend fun findAll(): Flow<MtRole> {
         return roleDao.findAll()
     }
 
-    fun save(role: Role) = userRoleDao.save(role)
+    suspend fun save(role: Role) = userRoleDao.save(role)
     
 }

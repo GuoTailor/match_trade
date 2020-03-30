@@ -18,10 +18,11 @@ fun main1() = runBlocking<Unit> {
     println("Completed in $time ms")
     println(Thread.currentThread().name)
 }
-
+//ip:39.108.187.54     用户名：root          密码：zelfly737218.
 suspend fun concurrentSum(): Int = coroutineScope {
     val one = async { doSomethingUsefulOne() }
     val two = async { doSomethingUsefulTwo() }
+    println(one.await())
     one.await() + two.await()
 }
 
@@ -63,4 +64,7 @@ fun testTime() {
     val date = Date()
 }
 
-fun main() = testTime()
+fun main() {
+    val c  = 68
+    println(c.toChar())
+}

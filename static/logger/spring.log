@@ -1,0 +1,839 @@
+--2020-03-30 19:44:08.613 - INFO 10288 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 19:44:08.648 - INFO 10288 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 19:44:08.689 - WARN 10288 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 19:44:08.697 - INFO 10288 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 19:44:08.711 - WARN 10288 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 19:44:08.712 - INFO 10288 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 19:44:08.769 - INFO 10288 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 19:44:09.121 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 19:44:09.122 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 19:44:09.216 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 90ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 19:44:09.437 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 19:44:09.438 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 19:44:09.483 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.484 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.485 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.485 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.485 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.486 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.486 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.487 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.487 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.487 - INFO 10288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:44:09.487 - INFO 10288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42ms. Found 0 Redis repository interfaces.
+--2020-03-30 19:44:09.654 - INFO 10288 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 19:44:09.760 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:09.780 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:09.783 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:09.805 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:09.807 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:09.810 - INFO 10288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:44:11.672 - INFO 10288 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 67e68329-1a0e-4b3e-ab45-b8eb7904d8a2
+
+--2020-03-30 19:44:11.748 - WARN 10288 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 19:44:11.748 - INFO 10288 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 19:44:11.753 - WARN 10288 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 19:44:11.754 - INFO 10288 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 19:44:13.075 - INFO 10288 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 19:44:14.171 - INFO 10288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 19:44:14.172 - INFO 10288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 19:44:14.173 - INFO 10288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 19:44:17.564 - INFO 10288 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 19:44:18.900 - INFO 10288 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 19:44:19.021 - INFO 10288 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 19:44:19.033 - INFO 10288 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 19:44:20.150 - INFO 10288 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 14.955 seconds (JVM running for 16.805)
+--2020-03-30 19:44:20.153 - INFO 10288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 19:44:20.154 - INFO 10288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 19:44:20.155 - INFO 10288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 19:44:20.155 - INFO 10288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 19:44:20.156 - INFO 10288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 19:44:20.156 - INFO 10288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 19:45:54.481 - INFO 19700 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 19:45:54.509 - INFO 19700 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 19:45:54.540 - WARN 19700 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 19:45:54.546 - INFO 19700 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 19:45:54.557 - WARN 19700 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 19:45:54.558 - INFO 19700 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 19:45:54.609 - INFO 19700 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 19:45:54.994 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 19:45:54.996 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 19:45:55.083 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 83ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 19:45:55.304 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 19:45:55.306 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 19:45:55.351 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.352 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.353 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.353 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.353 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.354 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.354 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.355 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.355 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.355 - INFO 19700 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 19:45:55.356 - INFO 19700 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42ms. Found 0 Redis repository interfaces.
+--2020-03-30 19:45:55.522 - INFO 19700 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 19:45:55.619 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:55.630 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:55.632 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:55.650 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:55.651 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:55.652 - INFO 19700 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 19:45:57.488 - INFO 19700 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 30d2d029-4499-45ff-963f-0967ead22e09
+
+--2020-03-30 19:45:57.589 - WARN 19700 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 19:45:57.589 - INFO 19700 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 19:45:57.593 - WARN 19700 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 19:45:57.594 - INFO 19700 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 19:45:58.919 - INFO 19700 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 19:46:00.088 - INFO 19700 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 19:46:00.088 - INFO 19700 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 19:46:00.089 - INFO 19700 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 19:46:03.538 - INFO 19700 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 19:46:04.603 - INFO 19700 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 19:46:04.701 - INFO 19700 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 19:46:04.716 - INFO 19700 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 19:46:05.796 - INFO 19700 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 14.627 seconds (JVM running for 16.411)
+--2020-03-30 19:46:05.800 - INFO 19700 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 19:46:05.801 - INFO 19700 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 19:46:05.802 - INFO 19700 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 19:46:05.802 - INFO 19700 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 19:46:05.803 - INFO 19700 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 19:46:05.803 - INFO 19700 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:02:37.989 - INFO 6632 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 20:02:38.016 - INFO 6632 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 20:02:38.048 - WARN 6632 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 20:02:38.053 - INFO 6632 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 20:02:38.065 - WARN 6632 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 20:02:38.066 - INFO 6632 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 20:02:38.115 - INFO 6632 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 20:02:38.485 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:02:38.486 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 20:02:38.573 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 83ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 20:02:38.789 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:02:38.791 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 20:02:38.836 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.837 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.837 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.838 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.838 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.838 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.839 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.840 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.840 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.841 - INFO 6632 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:02:38.841 - INFO 6632 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43ms. Found 0 Redis repository interfaces.
+--2020-03-30 20:02:39.012 - INFO 6632 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 20:02:39.124 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:39.135 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:39.137 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:39.154 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:39.155 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:39.157 - INFO 6632 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:02:40.975 - INFO 6632 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 9b08b178-03de-4dc7-bd6b-4d3bc7b4c1df
+
+--2020-03-30 20:02:41.068 - WARN 6632 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:02:41.068 - INFO 6632 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:02:41.077 - WARN 6632 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:02:41.077 - INFO 6632 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:02:42.406 - INFO 6632 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 20:02:43.470 - INFO 6632 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:02:43.470 - INFO 6632 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 20:02:43.471 - INFO 6632 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:02:46.612 - INFO 6632 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 20:02:47.703 - INFO 6632 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 20:02:47.798 - INFO 6632 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 20:02:47.813 - INFO 6632 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 20:02:48.912 - INFO 6632 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 14.242 seconds (JVM running for 16.005)
+--2020-03-30 20:02:48.916 - INFO 6632 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 20:02:48.916 - INFO 6632 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:02:48.916 - INFO 6632 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 20:02:48.916 - INFO 6632 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:02:48.917 - INFO 6632 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 20:02:48.917 - INFO 6632 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:02:58.082 - INFO 6632 --- [DefaultDispatcher-worker-1] CommonController                         : 123456
+--2020-03-30 20:02:58.122 -ERROR 6632 --- [DefaultDispatcher-worker-1] a.w.r.e.AbstractErrorWebExceptionHandler : [dc7269ef-1]  500 Server Error for HTTP POST "/register"
+
+org.springframework.transaction.TransactionUsageException: Unsupported annotated transaction on suspending function detected: public java.lang.Object com.mt.mtuser.service.UserService.register(com.mt.mtuser.entity.User,kotlin.coroutines.Continuation). Use TransactionalOperator.transactional extensions instead.
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.lambda$invokeWithinTransaction$0(TransactionAspectSupport.java:340)
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	|_ checkpoint ⇢ Handler com.mt.mtuser.controller.CommonController#register(Map) [DispatcherHandler]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.AuthorizationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.ExceptionTranslationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.savedrequest.ServerRequestCacheWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.SecurityContextServerWebExchangeWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authentication.AuthenticationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.ReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.header.HttpHeaderWriterWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.config.web.server.ServerHttpSecurity$ServerWebExchangeReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.WebFilterChainProxy [DefaultWebFilterChain]
+	|_ checkpoint ⇢ HTTP POST "/register" [ExceptionHandlingWebHandler]
+Stack trace:
+		at org.springframework.transaction.interceptor.TransactionAspectSupport.lambda$invokeWithinTransaction$0(TransactionAspectSupport.java:340)
+		at java.util.concurrent.ConcurrentMap.computeIfAbsent(ConcurrentMap.java:324)
+		at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:338)
+		at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:118)
+		at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+		at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:749)
+		at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:691)
+		at com.mt.mtuser.service.UserService$$EnhancerBySpringCGLIB$$c58b1579.register(<generated>)
+		at com.mt.mtuser.controller.CommonController$register$1.invokeSuspend(CommonController.kt:54)
+		at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+		at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:56)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:571)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:738)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:678)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:665)
+
+--2020-03-30 20:14:40.010 - INFO 20288 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 20:14:40.045 - INFO 20288 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 20:14:40.089 - WARN 20288 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 20:14:40.096 - INFO 20288 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 20:14:40.113 - WARN 20288 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 20:14:40.114 - INFO 20288 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 20:14:40.179 - INFO 20288 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 20:14:40.860 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:14:40.861 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 20:14:41.012 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 145ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 20:14:41.383 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:14:41.385 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 20:14:41.445 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.445 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.446 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.447 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.447 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.448 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.449 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.449 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.450 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.451 - INFO 20288 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:14:41.451 - INFO 20288 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 54ms. Found 0 Redis repository interfaces.
+--2020-03-30 20:14:41.786 - INFO 20288 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 20:14:41.929 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:41.949 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:41.953 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:41.987 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:41.990 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:41.994 - INFO 20288 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:14:44.825 - INFO 20288 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: eed03db4-c2ca-4d7d-adf9-b4dc5e595196
+
+--2020-03-30 20:14:45.018 - WARN 20288 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:14:45.019 - INFO 20288 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:14:45.028 - WARN 20288 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:14:45.028 - INFO 20288 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:14:47.060 - INFO 20288 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 20:14:48.448 - INFO 20288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:14:48.448 - INFO 20288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 20:14:48.449 - INFO 20288 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:14:51.814 - INFO 20288 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 20:14:52.879 - INFO 20288 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 20:14:52.970 - INFO 20288 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 20:14:52.982 - INFO 20288 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 20:14:54.059 - INFO 20288 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 18.233 seconds (JVM running for 20.871)
+--2020-03-30 20:14:54.063 - INFO 20288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 20:14:54.065 - INFO 20288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:14:54.079 - INFO 20288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 20:14:54.079 - INFO 20288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:14:54.083 - INFO 20288 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 20:14:54.083 - INFO 20288 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:32:43.240 - INFO 18036 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 20:32:43.269 - INFO 18036 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 20:32:43.301 - WARN 18036 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 20:32:43.307 - INFO 18036 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 20:32:43.318 - WARN 18036 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 20:32:43.319 - INFO 18036 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 20:32:43.374 - INFO 18036 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 20:32:43.765 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:32:43.766 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 20:32:43.863 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 95ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 20:32:44.098 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:32:44.099 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 20:32:44.144 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.145 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.145 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.146 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.146 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.146 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.147 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.147 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.148 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.148 - INFO 18036 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:32:44.148 - INFO 18036 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 41ms. Found 0 Redis repository interfaces.
+--2020-03-30 20:32:44.321 - INFO 18036 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 20:32:44.419 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:44.430 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:44.433 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:44.451 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:44.452 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:44.454 - INFO 18036 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:32:46.334 - INFO 18036 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: c9be2ea5-c75c-4f0c-8216-5b8ea7bd5219
+
+--2020-03-30 20:32:46.408 - WARN 18036 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:32:46.409 - INFO 18036 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:32:46.415 - WARN 18036 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:32:46.415 - INFO 18036 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:32:47.722 - INFO 18036 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 20:32:48.838 - INFO 18036 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:32:48.839 - INFO 18036 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 20:32:48.839 - INFO 18036 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:32:52.232 - INFO 18036 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 20:32:53.283 - INFO 18036 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 20:32:53.387 - INFO 18036 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 20:32:53.399 - INFO 18036 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 20:32:54.444 - INFO 18036 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 14.578 seconds (JVM running for 16.413)
+--2020-03-30 20:32:54.447 - INFO 18036 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 20:32:54.448 - INFO 18036 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:32:54.449 - INFO 18036 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 20:32:54.449 - INFO 18036 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:32:54.449 - INFO 18036 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 20:32:54.450 - INFO 18036 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:34:15.349 -DEBUG 18036 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Creating new transaction with name [com.mt.mtuser.controller.CommonController.register]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+--2020-03-30 20:34:15.706 -DEBUG 18036 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Acquired Connection [MonoRetry] for R2DBC transaction
+--2020-03-30 20:34:15.709 -DEBUG 18036 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Switching R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@405bbaf9, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@53e19018}]] to manual commit
+--2020-03-30 20:34:15.805 - INFO 18036 --- [DefaultDispatcher-worker-1] CommonController                         : 123456
+--2020-03-30 20:34:15.806 - INFO 18036 --- [DefaultDispatcher-worker-1] UserService                              : register222222admin
+--2020-03-30 20:34:15.849 -DEBUG 18036 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:34:15.853 -DEBUG 18036 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.NamedParameterExpander  : Expanding SQL statement [select count(0) from mt_user where phone = $1 limit 1] to [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:34:16.004 -DEBUG 18036 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Initiating transaction commit
+--2020-03-30 20:34:16.004 -DEBUG 18036 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Committing R2DBC transaction on Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@405bbaf9, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@53e19018}]]
+--2020-03-30 20:34:16.008 -DEBUG 18036 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Releasing R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@405bbaf9, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@53e19018}]] after transaction
+--2020-03-30 20:34:40.178 - INFO 3460 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 20:34:40.208 - INFO 3460 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 20:34:40.250 - WARN 3460 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 20:34:40.257 - INFO 3460 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 20:34:40.269 - WARN 3460 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 20:34:40.270 - INFO 3460 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 20:34:40.330 - INFO 3460 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 20:34:40.786 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:34:40.786 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 20:34:40.881 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 92ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 20:34:41.206 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 20:34:41.207 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 20:34:41.254 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.255 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.256 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.257 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.258 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.258 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.259 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.260 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.260 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.261 - INFO 3460 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 20:34:41.261 - INFO 3460 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43ms. Found 0 Redis repository interfaces.
+--2020-03-30 20:34:41.465 - INFO 3460 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 20:34:41.572 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:41.586 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:41.588 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:41.612 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:41.614 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:41.616 - INFO 3460 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 20:34:43.580 - INFO 3460 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 7ec258a0-a27b-4b54-92a8-e43a28d5c15d
+
+--2020-03-30 20:34:43.684 - WARN 3460 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:34:43.684 - INFO 3460 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:34:43.690 - WARN 3460 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 20:34:43.690 - INFO 3460 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 20:34:44.985 - INFO 3460 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 20:34:46.080 - INFO 3460 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:34:46.081 - INFO 3460 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 20:34:46.081 - INFO 3460 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 20:34:49.428 - INFO 3460 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 20:34:50.513 - INFO 3460 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 20:34:50.593 - INFO 3460 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 20:34:50.604 - INFO 3460 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 20:34:51.687 - INFO 3460 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 15.165 seconds (JVM running for 17.013)
+--2020-03-30 20:34:51.690 - INFO 3460 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 20:34:51.691 - INFO 3460 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:34:51.691 - INFO 3460 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 20:34:51.691 - INFO 3460 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:34:51.692 - INFO 3460 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 20:34:51.692 - INFO 3460 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 20:34:56.246 -DEBUG 3460 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Creating new transaction with name [com.mt.mtuser.controller.CommonController.register]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+--2020-03-30 20:34:56.588 -DEBUG 3460 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Acquired Connection [MonoRetry] for R2DBC transaction
+--2020-03-30 20:34:56.590 -DEBUG 3460 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Switching R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@725e944e, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@125a994d}]] to manual commit
+--2020-03-30 20:34:56.649 - INFO 3460 --- [DefaultDispatcher-worker-1] CommonController                         : 123456
+--2020-03-30 20:34:56.650 - INFO 3460 --- [DefaultDispatcher-worker-1] UserService                              : register333333admin
+--2020-03-30 20:34:56.712 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:34:56.715 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.NamedParameterExpander  : Expanding SQL statement [select count(0) from mt_user where phone = $1 limit 1] to [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:34:56.900 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [INSERT INTO mt_user (phone, password) VALUES ($1, $2)]
+--2020-03-30 20:34:57.079 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [INSERT INTO mt_user_role (userid, roleid) VALUES ($1, $2)]
+--2020-03-30 20:34:57.181 - WARN 3460 --- [reactor-tcp-nio-1] i.r.p.client.ReactorNettyClient          : Error: SEVERITY_LOCALIZED=错误, SEVERITY_NON_LOCALIZED=ERROR, CODE=23503, MESSAGE=插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey", DETAIL=键值对(roleid)=(4)没有在表"mt_role"中出现., SCHEMA_NAME=public, TABLE_NAME=mt_user_role, CONSTRAINT_NAME=mt_user_role_roleid_fkey, FILE=d:\pginstaller_12.auto\postgres.windows-x64\src\backend\utils\adt\ri_triggers.c, LINE=2474, ROUTINE=ri_ReportViolation
+--2020-03-30 20:34:57.362 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Initiating transaction rollback
+--2020-03-30 20:34:57.362 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Rolling back R2DBC transaction on Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@725e944e, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@125a994d}]]
+--2020-03-30 20:34:57.366 -DEBUG 3460 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Releasing R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@725e944e, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@125a994d}]] after transaction
+--2020-03-30 20:34:57.401 -ERROR 3460 --- [reactor-tcp-nio-1] a.w.r.e.AbstractErrorWebExceptionHandler : [ac2d9cef-1]  500 Server Error for HTTP POST "/register"
+
+org.springframework.dao.DataIntegrityViolationException: executeMany; SQL [INSERT INTO mt_user_role (userid, roleid) VALUES ($1, $2)]; 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"; nested exception is io.r2dbc.postgresql.ExceptionFactory$PostgresqlDataIntegrityViolationException: [23503] 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"
+	at org.springframework.data.r2dbc.support.R2dbcExceptionSubclassTranslator.doTranslate(R2dbcExceptionSubclassTranslator.java:78)
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	|_ checkpoint ⇢ Handler com.mt.mtuser.controller.CommonController#register(Map) [DispatcherHandler]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.AuthorizationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.ExceptionTranslationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.savedrequest.ServerRequestCacheWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.SecurityContextServerWebExchangeWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authentication.AuthenticationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.ReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.header.HttpHeaderWriterWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.config.web.server.ServerHttpSecurity$ServerWebExchangeReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.WebFilterChainProxy [DefaultWebFilterChain]
+	|_ checkpoint ⇢ HTTP POST "/register" [ExceptionHandlingWebHandler]
+Stack trace:
+		at org.springframework.data.r2dbc.support.R2dbcExceptionSubclassTranslator.doTranslate(R2dbcExceptionSubclassTranslator.java:78)
+		at org.springframework.data.r2dbc.support.AbstractFallbackR2dbcExceptionTranslator.translate(AbstractFallbackR2dbcExceptionTranslator.java:67)
+		at org.springframework.data.r2dbc.core.DefaultDatabaseClient.translateException(DefaultDatabaseClient.java:263)
+		at org.springframework.data.r2dbc.core.DefaultDatabaseClient.lambda$inConnectionMany$8(DefaultDatabaseClient.java:199)
+		at reactor.core.publisher.Flux.lambda$onErrorMap$29(Flux.java:6479)
+		at reactor.core.publisher.Flux.lambda$onErrorResume$30(Flux.java:6532)
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:88)
+		at reactor.core.publisher.FluxUsingWhen$UsingWhenSubscriber.deferredError(FluxUsingWhen.java:408)
+		at reactor.core.publisher.FluxUsingWhen$RollbackInner.onComplete(FluxUsingWhen.java:485)
+		at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:1946)
+		at reactor.core.publisher.MonoIgnoreElements$IgnoreElementsSubscriber.onComplete(MonoIgnoreElements.java:81)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onComplete(FluxMapFuseable.java:144)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onComplete(FluxFilterFuseable.java:165)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onComplete(FluxFilterFuseable.java:384)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:336)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.onComplete(FluxHandleFuseable.java:223)
+		at reactor.core.publisher.Operators$ScalarSubscription.request(Operators.java:2276)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.request(FluxHandleFuseable.java:243)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.request(FluxMapFuseable.java:346)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.request(FluxFilterFuseable.java:403)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.request(FluxFilterFuseable.java:184)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.request(FluxMapFuseable.java:162)
+		at reactor.core.publisher.MonoIgnoreElements$IgnoreElementsSubscriber.onSubscribe(MonoIgnoreElements.java:64)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onSubscribe(FluxMapFuseable.java:90)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onSubscribe(FluxFilterFuseable.java:81)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onSubscribe(FluxFilterFuseable.java:298)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onSubscribe(FluxMapFuseable.java:255)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.onSubscribe(FluxHandleFuseable.java:148)
+		at reactor.core.publisher.MonoCurrentContext.subscribe(MonoCurrentContext.java:35)
+		at reactor.core.publisher.InternalMonoOperator.subscribe(InternalMonoOperator.java:55)
+		at reactor.core.publisher.MonoDefer.subscribe(MonoDefer.java:52)
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4210)
+		at reactor.core.publisher.FluxUsingWhen$UsingWhenSubscriber.onError(FluxUsingWhen.java:374)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.checkTerminated(FluxFlatMap.java:819)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.drainLoop(FluxFlatMap.java:589)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.drain(FluxFlatMap.java:569)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.innerError(FluxFlatMap.java:840)
+		at reactor.core.publisher.FluxFlatMap$FlatMapInner.onError(FluxFlatMap.java:979)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onError(FluxHandle.java:196)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:118)
+		at reactor.core.publisher.FluxTakeUntil$TakeUntilPredicateSubscriber.onNext(FluxTakeUntil.java:77)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onNext(FluxFilterFuseable.java:112)
+		at reactor.core.publisher.FluxContextStart$ContextStartSubscriber.onNext(FluxContextStart.java:103)
+		at io.r2dbc.postgresql.util.FluxDiscardOnCancel$FluxDiscardOnCancelSubscriber.onNext(FluxDiscardOnCancel.java:86)
+		at reactor.core.publisher.FluxCreate$BufferAsyncSink.drain(FluxCreate.java:793)
+		at reactor.core.publisher.FluxCreate$BufferAsyncSink.next(FluxCreate.java:718)
+		at reactor.core.publisher.FluxCreate$SerializedSink.next(FluxCreate.java:153)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$Conversation.emit(ReactorNettyClient.java:679)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.emit(ReactorNettyClient.java:867)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:801)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:710)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:112)
+		at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onNext(FluxPeekFuseable.java:845)
+		at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+		at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+		at reactor.netty.channel.FluxReceive.drainReceiver(FluxReceive.java:220)
+		at reactor.netty.channel.FluxReceive.onInboundNext(FluxReceive.java:353)
+		at reactor.netty.channel.ChannelOperations.onInboundNext(ChannelOperations.java:352)
+		at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:90)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:321)
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:308)
+		at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:422)
+		at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+		at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+		at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+		at java.lang.Thread.run(Thread.java:748)
+Caused by: io.r2dbc.postgresql.ExceptionFactory$PostgresqlDataIntegrityViolationException: 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"
+	at io.r2dbc.postgresql.ExceptionFactory.createException(ExceptionFactory.java:91)
+	at io.r2dbc.postgresql.ExceptionFactory.handleErrorResponse(ExceptionFactory.java:110)
+	at io.r2dbc.postgresql.PostgresqlResult.lambda$map$1(PostgresqlResult.java:100)
+	at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:96)
+	at reactor.core.publisher.FluxTakeUntil$TakeUntilPredicateSubscriber.onNext(FluxTakeUntil.java:77)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onNext(FluxFilterFuseable.java:112)
+	at reactor.core.publisher.FluxContextStart$ContextStartSubscriber.onNext(FluxContextStart.java:103)
+	at io.r2dbc.postgresql.util.FluxDiscardOnCancel$FluxDiscardOnCancelSubscriber.onNext(FluxDiscardOnCancel.java:86)
+	at reactor.core.publisher.FluxCreate$BufferAsyncSink.drain(FluxCreate.java:793)
+	at reactor.core.publisher.FluxCreate$BufferAsyncSink.next(FluxCreate.java:718)
+	at reactor.core.publisher.FluxCreate$SerializedSink.next(FluxCreate.java:153)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$Conversation.emit(ReactorNettyClient.java:679)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.emit(ReactorNettyClient.java:867)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:801)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:710)
+	at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:112)
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onNext(FluxPeekFuseable.java:845)
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+	at reactor.netty.channel.FluxReceive.drainReceiver(FluxReceive.java:220)
+	at reactor.netty.channel.FluxReceive.onInboundNext(FluxReceive.java:353)
+	at reactor.netty.channel.ChannelOperations.onInboundNext(ChannelOperations.java:352)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:90)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:321)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:308)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:422)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+
+--2020-03-30 20:52:20.377 -DEBUG 3460 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Creating new transaction with name [com.mt.mtuser.controller.CommonController.register]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+--2020-03-30 20:52:20.378 -DEBUG 3460 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Acquired Connection [MonoRetry] for R2DBC transaction
+--2020-03-30 20:52:20.378 -DEBUG 3460 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Switching R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@4b8d96b0, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@3c01f4c6}]] to manual commit
+--2020-03-30 20:52:20.381 - INFO 3460 --- [DefaultDispatcher-worker-1] CommonController                         : null
+--2020-03-30 20:52:20.381 - INFO 3460 --- [DefaultDispatcher-worker-1] UserService                              : register333333admin
+--2020-03-30 20:52:20.383 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:52:20.384 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.NamedParameterExpander  : Expanding SQL statement [select count(0) from mt_user where phone = $1 limit 1] to [select count(0) from mt_user where phone = $1 limit 1]
+--2020-03-30 20:52:20.506 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [INSERT INTO mt_user (phone, password) VALUES ($1, $2)]
+--2020-03-30 20:52:20.511 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r2dbc.core.DefaultDatabaseClient   : Executing SQL statement [INSERT INTO mt_user_role (userid, roleid) VALUES ($1, $2)]
+--2020-03-30 20:52:20.524 - WARN 3460 --- [reactor-tcp-nio-4] i.r.p.client.ReactorNettyClient          : Error: SEVERITY_LOCALIZED=错误, SEVERITY_NON_LOCALIZED=ERROR, CODE=23503, MESSAGE=插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey", DETAIL=键值对(roleid)=(4)没有在表"mt_role"中出现., SCHEMA_NAME=public, TABLE_NAME=mt_user_role, CONSTRAINT_NAME=mt_user_role_roleid_fkey, FILE=d:\pginstaller_12.auto\postgres.windows-x64\src\backend\utils\adt\ri_triggers.c, LINE=2474, ROUTINE=ri_ReportViolation
+--2020-03-30 20:52:20.525 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Initiating transaction rollback
+--2020-03-30 20:52:20.525 -DEBUG 3460 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Rolling back R2DBC transaction on Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@4b8d96b0, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@3c01f4c6}]]
+--2020-03-30 20:52:20.527 -DEBUG 3460 --- [reactor-tcp-nio-4] o.s.d.r.c.R2dbcTransactionManager        : Releasing R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@4b8d96b0, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@3c01f4c6}]] after transaction
+--2020-03-30 20:52:20.528 -ERROR 3460 --- [reactor-tcp-nio-4] a.w.r.e.AbstractErrorWebExceptionHandler : [ac2d9cef-2]  500 Server Error for HTTP POST "/register"
+
+org.springframework.dao.DataIntegrityViolationException: executeMany; SQL [INSERT INTO mt_user_role (userid, roleid) VALUES ($1, $2)]; 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"; nested exception is io.r2dbc.postgresql.ExceptionFactory$PostgresqlDataIntegrityViolationException: [23503] 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"
+	at org.springframework.data.r2dbc.support.R2dbcExceptionSubclassTranslator.doTranslate(R2dbcExceptionSubclassTranslator.java:78)
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	|_ checkpoint ⇢ Handler com.mt.mtuser.controller.CommonController#register(Map) [DispatcherHandler]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.AuthorizationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.ExceptionTranslationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.savedrequest.ServerRequestCacheWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.SecurityContextServerWebExchangeWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authentication.AuthenticationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.ReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.header.HttpHeaderWriterWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.config.web.server.ServerHttpSecurity$ServerWebExchangeReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.WebFilterChainProxy [DefaultWebFilterChain]
+	|_ checkpoint ⇢ HTTP POST "/register" [ExceptionHandlingWebHandler]
+Stack trace:
+		at org.springframework.data.r2dbc.support.R2dbcExceptionSubclassTranslator.doTranslate(R2dbcExceptionSubclassTranslator.java:78)
+		at org.springframework.data.r2dbc.support.AbstractFallbackR2dbcExceptionTranslator.translate(AbstractFallbackR2dbcExceptionTranslator.java:67)
+		at org.springframework.data.r2dbc.core.DefaultDatabaseClient.translateException(DefaultDatabaseClient.java:263)
+		at org.springframework.data.r2dbc.core.DefaultDatabaseClient.lambda$inConnectionMany$8(DefaultDatabaseClient.java:199)
+		at reactor.core.publisher.Flux.lambda$onErrorMap$29(Flux.java:6479)
+		at reactor.core.publisher.Flux.lambda$onErrorResume$30(Flux.java:6532)
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:88)
+		at reactor.core.publisher.FluxUsingWhen$UsingWhenSubscriber.deferredError(FluxUsingWhen.java:408)
+		at reactor.core.publisher.FluxUsingWhen$RollbackInner.onComplete(FluxUsingWhen.java:485)
+		at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:1946)
+		at reactor.core.publisher.MonoIgnoreElements$IgnoreElementsSubscriber.onComplete(MonoIgnoreElements.java:81)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onComplete(FluxMapFuseable.java:144)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onComplete(FluxFilterFuseable.java:165)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onComplete(FluxFilterFuseable.java:384)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:336)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.onComplete(FluxHandleFuseable.java:223)
+		at reactor.core.publisher.Operators$ScalarSubscription.request(Operators.java:2276)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.request(FluxHandleFuseable.java:243)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.request(FluxMapFuseable.java:346)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.request(FluxFilterFuseable.java:403)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.request(FluxFilterFuseable.java:184)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.request(FluxMapFuseable.java:162)
+		at reactor.core.publisher.MonoIgnoreElements$IgnoreElementsSubscriber.onSubscribe(MonoIgnoreElements.java:64)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onSubscribe(FluxMapFuseable.java:90)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onSubscribe(FluxFilterFuseable.java:81)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onSubscribe(FluxFilterFuseable.java:298)
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onSubscribe(FluxMapFuseable.java:255)
+		at reactor.core.publisher.FluxHandleFuseable$HandleFuseableSubscriber.onSubscribe(FluxHandleFuseable.java:148)
+		at reactor.core.publisher.MonoCurrentContext.subscribe(MonoCurrentContext.java:35)
+		at reactor.core.publisher.InternalMonoOperator.subscribe(InternalMonoOperator.java:55)
+		at reactor.core.publisher.MonoDefer.subscribe(MonoDefer.java:52)
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4210)
+		at reactor.core.publisher.FluxUsingWhen$UsingWhenSubscriber.onError(FluxUsingWhen.java:374)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.checkTerminated(FluxFlatMap.java:819)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.drainLoop(FluxFlatMap.java:589)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.drain(FluxFlatMap.java:569)
+		at reactor.core.publisher.FluxFlatMap$FlatMapMain.innerError(FluxFlatMap.java:840)
+		at reactor.core.publisher.FluxFlatMap$FlatMapInner.onError(FluxFlatMap.java:979)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onError(FluxHandle.java:196)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:118)
+		at reactor.core.publisher.FluxTakeUntil$TakeUntilPredicateSubscriber.onNext(FluxTakeUntil.java:77)
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onNext(FluxFilterFuseable.java:112)
+		at reactor.core.publisher.FluxContextStart$ContextStartSubscriber.onNext(FluxContextStart.java:103)
+		at io.r2dbc.postgresql.util.FluxDiscardOnCancel$FluxDiscardOnCancelSubscriber.onNext(FluxDiscardOnCancel.java:86)
+		at reactor.core.publisher.FluxCreate$BufferAsyncSink.drain(FluxCreate.java:793)
+		at reactor.core.publisher.FluxCreate$BufferAsyncSink.next(FluxCreate.java:718)
+		at reactor.core.publisher.FluxCreate$SerializedSink.next(FluxCreate.java:153)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$Conversation.emit(ReactorNettyClient.java:679)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.emit(ReactorNettyClient.java:867)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:801)
+		at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:710)
+		at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:112)
+		at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onNext(FluxPeekFuseable.java:845)
+		at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+		at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+		at reactor.netty.channel.FluxReceive.drainReceiver(FluxReceive.java:220)
+		at reactor.netty.channel.FluxReceive.onInboundNext(FluxReceive.java:353)
+		at reactor.netty.channel.ChannelOperations.onInboundNext(ChannelOperations.java:352)
+		at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:90)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:321)
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:308)
+		at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:422)
+		at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+		at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+		at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+		at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+		at java.lang.Thread.run(Thread.java:748)
+Caused by: io.r2dbc.postgresql.ExceptionFactory$PostgresqlDataIntegrityViolationException: 插入或更新表 "mt_user_role" 违反外键约束 "mt_user_role_roleid_fkey"
+	at io.r2dbc.postgresql.ExceptionFactory.createException(ExceptionFactory.java:91)
+	at io.r2dbc.postgresql.ExceptionFactory.handleErrorResponse(ExceptionFactory.java:110)
+	at io.r2dbc.postgresql.PostgresqlResult.lambda$map$1(PostgresqlResult.java:100)
+	at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:96)
+	at reactor.core.publisher.FluxTakeUntil$TakeUntilPredicateSubscriber.onNext(FluxTakeUntil.java:77)
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableSubscriber.onNext(FluxFilterFuseable.java:112)
+	at reactor.core.publisher.FluxContextStart$ContextStartSubscriber.onNext(FluxContextStart.java:103)
+	at io.r2dbc.postgresql.util.FluxDiscardOnCancel$FluxDiscardOnCancelSubscriber.onNext(FluxDiscardOnCancel.java:86)
+	at reactor.core.publisher.FluxCreate$BufferAsyncSink.drain(FluxCreate.java:793)
+	at reactor.core.publisher.FluxCreate$BufferAsyncSink.next(FluxCreate.java:718)
+	at reactor.core.publisher.FluxCreate$SerializedSink.next(FluxCreate.java:153)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$Conversation.emit(ReactorNettyClient.java:679)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.emit(ReactorNettyClient.java:867)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:801)
+	at io.r2dbc.postgresql.client.ReactorNettyClient$BackendMessageSubscriber.onNext(ReactorNettyClient.java:710)
+	at reactor.core.publisher.FluxHandle$HandleSubscriber.onNext(FluxHandle.java:112)
+	at reactor.core.publisher.FluxPeekFuseable$PeekConditionalSubscriber.onNext(FluxPeekFuseable.java:845)
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+	at reactor.core.publisher.FluxMap$MapConditionalSubscriber.onNext(FluxMap.java:213)
+	at reactor.netty.channel.FluxReceive.drainReceiver(FluxReceive.java:220)
+	at reactor.netty.channel.FluxReceive.onInboundNext(FluxReceive.java:353)
+	at reactor.netty.channel.ChannelOperations.onInboundNext(ChannelOperations.java:352)
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:90)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:321)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:308)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:422)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+
+--2020-03-30 21:20:43.351 - INFO 14980 --- [main] c.a.n.c.c.impl.LocalConfigInfoProcessor  : LOCAL_SNAPSHOT_PATH:C:\Users\GYH\nacos\config
+--2020-03-30 21:20:43.520 - INFO 14980 --- [main] c.a.nacos.client.config.impl.Limiter     : limitTime:5.0
+--2020-03-30 21:20:43.558 - WARN 14980 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api] & group[DEFAULT_GROUP]
+--2020-03-30 21:20:43.564 - INFO 14980 --- [main] c.a.nacos.client.config.utils.JVMUtil    : isMultiInstance:false
+--2020-03-30 21:20:43.615 - WARN 14980 --- [main] c.a.c.n.c.NacosPropertySourceBuilder     : Ignore the empty nacos configuration and get it based on dataId[api-dev.yml] & group[DEFAULT_GROUP]
+--2020-03-30 21:20:43.616 - INFO 14980 --- [main] b.c.PropertySourceBootstrapConfiguration : Located property source: [BootstrapPropertySource {name='bootstrapProperties-api-dev.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api.yml,DEFAULT_GROUP'}, BootstrapPropertySource {name='bootstrapProperties-api,DEFAULT_GROUP'}]
+--2020-03-30 21:20:43.671 - INFO 14980 --- [main] com.mt.mtuser.MtUserApplicationKt        : The following profiles are active: dev
+--2020-03-30 21:20:44.035 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 21:20:44.036 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data R2DBC repositories in DEFAULT mode.
+--2020-03-30 21:20:44.134 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 94ms. Found 10 R2DBC repository interfaces.
+--2020-03-30 21:20:44.379 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+--2020-03-30 21:20:44.380 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+--2020-03-30 21:20:44.431 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.CompanyDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.433 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.434 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.RoomRecordDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.435 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.StockDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.435 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.436 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.UserRoleDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.436 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.ClickRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.437 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.DoubleRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.437 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimelyRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.438 - INFO 14980 --- [main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.mt.mtuser.dao.room.TimingRoomDao. If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository.
+--2020-03-30 21:20:44.438 - INFO 14980 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50ms. Found 0 Redis repository interfaces.
+--2020-03-30 21:20:44.608 - INFO 14980 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=ef725715-794d-31fb-b6f0-d4e000498335
+--2020-03-30 21:20:44.706 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration' of type [org.springframework.security.config.annotation.method.configuration.ReactiveMethodSecurityConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:44.726 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityExpressionHandler' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:44.729 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'methodMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:44.758 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:44.759 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactiveLoadBalancerConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:44.762 - INFO 14980 --- [main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+--2020-03-30 21:20:46.761 - INFO 14980 --- [main] ctiveUserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 50ded50d-dc8e-4478-8351-3bda8bad9573
+
+--2020-03-30 21:20:46.861 - WARN 14980 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 21:20:46.861 - INFO 14980 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 21:20:46.867 - WARN 14980 --- [main] c.n.c.sources.URLConfigurationSource     : No URLs will be polled as dynamic configuration sources.
+--2020-03-30 21:20:46.867 - INFO 14980 --- [main] c.n.c.sources.URLConfigurationSource     : To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+--2020-03-30 21:20:48.211 - INFO 14980 --- [main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+--2020-03-30 21:20:49.337 - INFO 14980 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 21:20:49.338 - INFO 14980 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Environment :null
+--2020-03-30 21:20:49.339 - INFO 14980 --- [main] com.alibaba.nacos.client.naming          : initializer namespace from System Property :null
+--2020-03-30 21:20:52.563 - INFO 14980 --- [main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 84
+--2020-03-30 21:20:53.649 - INFO 14980 --- [main] com.alibaba.nacos.client.naming          : [BEAT] adding beat: {"cluster":"DEFAULT","ip":"192.168.137.1","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":84,"scheduled":false,"serviceName":"DEFAULT_GROUP@@api","stopped":false,"weight":1.0} to beat map.
+--2020-03-30 21:20:53.743 - INFO 14980 --- [main] com.alibaba.nacos.client.naming          : [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@api with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"192.168.137.1","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":84,"weight":1.0}
+--2020-03-30 21:20:53.756 - INFO 14980 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP api 192.168.137.1:84 register finished
+--2020-03-30 21:20:54.831 - INFO 14980 --- [main] com.mt.mtuser.MtUserApplicationKt        : Started MtUserApplicationKt in 15.404 seconds (JVM running for 17.345)
+--2020-03-30 21:20:54.835 - INFO 14980 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api-dev.yml+DEFAULT_GROUP
+--2020-03-30 21:20:54.836 - INFO 14980 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api-dev.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 21:20:54.837 - INFO 14980 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api+DEFAULT_GROUP
+--2020-03-30 21:20:54.837 - INFO 14980 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 21:20:54.839 - INFO 14980 --- [main] c.a.n.client.config.impl.ClientWorker    : [fixed-localhost_8848] [subscribe] api.yml+DEFAULT_GROUP
+--2020-03-30 21:20:54.839 - INFO 14980 --- [main] c.a.nacos.client.config.impl.CacheData   : [fixed-localhost_8848] [add-listener] ok, tenant=, dataId=api.yml, group=DEFAULT_GROUP, cnt=1
+--2020-03-30 21:21:18.055 -DEBUG 14980 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Creating new transaction with name [com.mt.mtuser.controller.CommonController.register]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+--2020-03-30 21:21:18.479 -DEBUG 14980 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Acquired Connection [MonoRetry] for R2DBC transaction
+--2020-03-30 21:21:18.481 -DEBUG 14980 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Switching R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@47831524, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@7386c003}]] to manual commit
+--2020-03-30 21:21:18.539 - INFO 14980 --- [DefaultDispatcher-worker-1] CommonController                         : 123456
+--2020-03-30 21:21:18.965 - INFO 14980 --- [DefaultDispatcher-worker-1] io.lettuce.core.EpollProvider            : Starting without optional epoll library
+--2020-03-30 21:21:18.967 - INFO 14980 --- [DefaultDispatcher-worker-1] io.lettuce.core.KqueueProvider           : Starting without optional kqueue library
+--2020-03-30 21:21:21.043 -DEBUG 14980 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Initiating transaction rollback
+--2020-03-30 21:21:21.044 -DEBUG 14980 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Rolling back R2DBC transaction on Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@47831524, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@7386c003}]]
+--2020-03-30 21:21:21.050 -DEBUG 14980 --- [reactor-tcp-nio-1] o.s.d.r.c.R2dbcTransactionManager        : Releasing R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@47831524, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@7386c003}]] after transaction
+--2020-03-30 21:21:21.080 -ERROR 14980 --- [reactor-tcp-nio-1] a.w.r.e.AbstractErrorWebExceptionHandler : [b5c06bd2-1]  500 Server Error for HTTP POST "/register"
+
+org.springframework.data.redis.RedisConnectionFailureException: Unable to connect to Redis; nested exception is io.lettuce.core.RedisConnectionException: Unable to connect to localhost:6379
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1222)
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	|_ checkpoint ⇢ Handler com.mt.mtuser.controller.CommonController#register(Map) [DispatcherHandler]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.AuthorizationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authorization.ExceptionTranslationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.savedrequest.ServerRequestCacheWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.SecurityContextServerWebExchangeWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.authentication.AuthenticationWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.context.ReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.header.HttpHeaderWriterWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.config.web.server.ServerHttpSecurity$ServerWebExchangeReactorContextWebFilter [DefaultWebFilterChain]
+	|_ checkpoint ⇢ org.springframework.security.web.server.WebFilterChainProxy [DefaultWebFilterChain]
+	|_ checkpoint ⇢ HTTP POST "/register" [ExceptionHandlingWebHandler]
+Stack trace:
+		at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1222)
+		at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1201)
+		at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedReactiveConnection(LettuceConnectionFactory.java:975)
+		at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getReactiveConnection(LettuceConnectionFactory.java:436)
+		at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getReactiveConnection(LettuceConnectionFactory.java:94)
+		at org.springframework.data.redis.core.ReactiveRedisTemplate.lambda$doInConnection$0(ReactiveRedisTemplate.java:198)
+		at reactor.core.publisher.MonoSupplier.call(MonoSupplier.java:85)
+		at reactor.core.publisher.FluxUsingWhen.subscribe(FluxUsingWhen.java:80)
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4210)
+		at kotlinx.coroutines.reactive.AwaitKt.awaitOne(Await.kt:107)
+		at kotlinx.coroutines.reactive.AwaitKt.awaitOne$default(Await.kt:105)
+		at kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull(Await.kt:46)
+		at org.springframework.data.redis.core.ReactiveValueOperationsExtensionsKt.getAndAwait(ReactiveValueOperationsExtensions.kt:102)
+		at com.mt.mtuser.service.RedisUtil.getCode$suspendImpl(RedisUtil.kt:70)
+		at com.mt.mtuser.service.RedisUtil.getCode(RedisUtil.kt)
+		at com.mt.mtuser.controller.CommonController$register$1.invokeSuspend(CommonController.kt:57)
+		at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+		at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:56)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:571)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:738)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:678)
+		at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:665)
+Caused by: io.lettuce.core.RedisConnectionException: Unable to connect to localhost:6379
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:78)
+	at io.lettuce.core.RedisConnectionException.create(RedisConnectionException.java:56)
+	at io.lettuce.core.AbstractRedisClient.getConnection(AbstractRedisClient.java:234)
+	at io.lettuce.core.RedisClient.connect(RedisClient.java:207)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.lambda$getConnection$1(StandaloneConnectionProvider.java:115)
+	at java.util.Optional.orElseGet(Optional.java:267)
+	at org.springframework.data.redis.connection.lettuce.StandaloneConnectionProvider.getConnection(StandaloneConnectionProvider.java:115)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getNativeConnection(LettuceConnectionFactory.java:1220)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$SharedConnection.getConnection(LettuceConnectionFactory.java:1201)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getSharedReactiveConnection(LettuceConnectionFactory.java:975)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getReactiveConnection(LettuceConnectionFactory.java:436)
+	at org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.getReactiveConnection(LettuceConnectionFactory.java:94)
+	at org.springframework.data.redis.core.ReactiveRedisTemplate.lambda$doInConnection$0(ReactiveRedisTemplate.java:198)
+	at reactor.core.publisher.MonoSupplier.call(MonoSupplier.java:85)
+	at reactor.core.publisher.FluxUsingWhen.subscribe(FluxUsingWhen.java:80)
+	at reactor.core.publisher.Mono.subscribe(Mono.java:4210)
+	at kotlinx.coroutines.reactive.AwaitKt.awaitOne(Await.kt:107)
+	at kotlinx.coroutines.reactive.AwaitKt.awaitOne$default(Await.kt:105)
+	at kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull(Await.kt:46)
+	at org.springframework.data.redis.core.ReactiveValueOperationsExtensionsKt.getAndAwait(ReactiveValueOperationsExtensions.kt:102)
+	at com.mt.mtuser.service.RedisUtil.getCode$suspendImpl(RedisUtil.kt:70)
+	at com.mt.mtuser.service.RedisUtil.getCode(RedisUtil.kt)
+	at com.mt.mtuser.controller.CommonController$register$1.invokeSuspend(CommonController.kt:57)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:56)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:571)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:738)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:678)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:665)
+Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: no further information: localhost/127.0.0.1:6379
+Caused by: java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:330)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:702)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+
+--2020-03-30 21:22:01.521 -DEBUG 14980 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Creating new transaction with name [com.mt.mtuser.controller.CommonController.register]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+--2020-03-30 21:22:01.522 -DEBUG 14980 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Acquired Connection [MonoRetry] for R2DBC transaction
+--2020-03-30 21:22:01.522 -DEBUG 14980 --- [reactor-http-nio-2] o.s.d.r.c.R2dbcTransactionManager        : Switching R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@50f4369c, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@78f25efe}]] to manual commit
+--2020-03-30 21:22:01.524 - INFO 14980 --- [DefaultDispatcher-worker-1] CommonController                         : 123456
+--2020-03-30 21:22:05.329 -DEBUG 14980 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Initiating transaction commit
+--2020-03-30 21:22:05.329 -DEBUG 14980 --- [DefaultDispatcher-worker-1] o.s.d.r.c.R2dbcTransactionManager        : Committing R2DBC transaction on Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@50f4369c, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@78f25efe}]]
+--2020-03-30 21:22:05.333 -DEBUG 14980 --- [reactor-tcp-nio-8] o.s.d.r.c.R2dbcTransactionManager        : Releasing R2DBC Connection [PooledConnection[PostgresqlConnection{client=io.r2dbc.postgresql.client.ReactorNettyClient@50f4369c, codecs=io.r2dbc.postgresql.codec.DefaultCodecs@78f25efe}]] after transaction

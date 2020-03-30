@@ -54,8 +54,8 @@ class RoomService {
 
     suspend fun createClickRoom(clickRoom: ClickMatch): ClickMatch {
         // TODO 校验bean的数据合法性
-        val company = companyDao.findById(clickRoom.companyId!!).awaitSingle()
-        if (RoomExtend.getRoomDome(company.mode!!).contains(clickRoom.flag)) { // 判断房间模式
+        val company = companyDao.findById(clickRoom.companyId!!)
+        if (RoomExtend.getRoomDome(company?.mode!!).contains(clickRoom.flag)) { // 判断房间模式
             clickRoom.id = null
             clickRoom.isEnable<ClickMatch>(false)
             return mutex.withLock {
@@ -77,8 +77,8 @@ class RoomService {
 
     suspend fun createDoubleMatch(clickRoom: DoubleMatch): DoubleMatch {
         // TODO 校验bean的数据合法性
-        val company = companyDao.findById(clickRoom.companyId!!).awaitSingle()
-        if (RoomExtend.getRoomDome(company.mode!!).contains(clickRoom.flag)) { // 判断房间模式
+        val company = companyDao.findById(clickRoom.companyId!!)
+        if (RoomExtend.getRoomDome(company?.mode!!).contains(clickRoom.flag)) { // 判断房间模式
             clickRoom.id = null
             clickRoom.isEnable<ClickMatch>(false)
             return mutex.withLock {
@@ -102,7 +102,7 @@ class RoomService {
      * 使能一个房间
      * @param value 1：启用一个房间 0 关闭一个房间
      */
-    @Transactional
+    //@Transactional
     suspend fun enableRoom(roomNumber: String, value: String): Int {
         // TODO 验证时间是否超过24点
         val dao: BaseRoomDao<*> = when (roomNumber.substring(0, 1)) {
@@ -122,18 +122,18 @@ class RoomService {
             val newRecord = roomRecordDao.save(roomRecord)
             redisUtil.saveRoomRecord(newRecord)
         } else if (value == "0") {
-            roomRecord = redisUtil.deleteAndGetRoomRecord(roomNumber)
+            roomRecord = redisUtil.deleteAndGetRoomRecord(roomNumber) ?: throw IllegalStateException("房间不存在：$roomNumber")
             roomRecord.endTime = System.currentTimeMillis().toDate()
             roomRecord.getDuration()
             dynamicSql.dynamicUpdate(roomRecord)
                     .matching(where("id").`is`(roomRecord.id!!))
                     .fetch().awaitRowsUpdated()
-            // TODO 通知用户下线
+            // TODO 通知用户退出房间
         }
         return rest
     }
 
-    suspend fun <T : BaseRoom> updateRoomById(room: BaseRoom): Int {
+    suspend fun <T : BaseRoom> updateRoomById(room: T): Int {
         room.id ?: throw IllegalStateException("请指定id")
         room.enable = null
         room.roomNumber = null
@@ -160,12 +160,13 @@ class RoomService {
      * 检查房间数量，异步同时获取四种房间的数量
      */
     suspend fun checkRoomCount(companyId: Int): Boolean = coroutineScope {
-        val company = async { companyDao.findById(companyId).awaitSingle() }
+        val company = async { companyDao.findById(companyId) }
         val countClick = async { clickRoomDao.countByCompanyId(companyId) }
         val countDouble = async { doubleRoomDao.countByCompanyId(companyId) }
         val countTimely = async { timelyRoomDao.countByCompanyId(companyId) }
         val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
-        company.await().roomCount!! > (countClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
+        company.await() ?: throw IllegalStateException("公司不存在：$companyId")
+        company.await()?.roomCount!! > (countClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
     }
 
     /**

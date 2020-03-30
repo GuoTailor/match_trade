@@ -6,6 +6,7 @@ import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.CompanyService
+import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -36,10 +37,13 @@ class CompanyController {
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     fun register(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
-        return Mono.just(company)
-                .filter { !Util.isEmpty(it) }
-                .flatMap { ResponseInfo.ok(companyService.save(it)) }
-                .defaultIfEmpty(ResponseInfo<Company>(1, "请填写属性"))
+        return ResponseInfo.ok(mono {
+            if (!Util.isEmpty(company)) {
+                companyService.save(company)
+            } else {
+                throw IllegalStateException("请填写属性")
+            }
+        })
     }
 
     /**
@@ -55,8 +59,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Int): Mono<ResponseInfo<Void>> {
-        return ResponseInfo.ok(companyService.deleteById(id))
+    fun delete(@PathVariable id: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { companyService.deleteById(id) })
     }
 
     /**
@@ -75,7 +79,7 @@ class CompanyController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping
     fun update(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(companyService.update(company))
+        return ResponseInfo.ok(mono { companyService.update(company) })
     }
 
     /**
@@ -93,7 +97,7 @@ class CompanyController {
      */
     @GetMapping("/{id}")
     fun getCompany(@PathVariable id: Int): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(companyService.findById(id))
+        return ResponseInfo.ok(mono { companyService.findById(id) })
     }
 
     /**
@@ -110,7 +114,7 @@ class CompanyController {
      */
     @GetMapping
     fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
-        return ResponseInfo.ok(companyService.findAllByQuery(query))
+        return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })
     }
 
 }

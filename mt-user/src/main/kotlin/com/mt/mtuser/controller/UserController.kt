@@ -7,6 +7,8 @@ import com.mt.mtuser.entity.Role
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.UserService
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -40,15 +42,13 @@ class UserController {
      */
     @GetMapping("/info")
     fun getUserInfo(@RequestParam(required = false) id: Int?): Mono<ResponseInfo<User>> {
-        return ResponseInfo.ok(if (id == null) {
-            BaseUser.getcurrentUser()
-                    .flatMap { userService.findById(it.id!!) }
-                    .flatMap { user ->
-                        roleService.selectRolesByUserId(user.id!!).map { user.roles = listOf(it); user }
-                    }
-        } else {
-            userService.findById(id)
-        })
+        return mono {
+            val userid = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
+            val user = userService.findById(userid) ?: return@mono ResponseInfo<User>(1,"用户不存在")
+            val role = roleService.selectRolesByUserId(user.id!!)
+            user.roles = listOf(role)
+            ResponseInfo(0, "成功" ,user)
+        }
     }
 
     /**
@@ -66,15 +66,16 @@ class UserController {
      */
     @PutMapping
     fun alter(@RequestBody user: User): Mono<ResponseInfo<Int>> {
-        return if (!Util.isEmpty(user)) {
-            ResponseInfo.ok(BaseUser.getcurrentUser().flatMap {
-                user.id = it.id
+        return mono {
+            if (!Util.isEmpty(user)) {
+                val currentUser = BaseUser.getcurrentUser().awaitSingle()
+                user.id = currentUser.id
                 user.phone = null
                 user.passwordEncoder()
-                userService.save(user)
-            }, "修改成功")
-        } else {
-            ResponseInfo.failed(Mono.empty(), "请至少更新一个属性")
+                ResponseInfo<Int>(userService.save(user), "修改成功")
+            } else {
+                ResponseInfo<Int>(userService.save(user), "请至少更新一个属性")
+            }
         }
     }
 
@@ -96,7 +97,7 @@ class UserController {
     @PutMapping("/role")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     fun changeAuthority(@RequestBody role: Role): Mono<ResponseInfo<Role>> {
-        return ResponseInfo.ok(roleService.save(role), "修改成功")
+        return ResponseInfo.ok(mono{roleService.save(role)}, "修改成功")
     }
 
 }

@@ -7,6 +7,7 @@ import com.mt.mtuser.entity.Stock
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.StockService
+import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -38,7 +39,7 @@ class StockController {
      */
     @GetMapping("/{id}")
     fun getStock(@PathVariable id: Int): Mono<ResponseInfo<Stock?>> {
-        return ResponseInfo.ok(stockService.findById(id))
+        return ResponseInfo.ok<Stock?>(mono { stockService.findById(id) } as Mono<Stock?>)
     }
 
     /**
@@ -57,7 +58,7 @@ class StockController {
      */
     @GetMapping("/company/{id}")
     fun getCompanyStock(@PathVariable id: Int, query: PageQuery): Mono<ResponseInfo<PageView<Stock>>> {
-        return ResponseInfo.ok(stockService.findAllByQuery(query))
+        return ResponseInfo.ok(mono { stockService.findAllByQuery(query) })
     }
 
     /**
@@ -75,9 +76,9 @@ class StockController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun addStock(@RequestBody stock: Stock): Mono<ResponseInfo<Stock>>  {
+    fun addStock(@RequestBody stock: Stock): Mono<ResponseInfo<Stock>> {
         stock.id = null
-        return ResponseInfo.ok(stockService.save(stock))
+        return ResponseInfo.ok(mono { stockService.save(stock) })
     }
 
     /**
@@ -96,11 +97,14 @@ class StockController {
     @PutMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     fun updateStock(@RequestBody stock: Stock): Mono<ResponseInfo<Stock>> {
-        return Mono.just(stock)
-                .filter { !Util.isEmpty(it) }
-                .filter { it.id != null }
-                .flatMap { ResponseInfo.ok(stockService.save(it)) }
-                .defaultIfEmpty(ResponseInfo<Stock>(1, "请填写id属性"))
+        return mono {
+            if (!Util.isEmpty(stock)) {
+                stock.id = null
+                ResponseInfo(0, "成功", stockService.save(stock))
+            } else {
+                ResponseInfo<Stock>(1, "请填写id属性")
+            }
+        }
     }
 
     /**
@@ -118,8 +122,8 @@ class StockController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun deleteStock(@PathVariable id: Int):Mono<ResponseInfo<Void>> {
-        return ResponseInfo.ok(stockService.deleteById(id))
+    fun deleteStock(@PathVariable id: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { stockService.deleteById(id) })
     }
 
 

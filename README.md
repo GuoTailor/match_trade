@@ -19,6 +19,7 @@
 因为请求的验证是在mt-gateway完成的，其他服务没有配置token解析的模块
 - 如果要更改数据库的用户名密码记住mt-gateway里面也有数据库相关配置
 - spring security PreAuthorize注解 与kotlin协程不兼容 [详情](https://github.com/spring-projects/spring-security/issues/8143)
+- kotlin挂起函数不支持事务
 
 ## 关于学习文档：
     

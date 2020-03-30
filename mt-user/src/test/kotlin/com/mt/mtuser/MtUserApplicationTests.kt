@@ -14,13 +14,6 @@ class MtUserApplicationTests {
 
     @Test
     fun contextLoads() {
-        val user = User()
-        user.id = 5
-        user.nickName = "ok"
-        val requert = userService.save(user).block()
-        println(requert.toString())
-        Thread.sleep(1000)
-        println("结束")
     }
 
 }

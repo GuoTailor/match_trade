@@ -27,8 +27,8 @@ class RedisUtil {
     /**
      * 获取一个房间记录
      */
-    suspend fun getRoomRecord(roomNumber: String) {
-        redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
+    suspend fun getRoomRecord(roomNumber: String): RoomRecord? {
+        return redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber) as RoomRecord?
     }
 
     /**
@@ -42,11 +42,11 @@ class RedisUtil {
      * 获取并删除一个记录<br>
      * 注意该方法不安全
      */
-    suspend fun deleteAndGetRoomRecord(roomNumber: String): RoomRecord {
+    suspend fun deleteAndGetRoomRecord(roomNumber: String): RoomRecord? {
         // 不安全 也许有更好的办法
         val roomRecord = redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
         redisTemplate.deleteAndAwait(roomKey + roomNumber)
-        return roomRecord as RoomRecord
+        return roomRecord as RoomRecord?
     }
 
     /**
@@ -66,8 +66,8 @@ class RedisUtil {
     /**
      * 获取一个验证码
      */
-    suspend fun getCode(phone: String): String {
-        return redisTemplate.opsForValue().getAndAwait(codeKey + phone) as String
+    suspend fun getCode(phone: String): String? {
+        return redisTemplate.opsForValue().getAndAwait(codeKey + phone) as String?
     }
 
     suspend fun deleteCode(phone: String) {
