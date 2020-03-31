@@ -33,13 +33,23 @@ object RoomExtend {
         }
     }
 
-    fun getRoomModel(roomNumber: String): RoomEnum {
-        return when (roomNumber[0].toString()) {
+    fun getRoomModel(roomId: String): RoomEnum {
+        return when (roomId[0].toString()) {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
             RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
             RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
             RoomEnum.TIMING.flag -> RoomEnum.TIMING
-            else -> throw IllegalStateException("不支持的房间号模式${roomNumber}")
+            else -> throw IllegalStateException("不支持的房间号模式${roomId}")
+        }
+    }
+
+    fun getRoomEnum(flag: String) : RoomEnum{
+        return when (flag) {
+            RoomEnum.CLICK.flag -> RoomEnum.CLICK
+            RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
+            RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
+            RoomEnum.TIMING.flag -> RoomEnum.TIMING
+            else -> throw IllegalStateException("不支持的房间号模式${flag}")
         }
     }
 

@@ -56,6 +56,7 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 responseInfo.data = data
                 responseInfo
             }.onErrorResume {
+                it.printStackTrace()
                 val responseInfo = ResponseInfo<T>(1, it.message ?: "失败")
                 responseInfo.toMono()
             }

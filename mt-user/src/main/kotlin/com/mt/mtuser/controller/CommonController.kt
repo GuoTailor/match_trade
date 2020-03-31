@@ -2,8 +2,10 @@ package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.SmsSample
 import com.mt.mtuser.common.Util
+import com.mt.mtuser.dao.TestTImeDao
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.TestTime
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
@@ -31,7 +33,16 @@ class CommonController {
 
     @Autowired
     lateinit var redisUtil: RedisUtil
+    @Autowired
+    lateinit var testTImeDao: TestTImeDao
 
+    @PostMapping("/testTime")
+    fun testTime(@RequestBody testTime: TestTime): Mono<TestTime> {
+        return mono {
+            val time = testTImeDao.save(testTime)
+            testTImeDao.findById(time.id!!)
+        }
+    }
     /**
      * @api {get} /register 注册一个用户
      * @apiDescription  注册用户

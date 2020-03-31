@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 29/03/2020 00:12:39
+ Date: 31/03/2020 21:04:38
 */
 
 
@@ -72,28 +72,6 @@ START 1
 CACHE 1;
 
 -- ----------------------------
--- Sequence structure for mt_room_click_current_count_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_room_click_current_count_seq";
-CREATE SEQUENCE "public"."mt_room_click_current_count_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 32767
-START 1
-CACHE 1;
-
--- ----------------------------
--- Sequence structure for mt_room_double_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_room_double_id_seq";
-CREATE SEQUENCE "public"."mt_room_double_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
-
--- ----------------------------
 -- Sequence structure for mt_room_record _id_seq
 -- ----------------------------
 DROP SEQUENCE IF EXISTS "public"."mt_room_record _id_seq";
@@ -105,13 +83,13 @@ START 1
 CACHE 1;
 
 -- ----------------------------
--- Sequence structure for mt_room_timely_id_seq
+-- Sequence structure for mt_room_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_room_timely_id_seq";
-CREATE SEQUENCE "public"."mt_room_timely_id_seq" 
+DROP SEQUENCE IF EXISTS "public"."mt_room_seq";
+CREATE SEQUENCE "public"."mt_room_seq" 
 INCREMENT 1
 MINVALUE  1
-MAXVALUE 2147483647
+MAXVALUE 9223372036854775807
 START 1
 CACHE 1;
 
@@ -142,6 +120,17 @@ CACHE 1;
 -- ----------------------------
 DROP SEQUENCE IF EXISTS "public"."stock_id_seq";
 CREATE SEQUENCE "public"."stock_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 2147483647
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for test_json_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."test_json_id_seq";
+CREATE SEQUENCE "public"."test_json_id_seq" 
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
@@ -252,18 +241,16 @@ CREATE TABLE "public"."mt_role" (
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_room_click";
 CREATE TABLE "public"."mt_room_click" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_room_timely_id_seq'::regclass),
-  "room_number" varchar(7) COLLATE "pg_catalog"."default" NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "people" int4 NOT NULL DEFAULT 0,
-  "quote_time" timestamp(6) NOT NULL,
-  "second_stage" timestamp(6) NOT NULL,
+  "quote_time" time(6) NOT NULL,
+  "second_stage" time(6) NOT NULL,
   "time" time(6) NOT NULL,
   "number_trades" int4 NOT NULL,
-  "
-count" int2 NOT NULL,
+  "count" int2 NOT NULL,
   "current_count" int2 NOT NULL DEFAULT 0,
   "low_scope" numeric NOT NULL,
   "high_scope" numeric NOT NULL,
@@ -272,7 +259,7 @@ count" int2 NOT NULL,
   "rival" int2 NOT NULL
 )
 ;
-COMMENT ON COLUMN "public"."mt_room_click"."room_number" IS '房间号';
+COMMENT ON COLUMN "public"."mt_room_click"."room_id" IS '房间id，四张表唯一';
 COMMENT ON COLUMN "public"."mt_room_click"."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_room_click"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_room_click"."name" IS '房间名字';
@@ -281,8 +268,7 @@ COMMENT ON COLUMN "public"."mt_room_click"."quote_time" IS '报价和选择身�
 COMMENT ON COLUMN "public"."mt_room_click"."second_stage" IS '第二阶段时间';
 COMMENT ON COLUMN "public"."mt_room_click"."time" IS '时长';
 COMMENT ON COLUMN "public"."mt_room_click"."number_trades" IS '单笔交易数量';
-COMMENT ON COLUMN "public"."mt_room_click"."
-count" IS '撮合次数';
+COMMENT ON COLUMN "public"."mt_room_click"."count" IS '撮合次数';
 COMMENT ON COLUMN "public"."mt_room_click"."current_count" IS '当前撮合次数';
 COMMENT ON COLUMN "public"."mt_room_click"."low_scope" IS '报价最低值';
 COMMENT ON COLUMN "public"."mt_room_click"."high_scope" IS '报价最高值';
@@ -296,8 +282,7 @@ COMMENT ON TABLE "public"."mt_room_click" IS '点选撮和';
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_room_double";
 CREATE TABLE "public"."mt_room_double" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_room_double_id_seq'::regclass),
-  "room_number" varchar(7) COLLATE "pg_catalog"."default" NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "company_id" int4 NOT NULL,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "people" int4 NOT NULL DEFAULT 0,
@@ -310,7 +295,7 @@ CREATE TABLE "public"."mt_room_double" (
   "stock_id" int4 NOT NULL
 )
 ;
-COMMENT ON COLUMN "public"."mt_room_double"."room_number" IS '房间号';
+COMMENT ON COLUMN "public"."mt_room_double"."room_id" IS '房间id，四张表唯一';
 COMMENT ON COLUMN "public"."mt_room_double"."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_room_double"."name" IS '房间名字';
 COMMENT ON COLUMN "public"."mt_room_double"."people" IS '人数';
@@ -333,8 +318,7 @@ CREATE TABLE "public"."mt_room_record " (
   "company_id" int4 NOT NULL,
   "start_time" timestamp(6) NOT NULL DEFAULT now(),
   "end_time" timestamp(6),
-  "room_id" int4 NOT NULL,
-  "room_number" varchar(7) COLLATE "pg_catalog"."default" NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "stock_id" int4 NOT NULL
 )
 ;
@@ -342,8 +326,7 @@ COMMENT ON COLUMN "public"."mt_room_record "."model" IS '模式对应撮合模�
 COMMENT ON COLUMN "public"."mt_room_record "."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_room_record "."start_time" IS '启用时间';
 COMMENT ON COLUMN "public"."mt_room_record "."end_time" IS '结束时间';
-COMMENT ON COLUMN "public"."mt_room_record "."room_id" IS '房间id';
-COMMENT ON COLUMN "public"."mt_room_record "."room_number" IS '房间号';
+COMMENT ON COLUMN "public"."mt_room_record "."room_id" IS '房间id，四张房间表唯一';
 COMMENT ON COLUMN "public"."mt_room_record "."stock_id" IS '股票id';
 COMMENT ON TABLE "public"."mt_room_record " IS '房间启用记录';
 
@@ -352,8 +335,7 @@ COMMENT ON TABLE "public"."mt_room_record " IS '房间启用记录';
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_room_timely";
 CREATE TABLE "public"."mt_room_timely" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_room_timely_id_seq'::regclass),
-  "room_number" varchar(7) COLLATE "pg_catalog"."default" NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
@@ -366,7 +348,7 @@ CREATE TABLE "public"."mt_room_timely" (
   "create_time" timestamp(0) NOT NULL DEFAULT now()
 )
 ;
-COMMENT ON COLUMN "public"."mt_room_timely"."room_number" IS '房间号';
+COMMENT ON COLUMN "public"."mt_room_timely"."room_id" IS '房间id，四张表唯一';
 COMMENT ON COLUMN "public"."mt_room_timely"."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_room_timely"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_room_timely"."name" IS '房间名字';
@@ -384,26 +366,24 @@ COMMENT ON TABLE "public"."mt_room_timely" IS '及时撮和';
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_room_timing";
 CREATE TABLE "public"."mt_room_timing" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_room_timely_id_seq'::regclass),
-  "room_number" varchar(7) COLLATE "pg_catalog"."default" NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "people" int4 NOT NULL DEFAULT 0,
   "time" time(6) NOT NULL,
-  "match_time" timestamp(6) NOT NULL,
+  "match_time" time(6) NOT NULL,
   "number_trades" int4 NOT NULL,
-  "
-count" int2 NOT NULL,
+  "count" int2 NOT NULL,
   "low_scope" numeric NOT NULL,
   "high_scope" numeric NOT NULL,
   "enable" varchar(1) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 0,
-  "create_time" timestamp(0) NOT NULL DEFAULT now(),
-  "quote_time" timestamp(6) NOT NULL,
-  "current_count" int2 NOT NULL DEFAULT 0
+  "quote_time" time(6) NOT NULL,
+  "current_count" int2 NOT NULL DEFAULT 0,
+  "create_time" timestamp(0) NOT NULL DEFAULT now()
 )
 ;
-COMMENT ON COLUMN "public"."mt_room_timing"."room_number" IS '房间号';
+COMMENT ON COLUMN "public"."mt_room_timing"."room_id" IS '房间id，四张表唯一';
 COMMENT ON COLUMN "public"."mt_room_timing"."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_room_timing"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_room_timing"."name" IS '房间名字';
@@ -411,14 +391,13 @@ COMMENT ON COLUMN "public"."mt_room_timing"."people" IS '人数';
 COMMENT ON COLUMN "public"."mt_room_timing"."time" IS '时长';
 COMMENT ON COLUMN "public"."mt_room_timing"."match_time" IS '撮合时间';
 COMMENT ON COLUMN "public"."mt_room_timing"."number_trades" IS '单笔交易数量';
-COMMENT ON COLUMN "public"."mt_room_timing"."
-count" IS '撮合次数';
+COMMENT ON COLUMN "public"."mt_room_timing"."count" IS '撮合次数';
 COMMENT ON COLUMN "public"."mt_room_timing"."low_scope" IS '报价最低值';
 COMMENT ON COLUMN "public"."mt_room_timing"."high_scope" IS '报价最高值';
 COMMENT ON COLUMN "public"."mt_room_timing"."enable" IS '是否开启{0：关闭；1：开启}';
-COMMENT ON COLUMN "public"."mt_room_timing"."create_time" IS '创建时间';
 COMMENT ON COLUMN "public"."mt_room_timing"."quote_time" IS '报价时间';
 COMMENT ON COLUMN "public"."mt_room_timing"."current_count" IS '当前撮合次数';
+COMMENT ON COLUMN "public"."mt_room_timing"."create_time" IS '创建时间';
 COMMENT ON TABLE "public"."mt_room_timing" IS '定时撮合';
 
 -- ----------------------------
@@ -510,6 +489,17 @@ COMMENT ON COLUMN "public"."mt_user_role"."roleid" IS '该用户在公司的角�
 COMMENT ON COLUMN "public"."mt_user_role"."companyid" IS '公司id';
 
 -- ----------------------------
+-- Table structure for test_time
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."test_time";
+CREATE TABLE "public"."test_time" (
+  "id" int4 NOT NULL DEFAULT nextval('test_json_id_seq'::regclass),
+  "timestamp" timestamp(6),
+  "time" time(6)
+)
+;
+
+-- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_company_id_seq"
@@ -547,20 +537,6 @@ SELECT setval('"public"."mt_role_id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_room_click_current_count_seq"
-OWNED BY "public"."mt_room_click"."current_count";
-SELECT setval('"public"."mt_room_click_current_count_seq"', 2, false);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
-ALTER SEQUENCE "public"."mt_room_double_id_seq"
-OWNED BY "public"."mt_room_double"."id";
-SELECT setval('"public"."mt_room_double_id_seq"', 2, false);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
 ALTER SEQUENCE "public"."mt_room_record _id_seq"
 OWNED BY "public"."mt_room_record "."id";
 SELECT setval('"public"."mt_room_record _id_seq"', 2, false);
@@ -568,9 +544,7 @@ SELECT setval('"public"."mt_room_record _id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_room_timely_id_seq"
-OWNED BY "public"."mt_room_timely"."id";
-SELECT setval('"public"."mt_room_timely_id_seq"', 5, true);
+SELECT setval('"public"."mt_room_seq"', 19, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -584,7 +558,7 @@ SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_user_role_id_seq"
 OWNED BY "public"."mt_user_role"."id";
-SELECT setval('"public"."mt_user_role_id_seq"', 7, true);
+SELECT setval('"public"."mt_user_role_id_seq"', 10, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -596,9 +570,16 @@ SELECT setval('"public"."stock_id_seq"', 2, true);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
+ALTER SEQUENCE "public"."test_json_id_seq"
+OWNED BY "public"."test_time"."id";
+SELECT setval('"public"."test_json_id_seq"', 13, true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
 ALTER SEQUENCE "public"."user_id_seq"
 OWNED BY "public"."mt_user"."id";
-SELECT setval('"public"."user_id_seq"', 10, true);
+SELECT setval('"public"."user_id_seq"', 13, true);
 
 -- ----------------------------
 -- Primary Key structure for table mt_company
@@ -629,25 +610,25 @@ ALTER TABLE "public"."mt_role" ADD CONSTRAINT "mt_role_pkey" PRIMARY KEY ("id");
 -- Indexes structure for table mt_room_click
 -- ----------------------------
 CREATE UNIQUE INDEX "mt_room_click_room_number_idx" ON "public"."mt_room_click" USING btree (
-  "room_number" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
 
 -- ----------------------------
 -- Primary Key structure for table mt_room_click
 -- ----------------------------
-ALTER TABLE "public"."mt_room_click" ADD CONSTRAINT "mt_room_click_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."mt_room_click" ADD CONSTRAINT "mt_room_click_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
 -- Indexes structure for table mt_room_double
 -- ----------------------------
 CREATE UNIQUE INDEX "mt_room_double_room_number_idx" ON "public"."mt_room_double" USING btree (
-  "room_number" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
 
 -- ----------------------------
 -- Primary Key structure for table mt_room_double
 -- ----------------------------
-ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
 -- Primary Key structure for table mt_room_record 
@@ -658,25 +639,25 @@ ALTER TABLE "public"."mt_room_record " ADD CONSTRAINT "mt_room_record _pkey" PRI
 -- Indexes structure for table mt_room_timely
 -- ----------------------------
 CREATE UNIQUE INDEX "mt_room_timely_room_number_idx" ON "public"."mt_room_timely" USING btree (
-  "room_number" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
 
 -- ----------------------------
 -- Primary Key structure for table mt_room_timely
 -- ----------------------------
-ALTER TABLE "public"."mt_room_timely" ADD CONSTRAINT "mt_room_timely_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."mt_room_timely" ADD CONSTRAINT "mt_room_timely_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
 -- Indexes structure for table mt_room_timing
 -- ----------------------------
 CREATE UNIQUE INDEX "mt_room_timing_room_number_idx" ON "public"."mt_room_timing" USING btree (
-  "room_number" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
 
 -- ----------------------------
 -- Primary Key structure for table mt_room_timing
 -- ----------------------------
-ALTER TABLE "public"."mt_room_timing" ADD CONSTRAINT "mt_room_timing_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."mt_room_timing" ADD CONSTRAINT "mt_room_timing_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
 -- Primary Key structure for table mt_stock
@@ -697,6 +678,11 @@ ALTER TABLE "public"."mt_user" ADD CONSTRAINT "user_pkey" PRIMARY KEY ("id");
 -- Primary Key structure for table mt_user_role
 -- ----------------------------
 ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table test_time
+-- ----------------------------
+ALTER TABLE "public"."test_time" ADD CONSTRAINT "test_json_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_company_room

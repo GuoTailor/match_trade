@@ -6,17 +6,14 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 /**
  * Created by gyh on 2020/3/25.
  */
-interface BaseRoomDao<T : BaseRoom> : CoroutineCrudRepository<T, Int> {
-    suspend fun existsByRoomNumber(roomNumber: String): Int
+interface BaseRoomDao<T : BaseRoom, ID> : CoroutineCrudRepository<T, ID> {
+    suspend fun existsByRoomId(roomId: String): Int
 
     /**
-     * 通过房间号启用/禁用房间
+     * 通过房间id启用/禁用房间
      */
-    suspend fun enableRoomByRoomNumber(roomNumber: String, enable: String): Int
+    suspend fun enableRoomById(roomId: String, enable: String): Int
 
-    suspend fun enableRoomById(id: Int, enable: String): Int
+    suspend fun findByRoomId(roomId: String): T?
 
-    suspend fun findByRoomNumber(roomNumber: String): T?
-
-    suspend fun findLastRoomNumber(): String?
 }

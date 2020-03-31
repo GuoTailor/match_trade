@@ -3,11 +3,15 @@ package com.mt.mtuser.controller
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.service.room.RoomService
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import javax.validation.Valid
 
 /**
  * Created by gyh on 2020/3/25.
@@ -30,16 +34,18 @@ class RoomController {
      * @apiPermission admin
      */
     @PostMapping("/create/click")
-    fun createClickRoom(@RequestBody @Validated clickRoom: ClickMatch): Mono<ResponseInfo<ClickMatch>> {
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    // @Valid 和 @Validated 注解均不起作用，不知道为什么
+    fun createClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
         return ResponseInfo.ok(mono{
-            roomService.createClickRoom(clickRoom)
+            roomService.createRoom(clickRoom.awaitSingle())
         })
     }
 
-    @PutMapping("/enable/{roomNumber}")
-    fun enableRoom(@PathVariable roomNumber:String, @RequestParam value: String): Mono<ResponseInfo<Int>> {
+    @PutMapping("/enable/{roomId}")
+    fun enableRoom(@PathVariable roomId:String, @RequestParam value: String): Mono<ResponseInfo<Int>> {
         return ResponseInfo.ok(mono{
-            roomService.enableRoom(roomNumber, value)
+            roomService.enableRoom(roomId, value)
         })
     }
 }

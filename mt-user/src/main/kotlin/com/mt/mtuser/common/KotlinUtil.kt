@@ -2,6 +2,7 @@ package com.mt.mtuser.common
 
 import java.sql.Time
 import java.time.Duration
+import java.time.LocalTime
 import java.util.*
 
 /**
@@ -15,7 +16,15 @@ import java.util.*
  */
 fun Long.toDate(): Date = Date(this)
 
-fun Time.toDuration(): Duration = Duration.ofMillis(this.time)
+/**
+ * 返回LocalTime表示的毫秒值,注意可能的精度损失
+ */
+fun LocalTime.toMillis(): Long = this.toNanoOfDay() / 1000_000
+
+/**
+ * 吧LocalTime转换为Duration
+ */
+fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
 
 /**
  * 重载Date的[减]运算符

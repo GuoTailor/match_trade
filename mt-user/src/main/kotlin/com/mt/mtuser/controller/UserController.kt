@@ -65,8 +65,9 @@ class UserController {
      * @apiPermission user
      */
     @PutMapping
-    fun alter(@RequestBody user: User): Mono<ResponseInfo<Int>> {
+    fun alter(@RequestBody monoUser: Mono<User>): Mono<ResponseInfo<Int>> {
         return mono {
+            val user = monoUser.awaitSingle()
             if (!Util.isEmpty(user)) {
                 val currentUser = BaseUser.getcurrentUser().awaitSingle()
                 user.id = currentUser.id

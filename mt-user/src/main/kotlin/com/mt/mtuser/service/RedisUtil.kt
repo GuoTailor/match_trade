@@ -1,5 +1,6 @@
 package com.mt.mtuser.service
 
+import com.mt.mtuser.common.toDuration
 import com.mt.mtuser.entity.RoomRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
@@ -21,39 +22,39 @@ class RedisUtil {
      * 保存一个房间记录
      */
     suspend fun saveRoomRecord(roomRecord: RoomRecord) {
-        redisTemplate.opsForValue().setAndAwait(roomKey + roomRecord.roomNumber, roomRecord, roomRecord.duration!!)
+        redisTemplate.opsForValue().setAndAwait(roomKey + roomRecord.roomId, roomRecord, roomRecord.duration!!.toDuration())
     }
 
     /**
      * 获取一个房间记录
      */
-    suspend fun getRoomRecord(roomNumber: String): RoomRecord? {
-        return redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber) as RoomRecord?
+    suspend fun getRoomRecord(roomId: String): RoomRecord? {
+        return redisTemplate.opsForValue().getAndAwait(roomKey + roomId) as RoomRecord?
     }
 
     /**
      * 删除一个房间记录
      */
-    suspend fun deleteRoomRecord(roomNumber: String) {
-        redisTemplate.opsForValue().deleteAndAwait(roomKey + roomNumber)
+    suspend fun deleteRoomRecord(roomId: String) {
+        redisTemplate.opsForValue().deleteAndAwait(roomKey + roomId)
     }
 
     /**
      * 获取并删除一个记录<br>
      * 注意该方法不安全
      */
-    suspend fun deleteAndGetRoomRecord(roomNumber: String): RoomRecord? {
+    suspend fun deleteAndGetRoomRecord(roomId: String): RoomRecord? {
         // 不安全 也许有更好的办法
-        val roomRecord = redisTemplate.opsForValue().getAndAwait(roomKey + roomNumber)
-        redisTemplate.deleteAndAwait(roomKey + roomNumber)
+        val roomRecord = redisTemplate.opsForValue().getAndAwait(roomKey + roomId)
+        redisTemplate.deleteAndAwait(roomKey + roomId)
         return roomRecord as RoomRecord?
     }
 
     /**
      * 更新房间的过期时间
      */
-    suspend fun updateRoomExpire(roomNumber: String, duration: Duration) {
-        redisTemplate.expireAndAwait(roomKey + roomNumber, duration)
+    suspend fun updateRoomExpire(roomId: String, duration: Duration) {
+        redisTemplate.expireAndAwait(roomKey + roomId, duration)
     }
 
     /**

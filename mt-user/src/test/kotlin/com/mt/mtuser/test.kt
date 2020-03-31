@@ -4,10 +4,14 @@ package com.mt.mtuser
  * Created by gyh on 2020/3/26.
  */
 
+import com.mt.mtuser.common.toMillis
 import kotlinx.coroutines.*
 import java.sql.Time
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 import java.util.*
 import kotlin.system.*
 
@@ -59,12 +63,11 @@ fun main2() = runBlocking<Unit> {
 fun testTime() {
     val time = Time.valueOf("08:00:00")
     println(time.toLocalTime().toSecondOfDay())
-    val localTime = LocalTime.parse("08:00:00")
-    println(localTime.toSecondOfDay())
+    val localTime = LocalTime.parse("00:00:01")
+    println(localTime.toMillis())
     val date = Date()
+    val instant = Instant.ofEpochMilli(3600_000)
+    println(instant.toString())
 }
 
-fun main() {
-    val c  = 68
-    println(c.toChar())
-}
+fun main() = testTime()
