@@ -3,6 +3,7 @@ package com.mt.mtuser.config
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtuser.entity.BaseUser
+import com.mt.mtuser.entity.Role
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -23,10 +24,11 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
         return Mono.justOrEmpty(exchange).map<Authentication> {
             val request: ServerHttpRequest = exchange.request
             val id: String? = request.headers.getFirst("id")
-            val username: String? = request.headers.getFirst("username")
-            val role: String = request.headers.getFirst("role") ?: "[]"
-            val roles: List<String> = json.readValue(role)
-            UsernamePasswordAuthenticationToken(id, username, roles.map { GrantedAuthority { it } })
+            //val username: String? = request.headers.getFirst("username")
+            val role: String = request.headers.getFirst("roles") ?: "[]"
+            val roles: List<Role> = json.readValue(role)
+            println(roles)
+            UsernamePasswordAuthenticationToken(id, id, roles)
         }
     }
 }

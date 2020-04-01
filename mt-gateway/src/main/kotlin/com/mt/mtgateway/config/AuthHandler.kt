@@ -1,7 +1,7 @@
 package com.mt.mtgateway.config
 
-import com.mt.mtgateway.RespBody
-import com.mt.mtgateway.User
+import com.mt.mtgateway.bean.RespBody
+import com.mt.mtgateway.bean.User
 import com.mt.mtgateway.server.MyReactiveUserDetailsService
 import com.mt.mtgateway.token.TokenMgr
 import org.slf4j.LoggerFactory

@@ -7,4 +7,3 @@ spring:
         server-addr: localhost:8848
         file-extension: yml
         prefix: mt-gateway
-

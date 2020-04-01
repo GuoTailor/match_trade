@@ -1,14 +1,13 @@
 package com.mt.mtgateway.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mt.mtgateway.User;
+import com.mt.mtgateway.bean.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
 import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 /**
  * 签发和验证token的类
@@ -51,8 +50,8 @@ public class TokenMgr {
         Date expDate = new Date(expMillis);
         Claims claims = Jwts.claims();
         claims.put("id", user.getId());
-        claims.put("username", user.getUsername());
-        claims.put("role", json.writeValueAsString(user.getRoles()));
+        //claims.put("username", user.getUsername());
+        claims.put("roles", json.writeValueAsString(user.getRoles()));
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(key, signatureAlgorithm)          // 签名算法以及密匙

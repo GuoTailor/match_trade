@@ -44,19 +44,12 @@ class Role() : GrantedAuthority {
         this.companyid = companyid
     }
 
-    override fun toString(): String {
-        return javaClass.simpleName +
-                " [" +
-                "Hash = " + hashCode() +
-                ", id=" + id +
-                ", userid=" + userid +
-                ", roleid=" + roleid +
-                ", companyid=" + companyid +
-                "]"
-    }
-
     override fun getAuthority(): String {
         return name!!
+    }
+
+    override fun toString(): String {
+        return "Role(id=$id, userid=$userid, roleid=$roleid, companyid=$companyid, name=$name, nameZh=$nameZh)"
     }
 
 

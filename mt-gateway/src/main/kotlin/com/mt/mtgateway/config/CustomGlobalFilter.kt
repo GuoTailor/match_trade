@@ -2,15 +2,14 @@ package com.mt.mtgateway.config
 
 import com.mt.mtgateway.token.TokenMgr
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 
@@ -21,7 +20,8 @@ import java.nio.charset.StandardCharsets
 class CustomGlobalFilter : WebFilter, Ordered {
     val log = LoggerFactory.getLogger(this.javaClass.simpleName)
     val TOKEN_PREFIX = "Bearer "
-    val skipAuthUrls = arrayOf("/login", "/api/register", "/api/login")
+    @Value("\${skipAuthUrls}")
+    lateinit var skipAuthUrls: List<String>
 
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -36,13 +36,13 @@ class CustomGlobalFilter : WebFilter, Ordered {
                 if (checkPOJO.isSuccess) {
                     val claims = checkPOJO.claims
                     val id = claims["id"]
-                    val username = claims["username"].toString()
-                    val authorities = claims["role"].toString()
-                    log.info("验证 $username : $authorities")
+                    //val username = claims["username"].toString()
+                    val authorities = claims["roles"].toString()
+                    log.info("验证 $id : $authorities")
                     val host = exchange.request.mutate()
                             .header("id", id.toString())
-                            .header("username", username)
-                            .header("role", authorities)
+                            //.header("username", username)
+                            .header("roles", authorities)
                             .header("Authorization")
                             .build()
                     val build = exchange.mutate().request(host).build()

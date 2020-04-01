@@ -153,7 +153,7 @@ class CommonController {
      */
     @GetMapping("/system/info")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getSystemInfo(): Mono<ResponseInfo<Map<String, Any>>> {
+    fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Any>>> {
         return ResponseInfo.ok(mono {
             val data: MutableMap<String, Any> = HashMap()
             data["companyCount"] = companyService.count()

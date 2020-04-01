@@ -1,4 +1,4 @@
-package com.mt.mtgateway
+package com.mt.mtgateway.bean
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.function.BiConsumer
