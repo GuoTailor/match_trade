@@ -54,7 +54,7 @@ class WebFluxSecurityConfig {
                 //.authenticationEntryPoint { swe, _ -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED } }
                 .accessDeniedHandler(MyAccessDeniedHandler()).and()
                 .authorizeExchange()
-                .pathMatchers("/login", "/register").permitAll()
+                .pathMatchers("/login", "/register", "/common/**").permitAll()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyExchange().authenticated()
                 .and()

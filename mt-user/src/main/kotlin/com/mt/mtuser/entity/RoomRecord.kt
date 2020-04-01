@@ -31,8 +31,7 @@ class RoomRecord(
         var companyId: Int? = null,     // 公司id
         var startTime: Date? = null,    // 启用时间
         var endTime: Date? = null,      // 结束时间
-        @get:org.springframework.data.annotation.Transient
-        @set:org.springframework.data.annotation.Transient
+        @org.springframework.data.annotation.Transient
         var duration: LocalTime? = null  // 时长
 ) {
     constructor(room: BaseRoom) :

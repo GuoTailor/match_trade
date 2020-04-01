@@ -27,6 +27,13 @@ fun LocalTime.toMillis(): Long = this.toNanoOfDay() / 1000_000
 fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
 
 /**
+ * 判断现在加上指定时间之后是否超过今天的最大时间。
+ * 今天最大时间定义：'23:59:59.999999999'这是一天结束前的午夜时间。
+ * @return Boolean true:超过今天最大时间； false: 没有超过
+ */
+fun isAfterToday(time: LocalTime) = time.toNanoOfDay() + LocalTime.now().toNanoOfDay() > LocalTime.MAX.toNanoOfDay()
+
+/**
  * 重载Date的[减]运算符
  */
 operator fun Date.minus(startTime: Date): Long {

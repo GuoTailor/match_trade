@@ -14,8 +14,8 @@ import javax.validation.constraints.Null
  * @apiParam {Integer} companyId 公司id
  * @apiParam {Integer} stockId 股票id
  * @apiParam {String} name 房间名字
- * @apiParam {Date} quoteTime 报价和选择身份时间 格式：yyyy-MM-dd HH:mm:SS
- * @apiParam {Date} secondStage 第二阶段时间 格式：yyyy-MM-dd HH:mm:SS
+ * @apiParam {Date} quoteTime 报价和选择身份时间 格式：HH:mm:SS
+ * @apiParam {Date} secondStage 第二阶段时间 格式：HH:mm:SS
  * @apiParam {String} time 时长 格式：HH:mm:SS
  * @apiParam {Int} numberTrades 单笔交易数量
  * @apiParam {Int} count 撮合次数
@@ -27,7 +27,6 @@ import javax.validation.constraints.Null
 @Table("mt_room_click")
 class ClickMatch(
         override var roomId: String? = null,    // 房间id，四张房间表唯一
-        @NotNull
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id
         override var name: String? = null,      // 房间名字
@@ -45,9 +44,9 @@ class ClickMatch(
         override var highScope: Double? = null, // 报价最高值
         override var enable: String? = null,    // 是否开启（0：关闭，1：开启）
         override var createTime: Date? = null,  // 创建时间
-        var rival: Int? = null,                 // 选择的对手上限
-        override val flag: String = RoomEnum.CLICK.flag
+        var rival: Int? = null                  // 选择的对手上限
 ) : BaseRoom {
+    override val flag: String = RoomEnum.CLICK.flag
 
     override suspend fun validNull() {
         people = null

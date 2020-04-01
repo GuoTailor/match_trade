@@ -22,12 +22,19 @@ interface BaseRoom {
     var highScope: Double?       // 报价最高值
     var lowScope: Double?        // 报价最低值
     var enable: String?          // 是否开启（0：关闭，1：开启）
-    @set:DateTimeFormat(pattern = "HH:mm:SS")
-    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss", timezone = "GMT+8")
+    @set:DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     var createTime: Date?        // 创建时间
     @get:org.springframework.data.annotation.Transient
     val flag: String            // 标识符
 
+    companion object {
+        @JvmField
+        val ENABLE = "1"
+
+        @JvmField
+        val DISABLED = "0"
+    }
 
     @Suppress("UNCHECKED_CAST")
     suspend fun <T : BaseRoom> isEnable(value: Boolean): T {

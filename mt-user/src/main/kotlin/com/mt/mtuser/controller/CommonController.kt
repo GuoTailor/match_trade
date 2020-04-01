@@ -7,16 +7,19 @@ import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.TestTime
 import com.mt.mtuser.entity.User
+import com.mt.mtuser.service.CompanyService
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.UserService
+import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.util.*
 
 /**
  * Created by gyh on 2020/3/18.
@@ -25,14 +28,23 @@ import reactor.core.publisher.Mono
 class CommonController {
     private val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
+    //@Autowired
+    //lateinit var transactionManager: R2dbcTransactionManager
     @Autowired
     lateinit var roleService: RoleService
+
+    @Autowired
+    lateinit var roomService: RoomService
+
+    @Autowired
+    lateinit var companyService: CompanyService
 
     @Autowired
     lateinit var userService: UserService
 
     @Autowired
     lateinit var redisUtil: RedisUtil
+
     @Autowired
     lateinit var testTImeDao: TestTImeDao
 
@@ -43,6 +55,7 @@ class CommonController {
             testTImeDao.findById(time.id!!)
         }
     }
+
     /**
      * @api {get} /register 注册一个用户
      * @apiDescription  注册用户
@@ -59,9 +72,10 @@ class CommonController {
      * @apiPermission none
      */
     @PostMapping("/register")
-    @Transactional  // 由于事务不支持挂起函数，所以注解只能打在普通函数上面并且一定要让报错抛出去，不然事务不会回退
+    // 由于事务不支持挂起函数，所以注解只能打在普通函数上面并且一定要让报错抛出去，不然事务不会回退
     fun register(@RequestBody map: Map<String, String>): Mono<ResponseInfo<Unit>> {
-        return mono {
+        //val operator = TransactionalOperator.create(transactionManager)
+        val result = mono {
             val code = map["code"] ?: return@mono ResponseInfo<Unit>(1, "请输入验证码")
             val user = User()
             user.phone = map["phone"] ?: return@mono ResponseInfo<Unit>(1, "请输入手机号")
@@ -76,6 +90,8 @@ class CommonController {
                 ResponseInfo<Unit>(1, "验证码错误")
             }
         }
+        //return operator.transactional(result)
+        return result
     }
 
     /**
@@ -123,5 +139,30 @@ class CommonController {
     @GetMapping("/common/getRoles")
     fun getRoles(): Mono<ResponseInfo<List<MtRole>>> {
         return ResponseInfo.ok(mono { roleService.findAll().toList() })
+    }
+
+    /**
+     * @api {get} /system/info 获取系统信息
+     * @apiDescription  获取系统信息
+     * @apiName getSystemInfo
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":[]}
+     * @apiGroup Common
+     * @apiPermission superAdmin
+     */
+    @GetMapping("/system/info")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun getSystemInfo(): Mono<ResponseInfo<Map<String, Any>>> {
+        return ResponseInfo.ok(mono {
+            val data: MutableMap<String, Any> = HashMap()
+            data["companyCount"] = companyService.count()
+            data["userCount"] = userService.count()
+            data["roomCount"] = roomService.getAllRoomCount()
+            data["tradesCapacity"] = 0 // 交易量
+            data["tradesVolume"] = 0 // 交易金额
+            data["tradesNumber"] = 0 // 交易次数
+            data
+        })
     }
 }

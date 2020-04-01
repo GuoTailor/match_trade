@@ -41,7 +41,7 @@ class DynamicSqlService {
                 .tableName
     }
 
-    suspend fun dynamicUpdate(data: Any): DatabaseClient.UpdateMatchingSpec {
+    fun dynamicUpdate(data: Any): DatabaseClient.UpdateMatchingSpec {
         return connect.update()
                 .table(getTable(data.javaClass))
                 .using(getUpdate(data))

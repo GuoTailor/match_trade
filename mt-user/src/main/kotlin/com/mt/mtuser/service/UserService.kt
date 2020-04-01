@@ -60,6 +60,8 @@ class UserService {
                 .awaitSingle()
     }
 
+    suspend fun count() = userDao.count()
+
     /**
      * 判断用户是否存在，存在为true，不存在为false
      */
