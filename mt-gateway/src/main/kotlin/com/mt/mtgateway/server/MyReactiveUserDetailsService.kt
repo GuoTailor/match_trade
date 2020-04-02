@@ -22,7 +22,7 @@ class MyReactiveUserDetailsService  {
 
     fun findByUsername(username: String): Mono<User> {
         val user = userRepository.findByUsername(username)
-                .switchIfEmpty(Mono.defer { Mono.error<User>(IllegalStateException("User Not Found")) })
+                .switchIfEmpty(Mono.defer { Mono.empty<User>() })
         val roles = user.flatMapMany {
             roleRepository.findRoleByUserId(it.id!!)
         }

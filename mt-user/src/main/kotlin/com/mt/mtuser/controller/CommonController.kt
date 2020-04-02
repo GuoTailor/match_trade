@@ -2,16 +2,14 @@ package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.SmsSample
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.dao.TestTImeDao
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.entity.TestTime
+import com.mt.mtuser.schedule.ScheduleJobInfo
 import com.mt.mtuser.entity.User
-import com.mt.mtuser.service.CompanyService
-import com.mt.mtuser.service.RedisUtil
-import com.mt.mtuser.service.RoleService
-import com.mt.mtuser.service.UserService
+import com.mt.mtuser.schedule.QuartzManager
+import com.mt.mtuser.service.*
 import com.mt.mtuser.service.room.RoomService
+import com.mt.mtuser.schedule.RoomTask
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
@@ -46,14 +44,18 @@ class CommonController {
     lateinit var redisUtil: RedisUtil
 
     @Autowired
-    lateinit var testTImeDao: TestTImeDao
+    lateinit var quartzManager: QuartzManager
 
-    @PostMapping("/testTime")
-    fun testTime(@RequestBody testTime: TestTime): Mono<TestTime> {
+    @GetMapping("/testTime")
+    fun testTime(): Mono<Unit> {
         return mono {
-            val time = testTImeDao.save(testTime)
-            testTImeDao.findById(time.id!!)
+            quartzManager.addJob(ScheduleJobInfo( "1-5 * * * * ?", RoomTask::class.java))
         }
+    }
+
+    @GetMapping("/removeJob")
+    fun removeJob() {
+        quartzManager.removeJob(ScheduleJobInfo("1-5 * * * * ?", RoomTask::class.java))
     }
 
     /**
@@ -104,8 +106,8 @@ class CommonController {
      * /common/sendCode?phone=12459874125
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
-     * @apiSuccessExample {json} 用户不存在:
-     * {"code":1,"msg":"用户不存在","data":null}
+     * @apiSuccessExample {json} 用户已存在:
+     * {"code":1,"msg":"用户已存在","data":null}
      * @apiGroup Common
      * @apiPermission none
      */
