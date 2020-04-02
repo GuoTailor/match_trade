@@ -1,0 +1,46 @@
+version: '3'
+services:
+  postgres:
+    restart: always
+    container_name: postgres
+    image: postgres:9.6.2
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: admin
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /usr/local/dokcer/volumes/data:/var/lib/postgresql/data/pgdata
+    networks:
+      - mt-net
+  mt-gateway:
+    restart: always
+    image: mt-gateway:v1.0.0
+    container_name: mt-gateway
+    ports:
+     - 85:85
+    networks:
+      - mt-net
+  mt-user:
+    restart: always
+    image: mt-user:v1.0.0
+    container_name: mt-user
+    ports:
+     - 84:84
+    networks:
+     - mt-net
+  redis:
+    image: redis:4.0.13
+    container_name: redis
+    restart: always
+    command: --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - mt-net
+networks:
+  mt-net:
+    external:
+      name: mt-net
