@@ -1,0 +1,60 @@
+stages:
+  # 构建镜像
+  - build
+
+#  # 推送镜像
+#  - push
+
+  # 运行镜像
+  - run
+
+  # 清除无用镜像
+  - clean
+
+# 构建阶段
+build:
+  stage: build
+  script:
+    # 打包
+    - cd mt-gateway
+    - /usr/local/maven/apache-maven-3.6.1/bin/mvn clean kotlin:compile package -Dmaven.test.skip=true
+    - cd ../mt-user
+    - /usr/local/maven/apache-maven-3.6.1/bin/mvn clean kotlin:compile package -Dmaven.test.skip=true
+    # docker构建镜像
+    - pwd
+    - cd ../
+    - cp mt-gateway/target/mt-gateway-0.0.1-SNAPSHOT.jar docker
+    - cp mt-user/target/mt-user-0.0.1-SNAPSHOT.jar docker
+    - cd docker
+    - docker build -t mt-gateway:v1.0.0 -f Dockerfile-mt-gateway .
+    - docker build -t mt-user:v1.0.0 -f Dockerfile-mt-user .
+
+#push:
+#  stage: push
+#  script:
+    # 登录阿里云镜像仓库
+#    - docker login --username=耀龙啊 registry.cn-beijing.aliyuncs.com -p yin7372175240000
+
+    # 推送镜像 mt-gateway
+#    - docker tag mt-gateway:v1.0.0 registry.cn-beijing.aliyuncs.com/yaolong/mt-gateway:v1.0.0
+#    - docker push registry.cn-beijing.aliyuncs.com/yaolong/mt-gateway:v1.0.0
+
+#    # 推送镜像 mt-user
+#    - docker tag mt-user:v1.0.0 registry.cn-beijing.aliyuncs.com/yaolong/mt-user:v1.0.0
+#    - docker push registry.cn-beijing.aliyuncs.com/yaolong/mt-user:v1.0.0
+
+
+# 运行阶段
+run:
+  stage: run
+  script:
+    - cd docker
+    - docker-compose down
+    - docker-compose up -d
+
+# 清理阶段
+clean:
+  stage: clean
+  script:
+    - docker rmi $(docker images -f "dangling=true" -q)
+
