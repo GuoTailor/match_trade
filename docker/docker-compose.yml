@@ -30,7 +30,7 @@ services:
     networks:
      - mt-net
     volumes:
-      - /usr/local/dokcer/volumes/logger:/app/static/logger
+      - /usr/local/dokcer/volumes/logger:/static/logger
   redis:
     image: redis:4.0.13
     container_name: redis
