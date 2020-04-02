@@ -8,5 +8,4 @@ spring:
         file-extension: yml
         prefix: api
   profiles:
-    active: pord
-
+    active: prod
