@@ -22,7 +22,7 @@
 - kotlin挂起函数不支持事务
 
 ## 关于学习文档：
-    
+
 <a style="color:red;"> 注意以下文档均需要翻墙访问，且为英文文档，可以用chrome搭配谷歌访问助手访问，chrome支持翻译网页</a>
 
 - [kotlin文档](https://www.kotlincn.net/docs/reference/)
@@ -32,4 +32,36 @@
 - [关于如何在spring webflux中使用R2DBC](https://docs.spring.io/spring-data/r2dbc/docs/1.1.0.M4/reference/html/#reference)
 
 [再添加一篇关于 kotlin协程 与 Spring Reactor（Mono类）的互相转换](https://www.jianshu.com/p/17d93f1afc50)
- 
+
+## 关于持续集成一键部署
+**使用gitlab持续集成一键部署**
+
+1. **登录gitlab[登录入口](http://lian.yaolong.top:8070/)**
+
+   - 账号: root 
+   - 密码:12345678
+
+    ![](https://note.youdao.com/yws/api/personal/file/WEBef90f59563d9cb1e8e687d1b9619f5b9?method=download&shareKey=e1c9736515872eefd49d0fd60f1c81bd)
+
+2. **添加ssh秘钥**
+    ![](https://note.youdao.com/yws/api/personal/file/WEB516de060d72a8d5a5836eed5fe0dc9d6?method=download&shareKey=fdb428160cd6759effb52a6f445e42a1)
+
+    ![](https://note.youdao.com/yws/api/personal/file/WEBbcc5aeca3be8e855ef7962e34e14d61b?method=download&shareKey=469043c99e6428a54537b87311f69817)
+
+3. **登录成功后找到项目**
+
+    ![](https://note.youdao.com/yws/api/personal/file/WEBd34595f2e097a68e2bd74f81124aee7a?method=download&shareKey=553778945483540d7daa75b9c78f1c28)
+
+4. **复制ssh拉取地址**
+    ![](https://note.youdao.com/yws/api/personal/file/WEB8e507db30a197a69f707ba809b1b565a?method=download&shareKey=894b47232001e1d998550586024f7ab2)
+
+5. **项目中添加ssh地址**
+    ![](https://note.youdao.com/yws/api/personal/file/WEB310abfd9061b1c36473114f690d649d6?method=download&shareKey=78c4c86f1e8a1dba8fd33b12d518d209)
+
+    ![](https://note.youdao.com/yws/api/personal/file/WEB6ec72043ab69517e7abc280efbeb0c91?method=download&shareKey=346c85ff260eb9e0826fccbec1d41a86)
+
+6. **直接选择刚才添加的地址推送**
+
+7. **推送成功后在gitlab上面查看部署的流水线（部署的过程）**
+    ![](https://note.youdao.com/yws/api/personal/file/WEB63613ac7fdacc22000caf5f66e9102a5?method=download&shareKey=2ae3ad14c1b70c49a7334b9bc58f8d43)
+
