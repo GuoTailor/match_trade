@@ -4,8 +4,8 @@ spring:
     nacos:
       config:
         group: DEFAULT_GROUP
-        server-addr: localhost:8848
+        server-addr: 39.108.187.54:8848
         file-extension: yml
         prefix: api
   profiles:
-    active: dev
+    active: prod

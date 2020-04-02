@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
-import sun.misc.Regexp;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
