@@ -11,10 +11,15 @@ COPY dockerize-linux-amd64-v0.6.1.tar.gz .
 RUN tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
+
+
+# 创建文件夹
+RUN mkdir /app/
+
+RUN cd /app/
+
 # 数据卷
-VOLUME ["/app/static/logger"]
-
-
+VOLUME ["/static/logger"]
 
 COPY mt-user-$APP_VERSION.jar /app/app.jar
 
