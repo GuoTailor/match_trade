@@ -72,6 +72,7 @@ object SmsSample {
         return buf.toString()
     }
 
+
     private fun encodeUrlString(str: String?, charset: String): String? {
         var strret: String? = null
         if (str != null) {

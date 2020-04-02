@@ -14,8 +14,7 @@ RUN tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz 
 # 数据卷
 VOLUME ["/app/static/logger"]
 
-# 创建文件夹
-RUN mkdir /app
+
 
 COPY mt-user-$APP_VERSION.jar /app/app.jar
 
