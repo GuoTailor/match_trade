@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/match_trade.iml" filepath="$PROJECT_DIR$/match_trade.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mt-gateway/mt-gateway.iml" filepath="$PROJECT_DIR$/mt-gateway/mt-gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mt-user/mt-user.iml" filepath="$PROJECT_DIR$/mt-user/mt-user.iml" />
+    </modules>
+  </component>
+</project>
