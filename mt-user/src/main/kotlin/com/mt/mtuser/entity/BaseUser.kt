@@ -70,23 +70,22 @@ abstract class BaseUser : UserDetails {
 
         /**
          * 获取当前登陆的用户<P>
-         * 注意：该方法只返回用户的id,用户名
+         * 注意：该方法只返回用户的id,角色
          *
          * @return 用户
-        </P> */
+         */
         fun getcurrentUser(): Mono<BaseUser> {
             return ReactiveSecurityContextHolder
                     .getContext()
                     .map { context ->
                         val id = context.authentication.principal?.toString()
-                        val username = context.authentication.credentials?.toString()
                         val roles = context.authentication.authorities
                         object: BaseUser() {
                             override var roles = roles
                             override var id: Int? = id?.toInt()
                             override fun getPassword(): String? = null
                             override fun setPassword(password: String?) {}
-                            override fun getUsername() = username
+                            override fun getUsername() = null
                         }
                     }
         }

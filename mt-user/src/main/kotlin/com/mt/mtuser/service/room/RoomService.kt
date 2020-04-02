@@ -193,6 +193,7 @@ class RoomService {
     }
 
     suspend fun getAllRoomList() {
+        // todo 可修改的房间另算
 
     }
 
