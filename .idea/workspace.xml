@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c18e21ba-5682-4576-ac09-3ec3f19fc23e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/Dockerfile-mt-gateway" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Dockerfile-mt-gateway" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/Dockerfile-mt-user" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Dockerfile-mt-user" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +42,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="C:/springProject/microservice/lusfer/MyShopPlus" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -88,7 +86,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1585813955325</updated>
-      <workItem from="1585813963711" duration="9940000" />
+      <workItem from="1585813963711" duration="14648000" />
+      <workItem from="1585930754433" duration="1151000" />
     </task>
     <task id="LOCAL-00001" summary="新增修改">
       <created>1585815958395</created>
@@ -153,7 +152,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585823458396</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="新增修改">
+      <created>1585824033837</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1585824033837</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -168,25 +174,33 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="429" y="215" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1585821651514" />
-    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1585823457289">
+    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1585824032671">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1585823457289" />
+    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1585824032671" />
+    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1585833632507">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1585833632507" />
     <state x="477" y="128" key="MultipleFileMergeDialog" timestamp="1585822394572">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="477" y="128" key="MultipleFileMergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1585822394572" />
-    <state x="270" y="54" key="SettingsEditor" timestamp="1585815642762">
+    <state x="270" y="54" key="SettingsEditor" timestamp="1585831090828">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="270" y="54" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585815642762" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1585823468931">
+    <state x="270" y="54" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585831090828" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1585824068284">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1585823468931" />
-    <state x="472" y="203" key="git4idea.merge.GitPullDialog" timestamp="1585822370541">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1585824068284" />
+    <state x="449" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1585930755390">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="472" y="203" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1585822370541" />
+    <state x="449" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1585930755390" />
+    <state x="472" y="203" key="git4idea.merge.GitPullDialog" timestamp="1585931891487">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="472" y="203" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1585931891487" />
   </component>
 </project>
