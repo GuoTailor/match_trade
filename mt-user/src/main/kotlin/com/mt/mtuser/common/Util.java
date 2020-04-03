@@ -2,10 +2,10 @@ package com.mt.mtuser.common;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
-import sun.misc.Regexp;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
@@ -241,8 +240,8 @@ public class Util {
     }
 
     /**
-     * 随机生成指定长度的数字验证码
-     *
+     * 随机生成指定长度的数字验证码<br>
+     * 考虑使用{@link RandomStringUtils#randomNumeric(int)}
      * @param length 数字验证码长度
      * @return 数字验证码
      */

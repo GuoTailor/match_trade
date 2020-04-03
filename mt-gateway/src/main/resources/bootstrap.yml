@@ -9,3 +9,16 @@ spring:
         prefix: mt-gateway
   profiles:
     active: prod
+
+---
+spring:
+  cloud:
+    # 使用 Nacos 作为配置中心
+    nacos:
+      config:
+        group: DEFAULT_GROUP
+        server-addr: localhost:8848
+        file-extension: yml
+        prefix: mt-gateway
+  profiles:
+    active: dev

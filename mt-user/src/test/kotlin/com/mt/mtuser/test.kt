@@ -22,7 +22,7 @@ fun main1() = runBlocking<Unit> {
     println("Completed in $time ms")
     println(Thread.currentThread().name)
 }
-//ip:39.108.187.54     用户名：root          密码：zelfly737218.       lian.yaolong.top
+//ip:39.108.187.54     用户名：root          密码：zelfly737218.       lian.yaolong.top Yin7372175240000
 suspend fun concurrentSum(): Int = coroutineScope {
     val one = async { doSomethingUsefulOne() }
     val two = async { doSomethingUsefulTwo() }
