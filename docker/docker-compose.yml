@@ -29,6 +29,9 @@ services:
      - 84:84
     networks:
      - mt-net
+    volumes:
+      - /usr/local/dokcer/volumes/logger:/static/logger
+    
   redis:
     image: redis:4.0.13
     container_name: redis
@@ -37,7 +40,7 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - ./redis_data:/data
+      - /usr/local/dokcer/volumes/redis_data:/data
     networks:
       - mt-net
 networks:
