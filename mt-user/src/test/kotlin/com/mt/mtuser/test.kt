@@ -3,17 +3,13 @@ package com.mt.mtuser
 /**
  * Created by gyh on 2020/3/26.
  */
-
+import com.mt.mtuser.common.plus
 import com.mt.mtuser.common.toMillis
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.sql.Time
-import java.time.Duration
-import java.time.Instant
 import java.time.LocalTime
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
-import java.util.*
-import kotlin.system.*
+import kotlin.system.measureTimeMillis
 
 fun main1() = runBlocking<Unit> {
     val time = measureTimeMillis {
@@ -22,6 +18,7 @@ fun main1() = runBlocking<Unit> {
     println("Completed in $time ms")
     println(Thread.currentThread().name)
 }
+
 //ip:39.108.187.54     用户名：root          密码：zelfly737218.       lian.yaolong.top Yin7372175240000
 suspend fun concurrentSum(): Int = coroutineScope {
     val one = async { doSomethingUsefulOne() }
@@ -65,9 +62,30 @@ fun testTime() {
     println(time.toLocalTime().toSecondOfDay())
     val localTime = LocalTime.parse("00:00:01")
     println(localTime.toMillis())
-    val date = Date()
-    val instant = Instant.ofEpochMilli(3600_000)
-    println(instant.toString())
+    println(localTime + LocalTime.parse("00:00:01"))
 }
 
-fun main() = testTime()
+fun foo(): Flow<Int> = flow { // 流构建器
+    for (i in 1..3) {
+        delay(100) // 假装我们在这里做了一些有用的事情
+        println("nmka")
+        emit(i) // 发送下一个值
+    }
+}
+
+fun main3() = runBlocking<Unit> {
+    val time = measureTimeMillis {
+        val buf = foo().buffer() // 缓冲发射项，无需等待
+        buf.collect { value ->
+            delay(300) // 假装我们花费 300 毫秒来处理它
+            println(value)
+        }
+        buf.collect { value ->
+            delay(300) // 假装我们花费 300 毫秒来处理它
+            println(value)
+        }
+    }
+    println("Collected in $time ms")
+}
+
+fun main() = main3()

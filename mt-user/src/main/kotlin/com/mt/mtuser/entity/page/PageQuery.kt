@@ -3,7 +3,7 @@ package com.mt.mtuser.entity.page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.data.r2dbc.query.Criteria
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 
 /**

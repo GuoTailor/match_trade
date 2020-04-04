@@ -34,6 +34,13 @@ fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
 fun isAfterToday(time: LocalTime) = time.toNanoOfDay() + LocalTime.now().toNanoOfDay() > LocalTime.MAX.toNanoOfDay()
 
 /**
+ * LocalTime 加 运算符
+ */
+operator fun LocalTime.plus(other: LocalTime): LocalTime {
+    return this.plusNanos(other.toNanoOfDay())
+}
+
+/**
  * 重载Date的[减]运算符
  */
 operator fun Date.minus(startTime: Date): Long {

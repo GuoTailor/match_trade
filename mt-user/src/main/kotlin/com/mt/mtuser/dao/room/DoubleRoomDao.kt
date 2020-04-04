@@ -1,9 +1,9 @@
 package com.mt.mtuser.dao.room
 
 import com.mt.mtuser.entity.room.DoubleMatch
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 /**
  * Created by gyh on 2020/3/23.
@@ -23,5 +23,8 @@ interface DoubleRoomDao :  BaseRoomDao<DoubleMatch, String> {
 
     @Query("select * from mt_room_double where room_id = ：roomId")
     override suspend fun findByRoomId(roomId: String): DoubleMatch?
+
+    @Query("select * from mt_room_double where company_id in (:companyId)")
+    override fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<DoubleMatch>
 
 }

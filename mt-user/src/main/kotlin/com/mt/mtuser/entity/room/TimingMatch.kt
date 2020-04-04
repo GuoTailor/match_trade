@@ -14,6 +14,7 @@ import java.util.*
  * @apiParam {Integer} stockId 股票id
  * @apiParam {String} name 房间名字
  * @apiParam {String} time 时长 格式：HH:mm:SS
+ * @apiParam {String} startTime: 房间开启时间 格式：HH:mm:SS
  * @apiParam {String} matchTime 撮合时间 格式：HH:mm:SS
  * @apiParam {String} quoteTime 报价时间 格式：HH:mm:SS
  * @apiParam {Integer} numberTrades 单笔交易数量
@@ -31,6 +32,7 @@ class TimingMatch(
         override var name: String? = null,      // 房间名字
         override var people: Int? = null,       // 人数
         override var time: LocalTime? = null,     // 时长
+        override var startTime: LocalTime?,     // 房间开启时间
         var matchTime: LocalTime? = null,       // 撮合时间
         override var numberTrades: Int? = null,  // 单笔交易数量
         var count: Int? = null,                 // 撮合次数

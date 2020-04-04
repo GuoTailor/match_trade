@@ -4,8 +4,6 @@ import com.mt.mtuser.common.minus
 import com.mt.mtuser.entity.room.BaseRoom
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.sql.Time
-import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 
@@ -38,10 +36,9 @@ class RoomRecord(
             this(roomId = room.roomId, model = room.flag, companyId = room.companyId, duration = room.time)
 
 
-    fun getDuration(): RoomRecord{
+    fun computingTime(): RoomRecord{
         duration = startTime?.let {start ->
             endTime?.let { end ->
-                //Duration.ofMillis(start - end)
                 LocalTime.ofSecondOfDay((start - end) / 1000)
             }
         }

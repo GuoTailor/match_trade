@@ -1,10 +1,7 @@
 package com.mt.mtuser.controller
 
 import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.entity.room.ClickMatch
-import com.mt.mtuser.entity.room.DoubleMatch
-import com.mt.mtuser.entity.room.TimelyMatch
-import com.mt.mtuser.entity.room.TimingMatch
+import com.mt.mtuser.entity.room.*
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
@@ -14,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.util.*
 import javax.validation.Valid
 
 /**
@@ -115,7 +113,7 @@ class RoomController {
      */
     @PutMapping("/click")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<Int>> {
+    fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
         return ResponseInfo.ok(mono {
             roomService.updateRoomByRoomId(clickRoom.awaitSingle())
         })
@@ -134,7 +132,7 @@ class RoomController {
      */
     @PutMapping("/double")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<Int>> {
+    fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<DoubleMatch>> {
         return ResponseInfo.ok(mono {
             roomService.updateRoomByRoomId(doubleRoom.awaitSingle())
         })
@@ -153,7 +151,7 @@ class RoomController {
      */
     @PutMapping("/timely")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateTimelyMatch(@RequestBody timelyRoom: Mono<TimelyMatch>): Mono<ResponseInfo<Int>> {
+    fun updateTimelyMatch(@RequestBody timelyRoom: Mono<TimelyMatch>): Mono<ResponseInfo<TimelyMatch>> {
         return ResponseInfo.ok(mono {
             roomService.updateRoomByRoomId(timelyRoom.awaitSingle())
         })
@@ -172,33 +170,48 @@ class RoomController {
      */
     @PutMapping("/timing")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<Int>> {
+    fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<TimingMatch>> {
         return ResponseInfo.ok(mono {
             roomService.updateRoomByRoomId(timingRoom.awaitSingle())
         })
     }
 
     /**
-     * @api {put} /room/enable 开启或关闭房间
-     * @apiDescription  开启或关闭房间
-     * @apiName enableRoom
+     * @api {gut} /room/editable 获取全部可编辑的房间
+     * @apiDescription  获取全部可编辑的房间，就是自己管理的房间
+     * @apiName getEditableRoomList
      * @apiVersion 0.0.1
-     * @apiParam {String} roomId 房间id
-     * @apiParam {String} value 是开启还是关闭（0：关闭，1：开启）
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data":null}
+     * {"code": 0,"msg": "成功","data":[]}
      * @apiGroup Room
      * @apiPermission admin
      */
-    @PutMapping("/enable")
+    @PutMapping("/editable")
     @PreAuthorize("hasRole('ADMIN')")
-    fun enableRoom(@RequestParam roomId: String, @RequestParam value: String): Mono<ResponseInfo<Int>> {
+    fun getEditableRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
         return ResponseInfo.ok(mono {
-            roomService.enableRoom(roomId, value)
+            roomService.getEditableRoomList()
         })
     }
 
     //--------------------------------不需要管理员权限-------------------------------------
+
+    /**
+     * @api {gut} /room 获取全部的房间
+     * @apiDescription  获取全部的房间，就是自己能加入的房间
+     * @apiName getAllRoomList
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":[]}
+     * @apiGroup Room
+     * @apiPermission admin
+     */
+    @PutMapping
+    fun getAllRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
+        return ResponseInfo.ok(mono {
+            roomService.getAllRoomList()
+        })
+    }
 
     /**
      * @api {get} /room/enter 进入房间通过房间号
