@@ -4,19 +4,28 @@ import com.mt.mtuser.common.SmsSample
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.schedule.ScheduleJobInfo
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.schedule.QuartzManager
-import com.mt.mtuser.service.*
-import com.mt.mtuser.service.room.RoomService
+import com.mt.mtuser.schedule.RoomStartJobInfo
 import com.mt.mtuser.schedule.RoomTask
-import kotlinx.coroutines.flow.toList
+import com.mt.mtuser.service.CompanyService
+import com.mt.mtuser.service.RedisUtil
+import com.mt.mtuser.service.RoleService
+import com.mt.mtuser.service.UserService
+import com.mt.mtuser.service.room.RoomService
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.reactor.flux
 import kotlinx.coroutines.reactor.mono
+import org.quartz.JobDataMap
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
+import java.time.LocalTime
 import java.util.*
 
 /**
@@ -26,8 +35,6 @@ import java.util.*
 class CommonController {
     private val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
-    //@Autowired
-    //lateinit var transactionManager: R2dbcTransactionManager
     @Autowired
     lateinit var roleService: RoleService
 
@@ -47,15 +54,37 @@ class CommonController {
     lateinit var quartzManager: QuartzManager
 
     @GetMapping("/testTime")
-    fun testTime(): Mono<Unit> {
+    fun testTime(@RequestParam time: String, @RequestParam name: String): Mono<Unit> {
+        logger.info("修改成功")
         return mono {
-            quartzManager.addJob(ScheduleJobInfo( "1-5 * * * * ?", RoomTask::class.java))
+            val date = LocalTime.parse(time)
+            val cron = "0 %d %d ? * *".format(date.minute, date.hour)
+            quartzManager.addJob(RoomStartJobInfo(cron, name,
+                    JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.enableKey to true))))
         }
     }
 
+    @GetMapping("/modifyJobTime")
+    fun modifyJobTime(@RequestParam name: String) {
+        logger.info("修改成功")
+        quartzManager.modifyJobTime(RoomStartJobInfo("3/5 * * * * ?", name,
+                JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.enableKey to true))))
+    }
+
     @GetMapping("/removeJob")
-    fun removeJob() {
-        quartzManager.removeJob(ScheduleJobInfo("1-5 * * * * ?", RoomTask::class.java))
+    fun removeJob(@RequestParam name: String) {
+        quartzManager.removeJob(RoomStartJobInfo("1/3 * * * * ?", name,
+                JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.roomIdKey to true))))
+    }
+
+    @PutMapping("/findTest")
+    fun findTest(@RequestBody ids: List<Int>): Mono<List<User>> {
+        return mono {
+            val list = mutableListOf<User>()
+            userService.findByIdIn(ids)
+                    .collect { u -> list.add(u) }
+            list
+        }
     }
 
     /**
@@ -74,26 +103,22 @@ class CommonController {
      * @apiPermission none
      */
     @PostMapping("/register")
-    // 由于事务不支持挂起函数，所以注解只能打在普通函数上面并且一定要让报错抛出去，不然事务不会回退
-    fun register(@RequestBody map: Map<String, String>): Mono<ResponseInfo<Unit>> {
-        //val operator = TransactionalOperator.create(transactionManager)
-        val result = mono {
-            val code = map["code"] ?: return@mono ResponseInfo<Unit>(1, "请输入验证码")
+    fun register(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Unit>> {
+        val result = map.flatMap {
+            val code = it["code"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入验证码"))
             val user = User()
-            user.phone = map["phone"] ?: return@mono ResponseInfo<Unit>(1, "请输入手机号")
-            user.password = map["password"] ?: return@mono ResponseInfo<Unit>(1, "请输入密码")
+            user.phone = it["phone"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入手机号"))
+            user.password = it["password"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入密码"))
             logger.info(code)
-            val localCode = redisUtil.getCode(user.phone!!)
-            if (localCode != null && code == localCode) {
-                redisUtil.deleteCode(user.phone!!)
-                userService.register(user)
-                ResponseInfo<Unit>(0, "成功")
-            } else {
-                ResponseInfo<Unit>(1, "验证码错误")
-            }
+            mono { redisUtil.getCode(user.phone!!) }
+                    .filter { localCode -> localCode != null && code == localCode }
+                    .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
+                    .map { user }
+        }.flatMap {
+            mono { redisUtil.deleteCode(it.phone!!) }
+            userService.register(it)
         }
-        //return operator.transactional(result)
-        return result
+        return ResponseInfo.ok(result)
     }
 
     /**

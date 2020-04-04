@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.quartz.SchedulerFactoryBean
 import org.springframework.stereotype.Component
+import java.time.LocalTime
 
 
 /**
  * Created by gyh on 2020/4/2.
+ * 注意触发器和任务应使用相同group和name，也就是说每个任务分配唯一触发器，每个触发器只触发一个任务
  */
 @Component
 class QuartzManager {
@@ -21,37 +23,37 @@ class QuartzManager {
     private lateinit var schedulerFactoryBean: SchedulerFactoryBean
 
     /**
-     * 添加任务，使用任务组名（不存在就用默认的），触发器名，触发器组名
+     * 添加任务，使用任务组名，触发器名，触发器组名
+     * 如果任务已存在则更新任务的触发器
      */
     fun addJob(info: ScheduleJobInfo) {
         try {
             val scheduler = schedulerFactoryBean.scheduler
             val jobKey = JobKey.jobKey(info.jobName, info.groupName)
+            val cronScheduleBuilder = CronScheduleBuilder.cronSchedule(info.cron)
+            val cronTrigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity(info.jobName, info.groupName)
+                    .withSchedule(cronScheduleBuilder)
+                    .build()
+
             if (!scheduler.checkExists(jobKey)) {
-                // JobDetail 是具体Job实例
                 val jobDetail = JobBuilder.newJob(info.className)
                         .withIdentity(info.jobName, info.groupName)
                         .usingJobData(info.data)
                         .build()
-                // 基于表达式构建触发器
-                val cronScheduleBuilder = CronScheduleBuilder.cronSchedule(info.cron)
-                // CronTrigger表达式触发器 继承于Trigger
-                // TriggerBuilder 用于构建触发器实例
-                val cronTrigger = TriggerBuilder
-                        .newTrigger()
-                        .withIdentity(info.jobName, info.groupName)
-                        .withSchedule(cronScheduleBuilder)
-                        .build()
-
+                log.info("添加定时任务 {} - {} - {}",info.cron, info.jobName, info.groupName)
                 scheduler.scheduleJob(jobDetail, cronTrigger)
             } else {
-                log.info("{}， {} 定时任务已经存在", info.jobName, info.groupName)
+                log.info("{}， {} 定时任务已经存在，只修改时间", info.jobName, info.groupName)
+                val triggerKey = TriggerKey.triggerKey(info.jobName, info.groupName)
+                scheduler.rescheduleJob(triggerKey, cronTrigger)
+                //scheduler.resumeTrigger(triggerKey)
             }
         } catch (e: SchedulerException) {
             log.error("添加失败", e)
         }
     }
-
 
     /**
      * 暂停任务
@@ -84,24 +86,40 @@ class QuartzManager {
     }
 
     /**
-     * 删除任务，在业务逻辑中需要更新库表的信息
+     * 删除任务
      * @param info
      * @return
      */
-    fun removeJob(info: ScheduleJobInfo): Boolean {
+    fun removeJob(info: ScheduleJobInfo) = removeJob(info.groupName, info.jobName)
+
+    /**
+     * 删除任务
+     * @return
+     */
+    fun removeJob(groupName: String, jobName: String):Boolean {
         var result = true
         try {
             val scheduler = schedulerFactoryBean.scheduler
-            val jobKey = JobKey.jobKey(info.jobName, info.groupName)
+            val jobKey = JobKey.jobKey(jobName, groupName)
             if (scheduler.checkExists(jobKey)) {
                 result = scheduler.deleteJob(jobKey)
             }
-            log.info("==remove job: {} {}=", info.jobName, result)
+            log.info("==remove job: {} {}=", jobName, result)
         } catch (e: SchedulerException) {
-            log.error("删除任务失败", e)
+            log.error("删除任务失败 $jobName", e)
             result = false
         }
         return result
+    }
+
+    /**
+     * 修改任务，删除老任务，添加新任务
+     * 如果老任务不存在则直接添加新任务
+     * 如果新任务已存在就跟新任务执行周期
+     */
+    fun modifyJob(info: ScheduleJobInfo, oldGroup: String, oldName: String) {
+        removeJob(oldGroup, oldName)
+        addJob(info)
     }
 
     /**
@@ -110,21 +128,23 @@ class QuartzManager {
      * @return
      */
     fun modifyJobTime(info: ScheduleJobInfo): Boolean {
-        var result = true
+        var result = false
         try {
             val scheduler = schedulerFactoryBean.scheduler
-            val triggerKey = TriggerKey.triggerKey(info.jobName , info.groupName)
-            val trigger = scheduler.getTrigger(triggerKey) as CronTrigger
-            val oldTime = trigger.cronExpression
+            val triggerKey = TriggerKey.triggerKey(info.jobName, info.groupName)
+            val trigger = scheduler.getTrigger(triggerKey) as? CronTrigger
+            val oldTime = trigger?.cronExpression
             if (!oldTime.equals(info.cron, true)) {
                 val cronScheduleBuilder = CronScheduleBuilder.cronSchedule(info.cron)
                 val ct = TriggerBuilder
                         .newTrigger()
-                        .withIdentity(info.jobName , info.groupName)
+                        .withIdentity(info.jobName, info.groupName)
                         .withSchedule(cronScheduleBuilder)
                         .build()
+
                 scheduler.rescheduleJob(triggerKey, ct)
                 scheduler.resumeTrigger(triggerKey)
+                result = true
             }
         } catch (e: SchedulerException) {
             log.error("修改定时任务时间失败", e)

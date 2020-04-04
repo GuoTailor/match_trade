@@ -1,9 +1,9 @@
 package com.mt.mtuser.dao.room
 
 import com.mt.mtuser.entity.room.TimingMatch
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 /**
  * Created by gyh on 2020/3/23.
@@ -23,4 +23,7 @@ interface TimingRoomDao :  BaseRoomDao<TimingMatch, String> {
 
     @Query("select * from mt_room_timing where room_id = ：roomId")
     override suspend fun findByRoomId(roomId: String): TimingMatch?
+
+    @Query("select * from mt_room_timing where company_id in (:companyId)")
+    override fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<TimingMatch>
 }
