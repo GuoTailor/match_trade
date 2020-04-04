@@ -13,6 +13,7 @@ import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
+import reactor.core.publisher.Mono
 
 /**
  * Created by gyh on 2020/3/18.
@@ -33,7 +34,7 @@ class UserService {
     @Autowired
     lateinit var dynamicSql: DynamicSqlService
 
-    suspend fun register(user: User): ResponseInfo<Unit> {
+    fun register(user: User): Mono<Unit> = dynamicSql.withTransaction {
         logger.info("register" + user.phone + user.password)
         if (!StringUtils.isEmpty(user.phone) && !StringUtils.isEmpty(user.password)) {
             if (userDao.existsUserByPhone(user.phone!!) == 0) {
@@ -41,11 +42,9 @@ class UserService {
                 user.id = null
                 val newUser = userDao.save(user)
                 userRoleDao.save(Role(newUser.id, 3 /*todo 角色id写死很危险*/, null))
-                return ResponseInfo(0, "成功")
-            }
-            return ResponseInfo(1, "用户已存在")
-        }
-        return ResponseInfo(1, "请正确填写用户名或密码")
+                Unit
+            } else throw IllegalStateException("用户已存在")
+        } else throw IllegalStateException("请正确填写用户名或密码")
     }
 
     suspend fun findById(id: Int) = userDao.findById(id)
@@ -67,4 +66,8 @@ class UserService {
      */
     suspend fun existsUserByPhone(phone: String) = userDao.existsUserByPhone(phone) > 0
 
+
+    suspend fun findByIdIn(ids : List<Int>) = userDao.findByIdIn(ids)
+
+    suspend fun findAll() = userDao.findAll()
 }

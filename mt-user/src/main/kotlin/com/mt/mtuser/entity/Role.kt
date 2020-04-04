@@ -52,5 +52,10 @@ class Role() : GrantedAuthority {
         return "Role(id=$id, userid=$userid, roleid=$roleid, companyid=$companyid, name=$name, nameZh=$nameZh)"
     }
 
+    companion object {
+        const val SUPER_ADMIN = "ROLE_SUPER_ADMIN"
+        const val ADMIN = "ROLE_ADMIN"
+        const val USER = "ROLE_USER"
+    }
 
 }

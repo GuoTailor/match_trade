@@ -17,6 +17,7 @@ import javax.validation.constraints.Null
  * @apiParam {Date} quoteTime 报价和选择身份时间 格式：HH:mm:SS
  * @apiParam {Date} secondStage 第二阶段时间 格式：HH:mm:SS
  * @apiParam {String} time 时长 格式：HH:mm:SS
+ * @apiParam {String} startTime: 房间开启时间 格式：HH:mm:SS
  * @apiParam {Int} numberTrades 单笔交易数量
  * @apiParam {Int} count 撮合次数
  * @apiParam {Double} lowScope 报价最低值
@@ -36,6 +37,7 @@ class ClickMatch(
         var quoteTime: LocalTime? = null,            // 报价和选择身份时间
         var secondStage: LocalTime? = null,          // 第二阶段时间
         override var time: LocalTime? = null,    // 时长
+        override var startTime: LocalTime?,     // 房间开启时间
         override var numberTrades: Int? = null, // 单笔交易数量
         var count: Int? = null,                 // 撮合次数
         @Null(message = "不能设置当前撮合次数")

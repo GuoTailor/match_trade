@@ -17,6 +17,7 @@ interface BaseRoom {
     var stockId: Int?            // 股票id
     var name: String?            // 房间名字
     var people: Int?             // 人数
+    var startTime: LocalTime?   // 房间开启时间
     var time: LocalTime?          // 时长
     var numberTrades: Int?       // 单笔交易数量
     var highScope: Double?       // 报价最高值
