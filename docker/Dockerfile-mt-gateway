@@ -20,6 +20,6 @@ RUN mkdir /app
 COPY mt-gateway-$APP_VERSION.jar /app/app.jar
 
 # 检查数据库连接是否成功，成功了就运行jar
-ENTRYPOINT ["dockerize", "-timeout", "5m", "-wait", "tcp://postgres:5432", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar","--spring.profiles.active=dev","-c"]
+ENTRYPOINT ["dockerize", "-timeout", "5m", "-wait", "tcp://postgres:5432", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar","--spring.profiles.active=prod","-c"]
 
 EXPOSE 85
