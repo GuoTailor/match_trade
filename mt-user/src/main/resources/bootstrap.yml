@@ -7,8 +7,7 @@ spring:
         server-addr: nacos:8848
         file-extension: yml
         prefix: api
-  profiles:
-    active: prod
+  profiles: prod
 
 
 ---
@@ -22,5 +21,4 @@ spring:
         server-addr: localhost:8848
         file-extension: yml
         prefix: api
-  profiles:
-    active: dev
+  profiles: dev

@@ -12,23 +12,37 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
+import java.util.regex.Pattern
 
 /**
  * Created by gyh on 2020/3/16.
  */
 @Component
-class CustomGlobalFilter : WebFilter, Ordered {
+class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<String>) : WebFilter, Ordered {
     val log = LoggerFactory.getLogger(this.javaClass.simpleName)
+    val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
-    @Value("\${skipAuthUrls}")
-    lateinit var skipAuthUrls: List<String>
 
+    init {
+        skipAuthUrls.forEach {
+            urlPatten.add(Pattern.compile(it))
+            log.info(it)
+        }
+    }
+
+    fun match(input: CharSequence): Boolean {
+        urlPatten.forEach {
+            if (it.matcher(input).matches())
+                return true
+        }
+        return false
+    }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val url = exchange.request.path.value()
-        log.info(url + "    " + exchange.request.uri.path)
-        if (!skipAuthUrls.contains(url)) {
+        if (!match(url)) {
             val request = exchange.request
+            log.info(request.headers.toString())
             val authHeader: String? = request.headers.getFirst(HttpHeaders.AUTHORIZATION)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
                 val authToken = authHeader.replaceFirst(TOKEN_PREFIX, "")
@@ -50,7 +64,7 @@ class CustomGlobalFilter : WebFilter, Ordered {
                 }
                 return authErro(exchange, "token 已失效")
             }
-            return authErro(exchange, "无权访问")
+            return authErro(exchange, "无权访问 $url")
         }
         return chain.filter(exchange)
     }

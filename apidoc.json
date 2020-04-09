@@ -5,6 +5,10 @@
   "title": "撮合交易平台 api 文档",
   "url": "http://liuyuelian.top:85/api",
 
+  "header": {
+    "title": "My own header title",
+    "filename": "header.md"
+  },
   "template": {
   	"withCompare": true,
   	"withGenerator": true

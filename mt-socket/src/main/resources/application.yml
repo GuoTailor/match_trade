@@ -1,0 +1,33 @@
+server:
+  port: 83
+
+spring:
+  application:
+    name: socket
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000
+  r2dbc:
+    username: postgres
+    password: admin
+    url: r2dbc:postgres://localhost:5432/match_trade
+    pool:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG
+        web:
+          reactive:
+            result:
+              method:
+                InvocableHandlerMethod: DEBUG
+    root: INFO

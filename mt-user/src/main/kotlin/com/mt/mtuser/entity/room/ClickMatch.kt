@@ -37,7 +37,7 @@ class ClickMatch(
         var quoteTime: LocalTime? = null,            // 报价和选择身份时间
         var secondStage: LocalTime? = null,          // 第二阶段时间
         override var time: LocalTime? = null,    // 时长
-        override var startTime: LocalTime?,     // 房间开启时间
+        override var startTime: LocalTime? = null,     // 房间开启时间
         override var numberTrades: Int? = null, // 单笔交易数量
         var count: Int? = null,                 // 撮合次数
         @Null(message = "不能设置当前撮合次数")

@@ -15,4 +15,7 @@ interface UserDao : CoroutineCrudRepository<User, Int> {
 
     @Query("SELECT * from mt_user where id in (:ids) ")
     fun findByIdIn(ids: List<Int>): Flow<User>
+
+    @Query("select * from mt_user where phone = :phone")
+    suspend fun findByPhone(phone: String): User?
 }

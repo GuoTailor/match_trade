@@ -24,7 +24,7 @@ import reactor.core.publisher.MonoSink
  * Created by gyh on 2020/3/25.
  */
 @Service
-class DynamicSqlService {
+class R2dbcService {
     @Autowired
     lateinit var dataAccessStrategy: ReactiveDataAccessStrategy
 
@@ -62,6 +62,9 @@ class DynamicSqlService {
                 .table(getTable(data.javaClass))
                 .using(getUpdate(data))
     }
+
+    // -----------====目前我能想到的较好的办法对协程事务的支持，也许有其他方法，期待Spring Framework 5.3的发布====----------
+    // 见 https://github.com/spring-projects/spring-framework/issues/23575
 
     /**
      * 创建用事务包装的冷[mono][Mono]，它将在协程中运行给定的[block]并发出其结果

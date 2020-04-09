@@ -7,8 +7,7 @@ spring:
         server-addr: nacos:8848
         file-extension: yml
         prefix: mt-gateway
-  profiles:
-    active: prod
+  profiles: prod
 
 ---
 spring:
@@ -20,5 +19,4 @@ spring:
         server-addr: localhost:8848
         file-extension: yml
         prefix: mt-gateway
-  profiles:
-    active: dev
+  profiles: dev

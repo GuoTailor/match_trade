@@ -54,6 +54,7 @@ class Role() : GrantedAuthority {
 
     companion object {
         const val SUPER_ADMIN = "ROLE_SUPER_ADMIN"
+        const val ANALYST = "ROLE_ANALYST"
         const val ADMIN = "ROLE_ADMIN"
         const val USER = "ROLE_USER"
     }

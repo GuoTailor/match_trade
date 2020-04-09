@@ -7,16 +7,6 @@ import com.mt.mtuser.entity.room.*
  */
 object RoomExtend {
 
-    inline fun <reified T : Any> getFlag(): String {
-        return when (T::class) {
-            ClickMatch::class -> RoomEnum.CLICK.flag
-            DoubleMatch::class -> RoomEnum.DOUBLE.flag
-            TimelyMatch::class -> RoomEnum.TIMELY.flag
-            TimingMatch::class -> RoomEnum.TIMING.flag
-            else -> throw IllegalStateException("不支持的撮合模式${T::class.simpleName}")
-        }
-    }
-
     /**
      * 公司能开的房间模式号对应的房间模式列表
      */
@@ -25,7 +15,7 @@ object RoomExtend {
             "1" -> listOf(RoomEnum.CLICK.flag)
             "2" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag)
             "3" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag)
-            "4" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag, RoomEnum.TIMELY.flag)
+            "4" -> listOf(RoomEnum.CLICK.flag, RoomEnum.BICKER.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag, RoomEnum.TIMELY.flag)
             else -> throw java.lang.IllegalStateException("错误：${mode}和已有竞价模式{1：点选、2： 点选+定时、3：及时 +点选+两两撮合、4：全部}不匹配")
         }
     }
@@ -36,6 +26,7 @@ object RoomExtend {
     fun getRoomModel(roomId: String): RoomEnum {
         return when (roomId[0].toString()) {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
+            RoomEnum.BICKER.flag -> RoomEnum.BICKER
             RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
             RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
             RoomEnum.TIMING.flag -> RoomEnum.TIMING
@@ -49,6 +40,7 @@ object RoomExtend {
     fun getRoomEnum(flag: String): RoomEnum {
         return when (flag) {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
+            RoomEnum.BICKER.flag -> RoomEnum.BICKER
             RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
             RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
             RoomEnum.TIMING.flag -> RoomEnum.TIMING
@@ -62,6 +54,7 @@ object RoomExtend {
     fun <T : BaseRoom> replaceRoomFlag(roomId: String, newRoom: T): String {
         return when (roomId[0].toString()) {
             RoomEnum.CLICK.flag -> roomId.replace(RoomEnum.CLICK.flag, newRoom.flag)
+            RoomEnum.BICKER.flag -> roomId.replace(RoomEnum.BICKER.flag, newRoom.flag)
             RoomEnum.DOUBLE.flag -> roomId.replace(RoomEnum.DOUBLE.flag, newRoom.flag)
             RoomEnum.TIMELY.flag -> roomId.replace(RoomEnum.TIMELY.flag, newRoom.flag)
             RoomEnum.TIMING.flag -> roomId.replace(RoomEnum.TIMING.flag, newRoom.flag)
@@ -73,6 +66,7 @@ object RoomExtend {
 
 enum class RoomEnum(val flag: String) {
     CLICK("C"),
+    BICKER("B"),
     DOUBLE("D"),
     TIMELY("E"),
     TIMING("I"),

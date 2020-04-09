@@ -44,6 +44,25 @@ class RoomController {
     }
 
     /**
+     * @api {post} /room/bicker 创建一个点选撮合的房间
+     * @apiDescription  创建一个点选撮合的房间
+     * @apiName createBickerRoom
+     * @apiVersion 0.0.1
+     * @apiUse BickerMatch
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":null}
+     * @apiGroup Room
+     * @apiPermission admin
+     */
+    @PostMapping("/bicker")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun createBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
+        return ResponseInfo.ok(mono {
+            roomService.createRoom(bickerRoom.awaitSingle())
+        })
+    }
+
+    /**
      * @api {post} /room/double 创建一个两两撮合的房间
      * @apiDescription  创建一个两两撮合的房间
      * @apiName createDoubleRoom
@@ -116,6 +135,25 @@ class RoomController {
     fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
         return ResponseInfo.ok(mono {
             roomService.updateRoomByRoomId(clickRoom.awaitSingle())
+        })
+    }
+
+    /**
+     * @api {put} /room/bicker 更新一个点选撮合的房间
+     * @apiDescription  更新一个点选撮合的房间
+     * @apiName updateBickerRoom
+     * @apiVersion 0.0.1
+     * @apiUse BickerMatch
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":null}
+     * @apiGroup Room
+     * @apiPermission admin
+     */
+    @PutMapping("/bicker")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
+        return ResponseInfo.ok(mono {
+            roomService.updateRoomByRoomId(bickerRoom.awaitSingle())
         })
     }
 
