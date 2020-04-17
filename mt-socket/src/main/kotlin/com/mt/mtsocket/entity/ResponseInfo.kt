@@ -1,6 +1,5 @@
 package com.mt.mtsocket.entity
 
-import kotlinx.coroutines.CoroutineScope
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -13,6 +12,7 @@ import java.io.Serializable
 class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     var data: T? = null
+    var req: Int = -1
 
     constructor(code: Int, msg: String, data: T) : this(code, msg) {
         this.data = data

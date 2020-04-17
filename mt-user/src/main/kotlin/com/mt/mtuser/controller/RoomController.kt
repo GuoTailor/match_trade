@@ -44,8 +44,8 @@ class RoomController {
     }
 
     /**
-     * @api {post} /room/bicker 创建一个点选撮合的房间
-     * @apiDescription  创建一个点选撮合的房间
+     * @api {post} /room/bicker 创建一个抬杠撮合的房间
+     * @apiDescription  创建一个点抬杠撮合的房间
      * @apiName createBickerRoom
      * @apiVersion 0.0.1
      * @apiUse BickerMatch
@@ -139,8 +139,8 @@ class RoomController {
     }
 
     /**
-     * @api {put} /room/bicker 更新一个点选撮合的房间
-     * @apiDescription  更新一个点选撮合的房间
+     * @api {put} /room/bicker 更新一个抬杠撮合的房间
+     * @apiDescription  更新一个抬杠撮合的房间
      * @apiName updateBickerRoom
      * @apiVersion 0.0.1
      * @apiUse BickerMatch
@@ -196,7 +196,7 @@ class RoomController {
     }
 
     /**
-     * @api {put} /room/timing 更新一个点定时撮合的房间
+     * @api {put} /room/timing 更新一个定时撮合的房间
      * @apiDescription  更新一个定时撮合的房间
      * @apiName updateTimingMatch
      * @apiVersion 0.0.1

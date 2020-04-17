@@ -138,9 +138,9 @@ class RoomService {
         redisUtil.getRoomRecord(roomId) ?: throw IllegalStateException("房间未开启")
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         roomEnterMutex.withLock {
-            val list = redisUtil.getRoomPeople(roomId)
+            /*val list = redisUtil.getRoomPeople(roomId)
             list.add(userId)
-            redisUtil.updateRoomPeople(roomId, list)
+            redisUtil.updateRoomPeople(roomId, list)*/
         }
     }
 
@@ -150,9 +150,9 @@ class RoomService {
     suspend fun quitRoom(roomId: String) {
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         roomEnterMutex.withLock {
-            val list = redisUtil.getRoomPeople(roomId)
+            /*val list = redisUtil.getRoomPeople(roomId)
             if (list.remove(userId))
-                redisUtil.updateRoomPeople(roomId, list)
+                redisUtil.updateRoomPeople(roomId, list)*/
         }
     }
 

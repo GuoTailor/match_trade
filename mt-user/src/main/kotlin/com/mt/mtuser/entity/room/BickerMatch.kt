@@ -10,7 +10,7 @@ import javax.validation.constraints.Null
 /**
  * Created by gyh on 2020/3/23.
  * 抬杠撮合
- * @apiDefine ClickMatch
+ * @apiDefine BickerMatch
  * @apiParam {Integer} companyId 公司id
  * @apiParam {Integer} stockId 股票id
  * @apiParam {String} name 房间名字

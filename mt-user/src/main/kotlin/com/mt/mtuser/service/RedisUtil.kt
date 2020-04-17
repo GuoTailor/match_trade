@@ -73,16 +73,6 @@ class RedisUtil {
         redisTemplate.expireAndAwait(roomKey + roomId, duration)
     }
 
-    /**
-     * 更新房间人员列表
-     */
-    suspend fun updateRoomPeople(roomId: String, list: List<Int>) {
-        redisTemplate.opsForHash<String, List<Int>>().putAndAwait(roomKey + roomId, peopleList, list)
-    }
-
-    suspend fun getRoomPeople(roomId: String): MutableList<Int> {
-        return redisTemplate.opsForHash<String, MutableList<Int>>().getAndAwait(roomKey + roomId, peopleList) ?: mutableListOf()
-    }
 
     // -------------------------=======>>>验证码<<<=======-------------------------
 

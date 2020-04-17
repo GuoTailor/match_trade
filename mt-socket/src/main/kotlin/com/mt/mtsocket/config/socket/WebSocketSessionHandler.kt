@@ -32,16 +32,18 @@ class WebSocketSessionHandler {
 
     internal fun handle(): Mono<Void> {
         val receive = session.receive()
-                .map { obj: WebSocketMessage -> obj.payloadAsText }
-                .doOnNext { t: String -> receiveProcessor.onNext(t) }
-                .doOnComplete { disconnectedProcessor.onNext(session) }
-                .doOnCancel { disconnectedProcessor.onNext(session) }
+                .map { obj -> obj.payloadAsText }
+                .doOnNext { t -> receiveProcessor.onNext(t) }
                 .doOnComplete { receiveProcessor.onComplete() }
         val connected = Mono.fromRunnable<Any> {
             webSocketConnected = true
             connectedProcessor.onNext(session)
         }
-        return connected.thenMany(receive).then()
+        val disconnected = Mono.fromRunnable<Any> {
+            webSocketConnected = false
+            disconnectedProcessor.onNext(session)
+        }
+        return connected.thenMany(receive).then(disconnected).then()
     }
 
     fun connected(): Mono<WebSocketSession> {
