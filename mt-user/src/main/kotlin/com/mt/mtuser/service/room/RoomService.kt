@@ -132,31 +132,6 @@ class RoomService {
     }
 
     /**
-     * 进入房间通过房间号
-     */
-    suspend fun enterRoom(roomId: String) {
-        redisUtil.getRoomRecord(roomId) ?: throw IllegalStateException("房间未开启")
-        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        roomEnterMutex.withLock {
-            /*val list = redisUtil.getRoomPeople(roomId)
-            list.add(userId)
-            redisUtil.updateRoomPeople(roomId, list)*/
-        }
-    }
-
-    /**
-     * 退出房间过房间号
-     */
-    suspend fun quitRoom(roomId: String) {
-        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        roomEnterMutex.withLock {
-            /*val list = redisUtil.getRoomPeople(roomId)
-            if (list.remove(userId))
-                redisUtil.updateRoomPeople(roomId, list)*/
-        }
-    }
-
-    /**
      * 更改房间模式
      * 注意该方法没有检查权限，请调用时检查权限
      */

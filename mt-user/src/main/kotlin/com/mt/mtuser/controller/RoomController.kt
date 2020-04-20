@@ -251,40 +251,4 @@ class RoomController {
         })
     }
 
-    /**
-     * @api {get} /room/enter 进入房间通过房间号
-     * @apiDescription  进入房间通过房间号
-     * @apiName enableRoom
-     * @apiVersion 0.0.1
-     * @apiParam {String} roomId 房间id
-     * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data":null}
-     * @apiGroup Room
-     * @apiPermission user
-     */
-    @GetMapping("/enter")
-    fun enterRoom(@RequestParam roomId: String): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono {
-            roomService.enterRoom(roomId)
-        })
-    }
-
-    /**
-     * @api {get} /room/quit 退出房间通过房间号
-     * @apiDescription  退出房间通过房间号
-     * @apiName quitRoom
-     * @apiVersion 0.0.1
-     * @apiParam {String} roomId 房间id
-     * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data":null}
-     * @apiGroup Room
-     * @apiPermission user
-     */
-    @GetMapping("/quit")
-    fun quitRoom(roomId: String): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono {
-            roomService.quitRoom(roomId)
-        })
-    }
-
 }
