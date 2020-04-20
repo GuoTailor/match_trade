@@ -23,27 +23,26 @@ import kotlin.math.log
 class ExampleHandler : WebSocketHandler {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
+
     @Autowired
     private lateinit var dispatcherServlet: DispatcherServlet
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val sessionHandler = WebSocketSessionHandler(session)
-        val watchDog = WebSocketWatchDog().start(sessionHandler, 10000).ignoreElements()
-        val send = Flux
-                .interval(Duration.ofMillis(1000), Schedulers.elastic())
+        val watchDog = WebSocketWatchDog().start(sessionHandler, 3000)
+        val send = Flux.interval(Duration.ofMillis(1000), Schedulers.elastic())
                 .takeUntil { !sessionHandler.isConnected() }
                 .map { value: Long -> value.toString() }
                 .doOnNext { message -> logger.info("Server Sent: [{}]", message) }
                 .flatMap(sessionHandler::send)
-                .doOnComplete { logger.info("nmka") }
-        var disposable: Disposable? = null
-        val connect = sessionHandler.connected()
-                .doOnNext { disposable = send.subscribe() }
+                .doOnComplete { logger.info("完成") }
+
+        val disposable: Disposable = send.subscribe()
 
         val disconnect = sessionHandler.disconnected()
                 .doOnNext {
                     logger.info("Server Disconnected [{}]", it.id)
-                    disposable?.dispose()
+                    disposable.dispose()
                 }
         val output = sessionHandler.receive()
                 .flatMap {
@@ -57,17 +56,10 @@ class ExampleHandler : WebSocketHandler {
                 .flatMap(sessionHandler::send)
                 .ignoreElements()
 
-        logger.info("lianjie")
         return sessionHandler.handle()
-                .zipWith(connect) { o1, _ -> o1 }
                 .zipWith(disconnect) { o1, _ -> o1 }
                 .zipWith(output) { o1, _ -> o1 }
                 .zipWith(watchDog) { o1, _ -> o1 }
-    }
-
-    fun nmka(data: Mono<String>) {
-
-
     }
 
 }

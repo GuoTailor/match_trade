@@ -88,7 +88,7 @@ class CommonController {
     }
 
     /**
-     * @api {get} /register 注册一个用户
+     * @api {post} /register 注册一个用户
      * @apiDescription  注册用户
      * @apiName register
      * @apiVersion 0.0.1

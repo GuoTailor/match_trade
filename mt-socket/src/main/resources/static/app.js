@@ -1,7 +1,7 @@
 var ws = null;
 var url = "ws://localhost:85/socket/echo";
-var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1" +
-    "dIiwibmJmIjoxNTg2NTI1MzI3LCJleHAiOjE1ODcxMzAxMjd9.QO2m78W5GX5jciPUu481WE71prOxXTV3O59anOAcJww";
+var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1dIiwibmJm" +
+    "IjoxNTg3MzUzOTA5LCJleHAiOjE1ODc5NTg3MDl9.TAkNcR9kg__25GxxmJoQwX3fmbtVG29HlWvKQykr9IM";
 
 
 function setConnected(connected) {

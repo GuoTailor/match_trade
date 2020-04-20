@@ -1,6 +1,5 @@
 package com.mt.mtsocket.config.socket
 
-import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -30,20 +29,17 @@ class WebSocketSessionHandler {
         this.session = session
     }
 
-    internal fun handle(): Mono<Void> {
+    fun handle(): Mono<Void> {
         val receive = session.receive()
                 .map { obj -> obj.payloadAsText }
                 .doOnNext { t -> receiveProcessor.onNext(t) }
-                .doOnComplete { receiveProcessor.onComplete() }
-        val connected = Mono.fromRunnable<Any> {
-            webSocketConnected = true
-            connectedProcessor.onNext(session)
-        }
-        val disconnected = Mono.fromRunnable<Any> {
-            webSocketConnected = false
-            disconnectedProcessor.onNext(session)
-        }
-        return connected.thenMany(receive).then(disconnected).then()
+                .doOnComplete { connectionClosed() }
+                .doOnCancel { connectionClosed() }
+                .doOnRequest {
+                    webSocketConnected = true
+                    connectedProcessor.onNext(session)
+                }
+        return receive.then()
     }
 
     fun connected(): Mono<WebSocketSession> {
@@ -62,7 +58,7 @@ class WebSocketSessionHandler {
         return receiveProcessor
     }
 
-    fun getId(): String? {
+    fun getId(): String {
         return session.id
     }
 
@@ -77,9 +73,9 @@ class WebSocketSessionHandler {
     }
 
     fun connectionClosed() {
-        if (webSocketConnected) {
-            webSocketConnected = false
-            session.close()
-        }
+        webSocketConnected = false
+        session.close()
+        receiveProcessor.onComplete()
+        disconnectedProcessor.onNext(session)
     }
 }

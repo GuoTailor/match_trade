@@ -23,8 +23,8 @@ import java.util.Map;
 @Component
 public class DispatcherServlet {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
-    private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+    private final HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
     /**
      * 此servlet使用的处理程序映射的列表。
@@ -85,9 +85,7 @@ public class DispatcherServlet {
      * @since 4.2
      */
     private void invokeHandlerMethod(ServiceRequestInfo request, ServiceResponseInfo response, InvocableHandlerMethod invocableMethod) {
-        if (this.argumentResolvers != null) {
-            invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-        }
+        invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
         invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
         try {
             Object publisher = invocableMethod.invokeForRequest(request);

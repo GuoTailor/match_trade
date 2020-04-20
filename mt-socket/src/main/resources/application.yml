@@ -8,16 +8,21 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
+
+    stream:
+      default-binder: rocketmq
+      bindings:
+        in-trade:
+          destination: trade-topic
+          group: service-order
+        out-order:
+          destination: order-topic
+          content-type: application/json
+
   redis:
     host: localhost
     port: 6379
     timeout: 5000
-  r2dbc:
-    username: postgres
-    password: admin
-    url: r2dbc:postgres://localhost:5432/match_trade
-    pool:
-      enabled: true
 
 logging:
   level:

@@ -1,15 +1,11 @@
 package com.mt.mtsocket.entity
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
 import org.springframework.security.core.GrantedAuthority
 
 /**
  * Created by gyh on 2020/3/7.
  */
-@Table("mt_user_role")
 class Role() : GrantedAuthority {
-    @Id
     var id: Int? = null
 
     /**

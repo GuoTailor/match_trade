@@ -1,6 +1,7 @@
 package com.mt.mtgateway.config
 
 import com.mt.mtgateway.token.TokenMgr
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
@@ -23,7 +24,7 @@ import java.util.regex.Pattern
  */
 @Component
 class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<String>) : WebFilter, Ordered {
-    val log = LoggerFactory.getLogger(this.javaClass.simpleName)
+    val log = LoggerFactory.getLogger(this.javaClass.simpleName)!!
     val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
 
