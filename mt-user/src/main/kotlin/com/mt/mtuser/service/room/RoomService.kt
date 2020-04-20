@@ -12,7 +12,7 @@ import com.mt.mtuser.entity.RoomRecord
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.schedule.*
-import com.mt.mtuser.service.DynamicSqlService
+import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -41,6 +41,9 @@ class RoomService {
     private lateinit var clickRoomDao: ClickRoomDao
 
     @Autowired
+    private lateinit var bickerRoomDao: BickerRoomDao
+
+    @Autowired
     private lateinit var companyDao: CompanyDao
 
     @Autowired
@@ -50,7 +53,7 @@ class RoomService {
     private lateinit var timelyRoomDao: TimelyRoomDao
 
     @Autowired
-    private lateinit var dynamicSql: DynamicSqlService
+    private lateinit var r2dbc: R2dbcService
 
     @Autowired
     private lateinit var timingRoomDao: TimingRoomDao
@@ -64,7 +67,6 @@ class RoomService {
     @Autowired
     private lateinit var quartzManager: QuartzManager
     private val roomEnableMutex = Mutex()   // 房间启用和禁用的互斥锁
-    private val roomEnterMutex = Mutex()   // 房间进入和退出的互斥锁
     private val roomCreateMutex = Mutex()   // 房间进入和退出的互斥锁
 
     /**
@@ -91,7 +93,7 @@ class RoomService {
                         ?: throw IllegalStateException("房间不存在：$roomId")
                 roomRecord.endTime = System.currentTimeMillis().toDate()
                 roomRecord.computingTime()
-                dynamicSql.dynamicUpdate(roomRecord)
+                r2dbc.dynamicUpdate(roomRecord)
                         .matching(where("id").`is`(roomRecord.id!!))
                         .fetch().awaitRowsUpdated()
                 // TODO 通知用户退出房间
@@ -100,7 +102,7 @@ class RoomService {
         }
     }
 
-    fun enableRoom(roomId: String, value: Boolean) = dynamicSql.withTransaction {
+    fun enableRoom(roomId: String, value: Boolean) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(roomId)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
@@ -119,37 +121,12 @@ class RoomService {
                             ?: throw IllegalStateException("房间不存在：$roomId")
                     roomRecord.endTime = System.currentTimeMillis().toDate()
                     roomRecord.computingTime()
-                    dynamicSql.dynamicUpdate(roomRecord)
+                    r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
                     // TODO 通知用户退出房间
                 }
             }
-        }
-    }
-
-    /**
-     * 进入房间通过房间号
-     */
-    suspend fun enterRoom(roomId: String) {
-        redisUtil.getRoomRecord(roomId) ?: throw IllegalStateException("房间未开启")
-        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        roomEnterMutex.withLock {
-            val list = redisUtil.getRoomPeople(roomId)
-            list.add(userId)
-            redisUtil.updateRoomPeople(roomId, list)
-        }
-    }
-
-    /**
-     * 退出房间过房间号
-     */
-    suspend fun quitRoom(roomId: String) {
-        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        roomEnterMutex.withLock {
-            val list = redisUtil.getRoomPeople(roomId)
-            if (list.remove(userId))
-                redisUtil.updateRoomPeople(roomId, list)
         }
     }
 
@@ -180,13 +157,12 @@ class RoomService {
     suspend fun <T : BaseRoom> updateRoomByRoomId(room: T): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
-        val roleList = BaseUser.getcurrentUser().awaitSingle().getRoleByName(Role.ADMIN)
-        val companyList = roleList.map { it.companyid }
+        val companyList = BaseUser.getcurrentUser().awaitSingle().getCompanyList(Role.ADMIN)
         return if (companyList.contains(room.companyId)) {
             if (RoomExtend.getRoomModel(roomId).flag == room.flag) {
                 room.roomId = null
                 room.enable = null
-                dynamicSql.dynamicUpdate(room)
+                r2dbc.dynamicUpdate(room)
                         .matching(where("room_id").`is`(roomId))
                         .fetch().awaitRowsUpdated()
                 // 修改定时任务开始和结束的时间
@@ -240,11 +216,13 @@ class RoomService {
             BaseUser.getcurrentUser().awaitSingle().getCompanyList(role)
 
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
+        val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
         val doubleList = async { doubleRoomDao.findByCompanyIdAll(companyList) }
         val timelyList = async { timelyRoomDao.findByCompanyIdAll(companyList) }
         val timingList = async { timingRoomDao.findByCompanyIdAll(companyList) }
         val restList = LinkedList<BaseRoom>()
         clickList.await().toList(restList)
+        bickerList.await().toList(restList)
         doubleList.await().toList(restList)
         timelyList.await().toList(restList)
         timingList.await().toList(restList)
@@ -257,11 +235,12 @@ class RoomService {
     suspend fun checkRoomCount(companyId: Int): Boolean = coroutineScope {
         val company = async { companyDao.findById(companyId) }
         val countClick = async { clickRoomDao.countByCompanyId(companyId) }
+        val bickerClick = async { bickerRoomDao.countByCompanyId(companyId) }
         val countDouble = async { doubleRoomDao.countByCompanyId(companyId) }
         val countTimely = async { timelyRoomDao.countByCompanyId(companyId) }
         val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
         company.await() ?: throw IllegalStateException("公司不存在：$companyId")
-        company.await()?.roomCount!! > (countClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
+        company.await()?.roomCount!! > (countClick.await() + bickerClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
     }
 
     /**
@@ -269,10 +248,11 @@ class RoomService {
      */
     suspend fun getAllRoomCount(): Long = coroutineScope {
         val countClick = async { clickRoomDao.count() }
+        val countBicker = async { bickerRoomDao.count() }
         val countDouble = async { doubleRoomDao.count() }
         val countTimely = async { timelyRoomDao.count() }
         val countTiming = async { timingRoomDao.count() }
-        countClick.await() + countDouble.await() + countTimely.await() + countTiming.await()
+        countClick.await() + countBicker.await() + countDouble.await() + countTimely.await() + countTiming.await()
     }
 
     /**
@@ -282,6 +262,7 @@ class RoomService {
     fun <T : BaseRoom> getBaseRoomDao(roomId: String): BaseRoomDao<T, String> {
         return when (roomId.substring(0, 1)) {
             RoomEnum.CLICK.flag -> clickRoomDao as BaseRoomDao<T, String>
+            RoomEnum.BICKER.flag -> bickerRoomDao as BaseRoomDao<T, String>
             RoomEnum.DOUBLE.flag -> doubleRoomDao as BaseRoomDao<T, String>
             RoomEnum.TIMELY.flag -> timelyRoomDao as BaseRoomDao<T, String>
             RoomEnum.TIMING.flag -> timingRoomDao as BaseRoomDao<T, String>

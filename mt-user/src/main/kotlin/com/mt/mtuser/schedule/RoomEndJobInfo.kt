@@ -15,6 +15,18 @@ class RoomEndJobInfo : ScheduleJobInfo {
     override var jobName: String = "roomTimedEnable"    // 任务job的名称
     override var groupName: String = RoomTask.jobGroup  // 任务group的名称
 
+    constructor(cron: String,
+                jobName: String,
+                data: JobDataMap = JobDataMap(),
+                className: Class<out Job> = RoomTask::class.java,
+                groupName: String = RoomTask.jobGroup) {
+        this.cron = cron
+        this.className = className
+        this.data = data
+        this.jobName = jobName
+        this.groupName = groupName
+    }
+
     constructor(room: BaseRoom, vararg data: Pair<String, *>) {
         val date = room.startTime!! + room.time!!
         cron = "0 %d %d ? * *".format(date.minute, date.hour)

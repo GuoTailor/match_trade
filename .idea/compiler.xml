@@ -8,18 +8,27 @@
         <outputRelativeToContentRoot value="true" />
         <module name="mt-user" />
         <module name="mt-gateway" />
+        <module name="mt-engine" />
+        <module name="mt-socket" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="match_trade" target="1.5" />
-      <module name="mt-gateway" target="1.8" />
-      <module name="mt-user" target="1.8" />
+      <module name="demo" target="1.8" />
+      <module name="mt-websocket" target="1.8" />
+      <module name="mt-zookeeper" target="1.8" />
+      <module name="test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="demo" options="-parameters" />
+      <module name="mt-engine" options="-parameters" />
       <module name="mt-gateway" options="-parameters" />
+      <module name="mt-socket" options="-parameters" />
       <module name="mt-user" options="-parameters" />
+      <module name="mt-websocket" options="-parameters" />
+      <module name="mt-zookeeper" options="-parameters" />
+      <module name="test" options="-parameters" />
     </option>
   </component>
 </project>

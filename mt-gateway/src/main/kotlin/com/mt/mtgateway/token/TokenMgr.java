@@ -1,13 +1,15 @@
 package com.mt.mtgateway.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mt.mtgateway.bean.Role;
 import com.mt.mtgateway.bean.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
 import java.io.IOException;
 import java.security.Key;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 签发和验证token的类
@@ -43,6 +45,21 @@ public class TokenMgr {
         return builder.compact();
     }
 
+    /**
+     * 精简角色
+     *
+     * @return 精简后的模式，这样生成的token更短
+     */
+    public static Object[] simplify(Collection<Role> roles) {
+        Object[] data = new Object[roles.size()];
+        int i = 0;
+        for (Role role : roles) {
+            data[i++] = new Object[]{role.getName().replace("ROLE_", ""), role.getCompanyid()};
+        }
+        return data;
+    }
+
+    // TODO 不再序列化role的全部公司id
     public static String createJWT(User user) throws IOException {
         long nowMillis = System.currentTimeMillis();
         long expMillis = nowMillis + Constant.JWT_TTL;
@@ -51,7 +68,8 @@ public class TokenMgr {
         Claims claims = Jwts.claims();
         claims.put("id", user.getId());
         //claims.put("username", user.getUsername());
-        claims.put("roles", json.writeValueAsString(user.getRoles()));
+        Object[] role = simplify(user.getRoles());
+        claims.put("roles", json.writeValueAsString(role));
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(key, signatureAlgorithm)          // 签名算法以及密匙
