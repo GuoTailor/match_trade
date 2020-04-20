@@ -10,7 +10,6 @@ spring:
   profiles: prod
 
 ---
-
 spring:
   cloud:
     # 使用 Nacos 作为配置中心

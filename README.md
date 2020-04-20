@@ -8,8 +8,8 @@
       "data": ["数据"]
     }
 ```
-打包:进入到指定模块根目录运行``` mvnw clean kotlin:compile package -Dmaven.test.skip=true ``` <br>
-运行:进入到指定模块根目录运行``` mvnw spring-boot:run ```
+打包:进入到指定模块根目录运行` mvnw clean kotlin:compile package -Dmaven.test.skip=true ` <br>
+运行:进入到指定模块根目录运行` mvnw spring-boot:run `
 
 ## 注意事项：
 - 每次推代码时先拉一下调试没bug再推
@@ -102,4 +102,5 @@ spring:
 
 8. [nacos地址入口](http://liuyuelian.top:8848/nacos/)
 
+9. [api文档地址](http://47.107.178.147/)
 

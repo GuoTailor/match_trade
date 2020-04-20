@@ -44,6 +44,25 @@ class RoomController {
     }
 
     /**
+     * @api {post} /room/bicker 创建一个抬杠撮合的房间
+     * @apiDescription  创建一个点抬杠撮合的房间
+     * @apiName createBickerRoom
+     * @apiVersion 0.0.1
+     * @apiUse BickerMatch
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":null}
+     * @apiGroup Room
+     * @apiPermission admin
+     */
+    @PostMapping("/bicker")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun createBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
+        return ResponseInfo.ok(mono {
+            roomService.createRoom(bickerRoom.awaitSingle())
+        })
+    }
+
+    /**
      * @api {post} /room/double 创建一个两两撮合的房间
      * @apiDescription  创建一个两两撮合的房间
      * @apiName createDoubleRoom
@@ -120,6 +139,25 @@ class RoomController {
     }
 
     /**
+     * @api {put} /room/bicker 更新一个抬杠撮合的房间
+     * @apiDescription  更新一个抬杠撮合的房间
+     * @apiName updateBickerRoom
+     * @apiVersion 0.0.1
+     * @apiUse BickerMatch
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":null}
+     * @apiGroup Room
+     * @apiPermission admin
+     */
+    @PutMapping("/bicker")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
+        return ResponseInfo.ok(mono {
+            roomService.updateRoomByRoomId(bickerRoom.awaitSingle())
+        })
+    }
+
+    /**
      * @api {put} /room/double 更新一个两两撮合的房间
      * @apiDescription  更新一个两两撮合的房间
      * @apiName updateDoubleRoom
@@ -158,7 +196,7 @@ class RoomController {
     }
 
     /**
-     * @api {put} /room/timing 更新一个点定时撮合的房间
+     * @api {put} /room/timing 更新一个定时撮合的房间
      * @apiDescription  更新一个定时撮合的房间
      * @apiName updateTimingMatch
      * @apiVersion 0.0.1

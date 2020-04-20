@@ -1,12 +1,8 @@
 package com.mt.mtuser.entity.room
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.mt.mtuser.service.room.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.format.annotation.DateTimeFormat
-import java.sql.Time
-import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 
@@ -33,7 +29,7 @@ class DoubleMatch(
         override var name: String? = null,           // 房间名字
         override var people: Int? = null,            // 人数
         override var time: LocalTime? = null,         // 时长
-        override var startTime: LocalTime?,         // 房间开启时间
+        override var startTime: LocalTime? = null,         // 房间开启时间
         override var numberTrades: Int? = null,      // 单笔交易数量
         override var highScope: Double? = null,      // 报价最高值
         override var lowScope: Double? = null,       // 报价最低值

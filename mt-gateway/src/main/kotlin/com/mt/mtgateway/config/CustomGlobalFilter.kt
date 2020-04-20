@@ -1,35 +1,54 @@
 package com.mt.mtgateway.config
 
 import com.mt.mtgateway.token.TokenMgr
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.util.*
+import java.util.regex.Pattern
 
 /**
  * Created by gyh on 2020/3/16.
  */
 @Component
-class CustomGlobalFilter : WebFilter, Ordered {
-    val log = LoggerFactory.getLogger(this.javaClass.simpleName)
+class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<String>) : WebFilter, Ordered {
+    val log = LoggerFactory.getLogger(this.javaClass.simpleName)!!
+    val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
-    @Value("\${skipAuthUrls}")
-    lateinit var skipAuthUrls: List<String>
 
+    init {
+        skipAuthUrls.forEach {
+            urlPatten.add(Pattern.compile(it))
+            log.info(it)
+        }
+    }
+
+    fun match(input: CharSequence): Boolean {
+        urlPatten.forEach {
+            if (it.matcher(input).matches())
+                return true
+        }
+        return false
+    }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val url = exchange.request.path.value()
-        log.info(url + "    " + exchange.request.uri.path)
-        if (!skipAuthUrls.contains(url)) {
+        if (!match(url)) {
             val request = exchange.request
-            val authHeader: String? = request.headers.getFirst(HttpHeaders.AUTHORIZATION)
+            val authHeader = getAuthToken(request)
+            log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
                 val authToken = authHeader.replaceFirst(TOKEN_PREFIX, "")
                 val checkPOJO = TokenMgr.validateJWT(authToken)
@@ -39,7 +58,7 @@ class CustomGlobalFilter : WebFilter, Ordered {
                     //val username = claims["username"].toString()
                     val authorities = claims["roles"].toString()
                     log.info("验证 $id : $authorities")
-                    val host = exchange.request.mutate()
+                    val host = request.mutate() // TODO url去掉token字段
                             .header("id", id.toString())
                             //.header("username", username)
                             .header("roles", authorities)
@@ -48,11 +67,35 @@ class CustomGlobalFilter : WebFilter, Ordered {
                     val build = exchange.mutate().request(host).build()
                     return chain.filter(build)
                 }
-                return authErro(exchange, "token 已失效")
+                return authError(exchange, "token 已失效")
             }
-            return authErro(exchange, "无权访问")
+            return authError(exchange, "无权访问 $url")
         }
         return chain.filter(exchange)
+    }
+
+    private fun getAuthToken(request: ServerHttpRequest): String? {
+        val headers = request.headers
+        if (headers.getFirst("Connection") == "Upgrade") {
+            if (headers.getFirst("Upgrade") == "websocket") {
+                val queryMap = getQueryMap(request.uri.query)
+                return TOKEN_PREFIX + queryMap[TOKEN_PREFIX.trim().toLowerCase()]
+            }
+        }
+        return headers.getFirst(HttpHeaders.AUTHORIZATION)
+    }
+
+    private fun getQueryMap(queryStr: String): Map<String, String> {
+        val queryMap: MutableMap<String, String> = HashMap()
+        if (!StringUtils.isEmpty(queryStr)) {
+            val queryParam = queryStr.split("&")
+            queryParam.forEach { s: String ->
+                val kv = s.split("=".toRegex(), 2)
+                val value = if (kv.size == 2) kv[1] else ""
+                queryMap[kv[0]] = value
+            }
+        }
+        return queryMap
     }
 
     /**
@@ -61,7 +104,7 @@ class CustomGlobalFilter : WebFilter, Ordered {
      * @param mess 错误信息
      * @return
      */
-    private fun authErro(swe: ServerWebExchange, mess: String): Mono<Void> {
+    private fun authError(swe: ServerWebExchange, mess: String): Mono<Void> {
         log.info(mess)
         val resp = swe.response
         resp.statusCode = HttpStatus.UNAUTHORIZED
@@ -75,6 +118,6 @@ class CustomGlobalFilter : WebFilter, Ordered {
     }
 
     override fun getOrder(): Int {
-        return Ordered.LOWEST_PRECEDENCE
+        return Ordered.HIGHEST_PRECEDENCE
     }
 }
