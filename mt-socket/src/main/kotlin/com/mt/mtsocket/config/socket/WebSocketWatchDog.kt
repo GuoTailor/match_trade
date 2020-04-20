@@ -16,9 +16,9 @@ class WebSocketWatchDog {
         return session.receive()
                 .doOnNext(logger::info)
                 .timeout(Duration.ofMillis(interval))
+                .doOnError(TimeoutException::class.java) { session.send(it.message ?: "错误").subscribe() }
                 .doOnError(TimeoutException::class.java) { session.connectionClosed() }
                 .doOnError(TimeoutException::class.java) { logger.info("超时 " + session.getId()) }
-                .onErrorResume { session.send(it.message ?: "错误").zipWith(Mono.empty<String>()) { _, t2 -> t2 } }
                 .then()
     }
 }
