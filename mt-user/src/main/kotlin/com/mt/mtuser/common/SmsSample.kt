@@ -1,10 +1,10 @@
 package com.mt.mtuser.common
 
 import kotlinx.coroutines.reactive.awaitSingle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
-import java.lang.IllegalStateException
 import java.net.URLEncoder
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -14,9 +14,10 @@ import java.security.NoSuchAlgorithmException
  */
 object SmsSample {
     data class VerificationCode(val code: Int, val msg: String)
+    private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     suspend fun send(phone: String, code: String): VerificationCode {
-        val testContent = "【泰斯特科技】你的短信验证码为" + code + "验证码5分钟内有效！"
+        val testContent = "【泰斯特科技】你的验证码为${code},该验证码5分钟内有效,如非本人操作,请忽略此信息。请勿泄漏于他人!"
         val result = sendMessage(phone, testContent)
         val msg =  when (result) {
             "0" -> "成功"
@@ -28,10 +29,12 @@ object SmsSample {
             "51" -> "手机号码不正确"
             else -> "失败"
         }
+        logger.info("$phone : $code = $result + $msg")
         return VerificationCode(result.toInt(), msg)
     }
 
     private suspend fun sendNote(httpUrl: String, httpArg: String) :String {
+        logger.info("$httpUrl?$httpArg")
         val client = WebClient.create("$httpUrl?$httpArg")
         return client.get()
                 .accept(MediaType.ALL)
@@ -43,14 +46,12 @@ object SmsSample {
     private suspend fun sendMessage(phone: String, content: String): String {
         val username = "zelfly" //在短信宝注册的用户名
         val password = "zhengfei737218" //在短信宝注册的密码
-        val httpUrl = "https://api.smsbao.com/sms"
+        val httpUrl = "http://api.smsbao.com/sms"
         val httpArg = "u=" + username + "&" +
                 "p=" + md5(password) + "&" +
                 "m=" + phone + "&" +
                 "c=" + encodeUrlString(content, "UTF-8")
-        val result = sendNote(httpUrl, httpArg)
-        println(result)
-        return result
+        return sendNote(httpUrl, httpArg)
     }
 
     private fun md5(plainText: String): String {
