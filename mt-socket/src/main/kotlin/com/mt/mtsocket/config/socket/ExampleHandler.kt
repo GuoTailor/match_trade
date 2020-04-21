@@ -19,7 +19,7 @@ import kotlin.math.log
  * Created by gyh on 2020/4/5.
  * 这个架构一点也不好用
  */
-@WebSocketMapping("/echo")
+@WebSocketMapping("/room")
 class ExampleHandler : WebSocketHandler {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
@@ -39,11 +39,14 @@ class ExampleHandler : WebSocketHandler {
 
         val disposable: Disposable = send.subscribe()
 
+        val connect = sessionHandler.connected()
+
         val disconnect = sessionHandler.disconnected()
                 .doOnNext {
                     logger.info("Server Disconnected [{}]", it.id)
                     disposable.dispose()
                 }
+
         val output = sessionHandler.receive()
                 .flatMap {
                     val req = ServiceRequestInfo("/echo", it, it, 0)
