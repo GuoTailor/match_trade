@@ -26,7 +26,6 @@ class MyReactiveUserDetailsService {
                 .findByUsername(username)
                 .switchIfEmpty(Mono.empty<User>())
         val roles = user.flatMapMany {
-            it.password = null
             roleRepository.findRoleByUserId(it.id!!)
         }
         return Mono.zip(user, roles.collectList()) { u, r ->
