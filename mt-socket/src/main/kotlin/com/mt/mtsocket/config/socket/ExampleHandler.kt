@@ -1,12 +1,14 @@
 package com.mt.mtsocket.config.socket
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import com.mt.mtsocket.entity.BaseUser
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.StringUtils
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.Disposable
@@ -14,7 +16,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
-import kotlin.math.log
+import java.util.HashMap
 
 /**
  * Created by gyh on 2020/4/5.
@@ -31,47 +33,43 @@ class ExampleHandler : WebSocketHandler {
     override fun handle(session: WebSocketSession): Mono<Void> {
         val sessionHandler = WebSocketSessionHandler(session)
         val watchDog = WebSocketWatchDog().start(sessionHandler, 3000)
-        val send = Flux.interval(Duration.ofMillis(1000), Schedulers.elastic())
-                .takeUntil { !sessionHandler.isConnected() }
-                .map { value: Long -> value.toString() }
-                .doOnNext { message -> logger.info("Server Sent: [{}]", message) }
-                .flatMap(sessionHandler::send)
-                .doOnComplete { logger.info("完成") }
-
-        val disposable: Disposable = send.subscribe()
-
+        val queryMap = getQueryMap(sessionHandler.getSession().handshakeInfo.uri.query)
+        if (queryMap["roomId"] == null) {
+            return sessionHandler.send("错误，不支持的参数列表$queryMap")
+                    .then(sessionHandler.connectionClosed())
+        }
         val connect = sessionHandler.connected()
-
-        val disconnect = sessionHandler.disconnected()
-                .doOnNext {
-                    logger.info("Server Disconnected [{}]", it.id)
-                    disposable.dispose()
-                }
-
-        val output = sessionHandler.receive()
+                .flatMap { SocketSessionStore.addUser(it, queryMap["roomId"].toString()) }
+                .flatMap { sessionHandler.disconnected() }
+                .flatMap { BaseUser.getcurrentUser() }
+                .doOnNext { SocketSessionStore.removeUser(it.id!!) }
+                .flatMapMany { sessionHandler.receive() }
                 .flatMap {
-                    val req = ServiceRequestInfo("/echo", it, it, 0)
-                    val resp = ServiceResponseInfo(req = 0)
-                    dispatcherServlet.doDispatch(req, resp)
-                    logger.info(">>>>>>>>>>>><<<")
+                    val request = json.readValue<ServiceRequestInfo>(it)
+                    val resp = ServiceResponseInfo(req = request.req)
+                    dispatcherServlet.doDispatch(request, resp)
+                    logger.info("接收到数据$it")
                     resp.getMono()
-                }
-                .map { json.writeValueAsString(it) }
+                }.map { json.writeValueAsString(it) }
                 .flatMap(sessionHandler::send)
                 .ignoreElements()
 
         return sessionHandler.handle()
-                .zipWith(disconnect) { o1, _ -> o1 }
-                .zipWith(output) { o1, _ -> o1 }
-                .zipWith(watchDog) { o1, _ -> o1 }
+                .zipWith(connect)
+                .zipWith(watchDog).then()
     }
 
-    fun nmka(sessionHandler : WebSocketSessionHandler): Mono<Void> {
-        val connect = sessionHandler.connected()
-                //.flatMap { SocketSessionStore.addUser(it) }
-
-
-        return connect.then()
+    private fun getQueryMap(queryStr: String): Map<String, String> {
+        val queryMap: MutableMap<String, String> = HashMap()
+        if (!StringUtils.isEmpty(queryStr)) {
+            val queryParam = queryStr.split("&")
+            queryParam.forEach { s: String ->
+                val kv = s.split("=".toRegex(), 2)
+                val value = if (kv.size == 2) kv[1] else ""
+                queryMap[kv[0]] = value
+            }
+        }
+        return queryMap
     }
 
 }

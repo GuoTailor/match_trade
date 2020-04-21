@@ -25,7 +25,7 @@ class WebSocketSessionHandler {
         receiveProcessor = ReplayProcessor.create(historySize)
         connectedProcessor = MonoProcessor.create()
         disconnectedProcessor = MonoProcessor.create()
-        webSocketConnected = false
+        webSocketConnected = true
         this.session = session
     }
 
@@ -33,8 +33,8 @@ class WebSocketSessionHandler {
         val receive = session.receive()
                 .map { obj -> obj.payloadAsText }
                 .doOnNext { t -> receiveProcessor.onNext(t) }
-                .doOnComplete { connectionClosed() }
-                .doOnCancel { connectionClosed() }
+                .doOnComplete { connectionClosed().subscribe() }
+                .doOnCancel { connectionClosed().subscribe() }
                 .doOnRequest {
                     webSocketConnected = true
                     connectedProcessor.onNext(session)
@@ -62,20 +62,21 @@ class WebSocketSessionHandler {
         return session.id
     }
 
+    fun getSession() = session
+
     fun send(message: String): Mono<Void> {
         return if (webSocketConnected) {
             session.send(Mono.just(session.textMessage(message)))
-                    .doOnError(ClosedChannelException::class.java) { connectionClosed() }
-                    .doOnError(AbortedException::class.java) { connectionClosed() }
-                    .onErrorResume(ClosedChannelException::class.java) { Mono.empty() }
-                    .onErrorResume(AbortedException::class.java) { Mono.empty() }
+                    .onErrorResume(ClosedChannelException::class.java) { connectionClosed() }
+                    .onErrorResume(AbortedException::class.java) { connectionClosed() }
         } else Mono.empty()
     }
 
-    fun connectionClosed() {
+    fun connectionClosed(): Mono<Void> {
         webSocketConnected = false
-        session.close()
+        val result = session.close()
         receiveProcessor.onComplete()
         disconnectedProcessor.onNext(session)
+        return result
     }
 }
