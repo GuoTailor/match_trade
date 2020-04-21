@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
+import com.mt.mtsocket.entity.BaseUser
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -63,6 +64,14 @@ class ExampleHandler : WebSocketHandler {
                 .zipWith(disconnect) { o1, _ -> o1 }
                 .zipWith(output) { o1, _ -> o1 }
                 .zipWith(watchDog) { o1, _ -> o1 }
+    }
+
+    fun nmka(sessionHandler : WebSocketSessionHandler): Mono<Void> {
+        val connect = sessionHandler.connected()
+                .flatMap { BaseUser.getcurrentUser() }
+
+
+        return connect.then()
     }
 
 }
