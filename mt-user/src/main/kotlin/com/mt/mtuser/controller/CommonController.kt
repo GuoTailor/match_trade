@@ -139,7 +139,7 @@ class CommonController {
     @GetMapping("/common/sendCode")
     fun sendCode(@RequestParam phone: String): Mono<ResponseInfo<String>> {
         return ResponseInfo.ok(mono {
-            if (userService.existsUserByPhone(phone)) {
+            if (!userService.existsUserByPhone(phone)) {
                 val smsCode = Util.getRandomInt(4)
                 val (code, msg) = SmsSample.send(phone, smsCode)
                 if (code == 0) {
