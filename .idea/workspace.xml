@@ -1,353 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="91c2250d-e6a9-4b54-8402-527fd36509df" name="Default Changelist" comment="dockerfile新增时区设置">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/META-INF/mt-engine.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/application.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/com/mt/mtengine/MatchSink$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/com/mt/mtengine/MatchSink.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/com/mt/mtengine/MtEngineApplication.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/com/mt/mtengine/MtEngineApplicationKt$main$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/classes/com/mt/mtengine/MtEngineApplicationKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/test-classes/META-INF/mt-engine.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-engine/target/test-classes/com/mt/mtengine/MtEngineApplicationTests.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/META-INF/mt-gateway.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/bootstrap.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/MtGatewayApplication.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/MtGatewayApplicationKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/bean/RespBody$Build.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/bean/RespBody$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/bean/RespBody.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/bean/Role.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/bean/User.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/AuthHandler$login$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/AuthHandler$login$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/AuthHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/BeanConfig$authRoute$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/BeanConfig.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/CustomGlobalFilter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/config/R2dbcPostgresqlConfiguration.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/repository/RoleRepository.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/repository/UserRepository.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/server/MyReactiveUserDetailsService$findByUsername$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/server/MyReactiveUserDetailsService$findByUsername$roles$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/server/MyReactiveUserDetailsService$findByUsername$user$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/server/MyReactiveUserDetailsService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/token/CheckPOJO.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/token/Constant.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-gateway/target/classes/com/mt/mtgateway/token/TokenMgr.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/META-INF/mt-socket.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/application.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/MtSocketApplication.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/MtSocketApplicationKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/common/Util$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/common/Util.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/MessageHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/MyAccessDeniedHandler$handle$mono$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/MyAccessDeniedHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/ReactiveRedisConfiguration.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/ServerHttpBearerAuthenticationConverter$convert$1$$special$$inlined$readValue$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/ServerHttpBearerAuthenticationConverter$convert$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/ServerHttpBearerAuthenticationConverter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/SocketSessionRegistry.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/WebFluxSecurityConfig$bearerAuthenticationFilter$bearerAuthenticationFilter$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/WebFluxSecurityConfig.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$disconnect$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$output$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$output$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$output$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$send$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$send$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$send$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$send$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$handle$send$5.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler$sam$java_util_function_Function$0.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/ExampleHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/SocketSessionStore$addUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/SocketSessionStore.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketConfig.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketMapping.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketMappingHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$handle$receive$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$handle$receive$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$handle$receive$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$handle$receive$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$handle$receive$5.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$send$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$send$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$send$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler$send$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketSessionHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog$sam$java_util_function_Consumer$0.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog$start$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog$start$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog$start$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog$start$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/config/socket/WebSocketWatchDog.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/controller/TestController$echo$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/controller/TestController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/AbstractJackson2NettyMessageConverter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/AbstractMessageConverterMethodArgumentResolver.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/AbstractNamedValueMethodArgumentResolver$NamedValueInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/AbstractNamedValueMethodArgumentResolver.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/DispatcherServlet.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/HandlerMethodArgumentResolver.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/HandlerMethodArgumentResolverComposite.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/InvocableHandlerMethod.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/RequestParamMethodArgumentResolver$RequestParamNamedValueInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/RequestParamMethodArgumentResolver.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/RequestResponseBodyMethodProcessor.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/ServiceRequestInfo$map$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/ServiceRequestInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/ServiceResponseInfo$DataResponse.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/ServiceResponseInfo$getMono$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/ServiceResponseInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/condition/PatternsRequestCondition.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/exception/MethodArgumentNotValidException.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/exception/ServletRequestBindingException.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/AbstractWebSocketHandlerMethodMapping$MappingRegistry.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/AbstractWebSocketHandlerMethodMapping$Match.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/AbstractWebSocketHandlerMethodMapping$MatchComparator.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/AbstractWebSocketHandlerMethodMapping.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/HandlerMethodMappingNamingStrategy.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/RequestMappingInfo$Builder.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/RequestMappingInfo$DefaultBuilder.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/RequestMappingInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/RequestMappingInfoWebSocketHandlerMapping.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/distribute/mapping/RequestMappingWebSocketHandlerMapping.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion$createUser$1$getAuthorities$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion$createUser$1$getAuthorities$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion$createUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion$getcurrentUser$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion$getcurrentUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getCompanyList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getCompanyList$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getCompanyList$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getCompanyList$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getRoleByName$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser$getRoleByName$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/BaseUser.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/OrderParam.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo$Companion$responseBodyCreate$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo$Companion$responseBodyCreate$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo$Companion$responseBodyCreate$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo$Companion$responseBodyCreate$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/ResponseInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/Role$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/Role.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/RoomRecord.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/entity/TradeInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/mq/MatchOutProcessor.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/mq/MatchSink$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/mq/MatchSink.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/RedisUtil.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/Work$enterRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/Work$enterRoom$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/Work$offer$1$$special$$inlined$synchronized$lambda$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/Work$offer$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/com/mt/mtsocket/service/Work.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/static/app.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/classes/static/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/META-INF/mt-socket.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/MtSocketApplicationTests$contextLoads$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/MtSocketApplicationTests$contextLoads$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/MtSocketApplicationTests$contextLoads$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/MtSocketApplicationTests$contextLoads$5.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/MtSocketApplicationTests.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/TestProcessor$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-socket/target/test-classes/com/mt/mtsocket/TestProcessor.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/META-INF/mt-user.kotlin_module" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/bootstrap.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/MtUserApplication.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/MtUserApplicationKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/KotlinUtilKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample$VerificationCode.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample$send$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample$sendMessage$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample$sendNote$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample$sendNote$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/SmsSample.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/Util$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/common/Util.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/MyAccessDeniedHandler$handle$mono$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/MyAccessDeniedHandler.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/R2dbcPostgresqlConfiguration.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/ReactiveRedisConfiguration.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/ServerHttpBearerAuthenticationConverter$convert$1$$special$$inlined$readValue$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/ServerHttpBearerAuthenticationConverter$convert$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/ServerHttpBearerAuthenticationConverter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/WebFluxSecurityConfig$bearerAuthenticationFilter$bearerAuthenticationFilter$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/config/WebFluxSecurityConfig.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$findTest$1$invokeSuspend$$inlined$collect$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$findTest$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$getRoles$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$getSystemInfo$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$1$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$1$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$2$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$register$result$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$sendCode$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController$testTime$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CommonController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController$delete$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController$getAllCompany$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController$getCompany$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController$register$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController$update$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/CompanyController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$createBickerRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$createClickRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$createDoubleRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$createTimelyMatch$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$createTimingMatch$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$getAllRoomList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$getEditableRoomList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$updateBickerRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$updateClickRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$updateDoubleRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$updateTimelyMatch$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController$updateTimingMatch$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/RoomController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController$addStock$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController$deleteStock$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController$getCompanyStock$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController$getStock$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController$updateStock$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/StockController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$addAnalystRole$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$addAnalystRole$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$alter$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$changeAuthority$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$getAllUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController$getUserInfo$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/controller/UserController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/CompanyDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/RoleDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/RoomRecordDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/StockDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/UserDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/UserRoleDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/entity/MtRole.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/BaseRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/BickerRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/ClickRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/DoubleRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/TimelyRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/dao/room/TimingRoomDao.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion$createUser$1$getAuthorities$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion$createUser$1$getAuthorities$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion$createUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion$getcurrentUser$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion$getcurrentUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getCompanyList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getCompanyList$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getCompanyList$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getCompanyList$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getRoleByName$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser$getRoleByName$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/BaseUser.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/Company.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo$Companion$responseBodyCreate$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo$Companion$responseBodyCreate$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo$Companion$responseBodyCreate$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo$Companion$responseBodyCreate$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/ResponseInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/Role$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/Role.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/RoomRecord.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/Stock.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/User.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/page/PageQuery.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/page/PageView.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/page/PageViewKt$getPage$count$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/page/PageViewKt.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/BaseRoom$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/BaseRoom$DefaultImpls.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/BaseRoom.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/BickerMatch.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/ClickMatch.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/DoubleMatch.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/TimelyMatch.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/entity/room/TimingMatch.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/QuartzManager.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/RoomEndJobInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/RoomStartJobInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/RoomTask$Companion.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/RoomTask.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/schedule/ScheduleJobInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/CompanyService$findAllByQuery$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/CompanyService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/R2dbcService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RedisUtil$deleteAndGetRoomRecord$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RedisUtil$getCode$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RedisUtil$saveRoomRecord$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RedisUtil.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RoleService$findAll$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RoleService$getRoles$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RoleService$save$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/RoleService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/StockService$findAllByQuery$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/StockService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$addAnalystRole$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$existsUserByPhone$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$findAllUser$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$register$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$2$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$4.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$5$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$5.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$6$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$registerMono$6.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService$save$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/UserService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/BaseRoomService$getNextRoomId$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/BaseRoomService$getNextRoomId$result$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/BaseRoomService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomEnum.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomExtend.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$changeModel$$inlined$withLock$lambda$1$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$changeModel$$inlined$withLock$lambda$1$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$changeModel$$inlined$withLock$lambda$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$changeModel$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$bickerClick$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$company$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$countClick$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$countDouble$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$countTimely$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2$countTiming$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$checkRoomCount$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$createRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$enableRoom$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$enableRoom$3.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2$countBicker$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2$countClick$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2$countDouble$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2$countTimely$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2$countTiming$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getAllRoomCount$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2$bickerList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2$clickList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2$doubleList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2$timelyList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2$timingList$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$getRoomList$2.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService$updateRoomByRoomId$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mt-user/target/classes/com/mt/mtuser/service/room/RoomService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitlab-ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.gitlab-ci.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mt-gateway/src/main/resources/bootstrap.yml" beforeDir="false" afterPath="$PROJECT_DIR$/mt-gateway/src/main/resources/bootstrap.yml" afterDir="false" />
+    <list default="true" id="91c2250d-e6a9-4b54-8402-527fd36509df" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -380,6 +35,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/docker" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -466,9 +122,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1587441205946</updated>
-      <workItem from="1587441209602" duration="2290000" />
+      <workItem from="1587441209602" duration="2672000" />
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="dockerfile新增时区设置">
+      <created>1587444009187</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1587444009187</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -487,34 +150,34 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1587389142914" />
-    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1587443970217">
+    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1587444006889">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1587443970217" />
-    <state x="247" y="65" key="DiffContextDialog" timestamp="1587389372740">
+    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1587444006889" />
+    <state x="247" y="65" key="DiffContextDialog" timestamp="1587444004510">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="247" y="65" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1587389372740" />
+    <state x="247" y="65" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1587444004510" />
     <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1587443057841">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1587443057841" />
-    <state width="1493" height="313" key="GridCell.Tab.0.bottom" timestamp="1587396971854">
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom" timestamp="1587444282048">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="313" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1587396971854" />
-    <state width="1493" height="313" key="GridCell.Tab.0.center" timestamp="1587396971854">
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1587444282048" />
+    <state width="1493" height="210" key="GridCell.Tab.0.center" timestamp="1587444282048">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="313" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1587396971854" />
-    <state width="1493" height="313" key="GridCell.Tab.0.left" timestamp="1587396971854">
+    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1587444282048" />
+    <state width="1493" height="210" key="GridCell.Tab.0.left" timestamp="1587444282048">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="313" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1587396971854" />
-    <state width="1493" height="313" key="GridCell.Tab.0.right" timestamp="1587396971854">
+    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1587444282048" />
+    <state width="1493" height="210" key="GridCell.Tab.0.right" timestamp="1587444282048">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="313" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1587396971854" />
+    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1587444282048" />
     <state width="1493" height="313" key="GridCell.Tab.1.bottom" timestamp="1587396971856">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -535,9 +198,13 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="270" y="54" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1587443069910" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1587389397758">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1587444019482">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1587389397758" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1587444019482" />
+    <state x="444" y="203" key="git4idea.merge.GitPullDialog" timestamp="1587444030757">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="444" y="203" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1587444030757" />
   </component>
 </project>
