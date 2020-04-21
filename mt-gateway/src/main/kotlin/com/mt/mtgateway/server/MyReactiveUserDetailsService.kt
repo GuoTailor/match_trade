@@ -13,17 +13,20 @@ import java.lang.IllegalStateException
  * Created by gyh on 2020/3/15.
  */
 @Service
-class MyReactiveUserDetailsService  {
+class MyReactiveUserDetailsService {
 
     @Autowired
     private lateinit var userRepository: UserRepository
+
     @Autowired
     private lateinit var roleRepository: RoleRepository
 
     fun findByUsername(username: String): Mono<User> {
-        val user = userRepository.findByUsername(username)
-                .switchIfEmpty(Mono.defer { Mono.empty<User>() })
+        val user = userRepository
+                .findByUsername(username)
+                .switchIfEmpty(Mono.empty<User>())
         val roles = user.flatMapMany {
+            it.password = null
             roleRepository.findRoleByUserId(it.id!!)
         }
         return Mono.zip(user, roles.collectList()) { u, r ->

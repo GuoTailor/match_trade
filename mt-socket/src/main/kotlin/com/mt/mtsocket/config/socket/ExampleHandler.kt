@@ -68,7 +68,7 @@ class ExampleHandler : WebSocketHandler {
 
     fun nmka(sessionHandler : WebSocketSessionHandler): Mono<Void> {
         val connect = sessionHandler.connected()
-                .flatMap { BaseUser.getcurrentUser() }
+                //.flatMap { SocketSessionStore.addUser(it) }
 
 
         return connect.then()

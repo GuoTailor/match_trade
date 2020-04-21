@@ -36,10 +36,9 @@ class AuthHandler {
             val password = it["password"].toString()
             return@flatMap userRepository.findByUsername(username).flatMap { user ->
                 if (passwordEncoder.matches(password, user.password)) {
-                    ServerResponse.ok()
-                            .contentType(APPLICATION_JSON)
-                            .body(BodyInserters.fromValue(RespBody<String>(0, "成功", TokenMgr.createJWT(user as User))))
-                            // TODO 包装阻塞代码
+                    user.toke = TokenMgr.createJWT(user)    // TODO 包装阻塞代码
+                    ServerResponse.ok().contentType(APPLICATION_JSON)
+                            .body(BodyInserters.fromValue(RespBody<User>(0, "成功", user)))
                 } else {
                     ServerResponse.badRequest()
                             .body(BodyInserters.fromValue(RespBody<Void>(1, "Invalid credentials")))
