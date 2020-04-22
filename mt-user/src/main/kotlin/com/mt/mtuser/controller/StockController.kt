@@ -35,6 +35,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":1,"data":null}
      * @apiGroup Stock
+     * @apiUse tokenMsg
      * @apiPermission user
      */
     @GetMapping("/{id}")
@@ -54,6 +55,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup Stock
+     * @apiUse tokenMsg
      * @apiPermission user
      */
     @GetMapping("/company/{id}")
@@ -72,6 +74,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Stock
+     * @apiUse tokenMsg
      * @apiPermission supperAdmin
      */
     @PostMapping
@@ -92,6 +95,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": null}
      * @apiGroup Stock
+     * @apiUse tokenMsg
      * @apiPermission supperAdmin
      */
     @PutMapping
@@ -118,6 +122,7 @@ class StockController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": null}
      * @apiGroup Stock
+     * @apiUse tokenMsg
      * @apiPermission supperAdmin
      */
     @DeleteMapping("/{id}")

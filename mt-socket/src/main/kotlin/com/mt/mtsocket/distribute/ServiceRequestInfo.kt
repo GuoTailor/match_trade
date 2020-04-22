@@ -5,7 +5,7 @@ import com.mt.mtsocket.common.Util
 /**
  * Created by gyh on 2020/4/16.
  */
-class ServiceRequestInfo(val order: String, val data: Any, val body: String, val req: Int) {
+class ServiceRequestInfo(val order: String, val body: String? = null, val req: Int) {
 
     private val map: Map<String, Any>? by lazy { Util.getParameterMap(this.body) }
 

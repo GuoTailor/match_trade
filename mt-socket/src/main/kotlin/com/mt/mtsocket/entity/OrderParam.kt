@@ -7,7 +7,7 @@ import java.util.*
  * Created by gyh on 2020/4/15.
  * @apiDefine OrderParam
  * @apiParam {Double} price 报价
- * @apiParam {Boolean} [isBuy] 是否买家
+ * @apiParam {Boolean} [isBuy] 是否买家 true:是买家，false:不是买家
  * @apiParam {Int} [number] 交易数量，默认100股
  */
 class OrderParam(

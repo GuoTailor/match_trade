@@ -32,6 +32,7 @@ class CompanyController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":1,"data":null}
      * @apiGroup Company
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping
@@ -55,6 +56,7 @@ class CompanyController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
      * @apiGroup Company
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -74,6 +76,7 @@ class CompanyController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
      * @apiGroup Company
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -93,6 +96,7 @@ class CompanyController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
      * @apiGroup Company
+     * @apiUse tokenMsg
      * @apiPermission user
      */
     @GetMapping("/{id}")
@@ -111,6 +115,7 @@ class CompanyController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup Company
+     * @apiUse tokenMsg
      * @apiPermission user
      */
     @GetMapping

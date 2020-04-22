@@ -1,34 +1,42 @@
 package com.mt.mtsocket.config.socket
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import com.mt.mtsocket.entity.BaseUser
+import com.mt.mtsocket.entity.ResponseInfo
+import com.mt.mtsocket.service.WorkService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StringUtils
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
-import reactor.core.Disposable
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
-import java.time.Duration
-import java.util.HashMap
+import java.util.*
 
 /**
  * Created by gyh on 2020/4/5.
- * 这个架构一点也不好用
  */
 @WebSocketMapping("/room")
 class ExampleHandler : WebSocketHandler {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
+    private val blankRegex = "\\s".toRegex()
+    private val orderRegex = "\"order\":(.*?)[,}]".toRegex()
+    private val dataRegex = "\"data\":(.*?})[,}]".toRegex()
+    private val reqRegex = "\"req\":(.*?)[,}]".toRegex()
 
     @Autowired
     private lateinit var dispatcherServlet: DispatcherServlet
+    @Autowired
+    private lateinit var workService: WorkService
+
+    init {
+        json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val sessionHandler = WebSocketSessionHandler(session)
@@ -38,25 +46,31 @@ class ExampleHandler : WebSocketHandler {
             return sessionHandler.send("错误，不支持的参数列表$queryMap")
                     .then(sessionHandler.connectionClosed())
         }
+        val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
-                .flatMap { SocketSessionStore.addUser(it, queryMap["roomId"].toString()) }
+                .flatMap { SocketSessionStore.addUser(it, roomId) }
+                .flatMap { workService.enterRoom(roomId) }
                 .flatMap { sessionHandler.disconnected() }
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
-                .flatMapMany { sessionHandler.receive() }
+
+        val output = sessionHandler.receive()
                 .flatMap {
-                    val request = json.readValue<ServiceRequestInfo>(it)
+                    logger.info("接收到数据${it}")
+                    val request = toServiceRequestInfo(it)
                     val resp = ServiceResponseInfo(req = request.req)
                     dispatcherServlet.doDispatch(request, resp)
-                    logger.info("接收到数据$it")
                     resp.getMono()
-                }.map { json.writeValueAsString(it) }
+                }.onErrorResume { ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono() }
+                .map { json.writeValueAsString(it) }
+                .doOnError { logger.info("错误") }
                 .flatMap(sessionHandler::send)
-                .ignoreElements()
+                .then()
 
         return sessionHandler.handle()
                 .zipWith(connect)
-                .zipWith(watchDog).then()
+                .zipWith(watchDog)
+                .zipWith(output).then()
     }
 
     private fun getQueryMap(queryStr: String): Map<String, String> {
@@ -70,6 +84,14 @@ class ExampleHandler : WebSocketHandler {
             }
         }
         return queryMap
+    }
+
+    private fun toServiceRequestInfo(data: String): ServiceRequestInfo {
+        val json = data.replace(blankRegex, "")
+        val orderString = orderRegex.find(json)!!.groups[1]!!.value.replace("\"", "")
+        val dataString = dataRegex.find(json)?.groups?.get(1)?.value
+        val reqString = reqRegex.find(json)!!.groups[1]!!.value.toInt()
+        return ServiceRequestInfo(orderString, dataString, reqString)
     }
 
 }

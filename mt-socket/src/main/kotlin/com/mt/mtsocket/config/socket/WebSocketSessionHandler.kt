@@ -1,5 +1,6 @@
 package com.mt.mtsocket.config.socket
 
+import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -12,6 +13,7 @@ import java.nio.channels.ClosedChannelException
  * Created by gyh on 2020/4/7.
  */
 class WebSocketSessionHandler {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val receiveProcessor: ReplayProcessor<String>
     private val connectedProcessor: MonoProcessor<WebSocketSession>
     private val disconnectedProcessor: MonoProcessor<WebSocketSession>
@@ -30,16 +32,15 @@ class WebSocketSessionHandler {
     }
 
     fun handle(): Mono<Void> {
-        val receive = session.receive()
+        return session.receive()
                 .map { obj -> obj.payloadAsText }
                 .doOnNext { t -> receiveProcessor.onNext(t) }
-                .doOnComplete { connectionClosed().subscribe() }
-                .doOnCancel { connectionClosed().subscribe() }
+                .doOnComplete { logger.info("nmka2 Complete");connectionClosed().subscribe() }
+                .doOnCancel { logger.info("nmka2 Cancel");connectionClosed().subscribe() }
                 .doOnRequest {
                     webSocketConnected = true
                     connectedProcessor.onNext(session)
-                }
-        return receive.then()
+                }.then()
     }
 
     fun connected(): Mono<WebSocketSession> {
@@ -66,9 +67,11 @@ class WebSocketSessionHandler {
 
     fun send(message: String): Mono<Void> {
         return if (webSocketConnected) {
+            logger.info("send $message")
             session.send(Mono.just(session.textMessage(message)))
                     .onErrorResume(ClosedChannelException::class.java) { connectionClosed() }
                     .onErrorResume(AbortedException::class.java) { connectionClosed() }
+                    .doOnError { logger.info("send error ${it.message}") }
         } else Mono.empty()
     }
 

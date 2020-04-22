@@ -29,4 +29,19 @@ class MtSocketApplicationTests {
 
     }
 
+    @Test
+    fun testRegex() {
+        val data = "{\"order\":\"/echo\", \"data\": {\"value\": \"123\"}, \"req\":12}"
+        val blankRegex = "\\s".toRegex()
+        val orderRegex = "\"order\":(.*?)[,}]".toRegex()
+        val dataRegex = "\"data\":(.*?})[,}]".toRegex()
+        val reqRegex = "\"req\":(.*?)[,}]".toRegex()
+
+        val json = data.replace(blankRegex, "")
+        val orderString = orderRegex.find(json)!!.groups[1]!!.value.replace("\"", "")
+        val dataString = dataRegex.find(json)?.groups?.get(1)?.value
+        val reqString = reqRegex.find(json)!!.groups[1]!!.value.toInt()
+        println("$orderString $dataString, $reqString")
+    }
+
 }

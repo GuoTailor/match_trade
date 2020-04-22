@@ -176,6 +176,11 @@ class CommonController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
      * @apiGroup Common
+     * @apiUse tokenMsg
+     * @apiHeaderExample {json} 请求头例子:
+     *     {
+     *       "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1dIiwibmJmIjoxNTg3NTU5NTQ0LCJleHAiOjE1ODk2MzMxNDR9.zyppWBmaF0l6ezljR1bTWUkAon50KF-VTrge1-W2hsM"
+     *     }
      * @apiPermission superAdmin
      */
     @GetMapping("/system/info")
