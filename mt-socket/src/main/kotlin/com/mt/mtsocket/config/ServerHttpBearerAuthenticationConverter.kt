@@ -29,7 +29,7 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
             val roles = data.map { list ->
                 val r = Role()
                 r.name = "ROLE_" + list[0]
-                r.companyid = list[1] as? Int
+                r.companyId = list[1] as? Int
                 r
             }
             logger.info("验证 id:{} {} {}", id, roles, request.headers.toString())

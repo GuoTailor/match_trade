@@ -3,9 +3,12 @@ package com.mt.mtuser.controller
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.Role
+import com.mt.mtuser.entity.StockholderInfo
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.CompanyService
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -81,8 +84,46 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping
-    fun update(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(mono { companyService.update(company) })
+    fun update(@RequestBody company: Mono<Company>): Mono<ResponseInfo<Company>> {
+        return ResponseInfo.ok(mono { companyService.update(company.awaitSingle()) })
+    }
+
+    /**
+     * @api {put} /company/stockholder 添加一个股东
+     * @apiDescription  为公司添加一个股东
+     * @apiName addStockholder
+     * @apiVersion 0.0.1
+     * @apiUse StockholderInfo
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/stockholder")
+    fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Role>> {
+        return ResponseInfo.ok(mono { companyService.addStockholder(stockholderInfo.awaitSingle()) })
+    }
+
+    /**
+     * @api {put} /company/admin 添加一个公司管理员
+     * @apiDescription  为公司添加一个管理员
+     * @apiName addCompanyAdmin
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {String} phone 用户手机号
+     * @apiParam {String} realName 真实姓名
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/admin")
+    fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Role>> {
+        return ResponseInfo.ok(mono { companyService.addCompanyAdmin(stockholderInfo.awaitSingle()) })
     }
 
     /**

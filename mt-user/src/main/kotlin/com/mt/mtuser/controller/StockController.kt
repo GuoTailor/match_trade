@@ -40,7 +40,7 @@ class StockController {
      */
     @GetMapping("/{id}")
     fun getStock(@PathVariable id: Int): Mono<ResponseInfo<Stock?>> {
-        return ResponseInfo.ok<Stock?>(mono { stockService.findById(id) } as Mono<Stock?>)
+        return ResponseInfo.ok<Stock?>(mono { stockService.findById(id) })
     }
 
     /**
@@ -53,7 +53,8 @@ class StockController {
      * @apiParamExample {url} 请求-例子:
      * /stock/company/1?pageSize=10&pageNum=1
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105",
+     * "roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup Stock
      * @apiUse tokenMsg
      * @apiPermission user

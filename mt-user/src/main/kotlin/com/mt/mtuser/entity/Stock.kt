@@ -19,5 +19,5 @@ data class Stock(@Id var id: Int? = null,
                  var companyId: Int? = null,
                  var name: String? = null,
                  var price: Double? = null,
-                 var createTime: Date?= null
+                 var createTime: Date? = null
 )

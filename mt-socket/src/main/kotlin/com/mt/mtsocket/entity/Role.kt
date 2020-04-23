@@ -11,17 +11,17 @@ class Role() : GrantedAuthority {
     /**
      * 用户id
      */
-    var userid: Int? = null
+    var userId: Int? = null
 
     /**
      * 该用户在公司的角色id
      */
-    var roleid: Int? = null
+    var roleId: Int? = null
 
     /**
      * 公司id
      */
-    var companyid: Int? = null
+    var companyId: Int? = null
 
     /**
      * 角色名
@@ -34,10 +34,10 @@ class Role() : GrantedAuthority {
     var nameZh: String? = null
 
 
-    constructor(userid: Int?, roleid: Int?, companyid: Int?) : this() {
-        this.userid = userid
-        this.roleid = roleid
-        this.companyid = companyid
+    constructor(userId: Int?, roleId: Int?, companyId: Int?) : this() {
+        this.userId = userId
+        this.roleId = roleId
+        this.companyId = companyId
     }
 
     override fun getAuthority(): String {
@@ -45,7 +45,7 @@ class Role() : GrantedAuthority {
     }
 
     override fun toString(): String {
-        return "Role(id=$id, userid=$userid, roleid=$roleid, companyid=$companyid, name=$name, nameZh=$nameZh)"
+        return "Role(id=$id, userId=$userId, roleId=$roleId, companyId=$companyId, name=$name, nameZh=$nameZh)"
     }
 
     companion object {

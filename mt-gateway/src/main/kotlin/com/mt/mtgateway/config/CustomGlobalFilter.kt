@@ -51,7 +51,6 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
         val request = exchange.request
         val url = request.path.value()
         if (CorsUtils.isCorsRequest(request)) {
-            log.info("放回家头")
             val response: ServerHttpResponse = exchange.response
             val headers: HttpHeaders = response.headers
             headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
@@ -61,6 +60,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
             headers.add("Access-Control-Allow-Credentials", "true")
         }
         if (!match(url)) {
+            log.info(request.headers.toString())
             val authHeader = getAuthToken(request)
             log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
