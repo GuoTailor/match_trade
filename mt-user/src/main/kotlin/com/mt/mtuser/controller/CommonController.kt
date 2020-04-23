@@ -158,8 +158,9 @@ class CommonController {
      * @apiName getRoles
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":[{"nameZh": "超级管理员","name": "ROLE_SUPER_ADMIN","id": 1},
-     * {"nameZh": "企业管理员","name": "ROLE_ADMIN","id": 2},{"nameZh": "股东","name": "ROLE_USER","id": 3}]}
+     * {"code": 0,"msg": "成功","data": [{"id": 1,"name": "ROLE_SUPER_ADMIN","nameZh": "超级管理员"},{"id": 10,"name":
+     * "ROLE_USER","nameZh": "股东"},{"id": 2,"name": "ROLE_ANALYST","nameZh": "企业分析员"},{"id": 3,"name": "ROLE_ADMIN"
+     * ,"nameZh": "企业管理员"}]}
      * @apiGroup Common
      * @apiPermission none
      */
