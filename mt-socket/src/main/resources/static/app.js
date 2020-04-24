@@ -11,7 +11,7 @@ function setConnected(connected) {
 }
 
 function connect() {
-    ws = new WebSocket(url + "?bearer=" + token);
+    ws = new WebSocket(url + "?roomId=D12&bearer=" + token);
     ws.onopen = function () {
         setConnected(true);
         log('Info: Connection Established.');

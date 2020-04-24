@@ -9,8 +9,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.function.Function
-import java.util.stream.Collectors
 
 /**
  * Created by gyh on 2020/3/16.
@@ -29,7 +27,7 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
             val roles = data.map { list ->
                 val r = Role()
                 r.name = "ROLE_" + list[0]
-                r.companyid = list[1] as? Int
+                r.companyId = list[1] as? Int
                 r
             }
             UsernamePasswordAuthenticationToken(id, id, roles)

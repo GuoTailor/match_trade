@@ -12,12 +12,18 @@ import reactor.core.publisher.Mono
  */
 interface UserRoleDao: CoroutineCrudRepository<Role, Int> {
     @Query("select" +
-            " ur.id, userid, roleid, companyid, name, name_zh" +
+            " ur.id, user_id, role_id, company_id, name, name_zh" +
             " from mt_user_role ur" +
-            " left join mt_role r on ur.roleid = r.id" +
-            " where userid = $1")
-    suspend fun selectRolesByUserId(userId: Int): Role
+            " left join mt_role r on ur.role_id = r.id" +
+            " where user_id = $1")
+    suspend fun selectRolesByUserId(userId: Int): Role?
 
-    @Query("insert into mt_user_role(userid, roleid, companyid) values(:userid, :roleid, :companyid)")
+    @Query("insert into mt_user_role(user_id, role_id, company_id) values(:userId, :roleId, :companyId)")
     suspend fun save(userId: Int, roleId: Int, companyId: Int): Int
+
+    @Query("select count(*) from mt_user_role where user_id = :userId and role_id = :roleId and company_id = :companyId limit 1")
+    suspend fun exists(userId: Int, roleId: Int, companyId : Int): Int
+
+    @Query("select * from mt_user_role where user_id = :userId and role_id = :roleId and company_id = :companyId")
+    suspend fun find(userId: Int, roleId: Int, companyId : Int): Role?
 }

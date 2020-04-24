@@ -158,8 +158,9 @@ class CommonController {
      * @apiName getRoles
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":[{"nameZh": "超级管理员","name": "ROLE_SUPER_ADMIN","id": 1},
-     * {"nameZh": "企业管理员","name": "ROLE_ADMIN","id": 2},{"nameZh": "股东","name": "ROLE_USER","id": 3}]}
+     * {"code": 0,"msg": "成功","data": [{"id": 1,"name": "ROLE_SUPER_ADMIN","nameZh": "超级管理员"},{"id": 10,"name":
+     * "ROLE_USER","nameZh": "股东"},{"id": 2,"name": "ROLE_ANALYST","nameZh": "企业分析员"},{"id": 3,"name": "ROLE_ADMIN"
+     * ,"nameZh": "企业管理员"}]}
      * @apiGroup Common
      * @apiPermission none
      */
@@ -176,6 +177,11 @@ class CommonController {
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
      * @apiGroup Common
+     * @apiUse tokenMsg
+     * @apiHeaderExample {json} 请求头例子:
+     *     {
+     *       "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1dIiwibmJmIjoxNTg3NTU5NTQ0LCJleHAiOjE1ODk2MzMxNDR9.zyppWBmaF0l6ezljR1bTWUkAon50KF-VTrge1-W2hsM"
+     *     }
      * @apiPermission superAdmin
      */
     @GetMapping("/system/info")

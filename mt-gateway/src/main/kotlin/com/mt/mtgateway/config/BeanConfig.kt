@@ -26,7 +26,7 @@ class BeanConfig {
     @Bean
     fun authRoute(): RouterFunction<*> {
         return RouterFunctions
-                .route(POST("/login").and(accept(APPLICATION_JSON)), HandlerFunction { authHandler.login(it) })
+                .route(POST("/api/login").and(accept(APPLICATION_JSON)), HandlerFunction { authHandler.login(it) })
 
     }
 

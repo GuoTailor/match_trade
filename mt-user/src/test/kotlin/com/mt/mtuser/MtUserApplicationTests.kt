@@ -1,20 +1,10 @@
 package com.mt.mtuser
 
-import com.mt.mtuser.common.plus
 import com.mt.mtuser.entity.Role
 import com.mt.mtuser.entity.User
-import com.mt.mtuser.schedule.QuartzManager
-import com.mt.mtuser.schedule.RoomEndJobInfo
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.reactor.mono
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import org.quartz.JobDataMap
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
-import java.time.LocalTime
 
 
 //@SpringBootTest
@@ -52,7 +42,7 @@ class MtUserApplicationTests {
                     Mono.just(ur)
                 }.flatMap { newUser ->
                     val role = Role()
-                    role.userid = newUser.id
+                    role.userId = newUser.id
                     Mono.just(role)
                 }
     }

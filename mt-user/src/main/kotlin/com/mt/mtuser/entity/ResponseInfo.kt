@@ -1,7 +1,5 @@
 package com.mt.mtuser.entity
 
-import kotlinx.coroutines.CoroutineScope
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.io.Serializable
@@ -61,27 +59,6 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 responseInfo.toMono()
             }
         }
-
-        // -------------=====>>>>>>> flux <<<<<<<<<====----------------
-
-        @JvmStatic
-        fun <T> ok(monoBody: Flux<T>): Mono<ResponseInfo<List<T>>> {
-            return responseBodyCreate(monoBody, 0, "成功")
-        }
-
-        @JvmStatic
-        fun <T> responseBodyCreate(monoData: Flux<T>, code: Int, msg: String): Mono<ResponseInfo<List<T>>> {
-            return monoData.collectList().map { data ->
-                val responseInfo = ResponseInfo<List<T>>(code, msg)
-                responseInfo.data = data
-                responseInfo
-            }.onErrorResume {
-                val responseInfo = ResponseInfo<List<T>>(1, it.message ?: "失败")
-                responseInfo.toMono()
-            }
-        }
-
-        // -------------=====>>>>>>> 协程 <<<<<<<<<====----------------
 
     }
 }

@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 09/04/2020 23:32:49
+ Date: 24/04/2020 00:05:49
 */
 
 
@@ -127,17 +127,6 @@ START 1
 CACHE 1;
 
 -- ----------------------------
--- Sequence structure for test_json_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."test_json_id_seq";
-CREATE SEQUENCE "public"."test_json_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
-
--- ----------------------------
 -- Sequence structure for user_id_seq
 -- ----------------------------
 DROP SEQUENCE IF EXISTS "public"."user_id_seq";
@@ -155,15 +144,28 @@ DROP TABLE IF EXISTS "public"."mt_company";
 CREATE TABLE "public"."mt_company" (
   "id" int4 NOT NULL DEFAULT nextval('mt_company_id_seq'::regclass),
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "room_count" int4 NOT NULL,
+  "room_count" int4 NOT NULL DEFAULT 1,
   "mode" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "create_time" timestamp(0) DEFAULT now()
+  "create_time" timestamp(0) DEFAULT now(),
+  "license_url" varchar(255) COLLATE "pg_catalog"."default",
+  "credit_union_code" varchar(255) COLLATE "pg_catalog"."default",
+  "legal_person" varchar(255) COLLATE "pg_catalog"."default",
+  "unit_address" varchar(255) COLLATE "pg_catalog"."default",
+  "unit_contact_name" varchar(255) COLLATE "pg_catalog"."default",
+  "unit_contact_phone" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
 COMMENT ON COLUMN "public"."mt_company"."name" IS '公司名';
 COMMENT ON COLUMN "public"."mt_company"."room_count" IS '房间数量';
 COMMENT ON COLUMN "public"."mt_company"."mode" IS '竞价模式{1：点选、2： 点选+定时、3：定时 +点选+两两撮合、4：全部}';
 COMMENT ON COLUMN "public"."mt_company"."create_time" IS '注册时间';
+COMMENT ON COLUMN "public"."mt_company"."license_url" IS '营业执照图片地址';
+COMMENT ON COLUMN "public"."mt_company"."credit_union_code" IS '统一信用社代码';
+COMMENT ON COLUMN "public"."mt_company"."legal_person" IS '企业法人';
+COMMENT ON COLUMN "public"."mt_company"."unit_address" IS '单位地址';
+COMMENT ON COLUMN "public"."mt_company"."unit_contact_name" IS '单位联系人姓名';
+COMMENT ON COLUMN "public"."mt_company"."unit_contact_phone" IS '单位联系人电话';
+COMMENT ON TABLE "public"."mt_company" IS '公司';
 
 -- ----------------------------
 -- Table structure for mt_company_room
@@ -448,8 +450,8 @@ DROP TABLE IF EXISTS "public"."mt_stock";
 CREATE TABLE "public"."mt_stock" (
   "id" int4 NOT NULL DEFAULT nextval('stock_id_seq'::regclass),
   "company_id" int4 NOT NULL,
-  "name" varchar(255) COLLATE "pg_catalog"."default",
-  "price" numeric(11,4) NOT NULL,
+  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "price" numeric(11,4),
   "create_time" timestamp(6) NOT NULL DEFAULT now()
 )
 ;
@@ -475,7 +477,8 @@ CREATE TABLE "public"."mt_trade_info" (
   "seller_price" money NOT NULL,
   "trade_price" money NOT NULL,
   "trade_time" timestamp(6) NOT NULL,
-  "trade_state" varchar(4) COLLATE "pg_catalog"."default" NOT NULL
+  "trade_state" varchar(4) COLLATE "pg_catalog"."default" NOT NULL,
+  "state_details" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
 COMMENT ON COLUMN "public"."mt_trade_info"."company_id" IS '公司id';
@@ -489,6 +492,7 @@ COMMENT ON COLUMN "public"."mt_trade_info"."seller_price" IS '卖方价格';
 COMMENT ON COLUMN "public"."mt_trade_info"."trade_price" IS '成交价格';
 COMMENT ON COLUMN "public"."mt_trade_info"."trade_time" IS '交易时间';
 COMMENT ON COLUMN "public"."mt_trade_info"."trade_state" IS '交易状态';
+COMMENT ON COLUMN "public"."mt_trade_info"."state_details" IS '状态原因';
 
 -- ----------------------------
 -- Table structure for mt_user
@@ -520,32 +524,27 @@ COMMENT ON COLUMN "public"."mt_user"."last_time" IS '最后登录时间';
 DROP TABLE IF EXISTS "public"."mt_user_role";
 CREATE TABLE "public"."mt_user_role" (
   "id" int4 NOT NULL DEFAULT nextval('mt_user_role_id_seq'::regclass),
-  "userid" int4 NOT NULL,
-  "roleid" int4 NOT NULL,
-  "companyid" int4
+  "user_id" int4 NOT NULL,
+  "role_id" int4 NOT NULL,
+  "company_id" int4,
+  "real_name" varchar(32) COLLATE "pg_catalog"."default",
+  "department" varchar(64) COLLATE "pg_catalog"."default",
+  "position" varchar(64) COLLATE "pg_catalog"."default"
 )
 ;
-COMMENT ON COLUMN "public"."mt_user_role"."userid" IS '用户id';
-COMMENT ON COLUMN "public"."mt_user_role"."roleid" IS '该用户在公司的角色id';
-COMMENT ON COLUMN "public"."mt_user_role"."companyid" IS '公司id';
-
--- ----------------------------
--- Table structure for test_time
--- ----------------------------
-DROP TABLE IF EXISTS "public"."test_time";
-CREATE TABLE "public"."test_time" (
-  "id" int4 NOT NULL DEFAULT nextval('test_json_id_seq'::regclass),
-  "timestamp" timestamp(6),
-  "time" time(6)
-)
-;
+COMMENT ON COLUMN "public"."mt_user_role"."user_id" IS '用户id';
+COMMENT ON COLUMN "public"."mt_user_role"."role_id" IS '该用户在公司的角色id';
+COMMENT ON COLUMN "public"."mt_user_role"."company_id" IS '公司id';
+COMMENT ON COLUMN "public"."mt_user_role"."real_name" IS '真实姓名';
+COMMENT ON COLUMN "public"."mt_user_role"."department" IS '所在部门';
+COMMENT ON COLUMN "public"."mt_user_role"."position" IS '职位';
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_company_id_seq"
 OWNED BY "public"."mt_company"."id";
-SELECT setval('"public"."mt_company_id_seq"', 2, true);
+SELECT setval('"public"."mt_company_id_seq"', 3, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -564,9 +563,7 @@ SELECT setval('"public"."mt_kline_id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_positions_id_seq"
-OWNED BY "public"."mt_positions"."id";
-SELECT setval('"public"."mt_positions_id_seq"', 2, true);
+SELECT setval('"public"."mt_positions_id_seq"', 2, false);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -611,16 +608,14 @@ SELECT setval('"public"."stock_id_seq"', 2, true);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."test_json_id_seq"
-OWNED BY "public"."test_time"."id";
-SELECT setval('"public"."test_json_id_seq"', 13, true);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
 ALTER SEQUENCE "public"."user_id_seq"
 OWNED BY "public"."mt_user"."id";
 SELECT setval('"public"."user_id_seq"', 16, true);
+
+-- ----------------------------
+-- Uniques structure for table mt_company
+-- ----------------------------
+ALTER TABLE "public"."mt_company" ADD CONSTRAINT "mt_company_name_key" UNIQUE ("name");
 
 -- ----------------------------
 -- Primary Key structure for table mt_company
@@ -713,6 +708,11 @@ CREATE UNIQUE INDEX "mt_room_timing_room_number_idx" ON "public"."mt_room_timing
 ALTER TABLE "public"."mt_room_timing" ADD CONSTRAINT "mt_room_timing_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
+-- Uniques structure for table mt_stock
+-- ----------------------------
+ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "mt_stock_name_key" UNIQUE ("name");
+
+-- ----------------------------
 -- Primary Key structure for table mt_stock
 -- ----------------------------
 ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "stock_pkey" PRIMARY KEY ("id");
@@ -730,17 +730,12 @@ ALTER TABLE "public"."mt_user" ADD CONSTRAINT "user_pkey" PRIMARY KEY ("id");
 -- ----------------------------
 -- Uniques structure for table mt_user_role
 -- ----------------------------
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_roleid_companyid_key" UNIQUE ("userid", "roleid", "companyid");
+ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_roleid_companyid_key" UNIQUE ("user_id", "role_id", "company_id");
 
 -- ----------------------------
 -- Primary Key structure for table mt_user_role
 -- ----------------------------
 ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_pkey" PRIMARY KEY ("id");
-
--- ----------------------------
--- Primary Key structure for table test_time
--- ----------------------------
-ALTER TABLE "public"."test_time" ADD CONSTRAINT "test_json_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_company_room
@@ -811,6 +806,6 @@ ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_stock_id_fkey
 -- ----------------------------
 -- Foreign Keys structure for table mt_user_role
 -- ----------------------------
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_companyid_fkey" FOREIGN KEY ("companyid") REFERENCES "public"."mt_company" ("id") ON DELETE NO ACTION ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_roleid_fkey" FOREIGN KEY ("roleid") REFERENCES "public"."mt_role" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_fkey" FOREIGN KEY ("userid") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_companyid_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_roleid_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."mt_role" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;

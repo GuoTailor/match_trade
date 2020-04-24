@@ -1,7 +1,7 @@
 package com.mt.mtsocket.entity
 
-import org.springframework.data.annotation.Transient
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.springframework.data.annotation.Transient
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
@@ -70,8 +70,8 @@ abstract class BaseUser : UserDetails {
     @JsonIgnore
     fun getCompanyList(): MutableList<Int> {
         return roles.stream()
-                .filter { it is Role && it.companyid != null }
-                .map { (it as Role).companyid }
+                .filter { it is Role && it.companyId != null }
+                .map { (it as Role).companyId }
                 .collect(Collectors.toList())
     }
 
@@ -83,8 +83,8 @@ abstract class BaseUser : UserDetails {
     @JsonIgnore
     fun getCompanyList(roleName: String): MutableList<Int> {
         return roles.stream()
-                .filter { it is Role && it.authority == roleName && it.companyid != null }
-                .map { (it as Role).companyid }
+                .filter { it is Role && it.authority == roleName && it.companyId != null }
+                .map { (it as Role).companyId }
                 .collect(Collectors.toList())
     }
 

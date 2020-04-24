@@ -1,20 +1,20 @@
 package com.mt.mtgateway.config
 
 import com.mt.mtgateway.token.TokenMgr
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
+import org.springframework.web.cors.reactive.CorsUtils
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
-import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
@@ -24,6 +24,10 @@ import java.util.regex.Pattern
  */
 @Component
 class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<String>) : WebFilter, Ordered {
+    private val ALLOWED_HEADERS = "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN,token,username,client"
+    private val ALLOWED_METHODS = "*"
+    private val ALLOWED_ORIGIN = "*"
+    private val ALLOWED_Expose = "*"
     val log = LoggerFactory.getLogger(this.javaClass.simpleName)!!
     val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
@@ -44,9 +48,19 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val url = exchange.request.path.value()
+        val request = exchange.request
+        val url = request.path.value()
+        if (CorsUtils.isCorsRequest(request)) {
+            val response: ServerHttpResponse = exchange.response
+            val headers: HttpHeaders = response.headers
+            headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+            headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS)
+            headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS)
+            headers.add("Access-Control-Expose-Headers", ALLOWED_Expose)
+            headers.add("Access-Control-Allow-Credentials", "true")
+        }
         if (!match(url)) {
-            val request = exchange.request
+            log.info(request.headers.toString())
             val authHeader = getAuthToken(request)
             log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {

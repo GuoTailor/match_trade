@@ -8,48 +8,33 @@ import org.springframework.security.core.GrantedAuthority
  * Created by gyh on 2020/3/7.
  */
 @Table("mt_user_role")
-class Role() : GrantedAuthority {
-    @Id
-    var id: Int? = null
-
-    /**
-     * 用户id
-     */
-    var userid: Int? = null
-
-    /**
-     * 该用户在公司的角色id
-     */
-    var roleid: Int? = null
-
-    /**
-     * 公司id
-     */
-    var companyid: Int? = null
-
-    /**
-     * 角色名
-     */
-    var name: String? = null
-
-    /**
-     * 角色中文名
-     */
-    var nameZh: String? = null
-
-
-    constructor(userid: Int?, roleid: Int?, companyid: Int?) : this() {
-        this.userid = userid
-        this.roleid = roleid
-        this.companyid = companyid
-    }
+class Role(
+        @Id
+        var id: Int? = null,
+        /*** 用户id */
+        var userId: Int? = null,
+        /*** 该用户在公司的角色id */
+        var roleId: Int? = null,
+        /*** 公司id */
+        var companyId: Int? = null,
+        /*** 真实姓名 */
+        var realName: String? = null,
+        /*** 所在部门 */
+        var department: String? = null,
+        /*** 职位 */
+        var position: String? = null,
+        /*** 角色名 */
+        var name: String? = null,
+        /*** 角色中文名 */
+        var nameZh: String? = null
+) : GrantedAuthority {
 
     override fun getAuthority(): String {
         return name!!
     }
 
     override fun toString(): String {
-        return "Role(id=$id, userid=$userid, roleid=$roleid, companyid=$companyid, name=$name, nameZh=$nameZh)"
+        return "Role(id=$id, userId=$userId, roleId=$roleId, companyId=$companyId, name=$name, nameZh=$nameZh)"
     }
 
     companion object {

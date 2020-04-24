@@ -35,17 +35,15 @@ class AuthHandler {
             val username = it["phone"].toString()
             val password = it["password"].toString()
             return@flatMap userRepository.findByUsername(username).flatMap { user ->
-                if (passwordEncoder.matches(password, user.password)) {
-                    ServerResponse.ok()
-                            .contentType(APPLICATION_JSON)
-                            .body(BodyInserters.fromValue(RespBody<String>(0, "成功", TokenMgr.createJWT(user as User))))
-                            // TODO 包装阻塞代码
-                } else {
-                    ServerResponse.badRequest()
-                            .body(BodyInserters.fromValue(RespBody<Void>(1, "Invalid credentials")))
-                }
-            }.switchIfEmpty(ServerResponse.badRequest()
-                    .body(BodyInserters.fromValue(RespBody<Void>(1, "User does not exist"))))
+                val resp: RespBody<User> = if (passwordEncoder.matches(password, user.password)) {
+                    user.password = null
+                    user.toke = TokenMgr.createJWT(user)    // TODO 包装阻塞代码
+                    RespBody(0, "成功", user)
+                } else { RespBody(1, "无效凭据") }
+                ServerResponse.ok().contentType(APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(resp))
+            }.switchIfEmpty(ServerResponse.ok().contentType(APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(RespBody<Void>(1, "用户不存在"))))
         }
     }
 }

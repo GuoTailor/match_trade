@@ -1,68 +1,97 @@
 package com.mt.mtsocket.config.socket
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
+import com.mt.mtsocket.entity.BaseUser
+import com.mt.mtsocket.entity.ResponseInfo
+import com.mt.mtsocket.service.WorkService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.StringUtils
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
-import reactor.core.Disposable
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
-import java.time.Duration
-import kotlin.math.log
+import java.util.*
 
 /**
  * Created by gyh on 2020/4/5.
- * 这个架构一点也不好用
  */
 @WebSocketMapping("/room")
 class ExampleHandler : WebSocketHandler {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
+    private val blankRegex = "\\s".toRegex()
+    private val orderRegex = "\"order\":(.*?)[,}]".toRegex()
+    private val dataRegex = "\"data\":(.*?})[,}]".toRegex()
+    private val reqRegex = "\"req\":(.*?)[,}]".toRegex()
 
     @Autowired
     private lateinit var dispatcherServlet: DispatcherServlet
+    @Autowired
+    private lateinit var workService: WorkService
+
+    init {
+        json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val sessionHandler = WebSocketSessionHandler(session)
         val watchDog = WebSocketWatchDog().start(sessionHandler, 3000)
-        val send = Flux.interval(Duration.ofMillis(1000), Schedulers.elastic())
-                .takeUntil { !sessionHandler.isConnected() }
-                .map { value: Long -> value.toString() }
-                .doOnNext { message -> logger.info("Server Sent: [{}]", message) }
-                .flatMap(sessionHandler::send)
-                .doOnComplete { logger.info("完成") }
-
-        val disposable: Disposable = send.subscribe()
-
+        val queryMap = getQueryMap(sessionHandler.getSession().handshakeInfo.uri.query)
+        if (queryMap["roomId"] == null) {
+            return sessionHandler.send("错误，不支持的参数列表$queryMap")
+                    .then(sessionHandler.connectionClosed())
+        }
+        val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
-
-        val disconnect = sessionHandler.disconnected()
-                .doOnNext {
-                    logger.info("Server Disconnected [{}]", it.id)
-                    disposable.dispose()
-                }
+                .flatMap { SocketSessionStore.addUser(it, roomId) }
+                .flatMap { workService.enterRoom(roomId) }
+                .flatMap { sessionHandler.disconnected() }
+                .flatMap { BaseUser.getcurrentUser() }
+                .doOnNext { SocketSessionStore.removeUser(it.id!!) }
 
         val output = sessionHandler.receive()
                 .flatMap {
-                    val req = ServiceRequestInfo("/echo", it, it, 0)
-                    val resp = ServiceResponseInfo(req = 0)
-                    dispatcherServlet.doDispatch(req, resp)
-                    logger.info(">>>>>>>>>>>><<<")
+                    logger.info("接收到数据${it}")
+                    val request = toServiceRequestInfo(it)
+                    val resp = ServiceResponseInfo(req = request.req)
+                    dispatcherServlet.doDispatch(request, resp)
                     resp.getMono()
-                }
+                }.onErrorResume { ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono() }
                 .map { json.writeValueAsString(it) }
+                .doOnError { logger.info("错误") }
                 .flatMap(sessionHandler::send)
-                .ignoreElements()
+                .then()
 
         return sessionHandler.handle()
-                .zipWith(disconnect) { o1, _ -> o1 }
-                .zipWith(output) { o1, _ -> o1 }
-                .zipWith(watchDog) { o1, _ -> o1 }
+                .zipWith(connect)
+                .zipWith(watchDog)
+                .zipWith(output).then()
+    }
+
+    private fun getQueryMap(queryStr: String): Map<String, String> {
+        val queryMap: MutableMap<String, String> = HashMap()
+        if (!StringUtils.isEmpty(queryStr)) {
+            val queryParam = queryStr.split("&")
+            queryParam.forEach { s: String ->
+                val kv = s.split("=".toRegex(), 2)
+                val value = if (kv.size == 2) kv[1] else ""
+                queryMap[kv[0]] = value
+            }
+        }
+        return queryMap
+    }
+
+    private fun toServiceRequestInfo(data: String): ServiceRequestInfo {
+        val json = data.replace(blankRegex, "")
+        val orderString = orderRegex.find(json)!!.groups[1]!!.value.replace("\"", "")
+        val dataString = dataRegex.find(json)?.groups?.get(1)?.value
+        val reqString = reqRegex.find(json)!!.groups[1]!!.value.toInt()
+        return ServiceRequestInfo(orderString, dataString, reqString)
     }
 
 }

@@ -6,6 +6,7 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.annotation.Id
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
@@ -21,6 +22,10 @@ class StockService {
     private lateinit var connect: DatabaseClient
 
     suspend fun findById(id: Int) = stockDao.findById(id)
+
+    fun findByCompanyId(companyId: Int) = stockDao.findByCompanyId(companyId)
+
+    suspend fun findByName(stockName: String) = stockDao.findByName(stockName)
 
     suspend fun findAllByQuery(query: PageQuery): PageView<Stock> {
         return getPage(connect.select()

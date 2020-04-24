@@ -12,7 +12,6 @@ import java.io.Serializable
 class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     var data: T? = null
-    var req: Int = -1
 
     constructor(code: Int, msg: String, data: T) : this(code, msg) {
         this.data = data
@@ -32,6 +31,11 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
         @JvmStatic
         fun <T> ok(monoBody: Mono<T>, code: Int, msg: String): Mono<ResponseInfo<T>> {
             return responseBodyCreate(monoBody, code, msg)
+        }
+
+        @JvmStatic
+        fun failed(msg: String): Mono<ResponseInfo<Void>> {
+            return Mono.just(ResponseInfo(1, msg))
         }
 
         @JvmStatic
@@ -80,8 +84,6 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
                 responseInfo.toMono()
             }
         }
-
-        // -------------=====>>>>>>> 协程 <<<<<<<<<====----------------
 
     }
 }

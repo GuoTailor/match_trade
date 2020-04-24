@@ -29,6 +29,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping("/click")
@@ -49,6 +50,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping("/bicker")
@@ -68,6 +70,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping("/double")
@@ -87,6 +90,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping("/timely")
@@ -106,6 +110,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PostMapping("/timing")
@@ -125,6 +130,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/click")
@@ -144,6 +150,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/bicker")
@@ -163,6 +170,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/double")
@@ -182,6 +190,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/timely")
@@ -201,6 +210,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/timing")
@@ -219,6 +229,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":[]}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping("/editable")
@@ -239,6 +250,7 @@ class RoomController {
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":[]}
      * @apiGroup Room
+     * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping
