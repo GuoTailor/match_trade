@@ -4,6 +4,7 @@
     <list default="true" id="91c2250d-e6a9-4b54-8402-527fd36509df" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitlab-ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.gitlab-ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +129,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1587441205946</updated>
-      <workItem from="1587441209602" duration="3479000" />
+      <workItem from="1587441209602" duration="6188000" />
+      <workItem from="1587701587748" duration="3469000" />
     </task>
     <task id="LOCAL-00002" summary="dockerfile新增时区设置">
       <created>1587444009187</created>
@@ -144,7 +146,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587444500282</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="修改docker一键部署配置">
+      <created>1587445129819</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1587445129819</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -164,10 +173,14 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1587389142914" />
-    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1587444498611">
+    <state x="475" y="215" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1587702011255">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1587444498611" />
+    <state x="475" y="215" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1587702011255" />
+    <state x="338" y="6" key="CommitChangelistDialog2" timestamp="1587705021805">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="338" y="6" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1587705021805" />
     <state x="247" y="65" key="DiffContextDialog" timestamp="1587444004510">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -212,13 +225,13 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="270" y="54" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1587443069910" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1587444523751">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1587445436155">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1587444523751" />
-    <state x="444" y="203" key="git4idea.merge.GitPullDialog" timestamp="1587444030757">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1587445436155" />
+    <state x="444" y="203" key="git4idea.merge.GitPullDialog" timestamp="1587701618992">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="444" y="203" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1587444030757" />
+    <state x="444" y="203" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1587701618992" />
   </component>
 </project>

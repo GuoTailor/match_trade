@@ -31,7 +31,23 @@ services:
      - mt-net
     volumes:
       - /usr/local/dokcer/volumes/logger:/static/logger
-    
+  mt-engine:
+    restart: always
+    image: mt-engine:v1.0.0
+    container_name: mt-engine
+    ports:
+      - 82:82
+    networks:
+      - mt-net
+
+  mt-socket:
+    restart: always
+    image: mt-socket:v1.0.0
+    container_name: mt-socket
+    ports:
+      - 83:83
+    networks:
+      - mt-net
   redis:
     image: redis:4.0.13
     container_name: redis

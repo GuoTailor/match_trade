@@ -28,7 +28,8 @@ build:
     - cd docker
     - docker build -t mt-gateway:v1.0.0 -f Dockerfile-mt-gateway .
     - docker build -t mt-user:v1.0.0 -f Dockerfile-mt-user .
-
+    - docker build -t mt-engine:v1.0.0 -f Dockerfile-mt-engine .
+    - docker build -t mt-socket:v1.0.0 -f Dockerfile-mt-socket .
 #push:
 #  stage: push
 #  script:
