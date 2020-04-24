@@ -17,6 +17,6 @@ class LoadTimingTask : ApplicationRunner {
     private lateinit var quartzManager: QuartzManager
 
     override fun run(args: ApplicationArguments?) {
-        logger.info("启动完成")
+        logger.info("启动完成》》")
     }
 }

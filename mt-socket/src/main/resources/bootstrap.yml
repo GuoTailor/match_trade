@@ -30,6 +30,7 @@ spring:
         out-order:
           destination: order-topic
           content-type: application/json
+  profiles: dev
 
   redis:
     host: localhost
@@ -37,14 +38,10 @@ spring:
     timeout: 5000
 
 logging:
-  level:
-    org:
-      springframework:
-        data:
-          r2dbc: DEBUG
-        web:
-          reactive:
-            result:
-              method:
-                InvocableHandlerMethod: DEBUG
-    root: INFO
+  file:
+    max-size: 20MB
+    max-history: 60
+    path: ./static/logger
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    file: "${FILE_LOG_PATTERN:%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
