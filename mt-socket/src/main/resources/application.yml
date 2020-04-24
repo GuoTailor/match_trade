@@ -1,3 +1,16 @@
+spring:
+  cloud:
+    # 使用 Nacos 作为配置中心
+    nacos:
+      config:
+        group: DEFAULT_GROUP
+        server-addr: nacos:8848
+        file-extension: yml
+        prefix: mt-socket
+  profiles: prod
+
+---
+
 server:
   port: 83
 
