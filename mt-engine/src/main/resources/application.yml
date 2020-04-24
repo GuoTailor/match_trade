@@ -1,39 +1,39 @@
-spring:
-  cloud:
-    # 使用 Nacos 作为配置中心
-    nacos:
-      config:
-        group: DEFAULT_GROUP
-        server-addr: nacos:8848
-        file-extension: yml
-        prefix: mt-engine
-  profiles: prod
-
----
-
-server:
-  port: 82
-spring:
-  application:
-    name: engine
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:8848
-    stream:
-      default-binder: rocketmq
-      bindings:
-        out-trade:
-          destination: trade-topic
-          content-type: application/json
-        in-order:
-          destination: order-topic
-          group: match-order
-
-
-  r2dbc:
-    username: postgres
-    password: admin
-    url: r2dbc:postgres://localhost:5432/match_trade
-    pool:
-      enabled: true
+#spring:
+#  cloud:
+#    # 使用 Nacos 作为配置中心
+#    nacos:
+#      config:
+#        group: DEFAULT_GROUP
+#        server-addr: nacos:8848
+#        file-extension: yml
+#        prefix: mt-engine
+#  profiles: prod
+#
+#---
+#
+#server:
+#  port: 82
+#spring:
+#  application:
+#    name: engine
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: localhost:8848
+#    stream:
+#      default-binder: rocketmq
+#      bindings:
+#        out-trade:
+#          destination: trade-topic
+#          content-type: application/json
+#        in-order:
+#          destination: order-topic
+#          group: match-order
+#
+#
+#  r2dbc:
+#    username: postgres
+#    password: admin
+#    url: r2dbc:postgres://localhost:5432/match_trade
+#    pool:
+#      enabled: true
