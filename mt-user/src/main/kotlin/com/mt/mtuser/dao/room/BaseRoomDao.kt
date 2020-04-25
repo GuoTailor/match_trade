@@ -19,4 +19,5 @@ interface BaseRoomDao<T : BaseRoom, ID> : CoroutineCrudRepository<T, ID> {
 
     fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<T>
 
+    fun findTimeAll(): Flow<T>
 }

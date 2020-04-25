@@ -232,7 +232,7 @@ class RoomController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PutMapping("/editable")
+    @GetMapping("/editable")
     @PreAuthorize("hasRole('ADMIN')")
     fun getEditableRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
         return ResponseInfo.ok(mono {
@@ -253,7 +253,7 @@ class RoomController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PutMapping
+    @GetMapping
     fun getAllRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
         return ResponseInfo.ok(mono {
             roomService.getAllRoomList()

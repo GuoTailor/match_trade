@@ -52,7 +52,6 @@
     <orderEntry type="library" name="Maven: org.springframework.data:spring-data-keyvalue:2.3.0.RC1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.data:spring-data-commons:2.3.0.RC1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-oxm:5.2.5.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-context-support:5.2.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: io.lettuce:lettuce-core:5.2.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-common:4.1.48.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-handler:4.1.48.Final" level="project" />
@@ -156,6 +155,10 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-jcl:5.2.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-messaging:5.2.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-tx:5.2.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-quartz:2.3.0.M4" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-context-support:5.2.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:2.3.2" level="project" />
+    <orderEntry type="library" name="Maven: com.mchange:mchange-commons-java:0.2.15" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:2.2.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba.nacos:nacos-client:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba.nacos:nacos-common:1.2.1" level="project" />

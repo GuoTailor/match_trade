@@ -32,7 +32,7 @@ class TimingMatch(
         override var name: String? = null,      // 房间名字
         override var people: Int? = null,       // 人数
         override var time: LocalTime? = null,     // 时长
-        override var startTime: LocalTime? = null,     // 房间开启时间
+        override var startTime: LocalTime? = null,  // 房间开启时间
         var matchTime: LocalTime? = null,       // 撮合时间
         override var numberTrades: Int? = null,  // 单笔交易数量
         var count: Int? = null,                 // 撮合次数

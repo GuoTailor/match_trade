@@ -4,6 +4,7 @@ import com.mt.mtuser.common.toDuration
 import com.mt.mtuser.entity.RoomRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
+import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -14,6 +15,7 @@ import java.time.Duration
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisOperations<String, Any>
+    private val closeTopic = ChannelTopic("/redis/roomClose")
     private val roomKey = "ROOM_RECORD:"
     private val roomInfo = "info"
     private val peopleList = "peopleList"
@@ -92,5 +94,14 @@ class RedisUtil {
 
     suspend fun deleteCode(phone: String) {
         redisTemplate.opsForValue().deleteAndAwait(codeKey + phone)
+    }
+
+    // ------------------------=======>>>推送<<<=====----------------------
+
+    /**
+     * 推送房间关闭事件
+     */
+    suspend fun publishRoomClose(roomId: String) {
+        redisTemplate.convertAndSend(closeTopic.topic, roomId)
     }
 }

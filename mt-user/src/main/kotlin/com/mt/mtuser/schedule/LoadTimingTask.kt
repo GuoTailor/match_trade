@@ -1,5 +1,7 @@
 package com.mt.mtuser.schedule
 
+import com.mt.mtuser.service.room.RoomService
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
@@ -14,9 +16,10 @@ import org.springframework.stereotype.Component
 class LoadTimingTask : ApplicationRunner {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     @Autowired
-    private lateinit var quartzManager: QuartzManager
+    private lateinit var roomService: RoomService
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments?) = runBlocking {
+        roomService.loadTimingTask()
         logger.info("启动完成》》")
     }
 }

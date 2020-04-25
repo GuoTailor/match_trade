@@ -26,4 +26,7 @@ interface TimingRoomDao :  BaseRoomDao<TimingMatch, String> {
 
     @Query("select * from mt_room_timing where company_id in (:companyId)")
     override fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<TimingMatch>
+
+    @Query("select room_id, time, enable, start_time from mt_room_timing")
+    override fun findTimeAll(): Flow<TimingMatch>
 }

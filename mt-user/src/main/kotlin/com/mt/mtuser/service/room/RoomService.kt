@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.room
 
+import com.mt.mtuser.common.plus
 import com.mt.mtuser.common.isAfterToday
 import com.mt.mtuser.common.toDate
 import com.mt.mtuser.common.toMillis
@@ -16,6 +17,8 @@ import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
@@ -25,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
+import java.time.LocalTime
 import java.util.*
 
 /**
@@ -124,6 +128,7 @@ class RoomService {
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
+
                     // TODO 通知用户退出房间
                 }
             }
@@ -192,8 +197,7 @@ class RoomService {
             roomCreateMutex.withLock {
                 if (checkRoomCount(room.companyId!!)) {
                     logger.info((room as ClickMatch).toString())
-                    quartzManager.addJob(RoomStartJobInfo(room))
-                    quartzManager.addJob(RoomEndJobInfo(room))
+                    addTimingTask(room)
                     return dao.save(room)
                 } else throw IllegalStateException("公司房间已满")
             }
@@ -211,10 +215,10 @@ class RoomService {
     suspend fun getEditableRoomList() = getRoomList(Role.ADMIN)
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
-        val companyList: MutableList<Int> = if (role == null)
-            BaseUser.getcurrentUser().awaitSingle().getCompanyList() else
-            BaseUser.getcurrentUser().awaitSingle().getCompanyList(role)
-
+        val companyList: MutableList<Int> =
+                if (role == null) BaseUser.getcurrentUser().awaitSingle().getCompanyList()
+                else BaseUser.getcurrentUser().awaitSingle().getCompanyList(role)
+        // TODO 不支持分页 可以考虑禁止跳页查询
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
         val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
         val doubleList = async { doubleRoomDao.findByCompanyIdAll(companyList) }
@@ -227,6 +231,27 @@ class RoomService {
         timelyList.await().toList(restList)
         timingList.await().toList(restList)
         restList
+    }
+
+    /**
+     * 服务启动的时候调用
+     */
+    suspend fun loadTimingTask() {
+        clickRoomDao.findTimeAll().collect(::addTimingTask)
+        bickerRoomDao.findTimeAll().collect(::addTimingTask)
+        doubleRoomDao.findTimeAll().collect(::addTimingTask)
+        timelyRoomDao.findTimeAll().collect(::addTimingTask)
+        timingRoomDao.findTimeAll().collect(::addTimingTask)
+    }
+
+    suspend fun addTimingTask(room: BaseRoom) {
+        if (room.enable == BaseRoom.DISABLED
+                && room.startTime!! <= LocalTime.now()
+                && (room.startTime!! + room.time!!) > LocalTime.now()) {
+            enableRoom(room.roomId!!, true)
+        }
+        quartzManager.addJob(RoomStartJobInfo(room))
+        quartzManager.addJob(RoomEndJobInfo(room))
     }
 
     /**

@@ -4,7 +4,7 @@
   "description": "撮合交易平台server接口文档",
   "title": "撮合交易平台 api 文档",
   "url": "http://liuyuelian.top:85/api",
-  "sampleUrl": "http://liuyuelian.top:85/api",
+  "sampleUrl": "http://101.37.34.61:85/api",
 
   "header": {
     "title": "撮合交易api文档说明",

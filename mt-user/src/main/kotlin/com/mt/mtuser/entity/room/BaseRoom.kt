@@ -30,11 +30,9 @@ interface BaseRoom {
     val flag: String            // 标识符
 
     companion object {
-        @JvmField
-        val ENABLE = "1"
+        const val ENABLE = "1"
 
-        @JvmField
-        val DISABLED = "0"
+        const val DISABLED = "0"
     }
 
     @Suppress("UNCHECKED_CAST")

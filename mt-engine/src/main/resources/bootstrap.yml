@@ -11,8 +11,6 @@ spring:
 
 ---
 
-server:
-  port: 82
 spring:
   application:
     name: engine

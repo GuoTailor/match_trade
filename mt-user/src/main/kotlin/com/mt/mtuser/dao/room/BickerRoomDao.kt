@@ -28,4 +28,6 @@ interface BickerRoomDao: BaseRoomDao<BickerMatch, String> {
     @Query("select * from mt_room_bicker where company_id in (:companyId)")
     override fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<BickerMatch>
 
+    @Query("select room_id, time, enable, start_time from mt_room_bicker")
+    override fun findTimeAll(): Flow<BickerMatch>
 }
