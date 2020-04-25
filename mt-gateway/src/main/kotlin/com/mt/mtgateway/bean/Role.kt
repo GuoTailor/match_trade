@@ -5,5 +5,5 @@ package com.mt.mtgateway.bean
  */
 data class Role(
         var name: String,
-        var companyid: Int? = null
+        var companyId: Int? = null
 )

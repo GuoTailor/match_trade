@@ -54,7 +54,7 @@ public class TokenMgr {
         Object[] data = new Object[roles.size()];
         int i = 0;
         for (Role role : roles) {
-            data[i++] = new Object[]{role.getName().replace("ROLE_", ""), role.getCompanyid()};
+            data[i++] = new Object[]{role.getName().replace("ROLE_", ""), role.getCompanyId()};
         }
         return data;
     }
