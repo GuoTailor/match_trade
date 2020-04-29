@@ -68,6 +68,7 @@ abstract class BaseUser : UserDetails {
      * 获取该用户的公司列表
      */
     @JsonIgnore
+    @Deprecated("", ReplaceWith("RoleService.getCompanyList()"), DeprecationLevel.ERROR)
     fun getCompanyList(): MutableList<Int> {
         return roles.stream()
                 .filter { it is Role && it.companyId != null }
@@ -81,6 +82,7 @@ abstract class BaseUser : UserDetails {
      * 获取所有自己能加入的房间就请调用[getCompanyList]的无参方法
      */
     @JsonIgnore
+    @Deprecated("", ReplaceWith("RoleService.getCompanyList()"), DeprecationLevel.ERROR)
     fun getCompanyList(roleName: String): MutableList<Int> {
         return roles.stream()
                 .filter { it is Role && it.authority == roleName && it.companyId != null }
@@ -92,6 +94,7 @@ abstract class BaseUser : UserDetails {
      * 获取指定角色的集合
      */
     @JsonIgnore
+    @Deprecated("", ReplaceWith("RoleService.selectRolesByUserId()"), DeprecationLevel.ERROR)
     fun getRoleByName(roleName: String): MutableList<Role> {
         return roles.stream()
                 .filter { it is Role && it.authority == roleName }

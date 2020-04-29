@@ -1,0 +1,39 @@
+package com.mt.mtcommon
+
+import java.sql.Time
+import java.time.LocalTime
+import java.util.*
+
+/**
+ * Created by gyh on 2020/3/26.
+ * 房间启用记录
+ * @apiDefine ClickMatch
+ * @apiParam {Integer} id
+ * @apiParam {Integer} roomId 房间id
+ * @apiParam {String} model 模式对应撮合模式
+ * @apiParam {Integer} stockId 股票id
+ * @apiParam {Integer} companyId 公司id
+ * @apiParam {Date} startTime 启用时间
+ * @apiParam {Date} endTime 结束时间
+ */
+open class RoomRecord(
+        open var roomId: String? = null,     // 房间id，四张房间表唯一
+        open var model: String? = null,      // 模式对应撮合模式
+        open var stockId: Int? = null,       // 股票id
+        open var companyId: Int? = null,     // 公司id
+        open var startTime: Date? = null,    // 启用时间
+        open var endTime: Date? = null,      // 结束时间
+        open var cycle: LocalTime? = null,   // 周期
+        open var duration: LocalTime? = null // 时长
+) {
+
+    open fun computingTime(): RoomRecord {
+        duration = startTime?.let { start ->
+            endTime?.let { end ->
+                LocalTime.ofSecondOfDay((start.time - end.time) / 1000)
+            }
+        }
+        return this
+    }
+}
+

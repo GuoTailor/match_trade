@@ -14,8 +14,8 @@
 
 **注意**
 
-- websocket url路径：ws://liuyuelian.top:85/socket/room?roomId=房间id&bearer=token
-- <a style="color:red;"> 目前WebSocket基本已稳定</a>，可以点击[这里](http://liuyuelian.top:85/socket/index.html) 查看测试页面
+- websocket url路径：ws://101.37.34.61:85/socket/room?roomId=房间id&bearer=token
+- <a style="color:red;"> 目前WebSocket基本已稳定</a>，可以点击[这里](http://101.37.34.61:85/socket/index.html) 查看测试页面
 - WebSocket测试页面超过3秒没有向服务器发消息将会断开连接
 
 **通讯格式**

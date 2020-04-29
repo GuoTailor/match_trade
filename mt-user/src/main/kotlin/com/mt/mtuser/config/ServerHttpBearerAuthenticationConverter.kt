@@ -21,15 +21,9 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
         return Mono.justOrEmpty(exchange).map<Authentication> {
             val request: ServerHttpRequest = exchange.request
             val id: String? = request.headers.getFirst("id")
-            //val username: String? = request.headers.getFirst("username")
             val role: String = request.headers.getFirst("roles") ?: "[]"
-            val data: List<List<Any>> = json.readValue(role)
-            val roles = data.map { list ->
-                val r = Role()
-                r.name = "ROLE_" + list[0]
-                r.companyId = list[1] as? Int
-                r
-            }
+            val data: List<String> = json.readValue(role)
+            val roles = data.map { list -> Role(name = "ROLE_$list") }
             UsernamePasswordAuthenticationToken(id, id, roles)
         }
     }

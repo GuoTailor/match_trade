@@ -1,6 +1,6 @@
 package com.mt.mtuser.entity.room
 
-import com.mt.mtuser.service.room.RoomEnum
+import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime

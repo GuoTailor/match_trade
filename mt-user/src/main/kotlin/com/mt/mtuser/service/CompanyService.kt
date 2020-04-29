@@ -80,7 +80,7 @@ class CompanyService {
     suspend fun addStockholder(info: StockholderInfo): Role {
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
-        if (BaseUser.getcurrentUser().awaitSingle().getCompanyList().contains(info.companyId)) {
+        if (roleService.getCompanyList().contains(info.companyId)) {
             val roleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
             if (roleService.exists(user.id!!, info.companyId!!, roleId) == 0) {
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
@@ -102,7 +102,7 @@ class CompanyService {
     suspend fun addCompanyAdmin(info: StockholderInfo): Role {
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
-        if (BaseUser.getcurrentUser().awaitSingle().getCompanyList().contains(info.companyId)) {
+        if (roleService.getCompanyList().contains(info.companyId)) {
             val userRoleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
             val adminRoleId = roleService.getRoles().find { it.name == Role.ADMIN }!!.id!!
             val role = roleService.find(user.id!!, info.companyId!!, userRoleId) ?: throw IllegalStateException("用户不是股东")

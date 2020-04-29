@@ -1,11 +1,10 @@
 package com.mt.mtuser.entity.room
 
-import com.mt.mtuser.service.room.RoomEnum
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
 import java.util.*
-import javax.validation.constraints.NotNull
 import javax.validation.constraints.Null
+import com.mt.mtcommon.RoomEnum
 
 /**
  * Created by gyh on 2020/3/23.

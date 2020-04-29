@@ -1,7 +1,10 @@
 package com.mt.mtuser.service
 
+import com.mt.mtcommon.Consts
+import com.mt.mtcommon.RoomEvent
 import com.mt.mtuser.common.toDuration
-import com.mt.mtuser.entity.RoomRecord
+import com.mt.mtuser.entity.RoomRecordEntity
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.data.redis.listener.ChannelTopic
@@ -15,11 +18,10 @@ import java.time.Duration
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisOperations<String, Any>
-    private val closeTopic = ChannelTopic("/redis/roomClose")
-    private val roomKey = "ROOM_RECORD:"
-    private val roomInfo = "info"
-    private val peopleList = "peopleList"
-    private val codeKey = "CODE:"
+    private val closeTopic = ChannelTopic(Consts.roomEvent)
+    private val roomKey = Consts.roomKey
+    private val roomInfo = Consts.roomInfo
+    private val codeKey = Consts.codeKey
     private val codeTime = Duration.ofMinutes(5)
 
     // -------------------------=======>>>房间<<<=======-------------------------
@@ -27,24 +29,24 @@ class RedisUtil {
     /**
      * 保存一个房间记录,并通过房间记录的时长设置过期时间
      */
-    suspend fun saveRoomRecord(roomRecord: RoomRecord) {
-        redisTemplate.opsForHash<String, RoomRecord>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
+    suspend fun saveRoomRecord(roomRecord: RoomRecordEntity) {
+        redisTemplate.opsForHash<String, RoomRecordEntity>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
         redisTemplate.expireAndAwait(roomKey + roomRecord.roomId, roomRecord.duration!!.toDuration())
     }
 
     /**
      * 更新房间记录
      */
-    suspend fun updateRoomRecord(roomRecord: RoomRecord) {
-        redisTemplate.opsForHash<String, RoomRecord>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
+    suspend fun updateRoomRecord(roomRecord: RoomRecordEntity) {
+        redisTemplate.opsForHash<String, RoomRecordEntity>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
     }
 
     /**
      * 获取一个房间记录
      */
-    suspend fun getRoomRecord(roomId: String): RoomRecord? {
+    suspend fun getRoomRecord(roomId: String): RoomRecordEntity? {
         return redisTemplate
-                .opsForHash<String, RoomRecord>()
+                .opsForHash<String, RoomRecordEntity>()
                 .getAndAwait(roomKey + roomId, roomInfo)
     }
 
@@ -53,7 +55,7 @@ class RedisUtil {
      */
     suspend fun deleteRoomRecord(roomId: String) {
         redisTemplate
-                .opsForHash<String, RoomRecord>()
+                .opsForHash<String, RoomRecordEntity>()
                 .deleteAndAwait(roomKey + roomId)
     }
 
@@ -61,10 +63,10 @@ class RedisUtil {
      * 获取并删除一个记录<br>
      * 注意该方法不安全
      */
-    suspend fun deleteAndGetRoomRecord(roomId: String): RoomRecord? {
+    suspend fun deleteAndGetRoomRecord(roomId: String): RoomRecordEntity? {
         // 不安全 也许有更好的办法
-        val roomRecord = redisTemplate.opsForHash<String, RoomRecord>().getAndAwait(roomKey + roomId, roomInfo)
-        redisTemplate.opsForHash<String, RoomRecord>().deleteAndAwait(roomKey + roomId)
+        val roomRecord = redisTemplate.opsForHash<String, RoomRecordEntity>().getAndAwait(roomKey + roomId, roomInfo)
+        redisTemplate.opsForHash<String, RoomRecordEntity>().deleteAndAwait(roomKey + roomId)
         return roomRecord
     }
 
@@ -99,9 +101,11 @@ class RedisUtil {
     // ------------------------=======>>>推送<<<=====----------------------
 
     /**
-     * 推送房间关闭事件
+     * 推送房间开启/关闭事件
+     * 注意房间开启通知需要在房间记录写入到redis之后再发送
      */
-    suspend fun publishRoomClose(roomId: String) {
-        redisTemplate.convertAndSend(closeTopic.topic, roomId)
+    // todo 改为MQ
+    suspend fun publishRoomEvent(event: RoomEvent): Long {
+        return redisTemplate.convertAndSend(closeTopic.topic, event).awaitSingle()
     }
 }

@@ -27,31 +27,7 @@ public class TestProcessor {
         Flux<Integer> flux = directProcessor
                 .map(e -> e + 1);
 
-        flux.subscribe(new Subscriber<Integer>() {
-            private Subscription s;
-
-            @Override
-            public void onSubscribe(Subscription s) {
-                LOGGER.info("nmka");
-                this.s = s;
-                s.request(40);
-            }
-
-            @Override
-            public void onNext(Integer integer) {
-                LOGGER.info("subscribe:{}", integer);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                LOGGER.error(t.getMessage(), t);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+        flux.subscribe(it -> LOGGER.info("nmkasubscribe:{}", it));
 
         IntStream.range(1, 20)
                 .forEach((it) -> {

@@ -3,11 +3,17 @@ package com.mt.mtsocket.config
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.mt.mtcommon.Consts
+import com.mt.mtsocket.socket.SocketHandler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
-import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -18,10 +24,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
  */
 @Configuration
 class ReactiveRedisConfiguration {
+    private val json = jacksonObjectMapper()
+    @Autowired
+    private lateinit var socketHandler : SocketHandler
 
     @Bean
-    fun redisOperations(factory: ReactiveRedisConnectionFactory): ReactiveRedisOperations<String, Any> {
+    fun topic(): ChannelTopic {
+        return ChannelTopic(Consts.roomEvent)
+    }
 
+    @Bean
+    fun redisOperations(factory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, Any> {
         val om = ObjectMapper()
         //om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -38,4 +51,12 @@ class ReactiveRedisConfiguration {
                 .build()
         return ReactiveRedisTemplate(factory, context)
     }
+
+    @Bean
+    fun redisMessageListenerContainer(factory: ReactiveRedisConnectionFactory): ReactiveRedisMessageListenerContainer {
+        val container = ReactiveRedisMessageListenerContainer(factory)
+        container.receive(topic()).subscribe { socketHandler.onRoomEvent(json.readValue(it.message)) }
+        return container
+    }
+
 }

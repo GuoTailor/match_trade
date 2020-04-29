@@ -1,6 +1,6 @@
 package com.mt.mtuser.entity.room
 
-import com.mt.mtuser.service.room.RoomEnum
+import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
@@ -15,7 +15,6 @@ import java.util.*
  * @apiParam {String} name 房间名字
  * @apiParam {String} time 时长 格式：HH:mm:SS
  * @apiParam {String} startTime: 房间开启时间 格式：HH:mm:SS
- * @apiParam {String} matchTime 撮合时间 格式：HH:mm:SS
  * @apiParam {String} quoteTime 报价时间 格式：HH:mm:SS
  * @apiParam {Integer} numberTrades 单笔交易数量
  * @apiParam {Integer} count 撮合次数
@@ -47,5 +46,6 @@ class TimingMatch(
     override suspend fun validNull() {
         people = null
         currentCount = null
+        matchTime = LocalTime.ofSecondOfDay((time!!.second / count!!).toLong())
     }
 }

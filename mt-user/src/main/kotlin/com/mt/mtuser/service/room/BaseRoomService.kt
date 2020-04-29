@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.room
 
+import com.mt.mtcommon.RoomEnum
 import com.mt.mtuser.entity.room.BaseRoom
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

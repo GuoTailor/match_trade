@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.room
 
+import com.mt.mtcommon.RoomEnum
 import com.mt.mtuser.entity.room.*
 
 /**
@@ -63,12 +64,3 @@ object RoomExtend {
     }
 
 }
-
-enum class RoomEnum(val flag: String) {
-    CLICK("C"),
-    BICKER("B"),
-    DOUBLE("D"),
-    TIMELY("E"),
-    TIMING("I"),
-}
-

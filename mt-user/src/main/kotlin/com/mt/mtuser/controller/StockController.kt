@@ -60,7 +60,7 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("/company/{id}")
-    fun getCompanyStock(@PathVariable id: Int, query: PageQuery): Mono<ResponseInfo<PageView<Stock>>> {
+    fun getCompanyStock(@PathVariable id: Int, @RequestBody query: PageQuery): Mono<ResponseInfo<PageView<Stock>>> {
         return ResponseInfo.ok(mono { stockService.findAllByQuery(query) })
     }
 

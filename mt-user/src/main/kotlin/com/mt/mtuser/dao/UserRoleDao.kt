@@ -1,6 +1,7 @@
 package com.mt.mtuser.dao
 
 import com.mt.mtuser.entity.Role
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.annotation.Id
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -16,7 +17,7 @@ interface UserRoleDao: CoroutineCrudRepository<Role, Int> {
             " from mt_user_role ur" +
             " left join mt_role r on ur.role_id = r.id" +
             " where user_id = $1")
-    suspend fun selectRolesByUserId(userId: Int): Role?
+    fun selectRolesByUserId(userId: Int): Flow<Role>
 
     @Query("insert into mt_user_role(user_id, role_id, company_id) values(:userId, :roleId, :companyId)")
     suspend fun save(userId: Int, roleId: Int, companyId: Int): Int

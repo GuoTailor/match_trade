@@ -6,6 +6,7 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.UserService
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +27,7 @@ class UserController {
     private lateinit var roleService: RoleService
 
     /**
-     * @api {put} /user/info 获取用户的信息
+     * @api {gut} /user/info 获取用户的信息
      * @apiDescription  获取用户的信息
      * @apiName getUserInfo
      * @apiVersion 0.0.1
@@ -46,8 +47,8 @@ class UserController {
         return mono {
             val userId = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
             val user = userService.findById(userId) ?: return@mono ResponseInfo<User>(1, "用户不存在")
-            val role = roleService.selectRolesByUserId(user.id!!)
-            role?.let { user.roles = listOf(it) }
+            val roles = roleService.selectRolesByUserId(user.id!!).toList()
+            user.roles = roles
             ResponseInfo(0, "成功", user)
         }
     }

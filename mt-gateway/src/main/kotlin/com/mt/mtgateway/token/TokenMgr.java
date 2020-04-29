@@ -50,16 +50,14 @@ public class TokenMgr {
      *
      * @return 精简后的模式，这样生成的token更短
      */
-    public static Object[] simplify(Collection<Role> roles) {
-        Object[] data = new Object[roles.size()];
-        int i = 0;
+    public static Set<String> simplify(Collection<Role> roles) {
+        Set<String> data = new HashSet<>();
         for (Role role : roles) {
-            data[i++] = new Object[]{role.getName().replace("ROLE_", ""), role.getCompanyId()};
+            data.add(role.getName().replace("ROLE_", ""));
         }
         return data;
     }
 
-    // TODO 不再序列化role的全部公司id
     public static String createJWT(User user) throws IOException {
         long nowMillis = System.currentTimeMillis();
         long expMillis = nowMillis + Constant.JWT_TTL;
@@ -68,7 +66,7 @@ public class TokenMgr {
         Claims claims = Jwts.claims();
         claims.put("id", user.getId());
         //claims.put("username", user.getUsername());
-        Object[] role = simplify(user.getRoles());
+        Set<String> role = simplify(user.getRoles());
         claims.put("roles", json.writeValueAsString(role));
         return Jwts.builder()
                 .setClaims(claims)

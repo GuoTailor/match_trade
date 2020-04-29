@@ -1,5 +1,7 @@
 package com.mt.mtuser.service.room
 
+import com.mt.mtcommon.RoomEnum
+import com.mt.mtcommon.RoomEvent
 import com.mt.mtuser.common.plus
 import com.mt.mtuser.common.isAfterToday
 import com.mt.mtuser.common.toDate
@@ -7,20 +9,18 @@ import com.mt.mtuser.common.toMillis
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
-import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.Role
-import com.mt.mtuser.entity.RoomRecord
+import com.mt.mtuser.entity.RoomRecordEntity
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.schedule.*
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
+import com.mt.mtuser.service.RoleService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
@@ -67,7 +67,8 @@ class RoomService {
 
     @Autowired
     private lateinit var redisUtil: RedisUtil
-
+    @Autowired
+    private lateinit var roleService: RoleService
     @Autowired
     private lateinit var quartzManager: QuartzManager
     private val roomEnableMutex = Mutex()   // 房间启用和禁用的互斥锁
@@ -84,7 +85,7 @@ class RoomService {
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, value)
-        var roomRecord = RoomRecord(room)
+        var roomRecord = RoomRecordEntity(room)
         roomEnableMutex.withLock {
             if (value == BaseRoom.ENABLE) {
                 val startTime = System.currentTimeMillis()
@@ -112,7 +113,7 @@ class RoomService {
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
-            var roomRecord = RoomRecord(room)
+            var roomRecord = RoomRecordEntity(room)
             roomEnableMutex.withLock {
                 if (value) {
                     val startTime = System.currentTimeMillis()
@@ -128,9 +129,8 @@ class RoomService {
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
-
-                    // TODO 通知用户退出房间
                 }
+                redisUtil.publishRoomEvent(RoomEvent(roomId, value))
             }
         }
     }
@@ -162,7 +162,7 @@ class RoomService {
     suspend fun <T : BaseRoom> updateRoomByRoomId(room: T): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
-        val companyList = BaseUser.getcurrentUser().awaitSingle().getCompanyList(Role.ADMIN)
+        val companyList = roleService.getCompanyList(Role.ADMIN)
         return if (companyList.contains(room.companyId)) {
             if (RoomExtend.getRoomModel(roomId).flag == room.flag) {
                 room.roomId = null
@@ -191,12 +191,12 @@ class RoomService {
         val company = companyDao.findById(room.companyId!!)
         val dao = getBaseRoomDao<T>(room.flag)
         room.validNull()
-        if (RoomExtend.getRoomModels(company?.mode!!).contains(room.flag)) { // 判断房间模式(权限)
+        if (RoomExtend.getRoomModels(company?.mode!!).contains(room.flag)) {// 判断房间模式(权限)
             room.roomId = baseRoomService.getNextRoomId(room)               // 获取全局唯一的房间id
             room.isEnable<T>(false)
             roomCreateMutex.withLock {
                 if (checkRoomCount(room.companyId!!)) {
-                    logger.info((room as ClickMatch).toString())
+                    logger.info(room.toString())
                     addTimingTask(room)
                     return dao.save(room)
                 } else throw IllegalStateException("公司房间已满")
@@ -215,9 +215,7 @@ class RoomService {
     suspend fun getEditableRoomList() = getRoomList(Role.ADMIN)
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
-        val companyList: MutableList<Int> =
-                if (role == null) BaseUser.getcurrentUser().awaitSingle().getCompanyList()
-                else BaseUser.getcurrentUser().awaitSingle().getCompanyList(role)
+        val companyList = roleService.getCompanyList(role)
         // TODO 不支持分页 可以考虑禁止跳页查询
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
         val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
