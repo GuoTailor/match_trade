@@ -9,14 +9,14 @@ import org.springframework.data.r2dbc.repository.Query
  * Created by gyh on 2020/3/23.
  * 点选撮合
  */
-interface ClickRoomDao: BaseRoomDao<ClickMatch, String> {
+interface ClickRoomDao : BaseRoomDao<ClickMatch, String> {
 
     @Query("select count(1) from mt_room_click where room_id = :roomId limit 1")
     override suspend fun existsByRoomId(roomId: String): Int
 
     @Modifying
     @Query("update mt_room_click set enable = :enable where room_id = :roomId")
-    override suspend fun enableRoomById(roomId: String, enable:String): Int
+    override suspend fun enableRoomById(roomId: String, enable: String): Int
 
     @Query("select count(1) from mt_room_click where company_id = :companyId")
     suspend fun countByCompanyId(companyId: Int): Int

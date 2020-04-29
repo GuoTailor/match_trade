@@ -5,6 +5,7 @@ import java.time.LocalTime
 import java.util.*
 import javax.validation.constraints.Null
 import com.mt.mtcommon.RoomEnum
+import org.springframework.data.annotation.Id
 
 /**
  * Created by gyh on 2020/3/23.
@@ -26,6 +27,7 @@ import com.mt.mtcommon.RoomEnum
  */
 @Table("mt_room_click")
 class ClickMatch(
+        @Id
         override var roomId: String? = null,    // 房间id，四张房间表唯一
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id

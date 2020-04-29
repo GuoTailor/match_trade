@@ -9,7 +9,7 @@ import org.springframework.data.r2dbc.repository.Query
  * Created by gyh on 2020/3/23.
  * 两两撮合
  */
-interface DoubleRoomDao :  BaseRoomDao<DoubleMatch, String> {
+interface DoubleRoomDao : BaseRoomDao<DoubleMatch, String> {
 
     @Query("select count(1) from mt_room_double where room_id = :roomId limit 1")
     override suspend fun existsByRoomId(roomId: String): Int

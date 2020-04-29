@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity
 
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.io.Serializable
@@ -8,6 +9,7 @@ import java.io.Serializable
 /**
  * Created by gyh on 2020/3/18.
  */
+val logger = LoggerFactory.getLogger(ResponseInfo::class.java)
 class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     var data: T? = null
@@ -56,6 +58,7 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
             }.onErrorResume {
                 it.printStackTrace()
                 val responseInfo = ResponseInfo<T>(1, it.message ?: "失败")
+                logger.error(it.message)
                 responseInfo.toMono()
             }
         }

@@ -37,7 +37,6 @@ class DoubleMatch(
         override var createTime: Date? = null        // 创建时间
 ) : BaseRoom {
     override val flag: String = RoomEnum.DOUBLE.flag
-
     override suspend fun validNull() {
         people = null
     }

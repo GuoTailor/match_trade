@@ -1,9 +1,10 @@
 package com.mt.mtuser.entity.room
 
+import com.mt.mtcommon.RoomEnum
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
 import java.util.*
-import com.mt.mtcommon.RoomEnum
 import javax.validation.constraints.Null
 
 /**
@@ -26,6 +27,7 @@ import javax.validation.constraints.Null
  */
 @Table("mt_room_bicker")
 class BickerMatch(
+        @Id
         override var roomId: String? = null,    // 房间id，四张房间表唯一
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id
