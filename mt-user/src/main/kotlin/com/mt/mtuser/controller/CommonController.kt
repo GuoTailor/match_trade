@@ -1,5 +1,6 @@
 package com.mt.mtuser.controller
 
+import com.mt.mtuser.common.SendSms
 import com.mt.mtuser.common.SmsSample
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.entity.MtRole
@@ -141,8 +142,8 @@ class CommonController {
         return ResponseInfo.ok(mono {
             if (!userService.existsUserByPhone(phone)) {
                 val smsCode = Util.getRandomInt(4)
-                val (code, msg) = SmsSample.send(phone, smsCode)
-                if (code == 0) {
+                val (code, msg) = SendSms.send(phone, smsCode)
+                if (code == "OK") {
                     redisUtil.saveCode(phone, smsCode)
                 }
                 msg
