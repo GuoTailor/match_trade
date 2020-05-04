@@ -1,5 +1,6 @@
 package com.mt.mtengine
 
+import com.mt.mtengine.mq.MatchSink
 import org.apache.rocketmq.common.message.MessageConst
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

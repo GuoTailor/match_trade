@@ -2,7 +2,7 @@ package com.mt.mtuser.service
 
 import com.mt.mtcommon.Consts
 import com.mt.mtcommon.RoomEvent
-import com.mt.mtuser.common.toDuration
+import com.mt.mtcommon.toDuration
 import com.mt.mtuser.entity.RoomRecordEntity
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired

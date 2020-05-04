@@ -24,6 +24,7 @@ object RoomExtend {
     /**
      * 通过房间号获取房间模式
      */
+    // TODO 禁用
     fun getRoomModel(roomId: String): RoomEnum {
         return when (roomId[0].toString()) {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
@@ -38,6 +39,7 @@ object RoomExtend {
     /**
      * 通过房间号获取房间枚举
      */
+    // TODO 禁用
     fun getRoomEnum(flag: String): RoomEnum {
         return when (flag) {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK

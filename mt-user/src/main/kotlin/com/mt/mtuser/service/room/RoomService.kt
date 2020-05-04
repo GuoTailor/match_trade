@@ -2,17 +2,16 @@ package com.mt.mtuser.service.room
 
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomEvent
-import com.mt.mtuser.common.plus
-import com.mt.mtuser.common.isAfterToday
-import com.mt.mtuser.common.toDate
-import com.mt.mtuser.common.toMillis
+import com.mt.mtcommon.plus
+import com.mt.mtcommon.isAfterToday
+import com.mt.mtcommon.toDate
+import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.Role
 import com.mt.mtuser.entity.RoomRecordEntity
 import com.mt.mtuser.entity.room.BaseRoom
-import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.schedule.*
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
@@ -90,7 +89,7 @@ class RoomService {
             if (value == BaseRoom.ENABLE) {
                 val startTime = System.currentTimeMillis()
                 roomRecord.startTime = startTime.toDate()
-                roomRecord.endTime = (room.time!!.toMillis() + startTime).toDate()
+                roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
                 val newRecord = roomRecordDao.save(roomRecord)
                 redisUtil.saveRoomRecord(newRecord)
             } else if (value == BaseRoom.DISABLED) {
@@ -118,7 +117,7 @@ class RoomService {
                 if (value) {
                     val startTime = System.currentTimeMillis()
                     roomRecord.startTime = startTime.toDate()
-                    roomRecord.endTime = (room.time!!.toMillis() + startTime).toDate()
+                    roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
                     val newRecord = roomRecordDao.save(roomRecord)
                     redisUtil.saveRoomRecord(newRecord)
                 } else if (value) {

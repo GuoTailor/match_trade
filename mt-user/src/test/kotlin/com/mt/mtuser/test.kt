@@ -3,8 +3,8 @@ package com.mt.mtuser
 /**
  * Created by gyh on 2020/3/26.
  */
-import com.mt.mtuser.common.plus
-import com.mt.mtuser.common.toMillis
+import com.mt.mtcommon.plus
+import com.mt.mtcommon.toMillisOfDay
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.sql.Time
@@ -61,7 +61,7 @@ fun testTime() {
     val time = Time.valueOf("08:00:00")
     println(time.toLocalTime().toSecondOfDay())
     val localTime = LocalTime.parse("00:00:01")
-    println(localTime.toMillis())
+    println(localTime.toMillisOfDay())
     println(localTime + LocalTime.parse("00:00:01"))
 }
 

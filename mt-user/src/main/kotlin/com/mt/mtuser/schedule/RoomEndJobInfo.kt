@@ -1,6 +1,6 @@
 package com.mt.mtuser.schedule
 
-import com.mt.mtuser.common.plus
+import com.mt.mtcommon.plus
 import com.mt.mtuser.entity.room.BaseRoom
 import org.quartz.Job
 import org.quartz.JobDataMap
@@ -29,14 +29,14 @@ class RoomEndJobInfo : ScheduleJobInfo {
 
     constructor(room: BaseRoom, vararg data: Pair<String, *>) {
         val date = room.startTime!! + room.time!!
-        cron = "0 %d %d ? * *".format(date.minute, date.hour)
+        cron = "%d %d %d ? * *".format(date.second, date.minute, date.hour)
         this.className = RoomTask::class.java
         this.data = JobDataMap(mapOf(*data, RoomTask.roomIdKey to room.roomId,RoomTask.enableKey to false))
     }
 
     constructor(room: BaseRoom) {
         val date = room.startTime!! + room.time!!
-        cron = "0 %d %d ? * *".format(date.minute, date.hour)
+        cron = "%d %d %d ? * *".format(date.second, date.minute, date.hour)
         this.className = RoomTask::class.java
         this.data = JobDataMap(mapOf(RoomTask.roomIdKey to room.roomId, RoomTask.enableKey to false))
     }

@@ -28,7 +28,7 @@ class RoomStartJobInfo : ScheduleJobInfo {
 
     constructor(room: BaseRoom, vararg data: Pair<String, *>) {
         val date = room.startTime!!
-        this.cron = "0 %d %d ? * *".format(date.minute, date.hour)
+        this.cron = "%d %d %d ? * *".format(date.second, date.minute, date.hour)
         this.jobName = room.roomId!!
         this.className = RoomTask::class.java
         this.data = JobDataMap(mapOf(*data, RoomTask.roomIdKey to room.roomId,RoomTask.enableKey to true))
@@ -36,7 +36,7 @@ class RoomStartJobInfo : ScheduleJobInfo {
 
     constructor(room: BaseRoom) {
         val date = room.startTime!!
-        this.cron = "0 %d %d ? * *".format(date.minute, date.hour)
+        this.cron = "%d %d %d ? * *".format(date.second, date.minute, date.hour)
         this.jobName = room.roomId!!
         this.className = RoomTask::class.java
         this.data = JobDataMap(mapOf(RoomTask.roomIdKey to room.roomId, RoomTask.enableKey to true))

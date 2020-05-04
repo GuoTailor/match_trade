@@ -5,7 +5,6 @@ import com.mt.mtcommon.RoomRecord
 import com.mt.mtcommon.OrderParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
-import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -44,7 +43,7 @@ class RedisUtil {
      */
     fun putUserOrder(orderParam: OrderParam): Mono<Boolean> {
         return getUserOrder(orderParam.roomId!!)
-                .filter { it.id == orderParam.id }
+                .filter { it.userId == orderParam.userId }
                 .flatMap { redisTemplate.opsForList().remove(userOrder + orderParam.roomId, 0, it) }
                 .then(redisTemplate.opsForList().rightPush(userOrder + orderParam.roomId, orderParam))
                 .then(redisTemplate.expire(userOrder + orderParam.roomId,   // 今天23:59:59自动过期

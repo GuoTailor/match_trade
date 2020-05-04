@@ -34,7 +34,7 @@ class MtSocketApplicationTests {
         set.add(OrderParam(2))
         set.forEach { println(it) }
         val nmka = Mono.just(OrderParam(2))
-        nmka.map { SocketSessionStore.getRoom(it.id!!) }
+        nmka.map { SocketSessionStore.getRoom(it.userId!!) }
                 .filter { it != null }
                 .switchIfEmpty(Mono.just("nmka"))
                 .map { println(it) }
@@ -59,9 +59,9 @@ class MtSocketApplicationTests {
 
     @Test
     fun testRedis() {
-        redisUtil.putUserOrder(OrderParam(id = 1, roomId = "d11")).block()
-        redisUtil.putUserOrder(OrderParam(id = 2, roomId = "d11")).block()
-        redisUtil.putUserOrder(OrderParam(id = 1, roomId = "d11")).block()
+        redisUtil.putUserOrder(OrderParam(userId = 1, roomId = "d11")).block()
+        redisUtil.putUserOrder(OrderParam(userId = 2, roomId = "d11")).block()
+        redisUtil.putUserOrder(OrderParam(userId = 1, roomId = "d11")).block()
         //redisUtil.getUserOrder("d11").subscribe { println(it.toString() + " " + it.javaClass); redisUtil.deleteUserOrder(it) }
         redisUtil.getUserOrder("d11").doOnNext { println(it.toString() + " " + it.javaClass) }.blockLast()
         println("完成")
@@ -76,7 +76,7 @@ class MtSocketApplicationTests {
         val ptv = BasicPolymorphicTypeValidator.builder().build()
         om.activateDefaultTyping(ptv)
         om.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL)
-        val jsonString = om.writeValueAsString(OrderParam(id = 1, roomId = "d11"))
+        val jsonString = om.writeValueAsString(OrderParam(userId = 1, roomId = "d11"))
         println(jsonString)
     }
 
@@ -91,7 +91,7 @@ class MtSocketApplicationTests {
                 .hashKey(stringRedisSerializer)         // hash的key也采用String的序列化方式
                 .hashValue(jackson2JsonRedisSerializer) // hash的value序列化方式采用jackson
                 .build()
-        val value = OrderParam(id = 1, roomId = "d11")
+        val value = OrderParam(userId = 1, roomId = "d11")
         val serialization = context.valueSerializationPair
         val data = serialization.write(value)
         val dataString = String(data.array())

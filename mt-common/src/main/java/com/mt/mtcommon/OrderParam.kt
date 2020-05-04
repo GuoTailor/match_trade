@@ -1,5 +1,6 @@
 package com.mt.mtcommon
 
+import java.math.BigDecimal
 import java.util.*
 
 /**
@@ -10,20 +11,21 @@ import java.util.*
  * @apiParam {Int} [number] 交易数量，默认100股
  */
 open class OrderParam(
-        var id: Int? = null,        // 用户id
-        var price: Double? = null,  // 报价
+        var userId: Int? = null,        // 用户id
+        var price: BigDecimal? = null,  // 报价
         var roomId: String? = null, // 房间号
         var isBuy: Boolean? = null, // 是否买家
         var number: Int = 100,      // 交易数量，默认100股
+        var flag: String? = null,
         var time: Date = Date()     // 报价时间，默认当前时间
 ) {
 
     fun verify(): Boolean {
-        return (price?.let { it > 0 } ?: false) && number > 0
+        return (price?.let { it.toDouble() > 0 } ?: false) && number > 0
     }
 
     override fun toString(): String {
-        return "OrderParam(id=$id, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, time=$time)"
+        return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, time=$time)"
     }
 
     override fun equals(other: Any?): Boolean {     // 只需要用户id和房间号就可以唯一标识一个报价
@@ -32,14 +34,14 @@ open class OrderParam(
 
         other as OrderParam
 
-        if (id != other.id) return false
+        if (userId != other.userId) return false
         if (roomId != other.roomId) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = id ?: 0
+        var result = userId ?: 0
         result = 31 * result + (roomId?.hashCode() ?: 0)
         return result
     }

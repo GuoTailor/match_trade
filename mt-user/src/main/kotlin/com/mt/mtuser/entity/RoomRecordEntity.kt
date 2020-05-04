@@ -2,12 +2,11 @@ package com.mt.mtuser.entity
 
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomRecord
-import com.mt.mtuser.common.minus
 import com.mt.mtuser.entity.room.BaseRoom
+import com.mt.mtuser.entity.room.ClickMatch
 import com.mt.mtuser.entity.room.TimingMatch
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.sql.Time
 import java.time.LocalTime
 import java.util.*
 
@@ -32,17 +31,28 @@ class RoomRecordEntity(
         companyId: Int? = null,     // 公司id
         startTime: Date? = null,    // 启用时间
         endTime: Date? = null,      // 结束时间
+        quoteTime: LocalTime = LocalTime.MIN,   // 报价和选择身份时间
+        secondStage: LocalTime? = null, // 第二阶段时间
+        rival: Int? = null,         // 选择对手个数
         cycle: LocalTime? = null,   // 周期
-        duration: LocalTime? = null  // 时长
-) : RoomRecord(roomId, model, stockId, companyId, startTime, endTime, cycle, duration) {
+        duration: LocalTime? = null // 时长
+) : RoomRecord(roomId, model, stockId, companyId, startTime, endTime, quoteTime, secondStage, rival, cycle, duration) {
 
     constructor(room: BaseRoom) : this(
             roomId = room.roomId,
             model = room.flag,
             companyId = room.companyId,
             duration = room.time) {
+        if (room is ClickMatch) {
+            quoteTime = room.quoteTime ?: LocalTime.MIN
+            secondStage = room.secondStage
+            rival = room.rival
+        }
+        if (room is TimingMatch) {
+            quoteTime = room.quoteTime ?: LocalTime.MIN
+        }
         cycle = when (room.roomId!![0].toString()) {
-            RoomEnum.CLICK.flag ->  LocalTime.MIN
+            RoomEnum.CLICK.flag -> LocalTime.MIN
             RoomEnum.BICKER.flag -> LocalTime.ofSecondOfDay(1)
             RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)
             RoomEnum.TIMELY.flag -> LocalTime.ofSecondOfDay(1)
@@ -51,14 +61,5 @@ class RoomRecordEntity(
         }
     }
 
-
-    override fun computingTime(): RoomRecordEntity {
-        duration = startTime?.let { start ->
-            endTime?.let { end ->
-                LocalTime.ofSecondOfDay((start - end) / 1000)
-            }
-        }
-        return this
-    }
 }
 

@@ -15,10 +15,9 @@ class MatchTask : Job {
     private lateinit var workService: WorkService
 
     override fun execute(context: JobExecutionContext) {
-        val time = context.mergedJobDataMap[timeKey].toString()
         val roomId = context.mergedJobDataMap[roomIdKey].toString()
-        log.info("开始定时任务 {} {}", time, roomId)
-
+        log.info("开始定时任务 {}", roomId)
+        workService.match(roomId)
     }
 
     companion object {

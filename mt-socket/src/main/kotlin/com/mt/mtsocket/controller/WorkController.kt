@@ -48,7 +48,7 @@ class WorkController {
      * @apiPermission none
      */
     @RequestMapping("/offer")
-    fun offer(@RequestBody orderParam: OrderParam): Mono<ResponseInfo<String>> {
+    fun offer(@RequestBody orderParam: OrderParam): Mono<ResponseInfo<Boolean>> {
         return ResponseInfo.ok(workService.offer(orderParam))
     }
 }

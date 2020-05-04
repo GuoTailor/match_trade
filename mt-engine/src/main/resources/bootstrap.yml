@@ -12,35 +12,12 @@ spring:
 ---
 
 spring:
-  application:
-    name: engine
   cloud:
+    # 使用 Nacos 作为配置中心
     nacos:
-      discovery:
+      config:
+        group: DEFAULT_GROUP
         server-addr: localhost:8848
-    stream:
-      default-binder: rocketmq
-      bindings:
-        out-trade:
-          destination: trade-topic
-          content-type: application/json
-        in-order:
-          destination: order-topic
-          group: match-order
+        file-extension: yml
+        prefix: mt-engine
   profiles: dev
-
-  r2dbc:
-    username: postgres
-    password: admin
-    url: r2dbc:postgres://localhost:5432/match_trade
-    pool:
-      enabled: true
-logging:
-  file:
-    max-size: 20MB
-    max-history: 60
-    path: ./static/logger
-  pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
-    file: "${FILE_LOG_PATTERN:%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
-

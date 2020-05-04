@@ -1,17 +1,18 @@
 package com.mt.mtsocket;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.concurrent.Queues;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 /**
@@ -19,7 +20,31 @@ import java.util.stream.IntStream;
  */
 //@RunWith(MockitoJUnitRunner.class)
 public class TestProcessor {
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Test
+    public void testList() {
+        List<String> s = new ArrayList<>(Arrays.asList("1", "2", "3", "4"));
+        while (s.size() >= 2) {
+            String s1 = s.remove(0);
+            String s2 = s.remove(0);
+            System.out.println(s1 + s2);
+        }
+    }
+
+    @Test
+    public void testFlatMap() {
+        Mono<String> mono = Mono.fromSupplier(() -> {
+            logger.info("next");
+            return "nmka";
+        });
+        mono.flatMap(str -> {
+            Mono<String> strMono1 = Mono.just("1");
+            Mono<String> strMono2 = Mono.just("2");
+            return strMono1.zipWith(strMono2);
+        }).doOnNext(tuple -> logger.info(tuple.getT1() + tuple.getT2()))
+                .block();
+    }
 
     @Test
     public void testDirectProcessor() {
@@ -27,11 +52,11 @@ public class TestProcessor {
         Flux<Integer> flux = directProcessor
                 .map(e -> e + 1);
 
-        flux.subscribe(it -> LOGGER.info("nmkasubscribe:{}", it));
+        flux.subscribe(it -> logger.info("nmkasubscribe:{}", it));
 
         IntStream.range(1, 20)
                 .forEach((it) -> {
-                    LOGGER.info("发布 " + it);
+                    logger.info("发布 " + it);
                     directProcessor.onNext(it);
                 });
 
@@ -45,12 +70,12 @@ public class TestProcessor {
         Flux<Integer> flux = unicastProcessor
                 .map(e -> e)
                 .doOnError(e -> {
-                    LOGGER.error(e.getMessage(), e);
+                    logger.error(e.getMessage(), e);
                 });
 
         IntStream.rangeClosed(1, 12)
                 .forEach(e -> {
-                    LOGGER.info("emit:{}", e);
+                    logger.info("emit:{}", e);
                     unicastProcessor.onNext(e);
                     try {
                         TimeUnit.SECONDS.sleep(1);
@@ -58,11 +83,11 @@ public class TestProcessor {
                         e1.printStackTrace();
                     }
                 });
-        LOGGER.info("begin to sleep 7 seconds");
+        logger.info("begin to sleep 7 seconds");
         TimeUnit.SECONDS.sleep(7);
         //UnicastProcessor allows only a single Subscriber
         flux.onErrorReturn(50000).subscribe(e -> {
-            LOGGER.info("flux subscriber:{}", e);
+            logger.info("flux subscriber:{}", e);
         });
 
         unicastProcessor.onComplete();
@@ -78,12 +103,12 @@ public class TestProcessor {
         Flux<Integer> flux2 = processor.map(e -> e * 10).subscribeOn(Schedulers.elastic());
 
         IntStream.rangeClosed(1, 8).forEach(e -> {
-            LOGGER.info("emit:{}", e);
+            logger.info("emit:{}", e);
             processor.onNext(e); //如果发布的未消费数据超过bufferSize,则会阻塞在这里
         });
 
         flux1.subscribe(e -> {
-            LOGGER.info("flux1 subscriber:{}", e);
+            logger.info("flux1 subscriber:{}", e);
             try {
                 Thread.sleep(400);
             } catch (InterruptedException e1) {
@@ -92,14 +117,14 @@ public class TestProcessor {
         });
         Thread.sleep(100);
         flux2.subscribe(e -> {
-            LOGGER.info("flux2 subscriber:{}", e);
+            logger.info("flux2 subscriber:{}", e);
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
         });
-        LOGGER.info("nmka");
+        logger.info("nmka");
         Thread.sleep(1_000);
 
         processor.onNext(20);
@@ -124,7 +149,7 @@ public class TestProcessor {
                 .map(e -> e);
 
         flux1.subscribe(e -> {
-            LOGGER.info("flux1 subscriber:{}", e);
+            logger.info("flux1 subscriber:{}", e);
         });
 
 
@@ -138,12 +163,12 @@ public class TestProcessor {
                     }
                 });
 
-        LOGGER.info("finish publish data");
+        logger.info("finish publish data");
         TimeUnit.SECONDS.sleep(1);
 
-        LOGGER.info("begin to subscribe flux2");
+        logger.info("begin to subscribe flux2");
         flux2.subscribe(e -> {
-            LOGGER.info("flux2 subscriber:{}", e);
+            logger.info("flux2 subscriber:{}", e);
         });
 
         replayProcessor.onComplete();
@@ -168,24 +193,24 @@ public class TestProcessor {
         AtomicInteger count = new AtomicInteger(0);
         flux1.subscribe(e -> {
             if (e % 10 == 0)
-                LOGGER.info("flux1 subscriber:{}", e);
+                logger.info("flux1 subscriber:{}", e);
             count.incrementAndGet();
             i++;
         });
         flux2.subscribe(e -> {
             if (e % 10 == 0)
-                LOGGER.info("flux2 subscriber:{}", e);
+                logger.info("flux2 subscriber:{}", e);
         });
         flux3.subscribe(e -> {
             if (e % 10 == 0)
-                LOGGER.info("flux3 subscriber:{}", e);
+                logger.info("flux3 subscriber:{}", e);
         });
 
         IntStream.rangeClosed(1, 100)
                 .parallel()
                 .forEach(e -> {
                     if (e % 10 == 0)
-                        LOGGER.info("emit:{}", e);
+                        logger.info("emit:{}", e);
                     topicProcessor.onNext(e);
                 });
 
@@ -208,13 +233,13 @@ public class TestProcessor {
                 .map(e -> e);
 
         flux1.subscribe(e -> {
-            LOGGER.info("flux1 subscriber:{}", e);
+            logger.info("flux1 subscriber:{}", e);
         });
         flux2.subscribe(e -> {
-            LOGGER.info("flux2 subscriber:{}", e);
+            logger.info("flux2 subscriber:{}", e);
         });
         flux3.subscribe(e -> {
-            LOGGER.info("flux3 subscriber:{}", e);
+            logger.info("flux3 subscriber:{}", e);
         });
 
         IntStream.range(1, 20)

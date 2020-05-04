@@ -1,8 +1,9 @@
 package com.mt.mtsocket.service
 
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomRecord
-import com.mt.mtsocket.common.Util
+import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.mq.MatchSink
 import com.mt.mtsocket.socket.SocketSessionStore
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
 
 /**
  * Created by gyh on 2020/4/14.
@@ -38,17 +38,31 @@ class WorkService {
     /**
      * 报价
      */
-    fun offer(price: OrderParam): Mono<String> {
+    // TODO 去掉存redis，直接mq发出去
+    fun offer(price: OrderParam): Mono<Boolean> {
         return if (price.verify()) {
-            BaseUser.getcurrentUser()
+            val verify = BaseUser.getcurrentUser()
                     .flatMap { user ->
                         val roomId = store.getRoom(user.id!!)
-                                ?: return@flatMap Mono.error<String>(IllegalStateException("错误，用户没有加入房间"))
-                        price.id = user.id
-                        price.roomId = roomId
-                        redisUtil.putUserOrder(price)
-                        Mono.just("成功")
+                                ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
+                        if (RoomEnum.getRoomEnum(roomId) == RoomEnum.CLICK) {
+                            redisUtil.getRoomRecord(roomId)
+                        } else Mono.empty()
+                    }.flatMap {
+                        if (it.quoteTime.toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis()) {
+                            Mono.error(IllegalStateException("错误，房间还没开始报价"))
+                        } else Mono.empty<Unit>()
                     }
+            // TODO 只允许报一次价
+            verify.then(BaseUser.getcurrentUser()
+                    .flatMap { user ->
+                        val roomId = store.getRoom(user.id!!)
+                                ?: return@flatMap Mono.error<Boolean>(IllegalStateException("错误，用户没有加入房间"))
+                        price.userId = user.id
+                        price.roomId = roomId
+                        price.flag = RoomEnum.getRoomModel(roomId).flag
+                        redisUtil.putUserOrder(price)
+                    })
         } else Mono.error(IllegalStateException("报价错误"))
     }
 

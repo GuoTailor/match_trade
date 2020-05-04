@@ -8,6 +8,8 @@ import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
+import com.mt.mtsocket.schedule.MatchStartJobInfo
+import com.mt.mtsocket.schedule.QuartzManager
 import com.mt.mtsocket.service.RedisUtil
 import com.mt.mtsocket.service.WorkService
 import org.slf4j.LoggerFactory
@@ -38,6 +40,8 @@ class SocketHandler : WebSocketHandler {
 
     @Autowired
     private lateinit var redisUtil: RedisUtil
+    @Autowired
+    private lateinit var quartzManager: QuartzManager
 
     init {
         json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -80,7 +84,9 @@ class SocketHandler : WebSocketHandler {
 
     fun onRoomEvent(event: RoomEvent) {
         if (event.enable) {
-            // TODO 启动该房间的定时任务
+            // TODO 添加定时任务通知第二阶段开始 秃dou
+            val roomRecord = redisUtil.getRoomRecord(event.roomId).block()!!
+            quartzManager.addJob(MatchStartJobInfo(roomRecord))
         } else {
             SocketSessionStore.userRoom.forEach(4) { uid: Int, rid: String ->
                 if (event.roomId == rid) {

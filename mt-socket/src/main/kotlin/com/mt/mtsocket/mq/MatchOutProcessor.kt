@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component
  */
 @Component
 class MatchOutProcessor {
+
     @StreamListener(MatchSink.IN_TRADE)
     fun inTrade() {
-
+        TODO()
     }
 }
