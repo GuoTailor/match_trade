@@ -13,11 +13,15 @@ interface MatchSink {
     @Output(OUT_ORDER)
     fun outOrder():  MessageChannel
 
+    @Output(OUT_RIVAL)
+    fun outRival():  MessageChannel
+
     @Input(IN_TRADE)
     fun inTrade(): SubscribableChannel
 
     companion object {
         const val IN_TRADE = "in-trade"
         const val OUT_ORDER = "out-order"
+        const val OUT_RIVAL = "out-rival"
     }
 }

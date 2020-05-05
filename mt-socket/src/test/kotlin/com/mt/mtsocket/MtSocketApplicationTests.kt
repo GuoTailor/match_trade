@@ -15,6 +15,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
 
@@ -58,16 +59,6 @@ class MtSocketApplicationTests {
     }
 
     @Test
-    fun testRedis() {
-        redisUtil.putUserOrder(OrderParam(userId = 1, roomId = "d11")).block()
-        redisUtil.putUserOrder(OrderParam(userId = 2, roomId = "d11")).block()
-        redisUtil.putUserOrder(OrderParam(userId = 1, roomId = "d11")).block()
-        //redisUtil.getUserOrder("d11").subscribe { println(it.toString() + " " + it.javaClass); redisUtil.deleteUserOrder(it) }
-        redisUtil.getUserOrder("d11").doOnNext { println(it.toString() + " " + it.javaClass) }.blockLast()
-        println("完成")
-    }
-
-    @Test
     fun testRedisTemp() {
         val om = ObjectMapper()
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
@@ -104,4 +95,15 @@ class MtSocketApplicationTests {
         println(testOrder.toString())
     }
 
+    @Test
+    fun testJson() {
+        val om = ObjectMapper()
+        val map = Decimal(BigDecimal("0.2"), 2)
+        val json = om.writeValueAsString(map)
+        println(json)
+        val jsonMap = om.readValue(json, Decimal::class.java)
+        println(jsonMap)
+    }
 }
+
+data class Decimal(val decimal: BigDecimal? = null, val req: Int? = null)

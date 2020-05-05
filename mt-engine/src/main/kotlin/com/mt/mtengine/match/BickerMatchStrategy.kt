@@ -1,6 +1,7 @@
 package com.mt.mtengine.match
 
 import com.mt.mtcommon.RoomEnum
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
 import com.mt.mtengine.service.TradeInfoService
@@ -9,6 +10,7 @@ import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.scheduler.Schedulers
+import kotlin.math.sin
 
 /**
  * Created by gyh on 2020/5/4.
@@ -17,6 +19,9 @@ import reactor.core.scheduler.Schedulers
 @Component
 class BickerMatchStrategy : MatchStrategy() {
     override val roomType = RoomEnum.BICKER
+
+    @Autowired
+    private lateinit var sink: MatchSink
 
     @Autowired
     private lateinit var transactionManager: R2dbcTransactionManager
@@ -44,17 +49,17 @@ class BickerMatchStrategy : MatchStrategy() {
             val buyOrder = roomInfo.buyOrderList.pollLast()    // 报价最高的为买家
             val sellOrder = roomInfo.buyOrderList.pollFirst()
             if (MatchUtil.verify(buyOrder, sellOrder)) {
-                val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, buyOrder, sellOrder)
+                val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, sink, buyOrder, sellOrder)
                 val operator = TransactionalOperator.create(transactionManager)     // TODO 添加回滚事务后的操作
                 operator.transactional(result).subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
             } else {
-                MatchUtil.orderFailed(tradeInfoService, roomService, buyOrder, sellOrder,
+                MatchUtil.orderFailed(tradeInfoService, roomService, sink, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.buyOrderList.forEach {
-            MatchUtil.orderFailed(tradeInfoService, roomService, it, null, "失败: 没有可以匹配的报价")
+            MatchUtil.orderFailed(tradeInfoService, roomService, sink, it, null, "失败: 没有可以匹配的报价")
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
     }

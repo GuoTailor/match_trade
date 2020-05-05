@@ -17,7 +17,7 @@ class MatchTask : Job {
     override fun execute(context: JobExecutionContext) {
         val roomId = context.mergedJobDataMap[roomIdKey].toString()
         log.info("开始定时任务 {}", roomId)
-        workService.match(roomId)
+        //workService.match(roomId)
     }
 
     companion object {

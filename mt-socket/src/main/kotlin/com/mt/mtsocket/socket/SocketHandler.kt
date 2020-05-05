@@ -58,7 +58,7 @@ class SocketHandler : WebSocketHandler {
         val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
                 .flatMap { SocketSessionStore.addUser(sessionHandler, roomId) }
-                .flatMap { workService.enterRoom(roomId) }
+                .map { workService.enterRoom(roomId).then().onErrorResume { t -> sessionHandler.send(t.message) }.subscribe() }
                 .flatMap { sessionHandler.disconnected() }
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
@@ -84,9 +84,9 @@ class SocketHandler : WebSocketHandler {
 
     fun onRoomEvent(event: RoomEvent) {
         if (event.enable) {
-            // TODO 添加定时任务通知第二阶段开始 秃dou
-            val roomRecord = redisUtil.getRoomRecord(event.roomId).block()!!
-            quartzManager.addJob(MatchStartJobInfo(roomRecord))
+            // TODO 添加定时任务通知第二阶段开始
+            // val roomRecord = redisUtil.getRoomRecord(event.roomId).block()!!
+            // quartzManager.addJob(MatchStartJobInfo(roomRecord))
         } else {
             SocketSessionStore.userRoom.forEach(4) { uid: Int, rid: String ->
                 if (event.roomId == rid) {
@@ -94,7 +94,6 @@ class SocketHandler : WebSocketHandler {
                     val msg = json.writeValueAsString(data)
                     val sessionHandler = SocketSessionStore.userSession[uid]
                     sessionHandler?.send(msg)?.and(sessionHandler.connectionClosed())?.subscribe()
-                    redisUtil.deleteAllUserOrder(event.roomId).subscribe()
                 }
             }
         }

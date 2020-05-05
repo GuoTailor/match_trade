@@ -40,35 +40,48 @@ abstract class MatchStrategy {
         }
     }
 
+    // TODO 只能报一次价，买卖都只能有一次
     fun tryAddOrder(order: OrderParam) {
         var roomInfo = roomMap[order.roomId]
-        if (roomInfo == null) { // TODO 存在安全隐患，可以考虑双检锁，房间只有第一次创建才会被锁
-            val roomRecord = redisUtil.getRoomRecord(order.roomId!!).block()
-            if (roomRecord == null) {
-                logger.error("交易订单添加错误，不存在的房间号: {}，或房间没开启", order.roomId)
-                return
-            } else {
-                roomInfo = RoomInfo(order.roomId!!, roomRecord.cycle!!.toMillisOfDay())
-                roomMap[order.roomId!!] = roomInfo  // TODO 存在并发修改隐患
+        if (roomInfo == null) {
+            synchronized(this) {
+                if (roomInfo == null) {
+                    // 房间只有第一次创建才会被锁
+                    val roomRecord = redisUtil.getRoomRecord(order.roomId!!).block()
+                    if (roomRecord == null) {
+                        logger.error("交易订单添加错误，不存在的房间号: {}，或房间没开启", order.roomId)
+                        return
+                    } else {
+                        roomInfo = RoomInfo(order.roomId!!, roomRecord.cycle!!.toMillisOfDay())
+                        roomMap[order.roomId!!] = roomInfo!!  // TODO 存在并发修改隐患
+                        start()
+                    }
+                }
             }
         }
-        roomInfo.tryAddOrder(order, packTime)
+        roomInfo?.tryAddOrder(order, packTime)
     }
 
     fun tryAddRival(rival: RivalInfo) {
         var roomInfo = roomMap[rival.roomId]
         if (roomInfo == null) {
-            val roomRecord = redisUtil.getRoomRecord(rival.roomId!!).block()
-            if (roomRecord == null) {
-                logger.error("交易对手添加错误，不存在的房间号: {}，或房间没开启", rival.roomId)
-                return
-            } else {
-                roomInfo = RoomInfo(rival.roomId!!, roomRecord.cycle!!.toMillisOfDay())
-                roomMap[rival.roomId!!] = roomInfo
+            synchronized(this) {
+                if (roomInfo == null) {
+                    val roomRecord = redisUtil.getRoomRecord(rival.roomId!!).block()
+                    if (roomRecord == null) {
+                        logger.error("交易对手添加错误，不存在的房间号: {}，或房间没开启", rival.roomId)
+                        return
+                    } else {
+                        roomInfo = RoomInfo(rival.roomId!!, roomRecord.cycle!!.toMillisOfDay())
+                        roomMap[rival.roomId!!] = roomInfo!!
+                    }
+                }
             }
         }
-        roomInfo.tryAddRival(rival, packTime)
+        roomInfo?.tryAddRival(rival, packTime)
     }
+
+    // TODO 房间结束通知，去掉修改周期的通知，修改周期只有房间结束后才能改
 
     /**
      * 更新房间的周期

@@ -2,6 +2,7 @@ package com.mt.mtengine.match
 
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RoomEnum
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
 import com.mt.mtengine.service.TradeInfoService
@@ -18,6 +19,8 @@ import reactor.core.scheduler.Schedulers
 @Component
 class TimingMatchStrategy : MatchStrategy() {
     override val roomType = RoomEnum.TIMING
+    @Autowired
+    private lateinit var sink: MatchSink
 
     @Autowired
     private lateinit var transactionManager: R2dbcTransactionManager
@@ -46,13 +49,13 @@ class TimingMatchStrategy : MatchStrategy() {
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price != sellOrder.price) {
                     val operator = TransactionalOperator.create(transactionManager)
-                    val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, buyOrder, sellOrder)
+                    val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, sink, buyOrder, sellOrder)
                     operator.transactional(result).subscribeOn(Schedulers.elastic()).subscribe()    // TODO 添加回滚事务后的操作
                 } else {
-                    MatchUtil.orderFailed(tradeInfoService, roomService, buyOrder, sellOrder, "报价相同作废")
+                    MatchUtil.orderFailed(tradeInfoService, roomService, sink, buyOrder, sellOrder, "报价相同作废")
                 }
             } else {
-                MatchUtil.orderFailed(tradeInfoService, roomService, buyOrder, sellOrder,
+                MatchUtil.orderFailed(tradeInfoService, roomService, sink, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder)
                 ).subscribeOn(Schedulers.elastic()).subscribe()
             }

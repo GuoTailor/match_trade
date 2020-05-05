@@ -1,6 +1,7 @@
 package com.mt.mtengine.match
 
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.RivalInfo
 
 /**
  * Created by gyh on 2020/5/1.
@@ -22,6 +23,14 @@ object MatchManager {
         strategyList.forEach {
             if (it.isCanAdd(order.roomId)) {
                 it.tryAddOrder(order)
+            }
+        }
+    }
+
+    fun add(rival: RivalInfo) {
+        strategyList.forEach {
+            if (it.isCanAdd(rival.roomId)) {
+                it.tryAddRival(rival)
             }
         }
     }

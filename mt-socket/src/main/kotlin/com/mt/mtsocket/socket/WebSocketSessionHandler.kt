@@ -45,6 +45,8 @@ class WebSocketSessionHandler {
 
     fun connected(): Mono<WebSocketSession> {
         return connectedProcessor
+                .doOnError { logger.info("错误 {}", it.message) }
+                .doOnCancel { logger.info("取消") }
     }
 
     fun disconnected(): Mono<WebSocketSession> {
@@ -65,8 +67,8 @@ class WebSocketSessionHandler {
 
     fun getSession() = session
 
-    fun send(message: String): Mono<Void> {
-        return if (webSocketConnected) {
+    fun send(message: String?): Mono<Void> {
+        return if (webSocketConnected && message != null) {
             logger.info("send $message")
             session.send(Mono.just(session.textMessage(message)))
                     .onErrorResume(ClosedChannelException::class.java) { connectionClosed() }
@@ -76,6 +78,7 @@ class WebSocketSessionHandler {
     }
 
     fun connectionClosed(): Mono<Void> {
+        logger.info("close")
         webSocketConnected = false
         val result = session.close()
         receiveProcessor.onComplete()

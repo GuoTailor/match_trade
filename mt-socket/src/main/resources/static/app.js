@@ -1,8 +1,7 @@
 var ws = null;
 var url = "ws://101.37.34.61:85/socket/room";
-var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1dIiwibmJm" +
-    "IjoxNTg3MzUzOTA5LCJleHAiOjE1ODc5NTg3MDl9.TAkNcR9kg__25GxxmJoQwX3fmbtVG29HlWvKQykr9IM";
-
+var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4ODY0ODkw" +
+    "MCwiZXhwIjoxNTg5MjUzNzAwfQ.dDvF5esVCtI0Hdne7SZv4udVKGdSCUTHr4OnsacArsU";
 
 function setConnected(connected) {
     document.getElementById('connect').disabled = connected;

@@ -4,6 +4,7 @@ import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.TradeState
 import com.mt.mtengine.entity.MtTradeInfo
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
 import com.mt.mtengine.service.TradeInfoService
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.math.BigDecimal
 import java.util.*
+import kotlin.math.sin
 
 /**
  * Created by gyh on 2020/4/30.
@@ -23,6 +25,8 @@ import java.util.*
 @Component
 class DoubleMatchStrategy : MatchStrategy() {
     override val roomType = RoomEnum.DOUBLE
+    @Autowired
+    private lateinit var sink: MatchSink
 
     @Autowired
     private lateinit var transactionManager: R2dbcTransactionManager
@@ -57,7 +61,7 @@ class DoubleMatchStrategy : MatchStrategy() {
                 val operator = TransactionalOperator.create(transactionManager)     // TODO 添加回滚事务后的操作
                 operator.transactional(result).subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
             } else {
-                MatchUtil.orderFailed(tradeInfoService, roomService, order1, order2,
+                MatchUtil.orderFailed(tradeInfoService, roomService, sink, order1, order2,
                         "失败:" + MatchUtil.getVerifyInfo(order1, order2))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
@@ -67,9 +71,9 @@ class DoubleMatchStrategy : MatchStrategy() {
     fun match(buy: OrderParam, sell: OrderParam): Mono<MtTradeInfo> {
         // TODO 交易限制检查
         return if (buy.price != sell.price) {
-            MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, buy, sell)
+            MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, sink, buy, sell)
         } else {
-            MatchUtil.orderFailed(tradeInfoService, roomService, buy, sell, "相邻两笔，报价相同作废")
+            MatchUtil.orderFailed(tradeInfoService, roomService, sink, buy, sell, "相邻两笔，报价相同作废")
         }
     }
 

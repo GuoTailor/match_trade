@@ -1,9 +1,6 @@
 package com.mt.mtsocket.service
 
-import com.mt.mtcommon.OrderParam
-import com.mt.mtcommon.RoomEnum
-import com.mt.mtcommon.RoomRecord
-import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtcommon.*
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.mq.MatchSink
 import com.mt.mtsocket.socket.SocketSessionStore
@@ -38,46 +35,42 @@ class WorkService {
     /**
      * 报价
      */
-    // TODO 去掉存redis，直接mq发出去
-    fun offer(price: OrderParam): Mono<Boolean> {
+    fun addOrder(price: OrderParam): Mono<Boolean> {
         return if (price.verify()) {
-            val verify = BaseUser.getcurrentUser()
-                    .flatMap { user ->
-                        val roomId = store.getRoom(user.id!!)
+            BaseUser.getcurrentUser()
+                    .flatMap {
+                        val roomId = store.getRoom(it.id!!)
                                 ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
-                        if (RoomEnum.getRoomEnum(roomId) == RoomEnum.CLICK) {
-                            redisUtil.getRoomRecord(roomId)
-                        } else Mono.empty()
-                    }.flatMap {
-                        if (it.quoteTime.toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis()) {
-                            Mono.error(IllegalStateException("错误，房间还没开始报价"))
-                        } else Mono.empty<Unit>()
-                    }
-            // TODO 只允许报一次价
-            verify.then(BaseUser.getcurrentUser()
-                    .flatMap { user ->
-                        val roomId = store.getRoom(user.id!!)
-                                ?: return@flatMap Mono.error<Boolean>(IllegalStateException("错误，用户没有加入房间"))
+                        redisUtil.getRoomRecord(roomId)
+                    }.filter { it.quoteTime.toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis() }
+                    .filter { it.endTime!!.time > System.currentTimeMillis() }
+                    .switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
+                    .flatMap { BaseUser.getcurrentUser() }
+                    .map { user ->
+                        val roomId = store.getRoom(user.id!!) ?: throw IllegalStateException("错误，用户没有加入房间")
                         price.userId = user.id
                         price.roomId = roomId
                         price.flag = RoomEnum.getRoomModel(roomId).flag
-                        redisUtil.putUserOrder(price)
-                    })
+                        matchSink.outOrder().send(MessageBuilder.withPayload(price).build())
+                    }
         } else Mono.error(IllegalStateException("报价错误"))
     }
 
-    fun match(roomId: String) {
-        val size = redisUtil.getUserOrderSize(roomId).block() ?: 0
-        for (i in 0 until size) {
-            redisUtil.popUserOrder(roomId)
-                    .doOnError { log.error("错误", it) }
-                    .subscribe {
-                        val message = MessageBuilder.withPayload(it)
-                                .setHeader(MessageConst.PROPERTY_TAGS, "testTag")
-                                .build()
-                        val result = matchSink.outOrder().send(message)
-                        log.info("{} {}", it, result)
+    /**
+     * 添加对手
+     */
+    fun addRival(rival: RivalInfo): Mono<Boolean> {
+        return BaseUser.getcurrentUser()
+                .map {
+                    val roomId = store.getRoom(it.id!!)?: throw IllegalStateException("错误，用户没有加入房间")
+                    if (RoomEnum.getRoomModel(roomId) == RoomEnum.CLICK) {
+                        rival.userId = it.id!!
+                        rival.roomId = roomId
+                        matchSink.outRival().send(MessageBuilder.withPayload(rival).build())
+                    } else {
+                        throw IllegalStateException("错误，点选成交才能选择对手")
                     }
-        }
+                }
     }
+
 }

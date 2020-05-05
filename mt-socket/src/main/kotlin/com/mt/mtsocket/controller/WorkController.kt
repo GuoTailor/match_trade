@@ -1,6 +1,8 @@
 package com.mt.mtsocket.controller
 
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.RivalInfo
+import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.service.WorkService
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,6 +51,22 @@ class WorkController {
      */
     @RequestMapping("/offer")
     fun offer(@RequestBody orderParam: OrderParam): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(workService.offer(orderParam))
+        return ResponseInfo.ok(workService.addOrder(orderParam))
+    }
+
+    /**
+     * @api {connect} /rival 选择对手
+     * @apiDescription 报价
+     * @apiName offer
+     * @apiVersion 0.0.1
+     * @apiUse OrderParam
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission none
+     */
+    @RequestMapping("/rival")
+    fun addRival(@RequestBody rival: RivalInfo): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(workService.addRival(rival))
     }
 }

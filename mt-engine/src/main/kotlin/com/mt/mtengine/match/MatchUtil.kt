@@ -3,9 +3,11 @@ package com.mt.mtengine.match
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.TradeState
 import com.mt.mtengine.entity.MtTradeInfo
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
 import com.mt.mtengine.service.TradeInfoService
+import org.springframework.messaging.support.MessageBuilder
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
@@ -57,6 +59,7 @@ object MatchUtil {
     fun orderSuccess(positionsService: PositionsService,
                      tradeInfoService: TradeInfoService,
                      roomService: RoomService,
+                     sink: MatchSink,
                      buy: OrderParam,
                      sell: OrderParam): Mono<MtTradeInfo> {
 
@@ -70,11 +73,12 @@ object MatchUtil {
                         threadInfo.tradeState = TradeState.SUCCESS
                         threadInfo
                     }.flatMap { threadInfo -> tradeInfoService.save(threadInfo) }
-                }
+                }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
     }
 
     fun orderFailed(tradeInfoService: TradeInfoService,
                     roomService: RoomService,
+                    sink: MatchSink,
                     buy: OrderParam,
                     sell: OrderParam?,
                     stateDetails: String): Mono<MtTradeInfo> {
@@ -89,6 +93,6 @@ object MatchUtil {
                     threadInfo.tradeState = TradeState.FAILED
                     threadInfo.stateDetails = stateDetails
                     tradeInfoService.save(threadInfo)
-                }
+                }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
     }
 }

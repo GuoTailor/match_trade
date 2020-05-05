@@ -1,6 +1,7 @@
 package com.mt.mtengine.match
 
 import com.mt.mtcommon.RoomEnum
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
 import com.mt.mtengine.service.TradeInfoService
@@ -17,6 +18,8 @@ import reactor.core.scheduler.Schedulers
 @Component
 class ClickMatchStrategy : MatchStrategy() {
     override val roomType = RoomEnum.CLICK
+    @Autowired
+    private lateinit var sink: MatchSink
 
     @Autowired
     private lateinit var transactionManager: R2dbcTransactionManager
@@ -48,14 +51,15 @@ class ClickMatchStrategy : MatchStrategy() {
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price != sellOrder.price) {
                     val operator = TransactionalOperator.create(transactionManager)
-                    val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, buyOrder, sellOrder)
+                    val result = MatchUtil.orderSuccess(positionsService, tradeInfoService, roomService, sink, buyOrder, sellOrder)
                     operator.transactional(result).subscribeOn(Schedulers.elastic()).subscribe()    // TODO 添加回滚事务后的操作
                 }
             } else {
-                MatchUtil.orderFailed(tradeInfoService, roomService, buyOrder, sellOrder,
+                MatchUtil.orderFailed(tradeInfoService, roomService, sink, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder)
                 ).subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
+        roomInfo.rivalList.clear()
     }
 }
