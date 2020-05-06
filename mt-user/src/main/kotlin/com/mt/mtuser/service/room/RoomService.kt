@@ -1,16 +1,10 @@
 package com.mt.mtuser.service.room
 
-import com.mt.mtcommon.RoomEnum
-import com.mt.mtcommon.RoomEvent
-import com.mt.mtcommon.plus
-import com.mt.mtcommon.isAfterToday
-import com.mt.mtcommon.toDate
-import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtcommon.*
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.Role
-import com.mt.mtuser.entity.RoomRecordEntity
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.schedule.*
 import com.mt.mtuser.service.R2dbcService
@@ -53,7 +47,7 @@ class RoomService {
     private lateinit var doubleRoomDao: DoubleRoomDao
 
     @Autowired
-    private lateinit var timelyRoomDao: TimelyRoomDao
+    private lateinit var continueRoomDao: ContinueRoomDao
 
     @Autowired
     private lateinit var r2dbc: R2dbcService
@@ -77,42 +71,13 @@ class RoomService {
      * 使能一个房间
      * @param value 1：启用一个房间 0 关闭一个房间
      */
-    //@Transactional 由于事务不支持挂起函数，所以注解只能打在普通函数上面并且一定要让报错抛出去，不然事务不会回退
-    // TODO 提供事务支持 考虑手动调用事务回滚
-    suspend fun enableRoom(roomId: String, value: String): Int {
-        val dao = getBaseRoomDao<BaseRoom>(roomId)
-        val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
-        if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
-        val rest = dao.enableRoomById(roomId, value)
-        var roomRecord = RoomRecordEntity(room)
-        roomEnableMutex.withLock {
-            if (value == BaseRoom.ENABLE) {
-                val startTime = System.currentTimeMillis()
-                roomRecord.startTime = startTime.toDate()
-                roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
-                val newRecord = roomRecordDao.save(roomRecord)
-                redisUtil.saveRoomRecord(newRecord)
-            } else if (value == BaseRoom.DISABLED) {
-                roomRecord = redisUtil.deleteAndGetRoomRecord(roomId)
-                        ?: throw IllegalStateException("房间不存在：$roomId")
-                roomRecord.endTime = System.currentTimeMillis().toDate()
-                roomRecord.computingTime()
-                r2dbc.dynamicUpdate(roomRecord)
-                        .matching(where("id").`is`(roomRecord.id!!))
-                        .fetch().awaitRowsUpdated()
-                // TODO 通知用户退出房间
-            }
-            return rest
-        }
-    }
-
     fun enableRoom(roomId: String, value: Boolean) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(roomId)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
-            var roomRecord = RoomRecordEntity(room)
+            var roomRecord = room.toRoomRecord()
             roomEnableMutex.withLock {
                 if (value) {
                     val startTime = System.currentTimeMillis()
@@ -123,7 +88,7 @@ class RoomService {
                 } else if (value) {
                     roomRecord = redisUtil.deleteAndGetRoomRecord(roomId)
                             ?: throw IllegalStateException("房间不存在：$roomId")
-                    roomRecord.endTime = System.currentTimeMillis().toDate()
+                    roomRecord.endTime = Date()
                     roomRecord.computingTime()
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
@@ -219,7 +184,7 @@ class RoomService {
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
         val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
         val doubleList = async { doubleRoomDao.findByCompanyIdAll(companyList) }
-        val timelyList = async { timelyRoomDao.findByCompanyIdAll(companyList) }
+        val timelyList = async { continueRoomDao.findByCompanyIdAll(companyList) }
         val timingList = async { timingRoomDao.findByCompanyIdAll(companyList) }
         val restList = LinkedList<BaseRoom>()
         clickList.await().toList(restList)
@@ -237,7 +202,7 @@ class RoomService {
         clickRoomDao.findTimeAll().collect(::addTimingTask)
         bickerRoomDao.findTimeAll().collect(::addTimingTask)
         doubleRoomDao.findTimeAll().collect(::addTimingTask)
-        timelyRoomDao.findTimeAll().collect(::addTimingTask)
+        continueRoomDao.findTimeAll().collect(::addTimingTask)
         timingRoomDao.findTimeAll().collect(::addTimingTask)
     }
 
@@ -259,7 +224,7 @@ class RoomService {
         val countClick = async { clickRoomDao.countByCompanyId(companyId) }
         val bickerClick = async { bickerRoomDao.countByCompanyId(companyId) }
         val countDouble = async { doubleRoomDao.countByCompanyId(companyId) }
-        val countTimely = async { timelyRoomDao.countByCompanyId(companyId) }
+        val countTimely = async { continueRoomDao.countByCompanyId(companyId) }
         val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
         company.await() ?: throw IllegalStateException("公司不存在：$companyId")
         company.await()?.roomCount!! > (countClick.await() + bickerClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
@@ -272,7 +237,7 @@ class RoomService {
         val countClick = async { clickRoomDao.count() }
         val countBicker = async { bickerRoomDao.count() }
         val countDouble = async { doubleRoomDao.count() }
-        val countTimely = async { timelyRoomDao.count() }
+        val countTimely = async { continueRoomDao.count() }
         val countTiming = async { timingRoomDao.count() }
         countClick.await() + countBicker.await() + countDouble.await() + countTimely.await() + countTiming.await()
     }
@@ -286,7 +251,7 @@ class RoomService {
             RoomEnum.CLICK.flag -> clickRoomDao as BaseRoomDao<T, String>
             RoomEnum.BICKER.flag -> bickerRoomDao as BaseRoomDao<T, String>
             RoomEnum.DOUBLE.flag -> doubleRoomDao as BaseRoomDao<T, String>
-            RoomEnum.TIMELY.flag -> timelyRoomDao as BaseRoomDao<T, String>
+            RoomEnum.CONTINUE.flag -> continueRoomDao as BaseRoomDao<T, String>
             RoomEnum.TIMING.flag -> timingRoomDao as BaseRoomDao<T, String>
             else -> throw IllegalStateException("不支持的房间号")
         }

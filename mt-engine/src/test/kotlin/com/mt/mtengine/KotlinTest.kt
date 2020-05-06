@@ -1,32 +1,38 @@
 package com.mt.mtengine
 
+import com.fasterxml.jackson.databind.ObjectMapper
+
 /**
  * Created by gyh on 2020/5/5.
  */
 abstract class KotlinTest {
     abstract val flag: String
 
-    fun testSync() {
-        synchronized(this) {
-            println("start $flag")
+    fun testSync(lock: String) {
+        synchronized(lock) {
+            println("start $flag $lock")
             Thread.sleep(1000)
-            println("end $flag")
+            println("end $flag  $lock")
         }
     }
 }
 
-class ATest(override val flag: String = "A") : KotlinTest()
+class ATest(override val flag: String = "A", val nmka: String = "nmka") : KotlinTest() {
+    fun persion(): KotlinTest {
+        return this
+    }
+}
+
 class BTest(override val flag: String = "B") : KotlinTest()
 
 fun main() {
     val aTest = ATest()
-    val ta2 = Thread{ aTest.testSync() }
-    val ta1 = Thread{ aTest.testSync() }
-    val tb = Thread{ BTest().testSync() }
+    val om = ObjectMapper().writeValueAsString(aTest.persion())
+    println(om)
+    val ta1 = Thread { aTest.testSync(121.toString()) }
+    val tb = Thread { BTest().testSync(121.toString()) }
     ta1.start()
-    ta2.start()
     tb.start()
     ta1.join()
-    ta2.join()
     tb.join()
 }

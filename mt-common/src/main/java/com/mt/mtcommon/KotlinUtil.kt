@@ -21,9 +21,14 @@ fun Long.toDate(): Date = Date(this)
 fun LocalTime.toMillisOfDay(): Long = this.toNanoOfDay() / 1000_000
 
 /**
- * 吧LocalTime转换为Duration
+ * 把LocalTime转换为Duration
  */
 fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
+
+/**
+ * 把LocalTime转换为Date
+ */
+fun LocalTime.toDate(): Date = Date(System.currentTimeMillis() - LocalTime.now().toMillisOfDay() + this.toMillisOfDay())
 
 /**
  * 判断现在加上指定时间之后是否超过今天的最大时间。

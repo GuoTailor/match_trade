@@ -1,8 +1,8 @@
 package com.mt.mtengine.match
 
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.TradeInfo
 import com.mt.mtcommon.TradeState
-import com.mt.mtengine.entity.MtTradeInfo
 import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.PositionsService
 import com.mt.mtengine.service.RoomService
@@ -22,6 +22,8 @@ object MatchUtil {
             return@Comparator o2.time.compareTo(o1.time)    // 时间降序，越先报价时间越小
         } else return@Comparator priceResult
     }
+
+    val sortTime = Comparator<OrderParam> { o1, o2 -> o2.time.compareTo(o1.time) }  // 时间降序，越先报价时间越小
 
     /**
      * 基础验证，包括用户id，房间号，报价及数量，
@@ -47,7 +49,9 @@ object MatchUtil {
                     if (buy.roomId == sell.roomId) {
                         if (buy.verify()) {
                             if (sell.verify()) {
-                                "成功"
+                                if (buy.price!! > sell.price) {
+                                    "成功"
+                                } else "卖方价格（${sell.price}）和买方价格（${buy.price}）不匹配"
                             } else "卖方价格（${sell.price}）或数量（${sell.number}）不合法"
                         } else "买方价格（${buy.price}）或数量（${buy.number}）不合法"
                     } else "卖方房间号（${buy.roomId}）和买方房间号（${sell.roomId}）不相同"
@@ -61,14 +65,14 @@ object MatchUtil {
                      roomService: RoomService,
                      sink: MatchSink,
                      buy: OrderParam,
-                     sell: OrderParam): Mono<MtTradeInfo> {
+                     sell: OrderParam): Mono<TradeInfo> {
 
         return roomService.findCompanyIdByRoomId(buy.roomId!!)
                 .flatMap {
                     val m1 = positionsService.addAmount(it.companyId, it.stockId, buy.userId!!, buy.number)
                     val m2 = positionsService.minusAmount(it.companyId, it.stockId, sell.userId!!, sell.number)
                     m1.zipWith(m2) { _, _ ->
-                        val threadInfo = MtTradeInfo(buy, sell, it.companyId, it.stockId)
+                        val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId)
                         threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
                         threadInfo.tradeState = TradeState.SUCCESS
                         threadInfo
@@ -81,11 +85,11 @@ object MatchUtil {
                     sink: MatchSink,
                     buy: OrderParam,
                     sell: OrderParam?,
-                    stateDetails: String): Mono<MtTradeInfo> {
+                    stateDetails: String): Mono<TradeInfo> {
 
         return roomService.findCompanyIdByRoomId(buy.roomId!!)
                 .flatMap {
-                    val threadInfo = MtTradeInfo(buy, sell, it.companyId, it.stockId)
+                    val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId)
 
                     if (buy.price != null && sell?.price != null)
                         threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))

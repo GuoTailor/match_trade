@@ -23,6 +23,12 @@ interface MatchSink {
     fun inRival(): SubscribableChannel
 
     /**
+     * 撤单
+     */
+    @Input(IN_CANCEL)
+    fun inCancel(): SubscribableChannel
+
+    /**
      * 交易状态通知
      */
     @Output(OUT_TRADE)
@@ -32,5 +38,6 @@ interface MatchSink {
         const val OUT_TRADE = "out-trade"
         const val IN_ORDER = "in-order"
         const val IN_RIVAL = "in-rival"
+        const val IN_CANCEL = "in-cancel"
     }
 }

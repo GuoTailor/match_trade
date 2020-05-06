@@ -1,10 +1,13 @@
 package com.mt.mtuser
 
+import com.mt.mtcommon.toDuration
+import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.entity.Role
 import com.mt.mtuser.entity.User
 import org.junit.jupiter.api.Test
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
+import java.time.LocalTime
 
 
 //@SpringBootTest
@@ -54,6 +57,13 @@ class MtUserApplicationTests {
         user.password = "123456"
         val role = nmka2(Mono.just(user)).block()
         println(role)
+    }
+
+    @Test
+    fun testTime() {
+        val local = LocalTime.now().toMillisOfDay()
+        println(local)
+        println(System.currentTimeMillis())
     }
 
 }

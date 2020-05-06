@@ -1,5 +1,6 @@
 package com.mt.mtsocket.controller
 
+import com.mt.mtcommon.CancelOrder
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
 import com.mt.mtsocket.entity.BaseUser
@@ -68,5 +69,21 @@ class WorkController {
     @RequestMapping("/rival")
     fun addRival(@RequestBody rival: RivalInfo): Mono<ResponseInfo<Boolean>> {
         return ResponseInfo.ok(workService.addRival(rival))
+    }
+
+    /**
+     * @api {connect} /cancel 撤销订单
+     * @apiDescription 报价
+     * @apiName offer
+     * @apiVersion 0.0.1
+     * @apiUse CancelOrder
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission none
+     */
+    @RequestMapping("/cancel")
+    fun cancel(@RequestBody cancelOrder: CancelOrder): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(workService.cancelOrder(cancelOrder))
     }
 }

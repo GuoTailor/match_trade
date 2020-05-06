@@ -2,8 +2,8 @@ package com.mt.mtuser.service
 
 import com.mt.mtcommon.Consts
 import com.mt.mtcommon.RoomEvent
+import com.mt.mtcommon.RoomRecord
 import com.mt.mtcommon.toDuration
-import com.mt.mtuser.entity.RoomRecordEntity
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
@@ -29,24 +29,24 @@ class RedisUtil {
     /**
      * 保存一个房间记录,并通过房间记录的时长设置过期时间
      */
-    suspend fun saveRoomRecord(roomRecord: RoomRecordEntity) {
-        redisTemplate.opsForHash<String, RoomRecordEntity>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
+    suspend fun saveRoomRecord(roomRecord: RoomRecord) {
+        redisTemplate.opsForHash<String, RoomRecord>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
         redisTemplate.expireAndAwait(roomKey + roomRecord.roomId, roomRecord.duration!!.toDuration())
     }
 
     /**
      * 更新房间记录
      */
-    suspend fun updateRoomRecord(roomRecord: RoomRecordEntity) {
-        redisTemplate.opsForHash<String, RoomRecordEntity>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
+    suspend fun updateRoomRecord(roomRecord: RoomRecord) {
+        redisTemplate.opsForHash<String, RoomRecord>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
     }
 
     /**
      * 获取一个房间记录
      */
-    suspend fun getRoomRecord(roomId: String): RoomRecordEntity? {
+    suspend fun getRoomRecord(roomId: String): RoomRecord? {
         return redisTemplate
-                .opsForHash<String, RoomRecordEntity>()
+                .opsForHash<String, RoomRecord>()
                 .getAndAwait(roomKey + roomId, roomInfo)
     }
 
@@ -55,7 +55,7 @@ class RedisUtil {
      */
     suspend fun deleteRoomRecord(roomId: String) {
         redisTemplate
-                .opsForHash<String, RoomRecordEntity>()
+                .opsForHash<String, RoomRecord>()
                 .deleteAndAwait(roomKey + roomId)
     }
 
@@ -63,10 +63,10 @@ class RedisUtil {
      * 获取并删除一个记录<br>
      * 注意该方法不安全
      */
-    suspend fun deleteAndGetRoomRecord(roomId: String): RoomRecordEntity? {
+    suspend fun deleteAndGetRoomRecord(roomId: String): RoomRecord? {
         // 不安全 也许有更好的办法
-        val roomRecord = redisTemplate.opsForHash<String, RoomRecordEntity>().getAndAwait(roomKey + roomId, roomInfo)
-        redisTemplate.opsForHash<String, RoomRecordEntity>().deleteAndAwait(roomKey + roomId)
+        val roomRecord = redisTemplate.opsForHash<String, RoomRecord>().getAndAwait(roomKey + roomId, roomInfo)
+        redisTemplate.opsForHash<String, RoomRecord>().deleteAndAwait(roomKey + roomId)
         return roomRecord
     }
 

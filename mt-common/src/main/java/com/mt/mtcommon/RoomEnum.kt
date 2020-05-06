@@ -7,7 +7,7 @@ enum class RoomEnum(val flag: String) {
     CLICK("C"),
     BICKER("B"),
     DOUBLE("D"),
-    TIMELY("E"),
+    CONTINUE("E"),
     TIMING("I");
 
     companion object {
@@ -20,7 +20,7 @@ enum class RoomEnum(val flag: String) {
                 CLICK.flag -> CLICK
                 BICKER.flag -> BICKER
                 DOUBLE.flag -> DOUBLE
-                TIMELY.flag -> TIMELY
+                CONTINUE.flag -> CONTINUE
                 TIMING.flag -> TIMING
                 else -> throw IllegalStateException("不支持的房间号模式${flag}")
             }
@@ -35,7 +35,7 @@ enum class RoomEnum(val flag: String) {
                 CLICK.flag -> CLICK
                 BICKER.flag -> BICKER
                 DOUBLE.flag -> DOUBLE
-                TIMELY.flag -> TIMELY
+                CONTINUE.flag -> CONTINUE
                 TIMING.flag -> TIMING
                 else -> throw IllegalStateException("不支持的房间号模式${roomId}")
             }

@@ -17,6 +17,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 //@SpringBootTest
@@ -98,12 +100,13 @@ class MtSocketApplicationTests {
     @Test
     fun testJson() {
         val om = ObjectMapper()
-        val map = Decimal(BigDecimal("0.2"), 2)
+        val map = Decimal(BigDecimal("0.2"))
         val json = om.writeValueAsString(map)
         println(json)
+        Thread.sleep(1000)
         val jsonMap = om.readValue(json, Decimal::class.java)
-        println(jsonMap)
+        println(jsonMap.time.time)
     }
 }
 
-data class Decimal(val decimal: BigDecimal? = null, val req: Int? = null)
+data class Decimal(val decimal: BigDecimal? = null, val time: Date = Date())

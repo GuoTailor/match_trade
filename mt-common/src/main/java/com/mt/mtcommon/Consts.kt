@@ -8,5 +8,5 @@ object Consts {
     const val roomKey = "ROOM_RECORD:"
     const val roomInfo = "info"
     const val codeKey = "CODE:"
-    const val userOrder = "USER_ORDER:"
+    const val userOrder = "ROOM_ORDER_"
 }

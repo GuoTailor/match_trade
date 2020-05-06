@@ -16,7 +16,7 @@ object RoomExtend {
             "1" -> listOf(RoomEnum.CLICK.flag)
             "2" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag)
             "3" -> listOf(RoomEnum.CLICK.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag)
-            "4" -> listOf(RoomEnum.CLICK.flag, RoomEnum.BICKER.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag, RoomEnum.TIMELY.flag)
+            "4" -> listOf(RoomEnum.CLICK.flag, RoomEnum.BICKER.flag, RoomEnum.TIMING.flag, RoomEnum.DOUBLE.flag, RoomEnum.CONTINUE.flag)
             else -> throw java.lang.IllegalStateException("错误：${mode}和已有竞价模式{1：点选、2： 点选+定时、3：及时 +点选+两两撮合、4：全部}不匹配")
         }
     }
@@ -30,7 +30,7 @@ object RoomExtend {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
             RoomEnum.BICKER.flag -> RoomEnum.BICKER
             RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
-            RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
+            RoomEnum.CONTINUE.flag -> RoomEnum.CONTINUE
             RoomEnum.TIMING.flag -> RoomEnum.TIMING
             else -> throw IllegalStateException("不支持的房间号模式${roomId}")
         }
@@ -45,7 +45,7 @@ object RoomExtend {
             RoomEnum.CLICK.flag -> RoomEnum.CLICK
             RoomEnum.BICKER.flag -> RoomEnum.BICKER
             RoomEnum.DOUBLE.flag -> RoomEnum.DOUBLE
-            RoomEnum.TIMELY.flag -> RoomEnum.TIMELY
+            RoomEnum.CONTINUE.flag -> RoomEnum.CONTINUE
             RoomEnum.TIMING.flag -> RoomEnum.TIMING
             else -> throw IllegalStateException("不支持的房间号模式${flag}")
         }
@@ -59,7 +59,7 @@ object RoomExtend {
             RoomEnum.CLICK.flag -> roomId.replace(RoomEnum.CLICK.flag, newRoom.flag)
             RoomEnum.BICKER.flag -> roomId.replace(RoomEnum.BICKER.flag, newRoom.flag)
             RoomEnum.DOUBLE.flag -> roomId.replace(RoomEnum.DOUBLE.flag, newRoom.flag)
-            RoomEnum.TIMELY.flag -> roomId.replace(RoomEnum.TIMELY.flag, newRoom.flag)
+            RoomEnum.CONTINUE.flag -> roomId.replace(RoomEnum.CONTINUE.flag, newRoom.flag)
             RoomEnum.TIMING.flag -> roomId.replace(RoomEnum.TIMING.flag, newRoom.flag)
             else -> throw IllegalStateException("不支持的房间号模式${roomId}")
         }

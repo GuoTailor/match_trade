@@ -40,6 +40,7 @@ class SocketHandler : WebSocketHandler {
 
     @Autowired
     private lateinit var redisUtil: RedisUtil
+
     @Autowired
     private lateinit var quartzManager: QuartzManager
 
@@ -58,8 +59,14 @@ class SocketHandler : WebSocketHandler {
         val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
                 .flatMap { SocketSessionStore.addUser(sessionHandler, roomId) }
-                .map { workService.enterRoom(roomId).then().onErrorResume { t -> sessionHandler.send(t.message) }.subscribe() }
-                .flatMap { sessionHandler.disconnected() }
+                .map {
+                    workService.enterRoom(roomId).then()
+                            .onErrorResume {
+                                ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono()
+                                        .map { data -> json.writeValueAsString(data) }
+                                        .flatMap(sessionHandler::send)
+                            }.subscribe()
+                }.flatMap { sessionHandler.disconnected() }
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
 
@@ -80,23 +87,6 @@ class SocketHandler : WebSocketHandler {
                 .zipWith(connect)
                 .zipWith(watchDog)
                 .zipWith(output).then()
-    }
-
-    fun onRoomEvent(event: RoomEvent) {
-        if (event.enable) {
-            // TODO 添加定时任务通知第二阶段开始
-            // val roomRecord = redisUtil.getRoomRecord(event.roomId).block()!!
-            // quartzManager.addJob(MatchStartJobInfo(roomRecord))
-        } else {
-            SocketSessionStore.userRoom.forEach(4) { uid: Int, rid: String ->
-                if (event.roomId == rid) {
-                    val data = ServiceResponseInfo(ResponseInfo.ok("房间关闭"), -1)
-                    val msg = json.writeValueAsString(data)
-                    val sessionHandler = SocketSessionStore.userSession[uid]
-                    sessionHandler?.send(msg)?.and(sessionHandler.connectionClosed())?.subscribe()
-                }
-            }
-        }
     }
 
     private fun getQueryMap(queryStr: String): Map<String, String> {

@@ -51,7 +51,7 @@ class ClickMatch(
 ) : BaseRoom {
     override val flag: String = RoomEnum.CLICK.flag
 
-    override suspend fun validNull() {
+    override fun validNull() {
         people = null
         currentCount = null
     }

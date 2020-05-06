@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.Consts
+import com.mt.mtsocket.service.WorkService
 import com.mt.mtsocket.socket.SocketHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -26,7 +27,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 class ReactiveRedisConfiguration {
     private val json = jacksonObjectMapper()
     @Autowired
-    private lateinit var socketHandler : SocketHandler
+    private lateinit var workService: WorkService
 
     @Bean
     fun topic(): ChannelTopic {
@@ -55,7 +56,7 @@ class ReactiveRedisConfiguration {
     @Bean
     fun redisMessageListenerContainer(factory: ReactiveRedisConnectionFactory): ReactiveRedisMessageListenerContainer {
         val container = ReactiveRedisMessageListenerContainer(factory)
-        container.receive(topic()).subscribe { socketHandler.onRoomEvent(json.readValue(it.message)) }
+        container.receive(topic()).subscribe { workService.onRoomEvent(json.readValue(it.message)) }
         return container
     }
 

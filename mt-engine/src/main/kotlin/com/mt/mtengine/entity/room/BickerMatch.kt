@@ -51,7 +51,7 @@ class BickerMatch(
 ) : BaseRoom {
     override val flag: String = RoomEnum.BICKER.flag
 
-    override suspend fun validNull() {
+    override fun validNull() {
         people = null
         currentCount = null
     }

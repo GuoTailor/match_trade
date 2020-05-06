@@ -6,4 +6,5 @@ package com.mt.mtcommon
 object TradeState {
     const val SUCCESS = "success"
     const val FAILED = "failed"
+    const val STAY = "stay"
 }

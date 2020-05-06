@@ -40,6 +40,6 @@ fun main(args: Array<String>) {
         Thread.sleep(2000)
         rest = bean.outTrade().send(message)
         logger.info(rest.toString())
-    }.start()
+    }//.start()
 
 }

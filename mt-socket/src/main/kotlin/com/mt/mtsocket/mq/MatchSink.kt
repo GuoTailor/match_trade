@@ -16,6 +16,9 @@ interface MatchSink {
     @Output(OUT_RIVAL)
     fun outRival():  MessageChannel
 
+    @Output(OUT_CANCEL)
+    fun outCancel():  MessageChannel
+
     @Input(IN_TRADE)
     fun inTrade(): SubscribableChannel
 
@@ -23,5 +26,6 @@ interface MatchSink {
         const val IN_TRADE = "in-trade"
         const val OUT_ORDER = "out-order"
         const val OUT_RIVAL = "out-rival"
+        const val OUT_CANCEL = "out-cancel"
     }
 }

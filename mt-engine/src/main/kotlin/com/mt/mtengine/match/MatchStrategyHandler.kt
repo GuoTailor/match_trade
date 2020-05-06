@@ -1,5 +1,6 @@
 package com.mt.mtengine.match
 
+import com.mt.mtengine.match.strategy.MatchStrategy
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean

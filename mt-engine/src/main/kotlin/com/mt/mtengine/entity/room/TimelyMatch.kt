@@ -36,8 +36,8 @@ class TimelyMatch(
         override var enable: String? = null,         // 是否开启（0：关闭，1：开启）
         override var createTime: Date? = null        // 创建时间
 ) : BaseRoom {
-    override val flag: String = RoomEnum.TIMELY.flag
-    override suspend fun validNull() {
+    override val flag: String = RoomEnum.CONTINUE.flag
+    override fun validNull() {
         people = null
     }
 }

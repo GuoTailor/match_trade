@@ -1,11 +1,9 @@
 package com.mt.mtuser.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.mt.mtuser.common.Util
+import com.mt.mtcommon.*
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
-import java.sql.Time
-import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 
@@ -33,10 +31,12 @@ interface BaseRoom : Persistable<String> {
     override fun getId() = roomId
     override fun isNew() = true
 
+    suspend fun validNull()
     companion object {
-        const val ENABLE = "1"
 
+        const val ENABLE = "1"
         const val DISABLED = "0"
+
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -45,5 +45,29 @@ interface BaseRoom : Persistable<String> {
         return this as T
     }
 
-    suspend fun validNull()
+    fun toRoomRecord(): RoomRecord {
+        val record = RoomRecord(roomId = roomId, model = flag, companyId = companyId, duration = time)
+        startTime?.let { sTime ->
+            time?.let {
+                record.endTime = (sTime + it).toDate()
+            }
+        }
+        if (this is ClickMatch) {
+            record.quoteTime = quoteTime ?: LocalTime.MIN
+            record.secondStage = secondStage
+            record.rival = rival
+        }
+        if (this is TimingMatch) {
+            record.quoteTime = quoteTime ?: LocalTime.MIN
+        }
+        record.cycle = when (roomId!![0].toString()) {
+            RoomEnum.CLICK.flag -> LocalTime.MIN
+            RoomEnum.BICKER.flag -> LocalTime.MIN
+            RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)
+            RoomEnum.CONTINUE.flag -> LocalTime.ofSecondOfDay(1)
+            RoomEnum.TIMING.flag -> (this as TimingMatch).matchTime
+            else -> throw IllegalStateException("不支持的房间号模式${roomId}")
+        }
+        return record
+    }
 }

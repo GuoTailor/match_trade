@@ -82,8 +82,8 @@ class RoomController {
     }
 
     /**
-     * @api {post} /room/timely 创建一个及时撮合的房间
-     * @apiDescription  创建一个及时撮合的房间
+     * @api {post} /room/continue 创建一个连续撮合的房间
+     * @apiDescription  创建一个连续撮合的房间
      * @apiName createTimelyMatch
      * @apiVersion 0.0.1
      * @apiUse TimelyMatch
@@ -93,11 +93,11 @@ class RoomController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PostMapping("/timely")
+    @PostMapping("/continue")
     @PreAuthorize("hasRole('ADMIN')")
-    fun createTimelyMatch(@RequestBody timelyRoom: Mono<TimelyMatch>): Mono<ResponseInfo<TimelyMatch>> {
+    fun createTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.createRoom(timelyRoom.awaitSingle())
+            roomService.createRoom(continueRoom.awaitSingle())
         })
     }
 
@@ -182,8 +182,8 @@ class RoomController {
     }
 
     /**
-     * @api {put} /room/timely 更新一个及时撮合的房间
-     * @apiDescription  更新一个及时撮合的房间
+     * @api {put} /room/continue 更新一个连续撮合的房间
+     * @apiDescription  更新一个连续撮合的房间
      * @apiName updateTimelyMatch
      * @apiVersion 0.0.1
      * @apiUse TimelyMatch
@@ -193,11 +193,11 @@ class RoomController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PutMapping("/timely")
+    @PutMapping("/continue")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateTimelyMatch(@RequestBody timelyRoom: Mono<TimelyMatch>): Mono<ResponseInfo<TimelyMatch>> {
+    fun updateTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(timelyRoom.awaitSingle())
+            roomService.updateRoomByRoomId(continueRoom.awaitSingle())
         })
     }
 

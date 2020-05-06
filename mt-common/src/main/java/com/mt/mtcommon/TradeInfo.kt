@@ -1,5 +1,7 @@
 package com.mt.mtcommon
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.util.*
 
@@ -7,18 +9,32 @@ import java.util.*
  * Created by gyh on 2020/4/20.
  * 交易信息
  */
+@Table("mt_trade_info")
 open class TradeInfo(
+        @Id
         open var id: Int? = null,
-        open var companyId: Int? = null,            // 公司id
-        open var stockId: Int? = null,              // 股票id
-        open var roomId: String? = null,            // 房间id(在那个房间进行的交)
-        open var model: String? = null,             // 模式对应撮合模式
-        open var buyerId: Int? = null,              // 买方id
-        open var buyerPrice: BigDecimal? = null,    // 买方价格
-        open var sellerId: Int? = null,             // 卖方id
-        open var sellerPrice: BigDecimal? = null,   // 卖方价格
-        open var tradePrice: BigDecimal? = null,    // 成交价格
-        open var tradeTime: Date? = null,           // 交易时间
-        open var tradeState: String? = null,        // 交易状态
-        open var stateDetails: String? = null       // 状态原因
-)
+        var companyId: Int? = null,            // 公司id
+        var stockId: Int? = null,              // 股票id
+        var roomId: String? = null,            // 房间id(在那个房间进行的交)
+        var model: String? = null,             // 模式对应撮合模式
+        var buyerId: Int? = null,              // 买方id
+        var buyerPrice: BigDecimal? = null,    // 买方价格
+        var sellerId: Int? = null,             // 卖方id
+        var sellerPrice: BigDecimal? = null,   // 卖方价格
+        var tradePrice: BigDecimal? = null,    // 成交价格
+        var tradeTime: Date? = null,           // 交易时间
+        var tradeState: String? = null,        // 交易状态
+        var stateDetails: String? = null       // 状态原因
+) {
+    constructor(buy: OrderParam?, sell: OrderParam?, companyId: Int, stockId: Int) : this(
+            companyId = companyId,
+            stockId = stockId,
+            roomId = buy?.roomId,
+            model = buy?.flag,
+            buyerId = buy?.userId,
+            buyerPrice = buy?.price,
+            sellerId = sell?.userId,
+            sellerPrice = sell?.price,
+            tradeTime = Date()
+    )
+}

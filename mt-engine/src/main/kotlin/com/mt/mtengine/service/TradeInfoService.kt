@@ -1,7 +1,7 @@
 package com.mt.mtengine.service
 
+import com.mt.mtcommon.TradeInfo
 import com.mt.mtengine.dao.TradeInfoDao
-import com.mt.mtengine.entity.MtTradeInfo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -13,5 +13,5 @@ class TradeInfoService {
     @Autowired
     private lateinit var tradeInfoDao: TradeInfoDao
 
-    fun save(tradeInfo: MtTradeInfo) = tradeInfoDao.save(tradeInfo)
+    fun save(tradeInfo: TradeInfo) = tradeInfoDao.save(tradeInfo)
 }

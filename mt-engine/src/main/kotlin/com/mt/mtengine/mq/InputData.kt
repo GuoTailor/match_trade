@@ -1,5 +1,6 @@
 package com.mt.mtengine.mq
 
+import com.mt.mtcommon.CancelOrder
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
 import com.mt.mtengine.match.MatchManager
@@ -24,5 +25,10 @@ class InputData {
     @StreamListener(MatchSink.IN_RIVAL)
     fun inputRival(@Payload rivalInfo: RivalInfo) {
         MatchManager.add(rivalInfo)
+    }
+
+    @StreamListener(MatchSink.IN_CANCEL)
+    fun inputCancel(@Payload cancelOrder: CancelOrder) {
+        MatchManager.cancel(cancelOrder)
     }
 }

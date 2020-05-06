@@ -43,7 +43,7 @@ class TimingMatch(
         var currentCount: Int? = null        // 当前撮合次数
 ) : BaseRoom {
     override val flag: String = RoomEnum.TIMING.flag
-    override suspend fun validNull() {
+    override fun validNull() {
         people = null
         currentCount = null
         matchTime = LocalTime.ofSecondOfDay((time!!.second / count!!).toLong())
