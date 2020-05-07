@@ -23,6 +23,7 @@ open class TradeInfo(
         var sellerPrice: BigDecimal? = null,   // 卖方价格
         var tradePrice: BigDecimal? = null,    // 成交价格
         val tradeAmount: Int? = null,           // 成交数量
+        var tradeMoney: BigDecimal? = null,     // 成交金额
         var tradeTime: Date? = null,           // 交易时间
         var tradeState: String? = null,        // 交易状态
         var stateDetails: String? = null       // 状态原因
@@ -32,6 +33,7 @@ open class TradeInfo(
             stockId = stockId,
             roomId = buy?.roomId,
             model = buy?.flag,
+            tradeAmount = buy?.number,
             buyerId = buy?.userId,
             buyerPrice = buy?.price,
             sellerId = sell?.userId,

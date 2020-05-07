@@ -15,7 +15,7 @@ open class OrderParam(
         var price: BigDecimal? = null,  // 报价
         var roomId: String? = null,     // 房间号
         var isBuy: Boolean? = null,     // 是否买家
-        var number: Int = 100,          // 交易数量，默认100股
+        var number: Int? = null,        // 交易数量
         var flag: String? = null,       // 房间模式
         var time: Date = Date(),        // 报价时间，默认当前时间
         var tradeTime: Date? = null,    // 成交时间
@@ -25,7 +25,7 @@ open class OrderParam(
 ) {
 
     fun verify(): Boolean {
-        return (price?.let { it.toDouble() > 0 } ?: false) && number > 0
+        return (price?.let { it.toDouble() > 0 } ?: false) && number?.let { it > 0 } ?: false
     }
 
     fun onTrade(tradeInfo: TradeInfo) {

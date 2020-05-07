@@ -26,12 +26,14 @@ interface BaseRoom : Persistable<String> {
     @set:DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
     @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     var createTime: Date?        // 创建时间
+
     @get:org.springframework.data.annotation.Transient
     val flag: String            // 标识符
     override fun getId() = roomId
     override fun isNew() = true
 
     suspend fun validNull()
+
     companion object {
 
         const val ENABLE = "1"
@@ -46,7 +48,13 @@ interface BaseRoom : Persistable<String> {
     }
 
     fun toRoomRecord(): RoomRecord {
-        val record = RoomRecord(roomId = roomId, model = flag, companyId = companyId, duration = time)
+        val record = RoomRecord(
+                roomId = roomId,
+                model = flag,
+                companyId = companyId,
+                duration = time,
+                tradeAmount = numberTrades
+        )
         startTime?.let { sTime ->
             time?.let {
                 record.endTime = (sTime + it).toDate()

@@ -88,7 +88,7 @@ class CompanyService {
                 .page(query.page())
                 .fetch()
                 .all()
-                , connect, query)
+                , connect, query, "company_id = $companyId")
     }
 
     suspend fun findAll() = companyDao.findAll()

@@ -11,6 +11,9 @@ import java.util.*
  */
 interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
 
-    @Query("select sum()")
+    @Query("select sum(trade_amount) from mt_trade_info where trade_time > :time")
     suspend fun countStockByTradeTime(time: Date): Long
+
+    @Query("select sum(trade_amount) from mt_trade_info where trade_time > :time and company_id = :companyId")
+    suspend fun countStockByTradeTimeAndCompanyId(time: Date, companyId: Int): Long
 }

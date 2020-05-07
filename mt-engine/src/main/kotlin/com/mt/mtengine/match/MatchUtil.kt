@@ -59,44 +59,4 @@ object MatchUtil {
             } else "卖方用户id（${buy.userId}）或买方用户id（${sell.userId}）不合法"
         } else if (buy == null) "没有匹配的买家" else "有匹配的卖家"
     }
-
-    fun orderSuccess(positionsService: PositionsService,
-                     tradeInfoService: TradeInfoService,
-                     roomService: RoomService,
-                     sink: MatchSink,
-                     buy: OrderParam,
-                     sell: OrderParam): Mono<TradeInfo> {
-
-        return roomService.findCompanyIdByRoomId(buy.roomId!!)
-                .flatMap {
-                    val m1 = positionsService.addAmount(it.companyId, it.stockId, buy.userId!!, buy.number)
-                    val m2 = positionsService.minusAmount(it.companyId, it.stockId, sell.userId!!, sell.number)
-                    m1.zipWith(m2) { _, _ ->
-                        val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId)
-                        threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
-                        threadInfo.tradeState = TradeState.SUCCESS
-                        threadInfo
-                    }.flatMap { threadInfo -> tradeInfoService.save(threadInfo) }
-                }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-    }
-
-    fun orderFailed(tradeInfoService: TradeInfoService,
-                    roomService: RoomService,
-                    sink: MatchSink,
-                    buy: OrderParam,
-                    sell: OrderParam?,
-                    stateDetails: String): Mono<TradeInfo> {
-
-        return roomService.findCompanyIdByRoomId(buy.roomId!!)
-                .flatMap {
-                    val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId)
-
-                    if (buy.price != null && sell?.price != null)
-                        threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
-
-                    threadInfo.tradeState = TradeState.FAILED
-                    threadInfo.stateDetails = stateDetails
-                    tradeInfoService.save(threadInfo)
-                }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-    }
 }

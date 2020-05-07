@@ -35,14 +35,6 @@ class R2dbcService {
     @Autowired
     protected lateinit var connect: DatabaseClient
 
-    fun getAllColumns(data: Any) {
-        val list = LinkedList<String>()
-        val columns:List<SqlIdentifier> = dataAccessStrategy.getAllColumns(data.javaClass)
-        for (column in columns) {
-            println(dataAccessStrategy.toSql(column))
-        }
-    }
-
     fun getUpdate(data: Any): Update {
         val columns: MutableMap<SqlIdentifier, SettableValue> = dataAccessStrategy.getOutboundRow(data)
         val ids = dataAccessStrategy.getIdentifierColumns(data.javaClass)

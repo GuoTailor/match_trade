@@ -5,7 +5,6 @@ import com.mt.mtcommon.TradeInfo
 import com.mt.mtcommon.TradeState
 import com.mt.mtengine.mq.MatchSink
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -38,11 +37,12 @@ class MatchService {
                 .flatMap { info ->
                     val threadInfo = TradeInfo(buy, sell, info.companyId, info.stockId)
                     threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
+                    threadInfo.tradeMoney = threadInfo.tradePrice?.multiply(BigDecimal(threadInfo.tradeAmount ?: 0))
                     threadInfo.tradeState = TradeState.SUCCESS
                     buy.onTrade(threadInfo)
                     sell.onTrade(threadInfo)
-                    positionsService.addAmount(info.companyId, info.stockId, buy.userId!!, buy.number)
-                            .flatMap { positionsService.minusAmount(info.companyId, info.stockId, sell.userId!!, sell.number) }
+                    positionsService.addAmount(info.companyId, info.stockId, buy.userId!!, buy.number!!)
+                            .flatMap { positionsService.minusAmount(info.companyId, info.stockId, sell.userId!!, sell.number!!) }
                             .flatMap { tradeInfoService.save(threadInfo) }
                 }.flatMap { redisUtil.updateUserOrder(buy) }
                 .flatMap { redisUtil.updateUserOrder(sell) }

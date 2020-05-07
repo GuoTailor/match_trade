@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 24/04/2020 00:05:49
+ Date: 07/05/2020 16:01:38
 */
 
 
@@ -194,10 +194,10 @@ DROP TABLE IF EXISTS "public"."mt_kline";
 CREATE TABLE "public"."mt_kline" (
   "id" int4 NOT NULL DEFAULT nextval('mt_kline_id_seq'::regclass),
   "stock_id" int4 NOT NULL,
-  "opening_price" money NOT NULL,
-  "closing_price" money NOT NULL,
-  "top_price" money NOT NULL,
-  "bottom_pice" money NOT NULL,
+  "opening_price" numeric(11,4) NOT NULL,
+  "closing_price" numeric(11,4) NOT NULL,
+  "top_price" numeric(11,4) NOT NULL,
+  "bottom_pice" numeric(11,4) NOT NULL,
   "time" timestamp(6) NOT NULL DEFAULT now()
 )
 ;
@@ -472,13 +472,15 @@ CREATE TABLE "public"."mt_trade_info" (
   "room_id" int4 NOT NULL,
   "model" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "buyer_id" int4 NOT NULL,
-  "buyer_price" money NOT NULL,
+  "buyer_price" numeric(11,4) NOT NULL,
   "seller_id" int4 NOT NULL,
-  "seller_price" money NOT NULL,
-  "trade_price" money NOT NULL,
+  "seller_price" numeric(11,4) NOT NULL,
+  "trade_price" numeric(11,4) NOT NULL,
   "trade_time" timestamp(6) NOT NULL,
   "trade_state" varchar(4) COLLATE "pg_catalog"."default" NOT NULL,
-  "state_details" varchar(255) COLLATE "pg_catalog"."default"
+  "state_details" varchar(255) COLLATE "pg_catalog"."default",
+  "trade_amount" int4 NOT NULL,
+  "trade_money" numeric(11,4) NOT NULL
 )
 ;
 COMMENT ON COLUMN "public"."mt_trade_info"."company_id" IS '公司id';
@@ -493,6 +495,8 @@ COMMENT ON COLUMN "public"."mt_trade_info"."trade_price" IS '成交价格';
 COMMENT ON COLUMN "public"."mt_trade_info"."trade_time" IS '交易时间';
 COMMENT ON COLUMN "public"."mt_trade_info"."trade_state" IS '交易状态';
 COMMENT ON COLUMN "public"."mt_trade_info"."state_details" IS '状态原因';
+COMMENT ON COLUMN "public"."mt_trade_info"."trade_amount" IS '成交数量';
+COMMENT ON COLUMN "public"."mt_trade_info"."trade_money" IS '交易金额';
 
 -- ----------------------------
 -- Table structure for mt_user
@@ -582,7 +586,7 @@ SELECT setval('"public"."mt_room_record _id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."mt_room_seq"', 19, true);
+SELECT setval('"public"."mt_room_seq"', 28, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -596,7 +600,7 @@ SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_user_role_id_seq"
 OWNED BY "public"."mt_user_role"."id";
-SELECT setval('"public"."mt_user_role_id_seq"', 13, true);
+SELECT setval('"public"."mt_user_role_id_seq"', 14, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -716,6 +720,13 @@ ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "mt_stock_name_key" UNIQUE ("name
 -- Primary Key structure for table mt_stock
 -- ----------------------------
 ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "stock_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table mt_trade_info
+-- ----------------------------
+CREATE INDEX "mt_trade_info_trade_state_idx" ON "public"."mt_trade_info" USING btree (
+  "trade_state" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
 
 -- ----------------------------
 -- Primary Key structure for table mt_trade_info

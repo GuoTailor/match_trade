@@ -21,12 +21,22 @@ class PageView<T : Any> {
     var item: List<T>? = null
 }
 
-suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery): PageView<T> {
+suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery, where: String? = null): PageView<T> {
     val pageView = PageView<T>()
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName
-    ?: throw IllegalStateException("不支持的匿名类")
-    val where = pageQuery.getWhere().let { if (it.isBlank()) "" else " where $it" }
-    val count = connect.execute("select count(1) from $tableName $where")
+    ?: throw IllegalStateException("不支持的匿名类 ${T::class}")
+    val sqlWhere = pageQuery.getWhere().let {
+        if (it.isBlank() && where == null) {
+            ""
+        } else if (!it.isBlank() && where == null) {
+            " where $it"
+        } else if (it.isBlank() && where != null) {
+            " where $where"
+        } else {
+            " where $it and $where"
+        }
+    }
+    val count = connect.execute("select count(1) from $tableName $sqlWhere")
             .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one().awaitSingle()
     pageView.total = count?.toLong()
     pageView.item = data.collectList().awaitSingle()

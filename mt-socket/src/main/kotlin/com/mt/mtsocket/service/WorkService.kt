@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono
 class WorkService {
     private val log = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
+
     @Autowired
     private lateinit var redisUtil: RedisUtil
     private val store = SocketSessionStore
@@ -51,7 +52,10 @@ class WorkService {
                     }.filter { it.quoteTime.toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis() }
                     .filter { it.endTime!!.time > System.currentTimeMillis() }
                     .switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
-                    .map { matchSink.outOrder().send(MessageBuilder.withPayload(price).build()) }
+                    .map {
+                        price.number = it.tradeAmount
+                        matchSink.outOrder().send(MessageBuilder.withPayload(price).build())
+                    }
         } else Mono.error(IllegalStateException("报价错误"))
     }
 
@@ -61,7 +65,7 @@ class WorkService {
     fun addRival(rival: RivalInfo): Mono<Boolean> {
         return BaseUser.getcurrentUser()
                 .map {
-                    val roomId = store.getRoom(it.id!!)?: throw IllegalStateException("错误，用户没有加入房间")
+                    val roomId = store.getRoom(it.id!!) ?: throw IllegalStateException("错误，用户没有加入房间")
                     if (RoomEnum.getRoomModel(roomId) == RoomEnum.CLICK) {
                         rival.userId = it.id!!
                         rival.roomId = roomId
@@ -75,7 +79,7 @@ class WorkService {
     fun cancelOrder(cancelOrder: CancelOrder): Mono<Boolean> {
         return BaseUser.getcurrentUser()
                 .map {
-                    val roomId = store.getRoom(it.id!!)?: throw IllegalStateException("错误，用户没有加入房间")
+                    val roomId = store.getRoom(it.id!!) ?: throw IllegalStateException("错误，用户没有加入房间")
                     cancelOrder.userId = it.id
                     matchSink.outCancel().send(MessageBuilder.withPayload(cancelOrder).build())
                 }
