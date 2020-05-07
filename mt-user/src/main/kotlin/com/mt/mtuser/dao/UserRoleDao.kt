@@ -27,4 +27,7 @@ interface UserRoleDao: CoroutineCrudRepository<Role, Int> {
 
     @Query("select * from mt_user_role where user_id = :userId and role_id = :roleId and company_id = :companyId")
     suspend fun find(userId: Int, roleId: Int, companyId : Int): Role?
+
+    @Query("select * from mt_user_role where company_id = :companyId")
+    fun findByCompanyId(companyId: Int): Flow<Role>
 }

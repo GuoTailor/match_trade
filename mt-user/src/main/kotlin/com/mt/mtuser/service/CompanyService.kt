@@ -7,12 +7,14 @@ import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 
 /**
  * Created by gyh on 2020/3/18.
@@ -33,6 +35,9 @@ class CompanyService {
 
     @Autowired
     private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var r2dbcService: R2dbcService
 
     /**
      * 无赖使用{@link PostgresqlConnection}
@@ -60,7 +65,31 @@ class CompanyService {
 
     suspend fun update(company: Company) = companyDao.save(company)
 
-    suspend fun findById(id: Int) = companyDao.findById(id)
+    suspend fun findCompany(id: Int) = companyDao.findById(id)
+
+    suspend fun findCompany(query: PageQuery): PageView<Company> {
+        val roles = roleService.getCompanyList()
+        return getPage(connect.select()
+                .from<Company>()
+                .matching(query.where().and("id").`in`(roles))
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query)
+
+    }
+
+    suspend fun getAllShareholder(query: PageQuery): PageView<Role> {
+        val companyId = roleService.getCompanyList(Role.ADMIN)[0]
+        return getPage(connect.select()
+                .from<Role>()
+                .project("id", "user_id", "role_id", "company_id", "real_name", "department", "position")
+                .matching(query.where().and("company_id").`is`(companyId))
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query)
+    }
 
     suspend fun findAll() = companyDao.findAll()
 
@@ -99,13 +128,14 @@ class CompanyService {
     /**
      * 为公司添加一个管理员
      */
-    suspend fun addCompanyAdmin(info: StockholderInfo): Role {
+    suspend fun addCompanyAdmin(info: StockholderInfo): Role {  // TODO 一个公司只有一个管理员
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
-        if (roleService.getCompanyList().contains(info.companyId)) {
+        if (roleService.getCompanyList().contains(info.companyId)) {// TODO 有问题，为公司添加管理员不能用roleService.getCompanyList()
             val userRoleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
             val adminRoleId = roleService.getRoles().find { it.name == Role.ADMIN }!!.id!!
-            val role = roleService.find(user.id!!, info.companyId!!, userRoleId) ?: throw IllegalStateException("用户不是股东")
+            val role = roleService.find(user.id!!, info.companyId!!, userRoleId)
+                    ?: throw IllegalStateException("用户不是股东")
             role.roleId = adminRoleId
             role.realName = info.realName
             return roleService.save(role)

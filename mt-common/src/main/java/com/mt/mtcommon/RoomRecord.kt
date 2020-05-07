@@ -30,7 +30,7 @@ open class RoomRecord(
         open var secondStage: LocalTime? = null,// 第二阶段时间
         open var rival: Int? = null,            // 选择对手个数
         open var cycle: LocalTime? = null,      // 周期
-        open var duration: LocalTime? = null    // 时长,房间结束时会重新计算
+        open var duration: LocalTime? = null    // 时长,房间结束时会重新计算        // TODO 缺交易数量
 ) {
 
     open fun computingTime(): RoomRecord {

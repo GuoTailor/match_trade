@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity.page
 
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -26,6 +27,7 @@ class PageQuery(val pageNum: Int = 0,
                 private val order: String? = null,          // 排序字段 :id
                 private val direction: String? = null       // 排序方向 :asc
 ) {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val oper = arrayOf(arrayOf("cn", "like", "%%%s%%"), arrayOf("eq", "=", "%s"),
             arrayOf("nc", "not like", "%%%s%%"), arrayOf("ne", "<>", "%s"), arrayOf("gt", ">", "%s"),
             arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
@@ -83,4 +85,9 @@ class PageQuery(val pageNum: Int = 0,
         }
         return Criteria.empty()
     }
+
+    override fun toString(): String {
+        return "PageQuery(pageNum=$pageNum, pageSize=$pageSize, searchField=$searchField, searchOper=$searchOper, searchString=$searchString, order=$order, direction=$direction, logger=$logger, oper=${oper.contentToString()})"
+    }
+
 }

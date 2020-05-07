@@ -59,4 +59,5 @@ class RoleService {
 
     suspend fun find(userId: Int, roleId: Int, companyId : Int) = userRoleDao.find(userId, roleId, companyId)
 
+    fun findByCompanyId(companyId: Int) = userRoleDao.findByCompanyId(companyId)
 }

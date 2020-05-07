@@ -144,7 +144,50 @@ class CompanyController {
      */
     @GetMapping("/{id}")
     fun getCompany(@PathVariable id: Int): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(mono { companyService.findById(id) })
+        return ResponseInfo.ok(mono { companyService.findCompany(id) })
+    }
+
+    /**
+     * @api {get} /company/self 获取自己加入的公司信息
+     * @apiDescription  获取自己加入的公司信息
+     * @apiName getCompanys
+     * @apiUse PageQuery
+     * @apiVersion 0.0.1
+     * @apiParamExample {json} 请求-例子:
+     * {}
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 2,"item": [{"id": 1,"name": "6105","roomCount": 1,
+     * "mode": "[\"C\",\"B\",\"D\"]","createTime": "2020-03-18 15:35:45","licenseUrl": null,"creditUnionCode": null,
+     * "legalPerson": null,"unitAddress": null,"unitContactName": null,"unitContactPhone": null,"modes": ["C","B","D"]},
+     * {"id": 2,"name": "15-304","roomCount": 1,"mode": "[]","createTime": "2020-04-23 10:43:42","licenseUrl": null,
+     * "creditUnionCode": null,"legalPerson": null,"unitAddress": null,"unitContactName": null,"unitContactPhone": null,"modes": []}]}}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/self")
+    fun getCompanys(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
+        return ResponseInfo.ok(mono { companyService.findCompany(query) })
+    }
+
+    /**
+     * @api {get} /company/shareholder 获取公司所有的股东
+     * @apiDescription  获取公司所有的股东
+     * @apiName getAllShareholder
+     * @apiUse PageQuery
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 5,"item": [{"id": 7,"userId": 1,"roleId": 10,
+     * "companyId": 1,"realName": "nmka","department": null,"position": null,"name": null,"nameZh": null,"authority": null},
+     * {"id": 1,"userId": 5,"roleId": 3,"companyId": 1,"realName": "张三","department": null,"position": null,"name": null,
+     * "nameZh": null,"authority": null}]}}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/shareholder")
+    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<Role>>> {
+        return ResponseInfo.ok(mono { companyService.getAllShareholder(query) })
     }
 
     /**

@@ -19,6 +19,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.MonoSink
+import java.util.*
 
 /**
  * Created by gyh on 2020/3/25.
@@ -33,6 +34,14 @@ class R2dbcService {
 
     @Autowired
     protected lateinit var connect: DatabaseClient
+
+    fun getAllColumns(data: Any) {
+        val list = LinkedList<String>()
+        val columns:List<SqlIdentifier> = dataAccessStrategy.getAllColumns(data.javaClass)
+        for (column in columns) {
+            println(dataAccessStrategy.toSql(column))
+        }
+    }
 
     fun getUpdate(data: Any): Update {
         val columns: MutableMap<SqlIdentifier, SettableValue> = dataAccessStrategy.getOutboundRow(data)

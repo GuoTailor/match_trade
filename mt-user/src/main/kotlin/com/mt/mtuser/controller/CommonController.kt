@@ -46,43 +46,6 @@ class CommonController {
     @Autowired
     lateinit var redisUtil: RedisUtil
 
-    @Autowired
-    lateinit var quartzManager: QuartzManager
-
-    @GetMapping("/testTime")
-    fun testTime(@RequestParam time: String, @RequestParam name: String): Mono<Unit> {
-        logger.info("修改成功")
-        return mono {
-            val date = LocalTime.parse(time)
-            val cron = "0 %d %d ? * *".format(date.minute, date.hour)
-            quartzManager.addJob(RoomStartJobInfo(cron, name,
-                    JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.enableKey to true))))
-        }
-    }
-
-    @GetMapping("/modifyJobTime")
-    fun modifyJobTime(@RequestParam name: String) {
-        logger.info("修改成功")
-        quartzManager.modifyJobTime(RoomStartJobInfo("3/5 * * * * ?", name,
-                JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.enableKey to true))))
-    }
-
-    @GetMapping("/removeJob")
-    fun removeJob(@RequestParam name: String) {
-        quartzManager.removeJob(RoomStartJobInfo("1/3 * * * * ?", name,
-                JobDataMap(mapOf(RoomTask.roomIdKey to name, RoomTask.roomIdKey to true))))
-    }
-
-    @PutMapping("/findTest")
-    fun findTest(@RequestBody ids: List<Int>): Mono<List<User>> {
-        return mono {
-            val list = mutableListOf<User>()
-            userService.findByIdIn(ids)
-                    .collect { u -> list.add(u) }
-            list
-        }
-    }
-
     /**
      * @api {post} /register 注册一个用户
      * @apiDescription  注册用户
@@ -172,6 +135,9 @@ class CommonController {
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
+     * @apiSuccess {Integer} tradesCapacity=0 交易量
+     * @apiSuccess {Integer} tradesVolume=0 交易金额
+     * @apiSuccess {Integer} tradesNumber=0 交易次数
      * @apiGroup Common
      * @apiUse tokenMsg
      * @apiHeaderExample {json} 请求头例子:

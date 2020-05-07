@@ -29,8 +29,8 @@ class Role(
         var nameZh: String? = null
 ) : GrantedAuthority {
 
-    override fun getAuthority(): String {
-        return name!!
+    override fun getAuthority(): String? {
+        return name
     }
 
     override fun toString(): String {
