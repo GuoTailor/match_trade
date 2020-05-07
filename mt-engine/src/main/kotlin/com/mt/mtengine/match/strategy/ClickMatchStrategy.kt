@@ -65,9 +65,11 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
         val sellOrderList = LinkedList<OrderParam>()
         val rivalList = HashMap<Int, RivalInfo>()
 
-        override fun isStart(): Boolean {
+        override fun canStart(): Boolean {
             return System.currentTimeMillis() >= cycle && count == 0
         }
+
+        override fun isEnd() = count > 0
 
         /**
          * 点选撮合只撮合一次

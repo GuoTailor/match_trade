@@ -52,9 +52,11 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
         val orderList = TreeSet(MatchUtil.sortPriceAndTime)
         private var count = 0
 
-        override fun isStart(): Boolean {
+        override fun canStart(): Boolean {
             return System.currentTimeMillis() >= cycle && count == 0
         }
+
+        override fun isEnd() = count > 0
 
         /**
          * 抬杠撮合只撮合一次

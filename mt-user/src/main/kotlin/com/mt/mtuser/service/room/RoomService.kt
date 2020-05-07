@@ -155,8 +155,8 @@ class RoomService {
         val company = companyDao.findById(room.companyId!!)
         val dao = getBaseRoomDao<T>(room.flag)
         room.validNull()
-        if (RoomExtend.getRoomModels(company?.mode!!).contains(room.flag)) {// 判断房间模式(权限)
-            room.roomId = baseRoomService.getNextRoomId(room)               // 获取全局唯一的房间id
+        if (company!!.getModes().contains(room.flag)) {         // 判断房间模式(权限)
+            room.roomId = baseRoomService.getNextRoomId(room)   // 获取全局唯一的房间id
             room.isEnable<T>(false)
             roomCreateMutex.withLock {
                 if (checkRoomCount(room.companyId!!)) {

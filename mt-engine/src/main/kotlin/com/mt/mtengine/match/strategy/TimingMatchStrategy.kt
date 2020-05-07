@@ -63,9 +63,11 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = TreeSet(MatchUtil.sortPriceAndTime)
 
-        override fun isStart(): Boolean {
+        override fun canStart(): Boolean {
             return System.currentTimeMillis() >= nextCycleTime && System.currentTimeMillis() < endTime.time
         }
+
+        override fun isEnd() = System.currentTimeMillis() >= endTime.time
 
         override fun setNextCycle() {
             nextCycleTime += cycle

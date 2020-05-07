@@ -1,5 +1,7 @@
 package com.mt.mtuser
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.toDuration
 import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.entity.Role
@@ -52,11 +54,9 @@ class MtUserApplicationTests {
 
     @Test
     fun testMono() {
-        val user = User()
-        user.phone = " 123456"
-        user.password = "123456"
-        val role = nmka2(Mono.just(user)).block()
-        println(role)
+        val jsonStr = "[]"
+        val list: List<String> = ObjectMapper().readValue(jsonStr)
+        println(list)
     }
 
     @Test

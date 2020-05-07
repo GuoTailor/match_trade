@@ -75,9 +75,11 @@ class CompanyController {
      * @apiVersion 0.0.1
      * @apiUse Company
      * @apiParamExample {json} 请求-例子:
-     * {"id":2,"name":"15306科技有限公司", "roomCount":2, "mode": "2"}
+     * {"id": 1,"name": "6105","roomCount": 1, "modes": ["C","B","D"]}
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":null}
+     * {"code": 0,"msg": "成功","data": {"id": 1,"name": "6105","roomCount": 1,"mode": "[\"C\",\"B\",\"D\"]",
+     * "createTime": "2020-03-18 15:35:45","licenseUrl": null,"creditUnionCode": null,"legalPerson": null,
+     * "unitAddress": null,"unitContactName": null,"unitContactPhone": null,"modes": ["C","B","D"]}}
      * @apiGroup Company
      * @apiUse tokenMsg
      * @apiPermission admin

@@ -81,7 +81,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         } else roomInfo.tryAddRival(rival, packTime)
     }
 
-    // TODO 房间结束通知
+    // TODO 房间提前/延后结束通知
 
     /**
      * 开始撮合
@@ -98,7 +98,10 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         private val tempAdd = AtomicReference<Any>()
 
         /** 判断是否可以开始撮合 */
-        abstract fun isStart(): Boolean
+        abstract fun canStart(): Boolean
+
+        /** 判断房间是否结束 */
+        abstract fun isEnd(): Boolean
 
         /*** 设置下一次的撮合周期，改方法只会在撮合后调用 */
         abstract fun setNextCycle()
@@ -156,13 +159,16 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
             while (true) {
                 count = 0   // 计数清零
                 strategy!!.roomMap.forEach { k, v ->
-                    if (v.isStart()) {
+                    if (v.canStart()) {
                         strategy?.startMatch(k)
                         v.setNextCycle()
                         count++
                     }
                     if (v.addData()) {
                         count++
+                    }
+                    if (v.isEnd()) {
+                        strategy!!.roomMap.remove(k)
                     }
                 }
                 if (count == 0L) {  // 如果计数为0，说明没事可做，休眠一段时间以让出cpu
