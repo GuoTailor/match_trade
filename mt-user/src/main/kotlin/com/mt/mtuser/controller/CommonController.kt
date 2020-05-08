@@ -106,11 +106,9 @@ class CommonController {
                 val (code, msg) = SendSms.send(phone, smsCode, 5)
                 if (code == "0") {
                     redisUtil.saveCode(phone, smsCode)
-                }
-                msg
-            } else {
-                "用户已存在"
-            }
+                    msg
+                } else throw IllegalStateException(msg)
+            } else throw IllegalStateException("用户已存在")
         })
     }
 
