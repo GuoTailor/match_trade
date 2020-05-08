@@ -50,6 +50,23 @@ class CommonController {
     lateinit var roomRecordService: RoomRecordService
 
     /**
+     * @api {gut} /common/check 检查用户是否存在
+     * @apiDescription  检查用户是否存在
+     * @apiName checkingPhone
+     * @apiVersion 0.0.1
+     * @apiParam {String} phone 用户手机号
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":{"result": true}}
+     * @apiSuccess {String} result 是否存在 true：存在; false：不存在
+     * @apiGroup Common
+     * @apiPermission none
+     */
+    @GetMapping("/common/check")
+    fun checkingPhone(@RequestParam phone: String): Mono<ResponseInfo<Map<String, Boolean>>> {
+        return ResponseInfo.ok(mono { mapOf("result" to userService.existsUserByPhone(phone)) })
+    }
+
+    /**
      * @api {post} /register 注册一个用户
      * @apiDescription  注册用户
      * @apiName register

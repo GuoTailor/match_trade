@@ -182,6 +182,7 @@ class RoomService {
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
         val companyList = roleService.getCompanyList(role)
+        if (companyList.isEmpty()) throw IllegalStateException("错误：没有绑定公司，没有可用房间")
         // TODO 不支持分页 可以考虑禁止跳页查询
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
         val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
