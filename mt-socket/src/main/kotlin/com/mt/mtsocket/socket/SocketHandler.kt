@@ -3,6 +3,7 @@ package com.mt.mtsocket.socket
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtcommon.RoomEvent
+import com.mt.mtcommon.RoomRecord
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
@@ -58,15 +59,15 @@ class SocketHandler : WebSocketHandler {
         }
         val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
-                .flatMap { SocketSessionStore.addUser(sessionHandler, roomId) }
-                .map {
-                    workService.enterRoom(roomId).then()
-                            .onErrorResume {
-                                ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono()
-                                        .map { data -> json.writeValueAsString(data) }
-                                        .flatMap(sessionHandler::send)
-                            }.subscribe()
-                }.flatMap { sessionHandler.disconnected() }
+                .flatMap { workService.enterRoom(roomId) }
+                .onErrorResume {
+                    ServiceResponseInfo(ResponseInfo.failed("错误: ${it.message}"), -1).getMono()
+                            .map { data -> json.writeValueAsString(data) }
+                            .flatMap(sessionHandler::send)
+                            .flatMap { Mono.empty<RoomRecord>() }
+                }
+                .flatMap { SocketSessionStore.addUser(sessionHandler, it) }
+                .flatMap { sessionHandler.disconnected() }
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
 

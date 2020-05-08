@@ -35,14 +35,12 @@ interface BaseRoom : Persistable<String> {
     suspend fun validNull()
 
     companion object {
-
         const val ENABLE = "1"
         const val DISABLED = "0"
-
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <T : BaseRoom> isEnable(value: Boolean): T {
+    fun <T : BaseRoom> isEnable(value: Boolean): T {
         this.enable = if (value) "1" else "0"
         return this as T
     }

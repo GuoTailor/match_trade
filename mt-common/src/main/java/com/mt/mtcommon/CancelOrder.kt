@@ -7,4 +7,4 @@ package com.mt.mtcommon
  * @apiParam {Integer} [userId] 用户的id
  * @apiParam {String} roomId 房间Id
  */
-data class CancelOrder(var userId: Int? = null, var roomId: String? = null)
+data class CancelOrder(var userId: Int? = null, var roomId: String? = null, var flag: String? = null)

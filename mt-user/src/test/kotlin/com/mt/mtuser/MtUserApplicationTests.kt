@@ -66,4 +66,13 @@ class MtUserApplicationTests {
         println(System.currentTimeMillis())
     }
 
+    @Test
+    fun testNm() {
+        val json = ObjectMapper()
+        val string = "{\"Message\":\"账户余额不足\",\"RequestId\":\"F84EDD77-C09F-45CC-A850-25CD982B3C98\",\"Code\":\"isv.AMOUNT_NOT_ENOUGH\"}"
+        val info = json.readValue(string, Map::class.java)
+        println(info)
+    }
 }
+
+class Info(var message: String? = null, code: String? = null)

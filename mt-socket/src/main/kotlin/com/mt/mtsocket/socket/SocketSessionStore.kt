@@ -1,5 +1,6 @@
 package com.mt.mtsocket.socket
 
+import com.mt.mtcommon.RoomRecord
 import com.mt.mtsocket.entity.BaseUser
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
@@ -10,33 +11,27 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object SocketSessionStore {
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    internal val userSession = ConcurrentHashMap<Int, WebSocketSessionHandler>()
-    internal val userRoom = ConcurrentHashMap<Int, String>() // todo 整合到一起
+    internal val userInfoMap = ConcurrentHashMap<Int, UserRoomInfo>()
 
-    fun addUser(session: WebSocketSessionHandler, roomId: String): Mono<Unit> {
-        return BaseUser.getcurrentUser()
+    fun addUser(session: WebSocketSessionHandler, roomRecord: RoomRecord): Mono<Unit> {
+        return BaseUser.getcurrentUser()    // TODO 用户多地登陆会存在问题，同一userId会有不同的roomId，导致撤单操作混乱
                 .map {
-                    userSession[it.id!!] = session
-                    userRoom[it.id!!] = roomId
-                    logger.info("添加用户 ${it.id}")
+                    val userInfo = UserRoomInfo(session, it.id!!, roomRecord)
+                    userInfoMap[it.id!!] = userInfo
+                    logger.info("添加用户 $it")
                 }
     }
 
     fun removeUser(userId: Int) {
-        userSession.remove(userId)
-        userRoom.remove(userId)
+        userInfoMap.remove(userId)
         logger.info("移除用户 $userId")
     }
 
-    fun getSession(id: Int): WebSocketSessionHandler? {
-        return userSession[id]
+    fun getRoom(userId: Int): UserRoomInfo? {
+        return userInfoMap[userId]
     }
 
-    fun getAllSession(): MutableCollection<WebSocketSessionHandler> {
-        return userSession.values
-    }
-
-    fun getRoom(userId: Int): String? {
-        return userRoom[userId]
-    }
+    data class UserRoomInfo(val session: WebSocketSessionHandler,
+                            val userId: Int,
+                            val roomRecord: RoomRecord)     // TODO 可能的内存瓶颈，不应该为每个用户保存一个房间记录，而是一个房间号保存一个房间记录
 }

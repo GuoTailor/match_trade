@@ -38,7 +38,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
                     .min(MatchUtil.sortPriceAndTime).get()      // 获取对手中卖价最低的订单
             roomInfo.sellOrderList.remove(sellOrder)
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, buyOrder, sellOrder)
+                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
@@ -59,7 +59,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
     }
 
     class ClickRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.endTime!!.time, record.endTime ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime ?: LocalTime.MAX.toDate()) {
         private var count = 0
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = LinkedList<OrderParam>()

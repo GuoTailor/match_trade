@@ -40,9 +40,6 @@ class RoomService {
     @Autowired
     private lateinit var timingRoomDao: TimingRoomDao
 
-    @Autowired
-    private lateinit var redisUtil: RedisUtil
-
     // 必须open
     open class CompanyStockId(val companyId: Int, val stockId: Int)
 
@@ -66,35 +63,5 @@ class RoomService {
             RoomEnum.TIMING.flag -> timingRoomDao
             else -> throw IllegalStateException("不支持的房间号")
         }
-    }
-
-    /**
-     * 使能一个房间
-     * @param value true：启用一个房间 false 关闭一个房间
-     */
-    fun enableRoom(roomId: String, value: Boolean) = r2dbc.withTransaction {
-        val dao = getBaseRoomDao(roomId)
-        dao.findByRoomId(roomId)
-                .filter { isAfterToday(it.time!!) }
-                .flatMap { room ->
-                    val roomRecord = room.toRoomRecord()
-                    val result = if (value) {
-                        val startTime = System.currentTimeMillis()
-                        roomRecord.startTime = startTime.toDate()
-                        roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
-                        roomRecordDao.save(roomRecord)
-                                .flatMap { redisUtil.saveRoomRecord(it) }
-                    } else {
-                        redisUtil.deleteAndGetRoomRecord(roomId)
-                                .flatMap {
-                                    it.endTime = System.currentTimeMillis().toDate()
-                                    it.computingTime()
-                                    r2dbc.dynamicUpdate(it)
-                                            .matching(Criteria.where("id").`is`(it.id!!))
-                                            .fetch().rowsUpdated()
-                                }
-                    }
-                    result.flatMap { dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!) }
-                }.flatMap { redisUtil.publishRoomEvent(RoomEvent(roomId, value)) }
     }
 }

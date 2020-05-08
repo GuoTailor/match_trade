@@ -12,7 +12,7 @@ enum class RoomEnum(val flag: String) {
 
     companion object {
         /**
-         * 通过房间号获取房间枚举
+         * 通过房间标识获取房间枚举
          */
         @JvmStatic
         fun getRoomEnum(flag: String): RoomEnum {
@@ -26,19 +26,5 @@ enum class RoomEnum(val flag: String) {
             }
         }
 
-        /**
-         * 通过房间号获取房间模式
-         */
-        @JvmStatic
-        fun getRoomModel(roomId: String): RoomEnum {
-            return when (roomId[0].toString()) {
-                CLICK.flag -> CLICK
-                BICKER.flag -> BICKER
-                DOUBLE.flag -> DOUBLE
-                CONTINUE.flag -> CONTINUE
-                TIMING.flag -> TIMING
-                else -> throw IllegalStateException("不支持的房间号模式${roomId}")
-            }
-        }
     }
 }

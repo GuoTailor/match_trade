@@ -17,7 +17,7 @@ class BaseRoomService {
     @Autowired
     protected lateinit var connect: DatabaseClient
 
-    suspend fun getNextRoomId(room: BaseRoom) = getNextRoomId(RoomExtend.getRoomEnum(room.flag))
+    suspend fun getNextRoomId(room: BaseRoom) = getNextRoomId(RoomEnum.getRoomEnum(room.flag))
 
     /**
      * 获取下一个自增id

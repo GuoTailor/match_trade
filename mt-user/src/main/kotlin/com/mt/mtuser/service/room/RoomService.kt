@@ -6,7 +6,10 @@ import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.Role
 import com.mt.mtuser.entity.room.BaseRoom
-import com.mt.mtuser.schedule.*
+import com.mt.mtuser.schedule.QuartzManager
+import com.mt.mtuser.schedule.RoomEndJobInfo
+import com.mt.mtuser.schedule.RoomStartJobInfo
+import com.mt.mtuser.schedule.RoomTask
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
@@ -71,8 +74,8 @@ class RoomService {
      * 使能一个房间
      * @param value 1：启用一个房间 0 关闭一个房间
      */
-    fun enableRoom(roomId: String, value: Boolean) = r2dbc.withTransaction {
-        val dao = getBaseRoomDao<BaseRoom>(roomId)
+    fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
+        val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
@@ -83,8 +86,8 @@ class RoomService {
                     val startTime = System.currentTimeMillis()
                     roomRecord.startTime = startTime.toDate()
                     roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
-                    val newRecord = roomRecordDao.save(roomRecord)
-                    redisUtil.saveRoomRecord(newRecord)
+                    roomRecordDao.save(roomRecord)
+                    redisUtil.saveRoomRecord(roomRecord)
                 } else if (value) {
                     roomRecord = redisUtil.deleteAndGetRoomRecord(roomId)
                             ?: throw IllegalStateException("房间不存在：$roomId")
@@ -103,17 +106,16 @@ class RoomService {
      * 更改房间模式
      * 注意该方法没有检查权限，请调用时检查权限
      */
-    suspend fun <T : BaseRoom> changeModel(newRoom: T): T {
-        val oldRoomId = newRoom.roomId!!
-        val oldDao = getBaseRoomDao<BaseRoom>(oldRoomId)
-        val newDao = getBaseRoomDao(newRoom)
+    suspend fun <T : BaseRoom> changeModel(room: T, newFlag: String): T {
+        val roomId = room.roomId!!
+        val oldDao = getBaseRoomDao<T>(room.flag)
+        val newDao = getBaseRoomDao<T>(newFlag)
         roomEnableMutex.withLock {
-            val room = oldDao.findByRoomId(oldRoomId) ?: throw IllegalStateException("房间号不存在")
-            if (room.enable == BaseRoom.ENABLE) throw IllegalStateException("房间正在交易，不能切换模式")
-            newRoom.roomId = RoomExtend.replaceRoomFlag(oldRoomId, newRoom)
+            val oldRoom = oldDao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在: $roomId")
+            if (oldRoom.enable == BaseRoom.ENABLE) throw IllegalStateException("房间正在交易，不能切换模式")
             return coroutineScope {
-                val one = async { oldDao.deleteById(oldRoomId) }
-                val tew = async { newDao.save(newRoom) }
+                val one = async { oldDao.deleteById(roomId) }
+                val tew = async { newDao.save(room) }
                 one.await()
                 tew.await()
             }
@@ -123,12 +125,12 @@ class RoomService {
     /**
      * 通过房间id更新一个房间的配置
      */
-    suspend fun <T : BaseRoom> updateRoomByRoomId(room: T): T {
+    suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, newFlag: String): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val companyList = roleService.getCompanyList(Role.ADMIN)
         return if (companyList.contains(room.companyId)) {
-            if (RoomExtend.getRoomModel(roomId).flag == room.flag) {
+            if (newFlag == room.flag) {
                 room.roomId = null
                 room.enable = null
                 r2dbc.dynamicUpdate(room)
@@ -137,12 +139,12 @@ class RoomService {
                 // 修改定时任务开始和结束的时间
                 quartzManager.modifyJobTime(RoomStartJobInfo(room))
                 quartzManager.modifyJobTime(RoomEndJobInfo(room))
-                getBaseRoomDao(room).findByRoomId(roomId)!!
+                getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
             } else {
-                val newRoom = changeModel(room)
+                val newRoom = changeModel(room, newFlag)
                 // 修改任务的开始和结束任务名
-                quartzManager.modifyJob(RoomStartJobInfo(newRoom), roomId, RoomTask.jobGroup)
-                quartzManager.modifyJob(RoomEndJobInfo(newRoom), roomId, RoomTask.jobGroup)
+                quartzManager.modifyJob(RoomStartJobInfo(newRoom), RoomTask.jobStartGroup, roomId)
+                quartzManager.modifyJob(RoomEndJobInfo(newRoom), RoomTask.jobEndGroup, roomId)
                 newRoom
             }
         } else throw IllegalStateException("没有该房间的修改权限")
@@ -210,7 +212,7 @@ class RoomService {
         if (room.enable == BaseRoom.DISABLED
                 && room.startTime!! <= LocalTime.now()
                 && (room.startTime!! + room.time!!) > LocalTime.now()) {
-            enableRoom(room.roomId!!, true)
+            enableRoom(room.roomId!!, true, room.flag)
         }
         quartzManager.addJob(RoomStartJobInfo(room))
         quartzManager.addJob(RoomEndJobInfo(room))
@@ -246,8 +248,8 @@ class RoomService {
      * 通过房间号号获取对应的dao
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : BaseRoom> getBaseRoomDao(roomId: String): BaseRoomDao<T, String> {
-        return when (roomId.substring(0, 1)) {
+    fun <T : BaseRoom> getBaseRoomDao(flag: String): BaseRoomDao<T, String> {
+        return when(flag) {
             RoomEnum.CLICK.flag -> clickRoomDao as BaseRoomDao<T, String>
             RoomEnum.BICKER.flag -> bickerRoomDao as BaseRoomDao<T, String>
             RoomEnum.DOUBLE.flag -> doubleRoomDao as BaseRoomDao<T, String>

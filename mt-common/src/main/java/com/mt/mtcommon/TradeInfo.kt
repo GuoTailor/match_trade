@@ -28,11 +28,11 @@ open class TradeInfo(
         var tradeState: String? = null,        // 交易状态
         var stateDetails: String? = null       // 状态原因
 ) {
-    constructor(buy: OrderParam?, sell: OrderParam?, companyId: Int, stockId: Int) : this(
+    constructor(buy: OrderParam?, sell: OrderParam?, companyId: Int, stockId: Int, flag: String) : this(
             companyId = companyId,
             stockId = stockId,
             roomId = buy?.roomId,
-            model = buy?.flag,
+            model = flag,
             tradeAmount = buy?.number,
             buyerId = buy?.userId,
             buyerPrice = buy?.price,

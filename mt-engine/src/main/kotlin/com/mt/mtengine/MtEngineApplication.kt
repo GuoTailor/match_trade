@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
     Thread {
         Thread.sleep(3000)
         val bean = context.getBean(MatchSink::class.java)
-        val msg = RivalInfo(4, "", arrayOf(1, 2, 3))
+        val msg = RivalInfo(4, "", "", arrayOf(1, 2, 3))
         val message = MessageBuilder.withPayload(msg)
                 .setHeader(MessageConst.PROPERTY_TAGS, "testTag")
                 .build()

@@ -7,7 +7,9 @@ package com.mt.mtcommon
  */
 class RivalInfo(var userId: Int? = null,
                 var roomId: String? = null,
+                var flag: String? = null,
                 val rivals: Array<Int>? = null) {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

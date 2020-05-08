@@ -35,7 +35,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             val sellOrder = roomInfo.buyOrderList.pollFirst()!!     // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, buyOrder, sellOrder)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                             .subscribeOn(Schedulers.elastic()).subscribe()
                 } else {
                     buyFailedList.add(buyOrder)
@@ -52,7 +52,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
     }
 
     class ContinueRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.cycle!!.toMillisOfDay(), record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.cycle!!.toMillisOfDay(), record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)

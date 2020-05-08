@@ -8,10 +8,7 @@ import com.mt.mtuser.entity.User
 import com.mt.mtuser.schedule.QuartzManager
 import com.mt.mtuser.schedule.RoomStartJobInfo
 import com.mt.mtuser.schedule.RoomTask
-import com.mt.mtuser.service.CompanyService
-import com.mt.mtuser.service.RedisUtil
-import com.mt.mtuser.service.RoleService
-import com.mt.mtuser.service.UserService
+import com.mt.mtuser.service.*
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.reactor.mono
@@ -45,6 +42,12 @@ class CommonController {
 
     @Autowired
     lateinit var redisUtil: RedisUtil
+
+    @Autowired
+    lateinit var tradeInfoService: TradeInfoService
+
+    @Autowired
+    lateinit var roomRecordService: RoomRecordService
 
     /**
      * @api {post} /register 注册一个用户
@@ -100,7 +103,7 @@ class CommonController {
         return ResponseInfo.ok(mono {
             if (!userService.existsUserByPhone(phone)) {
                 val smsCode = Util.getRandomInt(4)
-                val (code, msg) = SendSms.send(phone, smsCode)
+                val (code, msg) = SendSms.send(phone, smsCode, 5)
                 if (code == "OK") {
                     redisUtil.saveCode(phone, smsCode)
                 }
@@ -135,28 +138,32 @@ class CommonController {
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
-     * @apiSuccess {Integer} tradesCapacity=0 交易量
-     * @apiSuccess {Integer} tradesVolume=0 交易金额
-     * @apiSuccess {Integer} tradesNumber=0 交易次数
+     * @apiSuccess {Integer} companyCount 公司数量
+     * @apiSuccess {Integer} userCount 用户数量
+     * @apiSuccess {Integer} roomCount 房间数量
+     * @apiSuccess {Long} tradesCapacity 交易量
+     * @apiSuccess {Long} tradesVolume 交易金额
+     * @apiSuccess {Integer} tradesNumber 交易次数
      * @apiGroup Common
      * @apiUse tokenMsg
      * @apiHeaderExample {json} 请求头例子:
      *     {
-     *       "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU0VSXCIsMV1dIiwibmJmIjoxNTg3NTU5NTQ0LCJleHAiOjE1ODk2MzMxNDR9.zyppWBmaF0l6ezljR1bTWUkAon50KF-VTrge1-W2hsM"
+     *       "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU
+     *       0VSXCIsMV1dIiwibmJmIjoxNTg3NTU5NTQ0LCJleHAiOjE1ODk2MzMxNDR9.zyppWBmaF0l6ezljR1bTWUkAon50KF-VTrge1-W2hsM"
      *     }
      * @apiPermission superAdmin
      */
     @GetMapping("/system/info")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Any>>> {
+    fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Number>>> {
         return ResponseInfo.ok(mono {
-            val data: MutableMap<String, Any> = HashMap()
+            val data: MutableMap<String, Number> = HashMap()
             data["companyCount"] = companyService.count()
             data["userCount"] = userService.count()
             data["roomCount"] = roomService.getAllRoomCount()
-            data["tradesCapacity"] = 0 // 交易量
-            data["tradesVolume"] = 0 // 交易金额
-            data["tradesNumber"] = 0 // 交易次数
+            data["tradesCapacity"] = tradeInfoService.countStockByTradeTime() // 交易量
+            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTime() // 交易金额
+            data["tradesNumber"] = roomRecordService.countByStartTime() // 交易次数
             data
         })
     }

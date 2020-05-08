@@ -5,6 +5,7 @@ import com.mt.mtcommon.TradeInfo
 import com.mt.mtcommon.TradeState
 import com.mt.mtengine.mq.MatchSink
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -32,10 +33,10 @@ class MatchService {
     @Autowired
     private lateinit var redisUtil: RedisUtil
 
-    fun onMatchSuccess(roomId: String, buy: OrderParam, sell: OrderParam) = r2dbc.withTransaction {
+    fun onMatchSuccess(roomId: String, flag: String, buy: OrderParam, sell: OrderParam) = r2dbc.withTransaction {
         roomService.findCompanyIdByRoomId(roomId)
                 .flatMap { info ->
-                    val threadInfo = TradeInfo(buy, sell, info.companyId, info.stockId)
+                    val threadInfo = TradeInfo(buy, sell, info.companyId, info.stockId, flag)
                     threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
                     threadInfo.tradeMoney = threadInfo.tradePrice?.multiply(BigDecimal(threadInfo.tradeAmount ?: 0))
                     threadInfo.tradeState = TradeState.SUCCESS
@@ -46,14 +47,14 @@ class MatchService {
                             .flatMap { tradeInfoService.save(threadInfo) }
                 }.flatMap { redisUtil.updateUserOrder(buy) }
                 .flatMap { redisUtil.updateUserOrder(sell) }
-                //.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchFailed(roomId, buy, sell, it.message ?: "失败") }
+                .doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
+                .doOnError { onMatchFailed(roomId, flag, buy, sell, it.message ?: "失败") }
     }
 
-    fun onMatchFailed(roomId: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String) = r2dbc.withTransaction {
+    fun onMatchFailed(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String) = r2dbc.withTransaction {
         roomService.findCompanyIdByRoomId(roomId)
                 .flatMap {
-                    val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId)
+                    val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId, flag)
                     if (buy?.price != null && sell?.price != null)
                         threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
                     threadInfo.tradeState = TradeState.FAILED
@@ -63,7 +64,7 @@ class MatchService {
                     tradeInfoService.save(threadInfo)
                 }.flatMap { buy?.let { redisUtil.updateUserOrder(it) } }
                 .flatMap { sell?.let { redisUtil.updateUserOrder(it) } }
-                //.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
+                .doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
                 .doOnError { onMatchError(buy, sell, it.message ?: "失败") }
 
     }

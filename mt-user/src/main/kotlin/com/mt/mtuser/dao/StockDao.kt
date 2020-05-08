@@ -2,10 +2,8 @@ package com.mt.mtuser.dao
 
 import com.mt.mtuser.entity.Stock
 import kotlinx.coroutines.flow.Flow
-import org.springframework.data.annotation.Id
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
 
 /**
  * Created by gyh on 2020/3/22.

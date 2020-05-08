@@ -32,9 +32,9 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
             val order2 = roomInfo.orderList.pollLast()!!
             val result = if (MatchUtil.verify(order1, order2) && order1.price != order2.price) {
                 if (order1.price!! > order2.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, order1, order2)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, order1, order2)
                 } else {
-                    matchService.onMatchSuccess(roomInfo.roomId, order2, order1)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, order2, order1)
                 }
             } else {
                 matchService.onMatchError(order1, order2, "失败:" + MatchUtil.getVerifyInfo(order1, order2))
@@ -45,7 +45,7 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
     }
 
     class DoubleRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.cycle!!.toMillisOfDay(), record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.cycle!!.toMillisOfDay(), record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val orderList = TreeSet(MatchUtil.sortTime)

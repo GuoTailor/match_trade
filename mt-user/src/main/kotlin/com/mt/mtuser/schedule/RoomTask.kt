@@ -20,14 +20,17 @@ class RoomTask : Job {
     override fun execute(context: JobExecutionContext) {
         val enable = context.mergedJobDataMap[enableKey] as Boolean
         val roomId = context.mergedJobDataMap[roomIdKey].toString()
+        val roomFlag = context.mergedJobDataMap[roomFlagKey].toString()
         log.info("开始定时任务 {} {}", enable, roomId)
-        val result = roomService.enableRoom(roomId, enable)
+        val result = roomService.enableRoom(roomId, enable, roomFlag)
         result.block()
     }
 
     companion object {
-        const val jobGroup = "roomGroup"
+        const val jobStartGroup = "roomStartGroup"
+        const val jobEndGroup = "roomEndGroup"
         const val roomIdKey = "roomId"
+        const val roomFlagKey = "roomFlag"
         const val enableKey = "enable"
     }
 }

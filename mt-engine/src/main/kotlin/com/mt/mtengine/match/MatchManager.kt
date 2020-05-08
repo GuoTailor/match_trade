@@ -23,7 +23,7 @@ object MatchManager {
 
     fun add(order: OrderParam) {
         strategyList.forEach {
-            if (it.isCan(order.roomId)) {
+            if (it.isCan(order.flag ?: "")) {
                 it.tryAddOrder(order)
             }
         }
@@ -31,7 +31,7 @@ object MatchManager {
 
     fun add(rival: RivalInfo) {
         strategyList.forEach {
-            if (it.isCan(rival.roomId)) {
+            if (it.isCan(rival.flag ?: "")) {
                 it.tryAddRival(rival)
             }
         }
@@ -39,7 +39,7 @@ object MatchManager {
 
     fun cancel(cancelOrder: CancelOrder) {
         strategyList.forEach {
-            if (it.isCan(cancelOrder.roomId)) {
+            if (it.isCan(cancelOrder.flag ?: "")) {
                 it.tryCancelOrder(cancelOrder)
             }
         }

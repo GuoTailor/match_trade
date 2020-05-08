@@ -19,15 +19,13 @@ import org.springframework.stereotype.Component
 class MatchOutProcessor {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
-    @Autowired
-    private lateinit var redisUtil: RedisUtil
 
     @StreamListener(MatchSink.IN_TRADE)
     fun inTrade(@Payload tradeInfo: TradeInfo) {
         val data = ServiceResponseInfo.DataResponse(ResponseInfo(0, "交易通知", tradeInfo), -1)
         val msg = json.writeValueAsString(data)
         logger.info(msg)
-        tradeInfo.buyerId?.let { SocketSessionStore.userSession[it]?.send(msg)?.subscribe() }
-        tradeInfo.sellerId?.let { SocketSessionStore.userSession[it]?.send(msg)?.subscribe() }
+        tradeInfo.buyerId?.let { SocketSessionStore.userInfoMap[it]?.session?.send(msg)?.subscribe() }
+        tradeInfo.sellerId?.let { SocketSessionStore.userInfoMap[it]?.session?.send(msg)?.subscribe() }
     }
 }

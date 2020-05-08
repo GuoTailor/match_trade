@@ -40,7 +40,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, buyOrder, sellOrder)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                             .subscribeOn(Schedulers.elastic()).subscribe()
                 } else {
                     buyFailedList.add(buyOrder)
@@ -57,7 +57,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
     }
 
     class TimingRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.cycle!!.toMillisOfDay(), record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.cycle!!.toMillisOfDay(), record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)

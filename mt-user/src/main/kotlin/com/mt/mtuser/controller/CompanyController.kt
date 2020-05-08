@@ -8,12 +8,15 @@ import com.mt.mtuser.entity.StockholderInfo
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.CompanyService
+import com.mt.mtuser.service.RoomRecordService
+import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.util.HashMap
 
 /**
  * Created by gyh on 2020/3/18.
@@ -23,6 +26,11 @@ import reactor.core.publisher.Mono
 class CompanyController {
     @Autowired
     lateinit var companyService: CompanyService
+
+    @Autowired
+    lateinit var tradeInfoService: TradeInfoService
+    @Autowired
+    lateinit var roomRecordService: RoomRecordService
 
     /**
      * @api {post} /company 注册一个公司
@@ -207,6 +215,32 @@ class CompanyController {
     @GetMapping
     fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
         return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })
+    }
+
+    /**
+     * @api {get} /company/data 获取今日数据
+     * @apiDescription  获取今日数据
+     * @apiName getTodayData
+     * @apiVersion 0.0.1
+     * @apiSuccess {Long} tradesCapacity 今日交易量
+     * @apiSuccess {Long} tradesVolume 今日交易金额
+     * @apiSuccess {Integer} tradesNumber=0 今日交易次数
+     * @apiSuccessExample {json} 成功返回:
+     * {}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/data")
+    fun getTodayData() {
+        ResponseInfo.ok(mono {
+            val data: MutableMap<String, Any> = HashMap()
+            data["companyCount"] = companyService.count()
+            data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId() // 交易量
+            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId() // 交易金额
+            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId() // 交易次数
+            data
+        })
     }
 
 }

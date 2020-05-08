@@ -83,7 +83,7 @@ class WorkController {
      * @apiPermission none
      */
     @RequestMapping("/cancel")
-    fun cancel(@RequestBody cancelOrder: CancelOrder): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(workService.cancelOrder(cancelOrder))
+    fun cancel(): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(workService.cancelOrder())
     }
 }

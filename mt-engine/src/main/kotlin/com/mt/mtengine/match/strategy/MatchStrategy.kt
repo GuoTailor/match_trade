@@ -28,7 +28,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
 
     fun start() = matchWork.start(this)
 
-    fun isCan(roomId: String?) = RoomEnum.getRoomModel(roomId ?: "") == roomType
+    fun isCan(flag: String) = RoomEnum.getRoomEnum(flag) == roomType
 
     private fun startMatch(roomId: String) {
         val roomInfo = roomMap[roomId]
@@ -92,6 +92,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
 
     abstract class RoomInfo(
             val roomId: String, // 房间号
+            val flag: String,   // 房间模式
             var cycle: Long,    // 周期，单位毫秒
             val endTime: Date   // 不支持提前结束和延迟结束
     ) {

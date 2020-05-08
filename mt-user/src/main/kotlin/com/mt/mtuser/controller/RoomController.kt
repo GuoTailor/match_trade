@@ -137,7 +137,8 @@ class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(clickRoom.awaitSingle())
+            val room = clickRoom.awaitSingle()
+            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
         })
     }
 
@@ -157,7 +158,8 @@ class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(bickerRoom.awaitSingle())
+            val room = bickerRoom.awaitSingle()
+            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
         })
     }
 
@@ -177,7 +179,8 @@ class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<DoubleMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(doubleRoom.awaitSingle())
+            val room = doubleRoom.awaitSingle()
+            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
         })
     }
 
@@ -197,7 +200,8 @@ class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     fun updateTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(continueRoom.awaitSingle())
+            val room = continueRoom.awaitSingle()
+            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
         })
     }
 
@@ -217,7 +221,8 @@ class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<TimingMatch>> {
         return ResponseInfo.ok(mono {
-            roomService.updateRoomByRoomId(timingRoom.awaitSingle())
+            val room = timingRoom.awaitSingle()
+            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
         })
     }
 
@@ -251,7 +256,7 @@ class RoomController {
      * {"code": 0,"msg": "成功","data":[]}
      * @apiGroup Room
      * @apiUse tokenMsg
-     * @apiPermission admin
+     * @apiPermission user
      */
     @GetMapping
     fun getAllRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
