@@ -35,10 +35,8 @@ interface BaseRoom : Persistable<String> {
     fun validNull()
 
     companion object {
-
         const val ENABLE = "1"
         const val DISABLED = "0"
-
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -47,24 +45,4 @@ interface BaseRoom : Persistable<String> {
         return this as T
     }
 
-    fun toRoomRecord(): RoomRecord {
-        val record = RoomRecord(roomId = roomId, model = flag, companyId = companyId, duration = time)
-        if (this is ClickMatch) {
-            record.quoteTime = quoteTime ?: LocalTime.MIN
-            record.secondStage = secondStage
-            record.rival = rival
-        }
-        if (this is TimingMatch) {
-            record.quoteTime = quoteTime ?: LocalTime.MIN
-        }
-        record.cycle = when (roomId!![0].toString()) {
-            RoomEnum.CLICK.flag -> LocalTime.MIN
-            RoomEnum.BICKER.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.CONTINUE.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.TIMING.flag -> (this as TimingMatch).matchTime
-            else -> throw IllegalStateException("不支持的房间号模式${roomId}")
-        }
-        return record
-    }
 }

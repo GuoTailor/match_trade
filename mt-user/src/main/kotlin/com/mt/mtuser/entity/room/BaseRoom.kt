@@ -66,7 +66,7 @@ interface BaseRoom : Persistable<String> {
         if (this is TimingMatch) {
             record.quoteTime = quoteTime ?: LocalTime.MIN
         }
-        record.cycle = when (roomId!![0].toString()) {
+        record.cycle = when (flag) {
             RoomEnum.CLICK.flag -> LocalTime.MIN
             RoomEnum.BICKER.flag -> LocalTime.MIN
             RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)

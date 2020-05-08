@@ -26,9 +26,8 @@ class BaseRoomService {
         val result = connect.execute("select nextval('mt_room_seq')")
                 .map { t, _ -> t.get("nextval", Integer::class.java) }
                 .awaitOne()
-        val roomId = roomFlag.flag + result
-        logger.info("构建房间id:{}", roomId)
-        return roomId
+        logger.info("构建房间id:{}", result)
+        return result.toString()
     }
 
 }

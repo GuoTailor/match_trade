@@ -24,7 +24,7 @@ interface TimelyRoomDao : BaseRoomDao<TimelyMatch, String> {
     @Query("select count(1) from mt_room_timely where company_id = :companyId")
     fun countByCompanyId(companyId: Int): Mono<Int>
 
-    @Query("select * from mt_room_timely where room_id = ：roomId")
+    @Query("select * from mt_room_timely where room_id = :roomId")
     override fun findByRoomId(roomId: String): Mono<TimelyMatch>
 
     @Query("select * from mt_room_timely where company_id in (:companyId)")

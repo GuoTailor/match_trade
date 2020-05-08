@@ -24,7 +24,7 @@ interface ClickRoomDao : BaseRoomDao<ClickMatch, String> {
     @Query("select count(1) from mt_room_click where company_id = :companyId")
     fun countByCompanyId(companyId: Int): Mono<Int>
 
-    @Query("select * from mt_room_click where room_id = ：roomId")
+    @Query("select * from mt_room_click where room_id = :roomId")
     override  fun findByRoomId(roomId: String): Mono<ClickMatch>
 
     @Query("select * from mt_room_click where company_id in (:companyId)")

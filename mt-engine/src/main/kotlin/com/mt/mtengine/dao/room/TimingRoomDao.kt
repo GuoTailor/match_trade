@@ -24,7 +24,7 @@ interface TimingRoomDao : BaseRoomDao<TimingMatch, String> {
     @Query("select count(1) from mt_room_timing where company_id = :companyId")
     fun countByCompanyId(companyId: Int): Mono<Int>
 
-    @Query("select * from mt_room_timing where room_id = ：roomId")
+    @Query("select * from mt_room_timing where room_id = :roomId")
     override fun findByRoomId(roomId: String): Mono<TimingMatch>
 
     @Query("select * from mt_room_timing where company_id in (:companyId)")
@@ -32,7 +32,6 @@ interface TimingRoomDao : BaseRoomDao<TimingMatch, String> {
 
     @Query("select room_id, time, enable, start_time from mt_room_timing")
     override fun findTimeAll(): Flux<TimingMatch>
-
 
     @Query("select company_id, stock_id from mt_room_timing where room_id = :roomId")
     override fun findBaseByRoomId(roomId: String): Mono<TimingMatch>

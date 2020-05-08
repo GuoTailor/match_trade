@@ -22,7 +22,7 @@ interface DoubleRoomDao : BaseRoomDao<DoubleMatch, String> {
     @Query("select count(1) from mt_room_double where company_id = :companyId")
     fun countByCompanyId(companyId: Int): Mono<Int>
 
-    @Query("select * from mt_room_double where room_id = ：roomId")
+    @Query("select * from mt_room_double where room_id = :roomId")
     override  fun findByRoomId(roomId: String): Mono<DoubleMatch>
 
     @Query("select * from mt_room_double where company_id in (:companyId)")

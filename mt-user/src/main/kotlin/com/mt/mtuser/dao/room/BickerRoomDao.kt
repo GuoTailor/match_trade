@@ -22,7 +22,7 @@ interface BickerRoomDao : BaseRoomDao<BickerMatch, String> {
     @Query("select count(1) from mt_room_bicker where company_id = :companyId")
     suspend fun countByCompanyId(companyId: Int): Int
 
-    @Query("select * from mt_room_bicker where room_id = ：roomId")
+    @Query("select * from mt_room_bicker where room_id = :roomId")
     override suspend fun findByRoomId(roomId: String): BickerMatch?
 
     @Query("select * from mt_room_bicker where company_id in (:companyId)")

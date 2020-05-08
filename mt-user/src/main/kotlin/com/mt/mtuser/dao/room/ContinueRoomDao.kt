@@ -21,7 +21,7 @@ interface ContinueRoomDao : BaseRoomDao<ContinueMatch, String> {
     @Query("select count(1) from mt_room_timely where company_id = :companyId")
     suspend fun countByCompanyId(companyId: Int): Int
 
-    @Query("select * from mt_room_timely where room_id = ：roomId")
+    @Query("select * from mt_room_timely where room_id = :roomId")
     override suspend fun findByRoomId(roomId: String): ContinueMatch?
 
     @Query("select * from mt_room_timely where company_id in (:companyId)")

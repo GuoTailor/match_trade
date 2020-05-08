@@ -25,7 +25,7 @@ interface BickerRoomDao : BaseRoomDao<BickerMatch, String> {
     @Query("select count(1) from mt_room_bicker where company_id = :companyId")
     fun countByCompanyId(companyId: Int): Mono<Int>
 
-    @Query("select * from mt_room_bicker where room_id = ：roomId")
+    @Query("select * from mt_room_bicker where room_id = :roomId")
     override fun findByRoomId(roomId: String): Mono<BickerMatch>
 
     @Query("select * from mt_room_bicker where company_id in (:companyId)")
