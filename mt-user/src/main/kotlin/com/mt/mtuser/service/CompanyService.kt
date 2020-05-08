@@ -111,7 +111,7 @@ class CompanyService {
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
         if (roleService.getCompanyList().contains(info.companyId)) {
             val roleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
-            if (roleService.exists(user.id!!, info.companyId!!, roleId) == 0) {
+            if (roleService.exists(user.id!!, roleId, info.companyId!!) == 0) {
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
                 positionsDao.save(Positions(companyId = info.companyId, stockId = stockId, userId = user.id, amount = info.amount))
                 val role = Role(userId = user.id,

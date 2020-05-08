@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 07/05/2020 23:49:45
+ Date: 08/05/2020 15:02:30
 */
 
 
@@ -218,13 +218,13 @@ CREATE TABLE "public"."mt_positions" (
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
   "user_id" int4 NOT NULL,
-  "amount " int4 NOT NULL
+  "amount" int4 NOT NULL
 )
 ;
 COMMENT ON COLUMN "public"."mt_positions"."company_id" IS '股票所属公司id';
 COMMENT ON COLUMN "public"."mt_positions"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_positions"."user_id" IS '用户id';
-COMMENT ON COLUMN "public"."mt_positions"."amount " IS '数量';
+COMMENT ON COLUMN "public"."mt_positions"."amount" IS '数量';
 COMMENT ON TABLE "public"."mt_positions" IS '持仓';
 
 -- ----------------------------
@@ -600,7 +600,7 @@ SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_user_role_id_seq"
 OWNED BY "public"."mt_user_role"."id";
-SELECT setval('"public"."mt_user_role_id_seq"', 14, true);
+SELECT setval('"public"."mt_user_role_id_seq"', 16, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -614,7 +614,7 @@ SELECT setval('"public"."stock_id_seq"', 2, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."user_id_seq"
 OWNED BY "public"."mt_user"."id";
-SELECT setval('"public"."user_id_seq"', 16, true);
+SELECT setval('"public"."user_id_seq"', 19, true);
 
 -- ----------------------------
 -- Uniques structure for table mt_company
