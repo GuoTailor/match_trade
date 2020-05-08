@@ -49,7 +49,7 @@ class UserService {
                 user.passwordEncoder()
                 user.id = null
                 val newUser = userDao.save(user)
-                userRoleDao.save(Role(newUser.id, roleService.getRoles().find { it.name == Role.USER }!!.id, null))
+                userRoleDao.save(Role(userId = newUser.id, roleId=roleService.getRoles().find { it.name == Role.USER }!!.id))
                 Unit
             } else throw IllegalStateException("用户已存在")
         } else throw IllegalStateException("请正确填写用户名或密码")

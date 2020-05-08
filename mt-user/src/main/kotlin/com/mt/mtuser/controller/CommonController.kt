@@ -76,9 +76,9 @@ class CommonController {
                     .filter { localCode -> localCode != null && code == localCode }
                     .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
                     .map { user }
-        }.flatMap {
-            mono { redisUtil.deleteCode(it.phone!!) }
-            userService.register(it)
+        }.flatMap { user ->
+            mono { redisUtil.deleteCode(user.phone!!) }
+                    .flatMap { userService.register(user) }
         }
         return ResponseInfo.ok(result)
     }
@@ -104,7 +104,7 @@ class CommonController {
             if (!userService.existsUserByPhone(phone)) {
                 val smsCode = Util.getRandomInt(4)
                 val (code, msg) = SendSms.send(phone, smsCode, 5)
-                if (code == "OK") {
+                if (code == "0") {
                     redisUtil.saveCode(phone, smsCode)
                 }
                 msg

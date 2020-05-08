@@ -91,7 +91,7 @@ class RedisUtil {
      * 获取一个验证码
      */
     suspend fun getCode(phone: String): String? {
-        return redisTemplate.opsForValue().getAndAwait(codeKey + phone) as String?
+        return redisTemplate.opsForValue().getAndAwait(codeKey + phone) as? String?
     }
 
     suspend fun deleteCode(phone: String) {
