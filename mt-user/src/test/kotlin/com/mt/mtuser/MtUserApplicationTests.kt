@@ -2,14 +2,13 @@ package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import org.junit.jupiter.api.Test
-import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
-import java.time.LocalTime
+import java.util.*
 
 
 //@SpringBootTest
@@ -61,9 +60,17 @@ class MtUserApplicationTests {
 
     @Test
     fun testTime() {
-        val ct = Criteria.empty()
-                .and("id").`in`("1", 3, 4)
-        println(ct.toString())
+        val c = Calendar.getInstance()
+        c.add(Calendar.MONTH, 0)
+        c.set(Calendar.DAY_OF_MONTH, 1)//设置为1号,当前日期既为本月第一天
+        val monthfirst = Util.createDate(c.time.time)
+        println("===============nowfirst:$monthfirst")
+
+        //获取当前月最后一天
+        val ca = Calendar.getInstance()
+        ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH))
+        val monthlast = Util.createDate(ca.time.time)
+        println("===============last:$monthlast")
     }
 
     @Test

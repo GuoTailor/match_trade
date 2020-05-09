@@ -31,6 +31,25 @@ fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
 fun LocalTime.toDate(): Date = Date(System.currentTimeMillis() - LocalTime.now().toMillisOfDay() + this.toMillisOfDay())
 
 /**
+ * 获取本月的第一天
+ */
+fun minDay(): Date {
+    val c = Calendar.getInstance()
+    c.add(Calendar.MONTH, 0)
+    c.set(Calendar.DAY_OF_MONTH, 1)
+    return c.time
+}
+
+/**
+ * 获取本月的最后一天
+ */
+fun maxDay(): Date {
+    val ca = Calendar.getInstance()
+    ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH))
+    return ca.time
+}
+
+/**
  * 判断现在加上指定时间之后是否超过今天的最大时间。
  * 今天最大时间定义：'23:59:59.999999999'这是一天结束前的午夜时间。
  * @return Boolean true:超过今天最大时间； false: 没有超过

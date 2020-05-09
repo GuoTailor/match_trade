@@ -133,13 +133,15 @@ class RoomService {
             if (oldFlag == room.flag) {
                 room.roomId = null
                 room.enable = null
-                r2dbc.dynamicUpdate(room)
+                val result = r2dbc.dynamicUpdate(room)
                         .matching(where("room_id").`is`(roomId))
                         .fetch().awaitRowsUpdated()
+                logger.info("更新结果 {}", result)
+                val newRoom = getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
                 // 修改定时任务开始和结束的时间
-                quartzManager.modifyJobTime(RoomStartJobInfo(room))
-                quartzManager.modifyJobTime(RoomEndJobInfo(room))
-                getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
+                quartzManager.modifyJobTime(RoomStartJobInfo(newRoom))
+                quartzManager.modifyJobTime(RoomEndJobInfo(newRoom))
+                newRoom
             } else {
                 val newRoom = changeModel(room, oldFlag)
                 // 修改任务的开始和结束任务名

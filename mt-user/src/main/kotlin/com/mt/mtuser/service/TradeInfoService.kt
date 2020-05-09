@@ -1,5 +1,7 @@
 package com.mt.mtuser.service
 
+import com.mt.mtcommon.maxDay
+import com.mt.mtcommon.minDay
 import com.mt.mtcommon.toDate
 import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.dao.TradeInfoDao
@@ -74,12 +76,29 @@ class TradeInfoService {
         return tradeInfoDao.avgPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
     }
 
-    suspend fun overview(userId: Int): Overview {
+    /**
+     * 获取今日成交概述
+     */
+    suspend fun dayOverview(userId: Int): Overview {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
         val endTime = System.currentTimeMillis()
         val buyOverview = tradeInfoDao.buyOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
         val sellOverview = tradeInfoDao.sellOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
+        buyOverview.copyNotNullField(sellOverview)
+        buyOverview.computeNetBuy()
+        return buyOverview
+    }
+
+    /**
+     * 获取本月
+     */
+    suspend fun monthOverview(userId: Int): Overview {
+        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+        val startTime = minDay()
+        val endTime = maxDay()
+        val buyOverview = tradeInfoDao.buyOverview(startTime, endTime, companyId, userId)
+        val sellOverview = tradeInfoDao.sellOverview(startTime, endTime, companyId, userId)
         buyOverview.copyNotNullField(sellOverview)
         buyOverview.computeNetBuy()
         return buyOverview
