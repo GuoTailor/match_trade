@@ -27,6 +27,9 @@ interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
     @Query("select * from mt_stockholder where user_id = :userId and role_id = :roleId and company_id = :companyId")
     suspend fun find(userId: Int, roleId: Int, companyId : Int): Stockholder?
 
+    @Query("select * from mt_stockholder where user_id = :userId and company_id = :companyId")
+    suspend fun findByUserIdAndCompanyId(userId: Int, companyId : Int): Stockholder?
+
     @Query("select * from mt_stockholder where company_id = :companyId")
     fun findByCompanyId(companyId: Int): Flow<Stockholder>
 }

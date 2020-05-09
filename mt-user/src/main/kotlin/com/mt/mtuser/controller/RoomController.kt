@@ -138,7 +138,7 @@ class RoomController {
     fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
         return ResponseInfo.ok(mono {
             val room = clickRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
+            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
         })
     }
 
@@ -159,7 +159,7 @@ class RoomController {
     fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
         return ResponseInfo.ok(mono {
             val room = bickerRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
+            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
         })
     }
 
@@ -180,7 +180,7 @@ class RoomController {
     fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<DoubleMatch>> {
         return ResponseInfo.ok(mono {
             val room = doubleRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
+            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
         })
     }
 
@@ -201,7 +201,7 @@ class RoomController {
     fun updateTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
         return ResponseInfo.ok(mono {
             val room = continueRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
+            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
         })
     }
 
@@ -222,7 +222,7 @@ class RoomController {
     fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<TimingMatch>> {
         return ResponseInfo.ok(mono {
             val room = timingRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.newFlag ?: room.flag)
+            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
         })
     }
 

@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono
  */
 interface PositionsDao : ReactiveCrudRepository<Positions, Int> {
 
-    @Query("select $sql from mt_positions where company_id = :companyId and stock_id = :stockId and user_id = :userId")
+    @Query("select $sql from mt_positions where company_id = :companyId and stock_id = :stockId and user_id = :userId for update")
     fun findBy(companyId: Int, stockId: Int, userId: Int): Mono<Positions>
 
     @Modifying

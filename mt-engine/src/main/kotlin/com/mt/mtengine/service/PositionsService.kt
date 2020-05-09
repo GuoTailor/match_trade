@@ -13,6 +13,9 @@ class PositionsService {
     @Autowired
     private lateinit var positionsDao: PositionsDao
 
+    /**
+     * 注意使用了排他锁，需要在事务上执行才会生效
+     */
     fun getUserPositions(companyId: Int, stockId: Int, userId: Int) = positionsDao.findBy(companyId, stockId, userId)
 
 

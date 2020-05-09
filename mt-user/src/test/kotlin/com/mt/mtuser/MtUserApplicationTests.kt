@@ -6,6 +6,7 @@ import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import org.junit.jupiter.api.Test
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
 import java.time.LocalTime
@@ -60,9 +61,9 @@ class MtUserApplicationTests {
 
     @Test
     fun testTime() {
-        val local = LocalTime.now().toMillisOfDay()
-        println(local)
-        println(System.currentTimeMillis())
+        val ct = Criteria.empty()
+                .and("id").`in`("1", 3, 4)
+        println(ct.toString())
     }
 
     @Test

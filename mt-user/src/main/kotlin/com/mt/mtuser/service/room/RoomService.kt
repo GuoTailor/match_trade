@@ -106,10 +106,10 @@ class RoomService {
      * 更改房间模式
      * 注意该方法没有检查权限，请调用时检查权限
      */
-    suspend fun <T : BaseRoom> changeModel(room: T, newFlag: String): T {
+    suspend fun <T : BaseRoom> changeModel(room: T, oldFlag: String): T {
         val roomId = room.roomId!!
-        val oldDao = getBaseRoomDao<T>(room.flag)
-        val newDao = getBaseRoomDao<T>(newFlag)
+        val oldDao = getBaseRoomDao<T>(oldFlag)
+        val newDao = getBaseRoomDao<T>(room.flag)
         roomEnableMutex.withLock {
             val oldRoom = oldDao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在: $roomId")
             if (oldRoom.enable == BaseRoom.ENABLE) throw IllegalStateException("房间正在交易，不能切换模式")
@@ -125,12 +125,12 @@ class RoomService {
     /**
      * 通过房间id更新一个房间的配置
      */
-    suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, newFlag: String): T {
+    suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, oldFlag: String): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val companyList = roleService.getCompanyList(Stockholder.ADMIN)
         return if (companyList.contains(room.companyId)) {
-            if (newFlag == room.flag) {
+            if (oldFlag == room.flag) {
                 room.roomId = null
                 room.enable = null
                 r2dbc.dynamicUpdate(room)
@@ -141,7 +141,7 @@ class RoomService {
                 quartzManager.modifyJobTime(RoomEndJobInfo(room))
                 getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
             } else {
-                val newRoom = changeModel(room, newFlag)
+                val newRoom = changeModel(room, oldFlag)
                 // 修改任务的开始和结束任务名
                 quartzManager.modifyJob(RoomStartJobInfo(newRoom), RoomTask.jobStartGroup, roomId)
                 quartzManager.modifyJob(RoomEndJobInfo(newRoom), RoomTask.jobEndGroup, roomId)

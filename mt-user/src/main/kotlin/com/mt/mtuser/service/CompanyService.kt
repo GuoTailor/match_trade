@@ -8,10 +8,13 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
+import reactor.kotlin.core.publisher.toMono
 
 /**
  * Created by gyh on 2020/3/18.
@@ -66,13 +69,23 @@ class CompanyService {
 
     suspend fun findCompany(query: PageQuery): PageView<Company> {
         val roles = roleService.getCompanyList()
-        return getPage(connect.select()
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        val result = connect.select()
                 .from<Company>()
                 .matching(query.where().and("id").`in`(roles))
                 .page(query.page())
                 .fetch()
                 .all()
-                , connect, query)
+                .flatMap { company ->
+                    val stock = mono { positionsDao.countStockByCompanyIdAndUserId(userId, company.id!!) }
+                    val money = mono { roleService.findByUserIdAndCompanyId(userId, company.id!!) }
+                    stock.zipWith(money) { s, m ->
+                        company.money = m?.money
+                        company.stock = s
+                        company
+                    }
+                }
+        return getPage(result, connect, query, query.where().and("id").`in`(roles))
 
     }
 
@@ -85,7 +98,7 @@ class CompanyService {
                 .page(query.page())
                 .fetch()
                 .all()
-                , connect, query, "company_id = $companyId")
+                , connect, query, query.where().and("company_id").`is`(companyId))
     }
 
     suspend fun findAll() = companyDao.findAll()

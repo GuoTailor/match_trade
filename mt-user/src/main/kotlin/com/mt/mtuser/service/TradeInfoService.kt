@@ -15,13 +15,15 @@ import java.util.*
  * Created by gyh on 2020/5/7.
  */
 @Service
-class TradeInfoService  {
+class TradeInfoService {
     private val logger = LoggerFactory.getLogger(this.javaClass)
+
     @Autowired
     private lateinit var tradeInfoDao: TradeInfoDao
 
     @Autowired
     private lateinit var roleService: RoleService
+
     @Autowired
     private lateinit var stockService: StockService
 
@@ -44,6 +46,7 @@ class TradeInfoService  {
      * 获取昨天的收盘价，也就是今天的开盘价
      */
     suspend fun getYesterdayClosingPriceByCompanyId() {
+        // TODO 交易失败的不计入计算
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay() - LocalTime.MAX.toMillisOfDay()
         val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
@@ -69,4 +72,6 @@ class TradeInfoService  {
         val endTime = System.currentTimeMillis()
         return tradeInfoDao.avgPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
     }
+
+
 }

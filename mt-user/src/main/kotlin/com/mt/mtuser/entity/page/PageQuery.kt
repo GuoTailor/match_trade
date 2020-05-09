@@ -52,17 +52,6 @@ class PageQuery(val pageNum: Int = 0,
         return criteria
     }
 
-    fun getWhere(): String {
-        if (!StringUtils.isEmpty(searchField) && !StringUtils.isEmpty(searchOper) && !StringUtils.isEmpty(searchString)) {
-            for (strings in oper) { //判断指令是否在允许范围内
-                if (strings[0] == searchOper) {
-                    return " \"$searchField\" ${strings[1]} '${String.format(strings[2], searchString)}'"
-                }
-            }
-        }
-        return ""
-    }
-
     fun page(): Pageable {
         var pageable = PageRequest.of(pageNum, pageSize)
         if (order != null) {

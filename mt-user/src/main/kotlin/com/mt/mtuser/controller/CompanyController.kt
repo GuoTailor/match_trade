@@ -165,11 +165,12 @@ class CompanyController {
      * @apiParamExample {json} 请求-例子:
      * {}
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 2,"item": [{"id": 1,"name": "6105","roomCount": 1,
-     * "mode": "[\"C\",\"B\",\"D\"]","createTime": "2020-03-18 15:35:45","licenseUrl": null,"creditUnionCode": null,
-     * "legalPerson": null,"unitAddress": null,"unitContactName": null,"unitContactPhone": null,"modes": ["C","B","D"]},
-     * {"id": 2,"name": "15-304","roomCount": 1,"mode": "[]","createTime": "2020-04-23 10:43:42","licenseUrl": null,
-     * "creditUnionCode": null,"legalPerson": null,"unitAddress": null,"unitContactName": null,"unitContactPhone": null,"modes": []}]}}
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 2,"item": [{"id": 1,"name": "6105",
+     * "roomCount": 1,"mode": "[\"C\",\"B\",\"D\"]","createTime": "2020-03-18 15:35:45","licenseUrl": null,
+     * "creditUnionCode": null,"legalPerson": null,"unitAddress": null,"unitContactName": null,"unitContactPhone": null,
+     * "stock": 0,"money": 0.0000,"modes": ["C","B","D"]},{"id": 2,"name": "15-304","roomCount": 1,"mode": "[]",
+     * "createTime": "2020-04-23 10:43:42","licenseUrl": null,"creditUnionCode": null,"legalPerson": null,"unitAddress": null,
+     * "unitContactName": null,"unitContactPhone": null,"stock": 0,"money": 0.0000,"modes": []}]}}
      * @apiGroup Company
      * @apiUse tokenMsg
      * @apiPermission user
@@ -212,8 +213,9 @@ class CompanyController {
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup Company
      * @apiUse tokenMsg
-     * @apiPermission user
+     * @apiPermission superAdmin
      */
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping
     fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
         return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })

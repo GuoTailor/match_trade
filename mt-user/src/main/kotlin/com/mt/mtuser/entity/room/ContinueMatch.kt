@@ -19,7 +19,7 @@ import java.util.*
  * @apiParam {Double} lowScope 报价最低值
  * @apiParam {Double} highScope 报价最高值
  * @apiParam {String} enable 是否开启（0：关闭，1：开启）
- * @apiParam {String} [newFlag]=E 新房间的标识符
+ * @apiParam {String} [oldFlag]=E 旧房间的标识符
  */
 @Table("mt_room_timely")
 class ContinueMatch(
@@ -39,7 +39,7 @@ class ContinueMatch(
 ) : BaseRoom {
     override val flag: String = RoomEnum.CONTINUE.flag
     @org.springframework.data.annotation.Transient
-    var newFlag: String? = null             // 标识符,更改房间时用
+    var oldFlag: String? = null             // 标识符,更改房间时用
     override suspend fun validNull() {
         people = null
     }

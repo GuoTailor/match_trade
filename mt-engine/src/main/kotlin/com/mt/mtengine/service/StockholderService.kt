@@ -14,6 +14,9 @@ class StockholderService {
     @Autowired
     private lateinit var stockholderDao: StockholderDao
 
+    /**
+     * 注意该查询使用了排他锁，由于reactive编程不能使用synchronized加锁，于是只能在数据库的行上加锁
+     */
     fun findByUserIdAndCompanyId(userId: Int, companyId: Int) = stockholderDao.findByUserIdAndCompanyId(userId, companyId)
 
     fun addMoney(userId: Int, companyId: Int, money: BigDecimal): Mono<Int> {

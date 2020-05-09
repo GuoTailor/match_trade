@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 09/05/2020 10:22:09
+ Date: 09/05/2020 10:49:46
 */
 
 
@@ -94,10 +94,10 @@ START 1
 CACHE 1;
 
 -- ----------------------------
--- Sequence structure for mt_trade_info_id_seq
+-- Sequence structure for mt_stockholder_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_trade_info_id_seq";
-CREATE SEQUENCE "public"."mt_trade_info_id_seq" 
+DROP SEQUENCE IF EXISTS "public"."mt_stockholder_id_seq";
+CREATE SEQUENCE "public"."mt_stockholder_id_seq" 
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
@@ -105,10 +105,10 @@ START 1
 CACHE 1;
 
 -- ----------------------------
--- Sequence structure for mt_user_role_id_seq
+-- Sequence structure for mt_trade_info_id_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_user_role_id_seq";
-CREATE SEQUENCE "public"."mt_user_role_id_seq" 
+DROP SEQUENCE IF EXISTS "public"."mt_trade_info_id_seq";
+CREATE SEQUENCE "public"."mt_trade_info_id_seq" 
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
@@ -466,7 +466,7 @@ COMMENT ON TABLE "public"."mt_stock" IS '股票';
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_stockholder";
 CREATE TABLE "public"."mt_stockholder" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_user_role_id_seq'::regclass),
+  "id" int4 NOT NULL DEFAULT nextval('mt_stockholder_id_seq'::regclass),
   "user_id" int4 NOT NULL,
   "role_id" int4 NOT NULL,
   "company_id" int4,
@@ -569,6 +569,8 @@ SELECT setval('"public"."mt_kline_id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
+ALTER SEQUENCE "public"."mt_positions_id_seq"
+OWNED BY "public"."mt_positions"."id";
 SELECT setval('"public"."mt_positions_id_seq"', 2, false);
 
 -- ----------------------------
@@ -593,16 +595,16 @@ SELECT setval('"public"."mt_room_seq"', 28, true);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_trade_info_id_seq"
-OWNED BY "public"."mt_trade_info"."id";
-SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
+ALTER SEQUENCE "public"."mt_stockholder_id_seq"
+OWNED BY "public"."mt_stockholder"."id";
+SELECT setval('"public"."mt_stockholder_id_seq"', 16, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_user_role_id_seq"
-OWNED BY "public"."mt_stockholder"."id";
-SELECT setval('"public"."mt_user_role_id_seq"', 16, true);
+ALTER SEQUENCE "public"."mt_trade_info_id_seq"
+OWNED BY "public"."mt_trade_info"."id";
+SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
 
 -- ----------------------------
 -- Alter sequences owned by

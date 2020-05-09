@@ -12,7 +12,7 @@ import java.math.BigDecimal
  */
 interface StockholderDao: ReactiveCrudRepository<Stockholder, Int> {
 
-    @Query("select * from mt_stockholder where user_id = :userId and company_id = :companyId")
+    @Query("select * from mt_stockholder where user_id = :userId and company_id = :companyId for update")
     fun findByUserIdAndCompanyId(userId: Int,  companyId : Int): Mono<Stockholder>
 
     @Modifying

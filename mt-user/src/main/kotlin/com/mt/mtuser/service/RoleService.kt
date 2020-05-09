@@ -59,4 +59,6 @@ class RoleService {
     suspend fun find(userId: Int, roleId: Int, companyId : Int) = stockholderDao.find(userId, roleId, companyId)
 
     fun findByCompanyId(companyId: Int) = stockholderDao.findByCompanyId(companyId)
+
+    suspend fun findByUserIdAndCompanyId(userId: Int, companyId: Int) = stockholderDao.findByUserIdAndCompanyId(userId, companyId)
 }

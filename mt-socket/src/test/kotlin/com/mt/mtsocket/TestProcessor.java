@@ -33,17 +33,25 @@ public class TestProcessor {
     }
 
     @Test
-    public void testFlatMap() {
-        Mono<String> mono = Mono.fromSupplier(() -> {
-            logger.info("next");
-            return "nmka";
-        });
-        mono.flatMap(str -> {
-            Mono<String> strMono1 = Mono.just("1");
-            Mono<String> strMono2 = Mono.just("2");
-            return strMono1.zipWith(strMono2);
-        }).doOnNext(tuple -> logger.info(tuple.getT1() + tuple.getT2()))
-                .block();
+    public void testFlatMap() throws InterruptedException {
+        Mono<String> mono = Mono.just("12")
+                .flatMap(it -> {
+                    System.out.println(it);
+                    return Mono.just("2");
+                }).flatMap(it -> {
+                    System.out.println(it);
+                    return Mono.empty();
+                });
+
+        Thread t1 = new Thread(mono::block);
+        Thread t2 = new Thread(mono::block);
+        Thread t3 = new Thread(mono::block);
+        t1.start();
+        t2.start();
+        t3.start();
+        t1.join();
+        t2.join();
+        t3.join();
     }
 
     @Test

@@ -1,13 +1,14 @@
 package com.mt.mtuser.entity
 
+import org.springframework.data.annotation.Transient
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.format.annotation.DateTimeFormat
+import java.math.BigDecimal
 import java.util.*
-import kotlin.reflect.KProperty
 
 /**
  * Created by gyh on 2020/3/18.
@@ -50,6 +51,11 @@ data class Company(
         /*** 单位联系人电话*/
         val unitContactPhone: String? = null
 ) {
+    @Transient
+    var stock: Long? = null
+    @Transient
+    var money: BigDecimal? = null
+
     fun getModes(): List<String> {
         return ObjectMapper().readValue(mode ?: "[]")
     }
