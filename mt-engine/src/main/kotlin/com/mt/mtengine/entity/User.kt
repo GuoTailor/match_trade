@@ -23,12 +23,12 @@ import java.util.*
  * @apiParam {Date} updateTime 最后修改日期
  */
 @Table("mt_user")
-class User : BaseUser() {
+class User {
     /**
      * 自增id
      */
     @Id
-    override var id: Int? = null
+    var id: Int? = null
 
     /**
      * 手机号
@@ -68,20 +68,6 @@ class User : BaseUser() {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     var lastTime: Date? = null
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    override fun getPassword(): String? {
-        return password
-    }
-
-    @JsonIgnore
-    override fun getUsername(): String? {
-        return phone
-    }
-
-    override fun setPassword(password: String?) {
-        this.password = password
-    }
 
     override fun toString(): String {
         return "User(id=$id, phone=$phone, nickName=$nickName, idNum=$idNum, password=$password, userPhoto=$userPhoto, createTime=$createTime, lastTime=$lastTime)"

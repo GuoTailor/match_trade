@@ -3,7 +3,7 @@ package com.mt.mtuser.controller
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.entity.Role
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.StockholderInfo
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
@@ -29,6 +29,7 @@ class CompanyController {
 
     @Autowired
     lateinit var tradeInfoService: TradeInfoService
+
     @Autowired
     lateinit var roomRecordService: RoomRecordService
 
@@ -112,7 +113,7 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/stockholder")
-    fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Role>> {
+    fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addStockholder(stockholderInfo.awaitSingle()) })
     }
 
@@ -128,11 +129,11 @@ class CompanyController {
      * {"code":0,"msg":"成功","data":null}
      * @apiGroup Company
      * @apiUse tokenMsg
-     * @apiPermission admin
+     * @apiPermission supperAdmin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/admin")
-    fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Role>> {
+    fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addCompanyAdmin(stockholderInfo.awaitSingle()) })
     }
 
@@ -193,8 +194,9 @@ class CompanyController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/shareholder")
-    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<Role>>> {
+    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<Stockholder>>> {
         return ResponseInfo.ok(mono { companyService.getAllShareholder(query) })
     }
 
@@ -224,21 +226,27 @@ class CompanyController {
      * @apiVersion 0.0.1
      * @apiSuccess {Long} tradesCapacity 今日交易量
      * @apiSuccess {Long} tradesVolume 今日交易金额
-     * @apiSuccess {Integer} tradesNumber=0 今日交易次数
+     * @apiSuccess {Integer} tradesNumber 今日交易次数
+     * @apiSuccess {Decimal} closingPrice 收盘价
+     * @apiSuccess {Decimal} openingPrice 开盘价
+     * @apiSuccess {Decimal} avgPrice 平均价
      * @apiSuccessExample {json} 成功返回:
-     * {}
+     * {"code":0,"msg":"成功","data":[]}
      * @apiGroup Company
      * @apiUse tokenMsg
-     * @apiPermission user
+     * @apiPermission admin
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/data")
-    fun getTodayData() {
-        ResponseInfo.ok(mono {
-            val data: MutableMap<String, Any> = HashMap()
-            data["companyCount"] = companyService.count()
-            data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId() // 交易量
-            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId() // 交易金额
-            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId() // 交易次数
+    fun getTodayData(): Mono<ResponseInfo<HashMap<String, Any>>> {
+        return ResponseInfo.ok(mono {
+            val data = HashMap<String, Any>()   // TODO 想办法为每个公司加缓存，可以考虑替换协程为Mono
+            data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId()   // 交易量
+            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId()     // 交易金额
+            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId()         // 交易次数
+            data["closingPrice"] = tradeInfoService.getTodayOpeningPriceByCompanyId()       // 收盘价
+            data["openingPrice"] = tradeInfoService.getYesterdayClosingPriceByCompanyId()   // 开盘价
+            data["avgPrice"] = tradeInfoService.getAvgPriceByCompanyId()                    // 平均价
             data
         })
     }

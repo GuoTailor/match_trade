@@ -71,8 +71,8 @@ abstract class BaseUser : UserDetails {
     @Deprecated("", ReplaceWith("RoleService.getCompanyList()"), DeprecationLevel.ERROR)
     fun getCompanyList(): MutableList<Int> {
         return roles.stream()
-                .filter { it is Role && it.companyId != null }
-                .map { (it as Role).companyId }
+                .filter { it is Stockholder && it.companyId != null }
+                .map { (it as Stockholder).companyId }
                 .collect(Collectors.toList())
     }
 
@@ -85,8 +85,8 @@ abstract class BaseUser : UserDetails {
     @Deprecated("", ReplaceWith("RoleService.getCompanyList()"), DeprecationLevel.ERROR)
     fun getCompanyList(roleName: String): MutableList<Int> {
         return roles.stream()
-                .filter { it is Role && it.authority == roleName && it.companyId != null }
-                .map { (it as Role).companyId }
+                .filter { it is Stockholder && it.authority == roleName && it.companyId != null }
+                .map { (it as Stockholder).companyId }
                 .collect(Collectors.toList())
     }
 
@@ -95,10 +95,10 @@ abstract class BaseUser : UserDetails {
      */
     @JsonIgnore
     @Deprecated("", ReplaceWith("RoleService.selectRolesByUserId()"), DeprecationLevel.ERROR)
-    fun getRoleByName(roleName: String): MutableList<Role> {
+    fun getRoleByName(roleName: String): MutableList<Stockholder> {
         return roles.stream()
-                .filter { it is Role && it.authority == roleName }
-                .map { it as Role }
+                .filter { it is Stockholder && it.authority == roleName }
+                .map { it as Stockholder }
                 .collect(Collectors.toList())
     }
 

@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 08/05/2020 15:02:30
+ Date: 09/05/2020 10:22:09
 */
 
 
@@ -348,10 +348,10 @@ COMMENT ON COLUMN "public"."mt_room_double"."start_time" IS '房间开启时间'
 COMMENT ON TABLE "public"."mt_room_double" IS '两两撮和';
 
 -- ----------------------------
--- Table structure for mt_room_record 
+-- Table structure for mt_room_record
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."mt_room_record ";
-CREATE TABLE "public"."mt_room_record " (
+DROP TABLE IF EXISTS "public"."mt_room_record";
+CREATE TABLE "public"."mt_room_record" (
   "id" int4 NOT NULL DEFAULT nextval('"mt_room_record _id_seq"'::regclass),
   "model" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "company_id" int4 NOT NULL,
@@ -361,13 +361,13 @@ CREATE TABLE "public"."mt_room_record " (
   "stock_id" int4 NOT NULL
 )
 ;
-COMMENT ON COLUMN "public"."mt_room_record "."model" IS '模式对应撮合模式';
-COMMENT ON COLUMN "public"."mt_room_record "."company_id" IS '公司id';
-COMMENT ON COLUMN "public"."mt_room_record "."start_time" IS '启用时间';
-COMMENT ON COLUMN "public"."mt_room_record "."end_time" IS '结束时间';
-COMMENT ON COLUMN "public"."mt_room_record "."room_id" IS '房间id，四张房间表唯一';
-COMMENT ON COLUMN "public"."mt_room_record "."stock_id" IS '股票id';
-COMMENT ON TABLE "public"."mt_room_record " IS '房间启用记录';
+COMMENT ON COLUMN "public"."mt_room_record"."model" IS '模式对应撮合模式';
+COMMENT ON COLUMN "public"."mt_room_record"."company_id" IS '公司id';
+COMMENT ON COLUMN "public"."mt_room_record"."start_time" IS '启用时间';
+COMMENT ON COLUMN "public"."mt_room_record"."end_time" IS '结束时间';
+COMMENT ON COLUMN "public"."mt_room_record"."room_id" IS '房间id，四张房间表唯一';
+COMMENT ON COLUMN "public"."mt_room_record"."stock_id" IS '股票id';
+COMMENT ON TABLE "public"."mt_room_record" IS '房间启用记录';
 
 -- ----------------------------
 -- Table structure for mt_room_timely
@@ -462,6 +462,29 @@ COMMENT ON COLUMN "public"."mt_stock"."create_time" IS '创建时间';
 COMMENT ON TABLE "public"."mt_stock" IS '股票';
 
 -- ----------------------------
+-- Table structure for mt_stockholder
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_stockholder";
+CREATE TABLE "public"."mt_stockholder" (
+  "id" int4 NOT NULL DEFAULT nextval('mt_user_role_id_seq'::regclass),
+  "user_id" int4 NOT NULL,
+  "role_id" int4 NOT NULL,
+  "company_id" int4,
+  "real_name" varchar(32) COLLATE "pg_catalog"."default",
+  "department" varchar(64) COLLATE "pg_catalog"."default",
+  "position" varchar(64) COLLATE "pg_catalog"."default",
+  "money" numeric(11,4) NOT NULL DEFAULT 0
+)
+;
+COMMENT ON COLUMN "public"."mt_stockholder"."user_id" IS '用户id';
+COMMENT ON COLUMN "public"."mt_stockholder"."role_id" IS '该用户在公司的角色id';
+COMMENT ON COLUMN "public"."mt_stockholder"."company_id" IS '公司id';
+COMMENT ON COLUMN "public"."mt_stockholder"."real_name" IS '真实姓名';
+COMMENT ON COLUMN "public"."mt_stockholder"."department" IS '所在部门';
+COMMENT ON COLUMN "public"."mt_stockholder"."position" IS '职位';
+COMMENT ON COLUMN "public"."mt_stockholder"."money" IS '资金';
+
+-- ----------------------------
 -- Table structure for mt_trade_info
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_trade_info";
@@ -523,27 +546,6 @@ COMMENT ON COLUMN "public"."mt_user"."create_time" IS '注册时间';
 COMMENT ON COLUMN "public"."mt_user"."last_time" IS '最后登录时间';
 
 -- ----------------------------
--- Table structure for mt_user_role
--- ----------------------------
-DROP TABLE IF EXISTS "public"."mt_user_role";
-CREATE TABLE "public"."mt_user_role" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_user_role_id_seq'::regclass),
-  "user_id" int4 NOT NULL,
-  "role_id" int4 NOT NULL,
-  "company_id" int4,
-  "real_name" varchar(32) COLLATE "pg_catalog"."default",
-  "department" varchar(64) COLLATE "pg_catalog"."default",
-  "position" varchar(64) COLLATE "pg_catalog"."default"
-)
-;
-COMMENT ON COLUMN "public"."mt_user_role"."user_id" IS '用户id';
-COMMENT ON COLUMN "public"."mt_user_role"."role_id" IS '该用户在公司的角色id';
-COMMENT ON COLUMN "public"."mt_user_role"."company_id" IS '公司id';
-COMMENT ON COLUMN "public"."mt_user_role"."real_name" IS '真实姓名';
-COMMENT ON COLUMN "public"."mt_user_role"."department" IS '所在部门';
-COMMENT ON COLUMN "public"."mt_user_role"."position" IS '职位';
-
--- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_company_id_seq"
@@ -580,7 +582,7 @@ SELECT setval('"public"."mt_role_id_seq"', 3, true);
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_room_record _id_seq"
-OWNED BY "public"."mt_room_record "."id";
+OWNED BY "public"."mt_room_record"."id";
 SELECT setval('"public"."mt_room_record _id_seq"', 2, false);
 
 -- ----------------------------
@@ -599,7 +601,7 @@ SELECT setval('"public"."mt_trade_info_id_seq"', 2, false);
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_user_role_id_seq"
-OWNED BY "public"."mt_user_role"."id";
+OWNED BY "public"."mt_stockholder"."id";
 SELECT setval('"public"."mt_user_role_id_seq"', 16, true);
 
 -- ----------------------------
@@ -683,9 +685,9 @@ CREATE UNIQUE INDEX "mt_room_double_room_number_idx" ON "public"."mt_room_double
 ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
--- Primary Key structure for table mt_room_record 
+-- Primary Key structure for table mt_room_record
 -- ----------------------------
-ALTER TABLE "public"."mt_room_record " ADD CONSTRAINT "mt_room_record _pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Indexes structure for table mt_room_timely
@@ -722,6 +724,16 @@ ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "mt_stock_name_key" UNIQUE ("name
 ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "stock_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
+-- Uniques structure for table mt_stockholder
+-- ----------------------------
+ALTER TABLE "public"."mt_stockholder" ADD CONSTRAINT "mt_user_role_userid_roleid_companyid_key" UNIQUE ("user_id", "role_id", "company_id");
+
+-- ----------------------------
+-- Primary Key structure for table mt_stockholder
+-- ----------------------------
+ALTER TABLE "public"."mt_stockholder" ADD CONSTRAINT "mt_user_role_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
 -- Indexes structure for table mt_trade_info
 -- ----------------------------
 CREATE INDEX "mt_trade_info_trade_state_idx" ON "public"."mt_trade_info" USING btree (
@@ -737,16 +749,6 @@ ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_pkey" PRIMARY
 -- Primary Key structure for table mt_user
 -- ----------------------------
 ALTER TABLE "public"."mt_user" ADD CONSTRAINT "user_pkey" PRIMARY KEY ("id");
-
--- ----------------------------
--- Uniques structure for table mt_user_role
--- ----------------------------
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_roleid_companyid_key" UNIQUE ("user_id", "role_id", "company_id");
-
--- ----------------------------
--- Primary Key structure for table mt_user_role
--- ----------------------------
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_company_room
@@ -784,10 +786,10 @@ ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_company_id_
 ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ----------------------------
--- Foreign Keys structure for table mt_room_record 
+-- Foreign Keys structure for table mt_room_record
 -- ----------------------------
-ALTER TABLE "public"."mt_room_record " ADD CONSTRAINT "mt_room_record _company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_room_record " ADD CONSTRAINT "mt_room_record _stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_room_timely
@@ -807,16 +809,16 @@ ALTER TABLE "public"."mt_room_timing" ADD CONSTRAINT "mt_room_timing_stock_id_fk
 ALTER TABLE "public"."mt_stock" ADD CONSTRAINT "stock_cid_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ----------------------------
+-- Foreign Keys structure for table mt_stockholder
+-- ----------------------------
+ALTER TABLE "public"."mt_stockholder" ADD CONSTRAINT "mt_user_role_companyid_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_stockholder" ADD CONSTRAINT "mt_user_role_roleid_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."mt_role" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_stockholder" ADD CONSTRAINT "mt_user_role_userid_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
 -- Foreign Keys structure for table mt_trade_info
 -- ----------------------------
 ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_buyer_id_fkey" FOREIGN KEY ("buyer_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_seller_id_fkey" FOREIGN KEY ("seller_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- ----------------------------
--- Foreign Keys structure for table mt_user_role
--- ----------------------------
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_companyid_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE NO ACTION ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_roleid_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."mt_role" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_user_role" ADD CONSTRAINT "mt_user_role_userid_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;

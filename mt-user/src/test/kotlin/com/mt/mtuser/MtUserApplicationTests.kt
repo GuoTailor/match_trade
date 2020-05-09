@@ -2,9 +2,8 @@ package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtcommon.toDuration
 import com.mt.mtcommon.toMillisOfDay
-import com.mt.mtuser.entity.Role
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import org.junit.jupiter.api.Test
 import org.springframework.util.StringUtils
@@ -34,7 +33,7 @@ class MtUserApplicationTests {
         }
     }*/
 
-    fun nmka2(user: Mono<User>): Mono<Role> {
+    fun nmka2(user: Mono<User>): Mono<Stockholder> {
         return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
                 .switchIfEmpty(Mono.error(IllegalStateException("请正确填写用户名或密码")))
                 .flatMap { println("nmka");Mono.just(0) }
@@ -46,7 +45,7 @@ class MtUserApplicationTests {
                     ur.id = 2
                     Mono.just(ur)
                 }.flatMap { newUser ->
-                    val role = Role()
+                    val role = Stockholder()
                     role.userId = newUser.id
                     Mono.just(role)
                 }

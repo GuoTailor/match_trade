@@ -2,7 +2,7 @@ package com.mt.mtuser.config
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtuser.entity.Role
+import com.mt.mtuser.entity.Stockholder
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -23,7 +23,7 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
             val id: String? = request.headers.getFirst("id")
             val role: String = request.headers.getFirst("roles") ?: "[]"
             val data: List<String> = json.readValue(role)
-            val roles = data.map { list -> Role(name = "ROLE_$list") }
+            val roles = data.map { list -> Stockholder(name = "ROLE_$list") }
             UsernamePasswordAuthenticationToken(id, id, roles)
         }
     }

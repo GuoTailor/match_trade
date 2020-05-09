@@ -2,15 +2,12 @@ package com.mt.mtsocket.socket
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.mt.mtcommon.RoomEvent
 import com.mt.mtcommon.RoomRecord
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
-import com.mt.mtsocket.schedule.MatchStartJobInfo
-import com.mt.mtsocket.schedule.QuartzManager
 import com.mt.mtsocket.service.RedisUtil
 import com.mt.mtsocket.service.WorkService
 import org.slf4j.LoggerFactory
@@ -41,9 +38,6 @@ class SocketHandler : WebSocketHandler {
 
     @Autowired
     private lateinit var redisUtil: RedisUtil
-
-    @Autowired
-    private lateinit var quartzManager: QuartzManager
 
     init {
         json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

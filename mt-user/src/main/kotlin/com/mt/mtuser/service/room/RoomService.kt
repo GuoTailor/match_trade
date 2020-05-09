@@ -4,7 +4,7 @@ import com.mt.mtcommon.*
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
-import com.mt.mtuser.entity.Role
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.schedule.QuartzManager
 import com.mt.mtuser.schedule.RoomEndJobInfo
@@ -128,7 +128,7 @@ class RoomService {
     suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, newFlag: String): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
-        val companyList = roleService.getCompanyList(Role.ADMIN)
+        val companyList = roleService.getCompanyList(Stockholder.ADMIN)
         return if (companyList.contains(room.companyId)) {
             if (newFlag == room.flag) {
                 room.roomId = null
@@ -178,7 +178,7 @@ class RoomService {
     /**
      * 获取能编辑的房间，就是自己管理的房间
      */
-    suspend fun getEditableRoomList() = getRoomList(Role.ADMIN)
+    suspend fun getEditableRoomList() = getRoomList(Stockholder.ADMIN)
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
         val companyList = roleService.getCompanyList(role)

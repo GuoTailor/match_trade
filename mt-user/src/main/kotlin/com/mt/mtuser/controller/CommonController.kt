@@ -15,9 +15,11 @@ import kotlinx.coroutines.reactor.mono
 import org.quartz.JobDataMap
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 
@@ -170,6 +172,7 @@ class CommonController {
      */
     @GetMapping("/system/info")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @Cacheable(cacheNames = ["getSystemInfo"])
     fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Number>>> {
         return ResponseInfo.ok(mono {
             val data: MutableMap<String, Number> = HashMap()
@@ -180,6 +183,6 @@ class CommonController {
             data["tradesVolume"] = tradeInfoService.countMoneyByTradeTime() // 交易金额
             data["tradesNumber"] = roomRecordService.countByStartTime() // 交易次数
             data
-        })
+        }.cache(Duration.ofMinutes(1)))
     }
 }

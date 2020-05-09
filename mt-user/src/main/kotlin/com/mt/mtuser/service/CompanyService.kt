@@ -7,14 +7,11 @@ import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 
 /**
  * Created by gyh on 2020/3/18.
@@ -79,10 +76,10 @@ class CompanyService {
 
     }
 
-    suspend fun getAllShareholder(query: PageQuery): PageView<Role> {
-        val companyId = roleService.getCompanyList(Role.ADMIN)[0]
+    suspend fun getAllShareholder(query: PageQuery): PageView<Stockholder> {
+        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         return getPage(connect.select()
-                .from<Role>()
+                .from<Stockholder>()
                 .project("id", "user_id", "role_id", "company_id", "real_name", "department", "position")
                 .matching(query.where().and("company_id").`is`(companyId))
                 .page(query.page())
@@ -106,20 +103,17 @@ class CompanyService {
     /**
      * 添加一个股东
      */
-    suspend fun addStockholder(info: StockholderInfo): Role {
+    suspend fun addStockholder(info: StockholderInfo): Stockholder {
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
         if (roleService.getCompanyList().contains(info.companyId)) {
-            val roleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
+            val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
             if (roleService.exists(user.id!!, roleId, info.companyId!!) == 0) {
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
                 positionsDao.save(Positions(companyId = info.companyId, stockId = stockId, userId = user.id, amount = info.amount))
-                val role = Role(userId = user.id,
-                        roleId = roleId,
-                        companyId = info.companyId,
-                        realName = info.realName,
-                        department = info.department,
-                        position = info.position)
+                val role = info.toStockholder()
+                role.userId = user.id
+                role.roleId = roleId
                 return roleService.save(role)
             } else throw IllegalStateException("用户已经是股东 $phone")
         } else throw IllegalStateException("不能为公司 ${info.companyId} 添加股东，没有权限")
@@ -128,17 +122,15 @@ class CompanyService {
     /**
      * 为公司添加一个管理员
      */
-    suspend fun addCompanyAdmin(info: StockholderInfo): Role {  // TODO 一个公司只有一个管理员
+    suspend fun addCompanyAdmin(info: StockholderInfo): Stockholder {  // TODO 一个公司只有一个管理员
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
-        if (roleService.getCompanyList().contains(info.companyId)) {// TODO 有问题，为公司添加管理员不能用roleService.getCompanyList()
-            val userRoleId = roleService.getRoles().find { it.name == Role.USER }!!.id!!
-            val adminRoleId = roleService.getRoles().find { it.name == Role.ADMIN }!!.id!!
-            val role = roleService.find(user.id!!, info.companyId!!, userRoleId)
-                    ?: throw IllegalStateException("用户不是股东")
-            role.roleId = adminRoleId
-            role.realName = info.realName
-            return roleService.save(role)
-        } else throw IllegalStateException("不能为公司 ${info.companyId} 添加股东，没有权限")
+        val userRoleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        val adminRoleId = roleService.getRoles().find { it.name == Stockholder.ADMIN }!!.id!!
+        val role = roleService.find(user.id!!, info.companyId!!, userRoleId)
+                ?: throw IllegalStateException("用户不是股东")
+        role.roleId = adminRoleId
+        role.realName = info.realName
+        return roleService.save(role)
     }
 }

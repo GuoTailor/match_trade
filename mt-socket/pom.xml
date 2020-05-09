@@ -64,11 +64,6 @@
             <artifactId>spring-integration-core</artifactId>
             <version>5.2.5.RELEASE</version>
         </dependency>
-        <!-- quartz -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-quartz</artifactId>
-        </dependency>
         <!-- nacos -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

@@ -3,13 +3,19 @@ package com.mt.mtengine.config
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.cache.CacheBuilder
+import org.springframework.cache.Cache
+import org.springframework.cache.concurrent.ConcurrentMapCache
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
+import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -35,6 +41,21 @@ class ReactiveRedisConfiguration {
                 .hashValue(jackson2JsonRedisSerializer) // hash的value序列化方式采用jackson
                 .build()
         return ReactiveRedisTemplate(factory, context)
+    }
+
+    @Bean
+    fun cacheManager(redisConnectionFactory: RedisConnectionFactory): ConcurrentMapCacheManager {
+        return object : ConcurrentMapCacheManager("companyAndStockId") {
+            override fun createConcurrentMapCache(name: String): Cache {
+                return ConcurrentMapCache(name, CacheBuilder
+                        .newBuilder()
+                        .concurrencyLevel(4)
+                        .expireAfterWrite(12, TimeUnit.HOURS)
+                        .maximumSize(256)
+                        .build<Any, Any>()
+                        .asMap(), false)
+            }
+        }
     }
 
 }

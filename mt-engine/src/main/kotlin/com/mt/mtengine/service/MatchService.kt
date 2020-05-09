@@ -28,6 +28,9 @@ class MatchService {
     private lateinit var tradeInfoService: TradeInfoService
 
     @Autowired
+    private lateinit var stockholderService: StockholderService
+
+    @Autowired
     private lateinit var r2dbc: R2dbcService
 
     @Autowired
@@ -44,6 +47,8 @@ class MatchService {
                     sell.onTrade(threadInfo)
                     positionsService.addAmount(info.companyId, info.stockId, buy.userId!!, buy.number!!)
                             .flatMap { positionsService.minusAmount(info.companyId, info.stockId, sell.userId!!, sell.number!!) }
+                            .flatMap { stockholderService.addMoney(buy.userId!!, info.companyId, threadInfo.tradeMoney!!) }
+                            .flatMap { stockholderService.minusMoney(sell.userId!!, info.companyId, threadInfo.tradeMoney!!) }
                             .flatMap { tradeInfoService.save(threadInfo) }
                 }.flatMap { redisUtil.updateUserOrder(buy) }
                 .flatMap { redisUtil.updateUserOrder(sell) }
@@ -66,7 +71,6 @@ class MatchService {
                 .flatMap { sell?.let { redisUtil.updateUserOrder(it) } }
                 .doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
                 .doOnError { onMatchError(buy, sell, it.message ?: "失败") }
-
     }
 
     fun onMatchError(buy: OrderParam?, sell: OrderParam?, fileInfo: String): Mono<Void> {

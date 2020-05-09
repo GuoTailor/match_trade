@@ -1,8 +1,8 @@
 package com.mt.mtuser.service
 
 import com.mt.mtuser.dao.UserDao
-import com.mt.mtuser.dao.UserRoleDao
-import com.mt.mtuser.entity.Role
+import com.mt.mtuser.dao.StockholderDao
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
@@ -34,7 +34,7 @@ class UserService {
     private lateinit var userDao: UserDao
 
     @Autowired
-    private lateinit var userRoleDao: UserRoleDao
+    private lateinit var stockholderDao: StockholderDao
 
     @Autowired
     lateinit var r2dbc: R2dbcService
@@ -49,7 +49,7 @@ class UserService {
                 user.passwordEncoder()
                 user.id = null
                 val newUser = userDao.save(user)
-                userRoleDao.save(Role(userId = newUser.id, roleId=roleService.getRoles().find { it.name == Role.USER }!!.id))
+                stockholderDao.save(Stockholder(userId = newUser.id, roleId=roleService.getRoles().find { it.name == Stockholder.USER }!!.id))
                 Unit
             } else throw IllegalStateException("用户已存在")
         } else throw IllegalStateException("请正确填写用户名或密码")
@@ -60,7 +60,7 @@ class UserService {
      * 关于使用协程的不便请看README的注意部分
      */
     @Transactional
-    fun registerMono(user: Mono<User>): Mono<Role> {
+    fun registerMono(user: Mono<User>): Mono<Stockholder> {
         return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
                 .switchIfEmpty(Mono.error(IllegalStateException("请正确填写用户名或密码")))
                 .flatMap { mono { userDao.existsUserByPhone(it.phone!!) } }
@@ -72,7 +72,7 @@ class UserService {
                     ur.id = null
                     mono { userDao.save(ur) }
                 }.flatMap { newUser ->
-                    mono { userRoleDao.save(Role(newUser.id, roleService.getRoles().find { it.name == Role.USER }!!.id, null)) }
+                    mono { stockholderDao.save(Stockholder(newUser.id, roleService.getRoles().find { it.name == Stockholder.USER }!!.id, null)) }
                 }
     }
 
@@ -113,7 +113,7 @@ class UserService {
         val user = userDao.findById(userId)
         if (user != null) {
             companyList.forEach { companyId ->
-                userRoleDao.save(user.id!!, roleService.getRoles().find { it.name == Role.USER }?.id!!, companyId)
+                stockholderDao.save(user.id!!, roleService.getRoles().find { it.name == Stockholder.USER }?.id!!, companyId)
             }
         } else throw IllegalStateException("用户不存在")
     }

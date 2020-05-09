@@ -64,40 +64,6 @@ abstract class BaseUser : UserDetails {
         return true
     }
 
-    /**
-     * 获取该用户的公司列表
-     */
-    @JsonIgnore
-    fun getCompanyList(): MutableList<Int> {
-        return roles.stream()
-                .filter { it is Role && it.companyId != null }
-                .map { (it as Role).companyId }
-                .collect(Collectors.toList())
-    }
-
-    /**
-     * 获取该用户的指定橘角色得公司列表
-     * 比如获取自己能管理得房间，那么角色就是 ROLE_ADMIN
-     * 获取所有自己能加入的房间就请调用[getCompanyList]的无参方法
-     */
-    @JsonIgnore
-    fun getCompanyList(roleName: String): MutableList<Int> {
-        return roles.stream()
-                .filter { it is Role && it.authority == roleName && it.companyId != null }
-                .map { (it as Role).companyId }
-                .collect(Collectors.toList())
-    }
-
-    /**
-     * 获取指定角色的集合
-     */
-    @JsonIgnore
-    fun getRoleByName(roleName: String): MutableList<Role> {
-        return roles.stream()
-                .filter { it is Role && it.authority == roleName }
-                .map { it as Role }
-                .collect(Collectors.toList())
-    }
 
     companion object {
         private val logger = Logger.getLogger(BaseUser::class.java.simpleName)

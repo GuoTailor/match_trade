@@ -10,9 +10,9 @@ import java.util.*
  */
 interface RoomRecordDao : CoroutineCrudRepository<RoomRecord, Int> {
 
-    @Query("select count(1) from mt_room_record where start_time > time")
+    @Query("select count(1) from mt_room_record where start_time > :time")
     suspend fun countByStartTime(time: Date): Int
 
-    @Query("select count(1) from mt_room_record where start_time > time and company_id = :companyId")
+    @Query("select count(1) from mt_room_record where start_time > :time and company_id = :companyId")
     suspend fun countByStartTimeAndCompanyId(time: Date, companyId: Int): Int
 }
