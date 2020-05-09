@@ -58,7 +58,7 @@ class ReactiveRedisConfiguration {
                 return ConcurrentMapCache(name, CacheBuilder
                         .newBuilder()
                         .concurrencyLevel(4)
-                        .expireAfterWrite(1, TimeUnit.MINUTES)
+                        .expireAfterWrite(3, TimeUnit.MINUTES)
                         .maximumSize(100)
                         .build<Any, Any>()
                         .asMap(), false)

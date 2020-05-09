@@ -11,22 +11,22 @@ import org.springframework.data.r2dbc.repository.Query
  */
 interface ContinueRoomDao : BaseRoomDao<ContinueMatch, String> {
 
-    @Query("select count(1) from mt_room_timely where room_id = :roomId limit 1")
+    @Query("select count(1) from mt_room_continue where room_id = :roomId limit 1")
     override suspend fun existsByRoomId(roomId: String): Int
 
     @Modifying
-    @Query("update mt_room_timely set enable = :enable where room_id = :roomId")
+    @Query("update mt_room_continue set enable = :enable where room_id = :roomId")
     override suspend fun enableRoomById(roomId: String, enable: String): Int
 
-    @Query("select count(1) from mt_room_timely where company_id = :companyId")
+    @Query("select count(1) from mt_room_continue where company_id = :companyId")
     suspend fun countByCompanyId(companyId: Int): Int
 
-    @Query("select * from mt_room_timely where room_id = :roomId")
+    @Query("select * from mt_room_continue where room_id = :roomId")
     override suspend fun findByRoomId(roomId: String): ContinueMatch?
 
-    @Query("select * from mt_room_timely where company_id in (:companyId)")
+    @Query("select * from mt_room_continue where company_id in (:companyId)")
     override fun findByCompanyIdAll(companyId: Iterable<Int>): Flow<ContinueMatch>
 
-    @Query("select room_id, time, enable, start_time from mt_room_timely")
+    @Query("select room_id, time, enable, start_time from mt_room_continue")
     override fun findTimeAll(): Flow<ContinueMatch>
 }

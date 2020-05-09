@@ -1,10 +1,7 @@
 package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.entity.Company
-import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.entity.Stockholder
-import com.mt.mtuser.entity.StockholderInfo
+import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.CompanyService
@@ -13,6 +10,7 @@ import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -219,6 +217,32 @@ class CompanyController {
     @GetMapping
     fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
         return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })
+    }
+
+    /**
+     * @api {get} /company/overview 获取交易概述
+     * @apiDescription  获取交易概述 day 是今天得交易概述，month 是这个月得交易概述
+     * @apiName getOverview
+     * @apiVersion 0.0.1
+     * @apiSuccess {Long} buyStock=0 买入股数
+     * @apiSuccess {Long} sellStock=0 卖出股数
+     * @apiSuccess {Decimal} buyMoney=0 买入金额
+     * @apiSuccess {Decimal} sellMoney=0 卖出金额
+     * @apiSuccess {Decimal} avgBuyMoney=0 平均买价
+     * @apiSuccess {Decimal} avgSellMoney=0 平均卖价
+     * @apiSuccess {Long} netBuyStock=0 净买入股数
+     * @apiSuccess {Decimal} netBuyMoney=0 净买入金额
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"day": {"buyStock": 0,"sellStock": 0,"buyMoney": 0,"sellMoney": 0,"avgBuyMoney": 0,
+     * "avgSellMoney": 0,"netBuyStock": 0,"netBuyMoney": 0},"month": {"buyStock": 0,"sellStock": 0,"buyMoney": 0,"sellMoney": 0,
+     * "avgBuyMoney": 0,"avgSellMoney": 0,"netBuyStock": 0,"netBuyMoney": 0}}}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/overview")
+    fun getOverview(companyId: Int): Mono<ResponseInfo<Map<String, Overview>>> {
+        return ResponseInfo.ok(mono { companyService.getOverview(companyId) })
     }
 
     /**

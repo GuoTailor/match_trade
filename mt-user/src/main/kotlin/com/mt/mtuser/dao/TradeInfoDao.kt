@@ -55,26 +55,6 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
             " and stock_id = :stockId ")
     suspend fun avgPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal
 
-    @Query("select COALESCE(sum(trade_amount), 0) as buyStock" +
-            " COALESCE(sum(trade_price), 0) as buyMoney" +
-            " COALESCE(avg(trade_price), 0) as avgBuyMoney " +
-            " from $table " +
-            " where trade_time >= :startTime " +
-            " and trade_time <= :endTime " +
-            " and company_id = :companyId " +
-            " and buyer_id = :buyerId")
-    suspend fun buyOverview(startTime: Date, endTime: Date, companyId: Int, buyerId: Int): Overview
-
-    @Query("select COALESCE(sum(trade_amount), 0) as sellStock" +
-            " COALESCE(sum(trade_price), 0) as sellMoney" +
-            " COALESCE(avg(trade_price), 0) as avgSellMoney " +
-            " from $table " +
-            " where trade_time >= :startTime " +
-            " and trade_time <= :endTime " +
-            " and company_id = :companyId " +
-            " and seller_id = :sellId")
-    suspend fun sellOverview(startTime: Date, endTime: Date, companyId: Int, sellId: Int): Overview
-
     companion object {
         const val table = "mt_trade_info"
     }

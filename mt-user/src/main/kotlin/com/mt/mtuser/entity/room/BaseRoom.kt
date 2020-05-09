@@ -63,15 +63,12 @@ interface BaseRoom : Persistable<String> {
             record.secondStage = secondStage
             record.rival = rival
         }
-        if (this is TimingMatch) {
-            record.quoteTime = quoteTime ?: LocalTime.MIN
-        }
         record.cycle = when (flag) {
             RoomEnum.CLICK.flag -> LocalTime.MIN
             RoomEnum.BICKER.flag -> LocalTime.MIN
             RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)
             RoomEnum.CONTINUE.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.TIMING.flag -> (this as TimingMatch).matchTime
+            RoomEnum.TIMING.flag -> LocalTime.MIN
             else -> throw IllegalStateException("不支持的房间号模式${roomId}")
         }
         return record

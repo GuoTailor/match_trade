@@ -32,20 +32,14 @@ class TimingMatch(
         override var people: Int? = null,       // 人数
         override var time: LocalTime? = null,     // 时长
         override var startTime: LocalTime? = null,  // 房间开启时间
-        var matchTime: LocalTime? = null,       // 撮合时间
         override var numberTrades: Int? = null,  // 单笔交易数量
-        var count: Int? = null,                 // 撮合次数
         override var lowScope: Double? = null,  // 最低报价
         override var highScope: Double? = null, // 最高报价
         override var enable: String? = null,    // 是否启用（0：关闭，1：开启）
-        override var createTime: Date? = null,  // 创建时间
-        var quoteTime: LocalTime? = null,    // 报价时间
-        var currentCount: Int? = null        // 当前撮合次数
+        override var createTime: Date? = null   // 创建时间
 ) : BaseRoom {
     override val flag: String = RoomEnum.TIMING.flag
     override fun validNull() {
         people = null
-        currentCount = null
-        matchTime = LocalTime.ofSecondOfDay((time!!.second / count!!).toLong())
     }
 }

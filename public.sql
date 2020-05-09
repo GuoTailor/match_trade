@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 09/05/2020 10:49:46
+ Date: 09/05/2020 21:14:41
 */
 
 
@@ -285,8 +285,6 @@ CREATE TABLE "public"."mt_room_click" (
   "second_stage" time(6) NOT NULL,
   "time" time(6) NOT NULL,
   "number_trades" int4 NOT NULL,
-  "count" int2 NOT NULL,
-  "current_count" int2 NOT NULL DEFAULT 0,
   "low_scope" numeric NOT NULL,
   "high_scope" numeric NOT NULL,
   "enable" varchar(1) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 0,
@@ -304,8 +302,6 @@ COMMENT ON COLUMN "public"."mt_room_click"."quote_time" IS '报价和选择身�
 COMMENT ON COLUMN "public"."mt_room_click"."second_stage" IS '第二阶段时间';
 COMMENT ON COLUMN "public"."mt_room_click"."time" IS '时长';
 COMMENT ON COLUMN "public"."mt_room_click"."number_trades" IS '单笔交易数量';
-COMMENT ON COLUMN "public"."mt_room_click"."count" IS '撮合次数';
-COMMENT ON COLUMN "public"."mt_room_click"."current_count" IS '当前撮合次数';
 COMMENT ON COLUMN "public"."mt_room_click"."low_scope" IS '报价最低值';
 COMMENT ON COLUMN "public"."mt_room_click"."high_scope" IS '报价最高值';
 COMMENT ON COLUMN "public"."mt_room_click"."enable" IS '是否开启{0：关闭；1：开启}';
@@ -313,6 +309,39 @@ COMMENT ON COLUMN "public"."mt_room_click"."create_time" IS '创建时间';
 COMMENT ON COLUMN "public"."mt_room_click"."rival" IS '选择对手个数';
 COMMENT ON COLUMN "public"."mt_room_click"."start_time" IS '房间开启时间';
 COMMENT ON TABLE "public"."mt_room_click" IS '点选撮和';
+
+-- ----------------------------
+-- Table structure for mt_room_continue
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_room_continue";
+CREATE TABLE "public"."mt_room_continue" (
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
+  "company_id" int4 NOT NULL,
+  "stock_id" int4 NOT NULL,
+  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "people" int4 NOT NULL DEFAULT 0,
+  "time" time(6) NOT NULL,
+  "number_trades" int4 NOT NULL,
+  "low_scope" numeric NOT NULL,
+  "high_scope" numeric NOT NULL,
+  "enable" varchar(1) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 0,
+  "create_time" timestamp(0) NOT NULL DEFAULT now(),
+  "start_time" time(6) NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_room_continue"."room_id" IS '房间id，四张表唯一';
+COMMENT ON COLUMN "public"."mt_room_continue"."company_id" IS '公司id';
+COMMENT ON COLUMN "public"."mt_room_continue"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_room_continue"."name" IS '房间名字';
+COMMENT ON COLUMN "public"."mt_room_continue"."people" IS '人数';
+COMMENT ON COLUMN "public"."mt_room_continue"."time" IS '时长';
+COMMENT ON COLUMN "public"."mt_room_continue"."number_trades" IS '单笔交易数量';
+COMMENT ON COLUMN "public"."mt_room_continue"."low_scope" IS '报价最低值';
+COMMENT ON COLUMN "public"."mt_room_continue"."high_scope" IS '报价最高值';
+COMMENT ON COLUMN "public"."mt_room_continue"."enable" IS '是否开启{0：关闭；1：开启}';
+COMMENT ON COLUMN "public"."mt_room_continue"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."mt_room_continue"."start_time" IS '房间开启时间';
+COMMENT ON TABLE "public"."mt_room_continue" IS '及时撮和';
 
 -- ----------------------------
 -- Table structure for mt_room_double
@@ -370,39 +399,6 @@ COMMENT ON COLUMN "public"."mt_room_record"."stock_id" IS '股票id';
 COMMENT ON TABLE "public"."mt_room_record" IS '房间启用记录';
 
 -- ----------------------------
--- Table structure for mt_room_timely
--- ----------------------------
-DROP TABLE IF EXISTS "public"."mt_room_timely";
-CREATE TABLE "public"."mt_room_timely" (
-  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
-  "company_id" int4 NOT NULL,
-  "stock_id" int4 NOT NULL,
-  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "people" int4 NOT NULL DEFAULT 0,
-  "time" time(6) NOT NULL,
-  "number_trades" int4 NOT NULL,
-  "low_scope" numeric NOT NULL,
-  "high_scope" numeric NOT NULL,
-  "enable" varchar(1) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 0,
-  "create_time" timestamp(0) NOT NULL DEFAULT now(),
-  "start_time" time(6) NOT NULL
-)
-;
-COMMENT ON COLUMN "public"."mt_room_timely"."room_id" IS '房间id，四张表唯一';
-COMMENT ON COLUMN "public"."mt_room_timely"."company_id" IS '公司id';
-COMMENT ON COLUMN "public"."mt_room_timely"."stock_id" IS '股票id';
-COMMENT ON COLUMN "public"."mt_room_timely"."name" IS '房间名字';
-COMMENT ON COLUMN "public"."mt_room_timely"."people" IS '人数';
-COMMENT ON COLUMN "public"."mt_room_timely"."time" IS '时长';
-COMMENT ON COLUMN "public"."mt_room_timely"."number_trades" IS '单笔交易数量';
-COMMENT ON COLUMN "public"."mt_room_timely"."low_scope" IS '报价最低值';
-COMMENT ON COLUMN "public"."mt_room_timely"."high_scope" IS '报价最高值';
-COMMENT ON COLUMN "public"."mt_room_timely"."enable" IS '是否开启{0：关闭；1：开启}';
-COMMENT ON COLUMN "public"."mt_room_timely"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."mt_room_timely"."start_time" IS '房间开启时间';
-COMMENT ON TABLE "public"."mt_room_timely" IS '及时撮和';
-
--- ----------------------------
 -- Table structure for mt_room_timing
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_room_timing";
@@ -413,14 +409,10 @@ CREATE TABLE "public"."mt_room_timing" (
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "people" int4 NOT NULL DEFAULT 0,
   "time" time(6) NOT NULL,
-  "match_time" time(6) NOT NULL,
   "number_trades" int4 NOT NULL,
-  "count" int2 NOT NULL,
   "low_scope" numeric NOT NULL,
   "high_scope" numeric NOT NULL,
   "enable" varchar(1) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 0,
-  "quote_time" time(6) NOT NULL,
-  "current_count" int2 NOT NULL DEFAULT 0,
   "create_time" timestamp(0) NOT NULL DEFAULT now(),
   "start_time" time(6) NOT NULL
 )
@@ -431,14 +423,10 @@ COMMENT ON COLUMN "public"."mt_room_timing"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_room_timing"."name" IS '房间名字';
 COMMENT ON COLUMN "public"."mt_room_timing"."people" IS '人数';
 COMMENT ON COLUMN "public"."mt_room_timing"."time" IS '时长';
-COMMENT ON COLUMN "public"."mt_room_timing"."match_time" IS '撮合时间';
 COMMENT ON COLUMN "public"."mt_room_timing"."number_trades" IS '单笔交易数量';
-COMMENT ON COLUMN "public"."mt_room_timing"."count" IS '撮合次数';
 COMMENT ON COLUMN "public"."mt_room_timing"."low_scope" IS '报价最低值';
 COMMENT ON COLUMN "public"."mt_room_timing"."high_scope" IS '报价最高值';
 COMMENT ON COLUMN "public"."mt_room_timing"."enable" IS '是否开启{0：关闭；1：开启}';
-COMMENT ON COLUMN "public"."mt_room_timing"."quote_time" IS '报价时间';
-COMMENT ON COLUMN "public"."mt_room_timing"."current_count" IS '当前撮合次数';
 COMMENT ON COLUMN "public"."mt_room_timing"."create_time" IS '创建时间';
 COMMENT ON COLUMN "public"."mt_room_timing"."start_time" IS '房间开启时间';
 COMMENT ON TABLE "public"."mt_room_timing" IS '定时撮合';
@@ -675,6 +663,18 @@ CREATE UNIQUE INDEX "mt_room_click_room_number_idx" ON "public"."mt_room_click" 
 ALTER TABLE "public"."mt_room_click" ADD CONSTRAINT "mt_room_click_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
+-- Indexes structure for table mt_room_continue
+-- ----------------------------
+CREATE UNIQUE INDEX "mt_room_timely_room_number_idx" ON "public"."mt_room_continue" USING btree (
+  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_room_continue
+-- ----------------------------
+ALTER TABLE "public"."mt_room_continue" ADD CONSTRAINT "mt_room_timely_pkey" PRIMARY KEY ("room_id");
+
+-- ----------------------------
 -- Indexes structure for table mt_room_double
 -- ----------------------------
 CREATE UNIQUE INDEX "mt_room_double_room_number_idx" ON "public"."mt_room_double" USING btree (
@@ -690,18 +690,6 @@ ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_pkey" PRIMA
 -- Primary Key structure for table mt_room_record
 -- ----------------------------
 ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _pkey" PRIMARY KEY ("id");
-
--- ----------------------------
--- Indexes structure for table mt_room_timely
--- ----------------------------
-CREATE UNIQUE INDEX "mt_room_timely_room_number_idx" ON "public"."mt_room_timely" USING btree (
-  "room_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
-);
-
--- ----------------------------
--- Primary Key structure for table mt_room_timely
--- ----------------------------
-ALTER TABLE "public"."mt_room_timely" ADD CONSTRAINT "mt_room_timely_pkey" PRIMARY KEY ("room_id");
 
 -- ----------------------------
 -- Indexes structure for table mt_room_timing
@@ -782,6 +770,12 @@ ALTER TABLE "public"."mt_room_click" ADD CONSTRAINT "mt_room_click_company_id_fk
 ALTER TABLE "public"."mt_room_click" ADD CONSTRAINT "mt_room_click_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ----------------------------
+-- Foreign Keys structure for table mt_room_continue
+-- ----------------------------
+ALTER TABLE "public"."mt_room_continue" ADD CONSTRAINT "mt_room_timely_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_room_continue" ADD CONSTRAINT "mt_room_timely_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- ----------------------------
 -- Foreign Keys structure for table mt_room_double
 -- ----------------------------
 ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -792,12 +786,6 @@ ALTER TABLE "public"."mt_room_double" ADD CONSTRAINT "mt_room_double_stock_id_fk
 -- ----------------------------
 ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "public"."mt_room_record" ADD CONSTRAINT "mt_room_record _stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- ----------------------------
--- Foreign Keys structure for table mt_room_timely
--- ----------------------------
-ALTER TABLE "public"."mt_room_timely" ADD CONSTRAINT "mt_room_timely_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "public"."mt_room_timely" ADD CONSTRAINT "mt_room_timely_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_room_timing

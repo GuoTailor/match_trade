@@ -21,7 +21,7 @@ import java.util.*
  * @apiParam {String} enable 是否开启（0：关闭，1：开启）
  * @apiParam {String} [oldFlag]=E 旧房间的标识符
  */
-@Table("mt_room_timely")
+@Table("mt_room_continue")
 class ContinueMatch(
         @Id
         override var roomId: String? = null,        // 房间id，四张房间表唯一

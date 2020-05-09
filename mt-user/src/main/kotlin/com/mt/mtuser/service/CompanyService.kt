@@ -39,6 +39,9 @@ class CompanyService {
     @Autowired
     private lateinit var r2dbcService: R2dbcService
 
+    @Autowired
+    private lateinit var tradeInfoService: TradeInfoService
+
     /**
      * 无赖使用{@link PostgresqlConnection}
      * 由于r2dbc的sql语句中不支持占位符，
@@ -145,5 +148,17 @@ class CompanyService {
         role.roleId = adminRoleId
         role.realName = info.realName
         return roleService.save(role)
+    }
+
+    /**
+     * 获取交易概述
+     */
+    // TODO 想办法加缓存
+    suspend fun getOverview(companyId: Int): Map<String, Overview> {
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        return mapOf(
+                "day" to tradeInfoService.dayOverview(userId, companyId),
+                "month" to tradeInfoService.monthOverview(userId, companyId)
+        )
     }
 }

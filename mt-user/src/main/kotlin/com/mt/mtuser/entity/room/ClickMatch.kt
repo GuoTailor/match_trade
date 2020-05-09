@@ -19,7 +19,6 @@ import org.springframework.data.annotation.Id
  * @apiParam {String} time 时长 格式：HH:mm:SS
  * @apiParam {String} startTime: 房间开启时间 格式：HH:mm:SS
  * @apiParam {Int} numberTrades 单笔交易数量
- * @apiParam {Int} count 撮合次数
  * @apiParam {Double} lowScope 报价最低值
  * @apiParam {Double} highScope 报价最高值
  * @apiParam {Integer} rival 选择的对手上限
@@ -41,9 +40,6 @@ class ClickMatch(
         override var time: LocalTime? = null,    // 时长
         override var startTime: LocalTime? = null,     // 房间开启时间
         override var numberTrades: Int? = null, // 单笔交易数量
-        var count: Int? = null,                 // 撮合次数
-        @Null(message = "不能设置当前撮合次数")
-        var currentCount: Int? = null,          // 当前撮合次数
         override var lowScope: Double? = null,  // 报价最低值
         override var highScope: Double? = null, // 报价最高值
         override var enable: String? = null,    // 是否开启（0：关闭，1：开启）
@@ -56,10 +52,11 @@ class ClickMatch(
 
     override suspend fun validNull() {
         people = null
-        currentCount = null
     }
 
     override fun toString(): String {
-        return "ClickMatch(roomId=$roomId, companyId=$companyId, stockId=$stockId, name=$name, people=$people, quoteTime=$quoteTime, secondStage=$secondStage, time=$time, numberTrades=$numberTrades, count=$count, currentCount=$currentCount, lowScope=$lowScope, highScope=$highScope, enable=$enable, createTime=$createTime, rival=$rival, flag='$flag')"
+        return "ClickMatch(roomId=$roomId, companyId=$companyId, stockId=$stockId, name=$name, people=$people, " +
+                "quoteTime=$quoteTime, secondStage=$secondStage, time=$time, numberTrades=$numberTrades, lowScope=$lowScope, " +
+                "highScope=$highScope, enable=$enable, createTime=$createTime, rival=$rival, flag='$flag')"
     }
 }

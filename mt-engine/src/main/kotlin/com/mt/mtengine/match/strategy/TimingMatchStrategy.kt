@@ -57,17 +57,18 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
     }
 
     class TimingRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.cycle!!.toMillisOfDay(), record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = TreeSet(MatchUtil.sortPriceAndTime)
+        private var count = 0
 
         override fun canStart(): Boolean {
-            return System.currentTimeMillis() >= nextCycleTime && System.currentTimeMillis() < endTime.time
+            return System.currentTimeMillis() >= cycle && count == 0
         }
 
-        override fun isEnd() = System.currentTimeMillis() >= endTime.time
+        override fun isEnd() = count > 0
 
         override fun setNextCycle() {
             nextCycleTime += cycle

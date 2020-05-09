@@ -16,14 +16,14 @@ class Overview(
         var netBuyMoney: BigDecimal? = null // 净买入金额
 ) {
     fun copyNotNullField(other: Overview): Overview {
-        buyStock?.let { buyStock = other.buyStock }
-        sellStock?.let { sellStock = other.sellStock }
-        buyMoney?.let { buyMoney = other.buyMoney }
-        sellMoney?.let { sellMoney = other.sellMoney }
-        avgBuyMoney?.let { avgBuyMoney = other.avgBuyMoney }
-        avgSellMoney?.let { avgSellMoney = other.avgSellMoney }
-        netBuyStock?.let { netBuyStock = other.netBuyStock }
-        netBuyMoney?.let { netBuyMoney = other.netBuyMoney }
+        if (buyStock == null) { buyStock = other.buyStock }
+        if (sellStock == null) { sellStock = other.sellStock }
+        if (buyMoney == null) { buyMoney = other.buyMoney }
+        if (sellMoney == null) { sellMoney = other.sellMoney }
+        if (avgBuyMoney == null) { avgBuyMoney = other.avgBuyMoney }
+        if (avgSellMoney == null) { avgSellMoney = other.avgSellMoney }
+        if (netBuyStock == null) { netBuyStock = other.netBuyStock }
+        if (netBuyMoney == null) { netBuyMoney = other.netBuyMoney }
         return this
     }
 

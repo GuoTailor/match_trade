@@ -35,28 +35,22 @@ class BickerMatch(
         @get:Null(message = "不能设置房间的当前人数")
         @set:Null(message = "不能设置房间的当前人数")
         override var people: Int? = null,       // 人数
-        var quoteTime: LocalTime? = null,            // 报价和选择身份时间
-        var secondStage: LocalTime? = null,          // 第二阶段时间
         override var time: LocalTime? = null,    // 时长
         override var startTime: LocalTime? = null,     // 房间开启时间
         override var numberTrades: Int? = null, // 单笔交易数量
-        var count: Int? = null,                 // 撮合次数
-        @Null(message = "不能设置当前撮合次数")
-        var currentCount: Int? = null,          // 当前撮合次数
         override var lowScope: Double? = null,  // 报价最低值
         override var highScope: Double? = null, // 报价最高值
         override var enable: String? = null,    // 是否开启（0：关闭，1：开启）
-        override var createTime: Date? = null,  // 创建时间
-        var rival: Int? = null                  // 选择的对手上限
+        override var createTime: Date? = null   // 创建时间
 ) : BaseRoom {
     override val flag: String = RoomEnum.BICKER.flag
 
     override fun validNull() {
         people = null
-        currentCount = null
     }
 
     override fun toString(): String {
-        return "ClickMatch(roomId=$roomId, companyId=$companyId, stockId=$stockId, name=$name, people=$people, quoteTime=$quoteTime, secondStage=$secondStage, time=$time, numberTrades=$numberTrades, count=$count, currentCount=$currentCount, lowScope=$lowScope, highScope=$highScope, enable=$enable, createTime=$createTime, rival=$rival, flag='$flag')"
+        return "ClickMatch(roomId=$roomId, companyId=$companyId, stockId=$stockId, name=$name, people=$people, time=$time, " +
+                "numberTrades=$numberTrades, lowScope=$lowScope, highScope=$highScope, enable=$enable, createTime=$createTime, flag='$flag')"
     }
 }
