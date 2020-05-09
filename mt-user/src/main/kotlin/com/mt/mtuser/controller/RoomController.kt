@@ -127,6 +127,7 @@ class RoomController {
      * @apiName updateClickRoom
      * @apiVersion 0.0.1
      * @apiUse ClickMatch
+     * @apiParam {String} roomId 房间id
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
@@ -148,6 +149,7 @@ class RoomController {
      * @apiName updateBickerRoom
      * @apiVersion 0.0.1
      * @apiUse BickerMatch
+     * @apiParam {String} roomId 房间id
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
@@ -169,6 +171,7 @@ class RoomController {
      * @apiName updateDoubleRoom
      * @apiVersion 0.0.1
      * @apiUse DoubleMatch
+     * @apiParam {String} roomId 房间id
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
@@ -190,6 +193,7 @@ class RoomController {
      * @apiName updateTimelyMatch
      * @apiVersion 0.0.1
      * @apiUse TimelyMatch
+     * @apiParam {String} roomId 房间id
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room
@@ -211,6 +215,7 @@ class RoomController {
      * @apiName updateTimingMatch
      * @apiVersion 0.0.1
      * @apiUse TimingMatch
+     * @apiParam {String} roomId 房间id
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data":null}
      * @apiGroup Room

@@ -26,7 +26,10 @@ suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseCli
     val pageView = PageView<T>()
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName
     ?: throw IllegalStateException("不支持的匿名类 ${T::class}")
-    val sqlWhere = " where " + (where?.toString() ?: pageQuery.where().toString())
+    var sqlWhere = (where?.toString() ?: pageQuery.where().toString())
+    if (sqlWhere.isNotBlank()) {
+        sqlWhere = " where $sqlWhere"
+    }
     val count = connect.execute("select count(1) from $tableName $sqlWhere")
             .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one().awaitSingle()
     pageView.total = count?.toLong()

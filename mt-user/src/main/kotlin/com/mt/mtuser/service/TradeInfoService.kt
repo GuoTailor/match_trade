@@ -3,6 +3,7 @@ package com.mt.mtuser.service
 import com.mt.mtcommon.toDate
 import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.dao.TradeInfoDao
+import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,5 +74,15 @@ class TradeInfoService {
         return tradeInfoDao.avgPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
     }
 
+    suspend fun overview(userId: Int): Overview {
+        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
+        val endTime = System.currentTimeMillis()
+        val buyOverview = tradeInfoDao.buyOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
+        val sellOverview = tradeInfoDao.sellOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
+        buyOverview.copyNotNullField(sellOverview)
+        buyOverview.computeNetBuy()
+        return buyOverview
+    }
 
 }
