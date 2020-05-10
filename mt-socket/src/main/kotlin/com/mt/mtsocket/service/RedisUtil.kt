@@ -73,7 +73,14 @@ class RedisUtil {
      * 获取全部元素
      */
     fun getUserOrder(order: OrderParam): Flux<OrderParam> {
-        return redisTemplate.opsForList().range("$userOrderKey${order.roomId}:${order.userId}", 0, -1).cast(OrderParam::class.java)
+        return getUserOrder(order.userId!!, order.roomId!!)
+    }
+
+    /**
+     * 获取全部元素
+     */
+    fun getUserOrder(userId: Int, roomId: String): Flux<OrderParam> {
+        return redisTemplate.opsForList().range("$userOrderKey${roomId}:${userId}", 0, -1).cast(OrderParam::class.java)
     }
 
     /**

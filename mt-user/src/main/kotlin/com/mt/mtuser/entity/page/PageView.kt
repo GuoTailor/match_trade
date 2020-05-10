@@ -22,6 +22,9 @@ class PageView<T : Any> {
     var item: List<T>? = null
 }
 
+/**
+ * 如果指定了[where] 使用[where], 放弃使用[pageQuery.where()],如果没有指定[where]，则使用[pageQuery.where()]作为条件
+ */
 suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery, where: Criteria? = null): PageView<T> {
     val pageView = PageView<T>()
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName

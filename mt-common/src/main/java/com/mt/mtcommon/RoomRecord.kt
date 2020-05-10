@@ -26,7 +26,8 @@ open class RoomRecord(
         open var companyId: Int? = null,        // 公司id
         open var startTime: Date? = null,       // 启用时间
         open var endTime: Date? = null,         // 结束时间,房间结束时会重新计算
-        open var quoteTime: LocalTime = LocalTime.MIN,  // 报价和选择身份时间
+        @org.springframework.data.annotation.Transient
+        open var quoteTime: LocalTime? = LocalTime.MIN,  // 报价和选择身份时间
         open var secondStage: LocalTime? = null,// 第二阶段时间
         open var rival: Int? = null,            // 选择对手个数
         open var tradeAmount: Int? = null,      // 交易数量
@@ -37,7 +38,7 @@ open class RoomRecord(
     open fun computingTime(): RoomRecord {
         duration = startTime?.let { start ->
             endTime?.let { end ->
-                LocalTime.ofSecondOfDay((end.time - start.time) / 1000 - quoteTime.toSecondOfDay())
+                LocalTime.ofSecondOfDay((end.time - start.time) / 1000 - (quoteTime ?: LocalTime.MIN).toSecondOfDay())
             }
         }
         return this

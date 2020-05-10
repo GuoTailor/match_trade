@@ -22,7 +22,6 @@ import org.springframework.data.annotation.Id
  * @apiParam {Double} lowScope 报价最低值
  * @apiParam {Double} highScope 报价最高值
  * @apiParam {Integer} rival 选择的对手上限
- * @apiParam {String} enable 是否开启（0：关闭，1：开启）
  * @apiParam {String} [oldFlag]=C 旧房间的标识符
  */
 @Table("mt_room_click")

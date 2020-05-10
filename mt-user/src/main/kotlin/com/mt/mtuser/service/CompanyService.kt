@@ -89,7 +89,6 @@ class CompanyService {
                     }
                 }
         return getPage(result, connect, query, query.where().and("id").`in`(roles))
-
     }
 
     suspend fun getAllShareholder(query: PageQuery): PageView<Stockholder> {

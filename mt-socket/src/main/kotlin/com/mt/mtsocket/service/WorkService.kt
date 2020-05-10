@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import java.time.LocalTime
 
 /**
  * Created by gyh on 2020/4/14.
@@ -49,7 +50,7 @@ class WorkService {
                         price.flag = roomRecord.model
                         price.number = roomRecord.tradeAmount
                         roomRecord
-                    }.filter { it.quoteTime.toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis() }
+                    }.filter { (it.quoteTime ?: LocalTime.MIN).toMillisOfDay() + it.startTime!!.time < System.currentTimeMillis() }
                     .filter { it.endTime!!.time > System.currentTimeMillis() }
                     .switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
                     .map { matchSink.outOrder().send(MessageBuilder.withPayload(price).build()) }
@@ -85,6 +86,16 @@ class WorkService {
                     val roomRecord = userRoomInfo.roomRecord
                     val cancelOrder = CancelOrder(it.id, roomRecord.roomId, roomRecord.model)
                     matchSink.outCancel().send(MessageBuilder.withPayload(cancelOrder).build())
+                }
+    }
+
+    fun getOrderRecord(): Mono<List<OrderParam>> {
+        return BaseUser.getcurrentUser()
+                .flatMap {
+                    val userRoomInfo = store.getRoom(it.id!!)
+                            ?: return@flatMap Mono.error<List<OrderParam>>(IllegalStateException("错误，用户没有加入房间"))
+                    val roomId = userRoomInfo.roomRecord.roomId!!
+                    redisUtil.getUserOrder(it.id!!, roomId).collectList()
                 }
     }
 

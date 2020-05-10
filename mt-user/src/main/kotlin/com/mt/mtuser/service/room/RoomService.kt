@@ -5,6 +5,8 @@ import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
 import com.mt.mtuser.entity.Stockholder
+import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.schedule.QuartzManager
 import com.mt.mtuser.schedule.RoomEndJobInfo
@@ -13,6 +15,7 @@ import com.mt.mtuser.schedule.RoomTask
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
+import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalTime
 import java.util.*
 
@@ -59,12 +63,17 @@ class RoomService {
     private lateinit var timingRoomDao: TimingRoomDao
 
     @Autowired
+    private lateinit var tradeInfoService: TradeInfoService
+
+    @Autowired
     private lateinit var roomRecordDao: RoomRecordDao
 
     @Autowired
     private lateinit var redisUtil: RedisUtil
+
     @Autowired
     private lateinit var roleService: RoleService
+
     @Autowired
     private lateinit var quartzManager: QuartzManager
     private val roomEnableMutex = Mutex()   // 房间启用和禁用的互斥锁
@@ -182,6 +191,19 @@ class RoomService {
      */
     suspend fun getEditableRoomList() = getRoomList(Stockholder.ADMIN)
 
+    suspend fun getMaxMinPrice(roomId: String): Map<String, BigDecimal> {
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId) ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+        return tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+    }
+
+    /**
+     * 查找指定房间的历史订单
+     */
+    suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId) ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+        return tradeInfoService.findOrder(roomId, query, roomRecord.startTime!!, roomRecord.endTime!!)
+    }
+
     suspend fun getRoomList(role: String? = null) = coroutineScope {
         val companyList = roleService.getCompanyList(role)
         if (companyList.isEmpty()) throw IllegalStateException("错误：没有绑定公司，没有可用房间")
@@ -252,7 +274,7 @@ class RoomService {
      */
     @Suppress("UNCHECKED_CAST")
     fun <T : BaseRoom> getBaseRoomDao(flag: String): BaseRoomDao<T, String> {
-        return when(flag) {
+        return when (flag) {
             RoomEnum.CLICK.flag -> clickRoomDao as BaseRoomDao<T, String>
             RoomEnum.BICKER.flag -> bickerRoomDao as BaseRoomDao<T, String>
             RoomEnum.DOUBLE.flag -> doubleRoomDao as BaseRoomDao<T, String>

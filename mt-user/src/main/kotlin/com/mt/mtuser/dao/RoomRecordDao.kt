@@ -15,4 +15,7 @@ interface RoomRecordDao : CoroutineCrudRepository<RoomRecord, Int> {
 
     @Query("select count(1) from mt_room_record where start_time > :time and company_id = :companyId")
     suspend fun countByStartTimeAndCompanyId(time: Date, companyId: Int): Int
+
+    @Query("select * from mt_room_record where room_id = :roomId order by start_time desc limit 1")
+    suspend fun findLastRecordByRoomId(roomId: String): RoomRecord?
 }

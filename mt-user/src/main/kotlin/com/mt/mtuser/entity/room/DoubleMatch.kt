@@ -18,7 +18,6 @@ import java.util.*
  * @apiParam {Int} numberTrades 单笔交易数量
  * @apiParam {Double} lowScope 报价最低值
  * @apiParam {Double} highScope 报价最高值
- * @apiParam {String} enable 是否开启（0：关闭，1：开启）
  * @apiParam {String} [oldFlag]=D 旧房间的标识符
  */
 @Table("mt_room_double")

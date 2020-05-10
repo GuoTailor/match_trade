@@ -1,6 +1,9 @@
 package com.mt.mtuser.controller
 
+import com.mt.mtcommon.TradeInfo
 import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.*
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.reactive.awaitSingle
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.util.*
 
 /**
@@ -267,6 +271,47 @@ class RoomController {
     fun getAllRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
         return ResponseInfo.ok(mono {
             roomService.getAllRoomList()
+        })
+    }
+
+    /**
+     * @api {gut} /room/maxMinPrice 获取房间的最大报价和最小的报价
+     * @apiDescription  获取房间的最大报价和最小的报价
+     * @apiName getMaxMinPrice
+     * @apiVersion 0.0.1
+     * @apiParam {String} roomId 房间id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"maxPrice": 0,"minPrice": 0}}
+     * @apiGroup Room
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/maxMinPrice")
+    fun getMaxMinPrice(roomId: String): Mono<ResponseInfo<Map<String, BigDecimal>>> {
+        return ResponseInfo.ok(mono {
+            roomService.getMaxMinPrice(roomId)
+        })
+    }
+
+    /**
+     * @api {gut} /room/order 获取房间的最大报价和最小的报价
+     * @apiDescription  获取房间的最大报价和最小的报价
+     * @apiName findOrder
+     * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiParam {String} roomId 房间id
+     * @apiParamExample {url} Request-Example:
+     * /room/order?roomId=1&pageSize=2
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": []}
+     * @apiGroup Room
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/order")
+    fun findOrder(roomId: String, query: PageQuery): Mono<ResponseInfo<PageView<TradeInfo>>> {
+        return ResponseInfo.ok(mono {
+            roomService.findOrder(roomId, query)
         })
     }
 

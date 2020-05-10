@@ -58,7 +58,7 @@ class WorkController {
     /**
      * @api {connect} /rival 选择对手
      * @apiDescription 报价
-     * @apiName offer
+     * @apiName addRival
      * @apiVersion 0.0.1
      * @apiUse OrderParam
      * @apiSuccessExample {json} 成功返回:
@@ -74,7 +74,7 @@ class WorkController {
     /**
      * @api {connect} /cancel 撤销订单
      * @apiDescription 报价
-     * @apiName offer
+     * @apiName cancel
      * @apiVersion 0.0.1
      * @apiUse CancelOrder
      * @apiSuccessExample {json} 成功返回:
@@ -86,4 +86,22 @@ class WorkController {
     fun cancel(): Mono<ResponseInfo<Boolean>> {
         return ResponseInfo.ok(workService.cancelOrder())
     }
+
+    /**
+     * @api {connect} /order 获取自己的全部报价
+     * @apiDescription 获取自己的全部报价，不支持分页
+     * @apiName getOrderRecord
+     * @apiVersion 0.0.1
+     * @apiUse CancelOrder
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission none
+     */
+    @RequestMapping("/order")
+    fun getOrderRecord(): Mono<ResponseInfo<List<OrderParam>>> {
+        return ResponseInfo.ok(workService.getOrderRecord())
+    }
+
+
 }

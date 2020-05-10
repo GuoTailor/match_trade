@@ -12,7 +12,7 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 09/05/2020 21:14:41
+ Date: 10/05/2020 07:52:35
 */
 
 
@@ -480,7 +480,7 @@ CREATE TABLE "public"."mt_trade_info" (
   "id" int4 NOT NULL DEFAULT nextval('mt_trade_info_id_seq'::regclass),
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
-  "room_id" int4 NOT NULL,
+  "room_id" varchar(20) COLLATE "pg_catalog"."default" NOT NULL,
   "model" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "buyer_id" int4 NOT NULL,
   "buyer_price" numeric(11,4) NOT NULL,

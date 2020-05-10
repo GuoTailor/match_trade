@@ -1,16 +1,19 @@
 package com.mt.mtuser.service
 
-import com.mt.mtcommon.maxDay
-import com.mt.mtcommon.minDay
-import com.mt.mtcommon.toDate
-import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtcommon.*
 import com.mt.mtuser.dao.TradeInfoDao
+import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
+import com.mt.mtuser.entity.TradeDetails
+import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
+import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.from
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalTime
@@ -53,12 +56,13 @@ class TradeInfoService {
     /**
      * 获取昨天的收盘价，也就是今天的开盘价
      */
-    suspend fun getYesterdayClosingPriceByCompanyId() {
+    suspend fun getYesterdayClosingPriceByCompanyId(): BigDecimal {
         // TODO 交易失败的不计入计算
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay() - LocalTime.MAX.toMillisOfDay()
         val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
+        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
+                ?: BigDecimal(0)
     }
 
     /**
@@ -69,6 +73,7 @@ class TradeInfoService {
         val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
         val endTime = System.currentTimeMillis()
         return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
+                ?: BigDecimal(0)
     }
 
     /**
@@ -150,6 +155,39 @@ class TradeInfoService {
         buyOverview.copyNotNullField(sellOverview)
         buyOverview.computeNetBuy()
         return buyOverview
+    }
+
+    /**
+     * 获取指定时间范围的最大和最小报价
+     */
+    suspend fun getMaxMinPrice(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
+        val max = tradeInfoDao.findMaxPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
+        val min = tradeInfoDao.findMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
+        return mapOf("maxPrice" to max, "minPrice" to min)
+    }
+
+    /**
+     * 获取订单详情
+     */
+    suspend fun findDetailsById(id: Int): TradeDetails? {
+        return tradeInfoDao.findDetailsById(id)
+    }
+
+    /**
+     * 查询历史订单
+     */
+    suspend fun findOrder(roomId: String, query: PageQuery, startTime: Date, endTime: Date): PageView<TradeInfo> {
+        val where = query.where()
+                .and("room_id").`is`(roomId)
+                .and("trade_time").greaterThan(startTime)
+                .and("trade_time").lessThan(endTime)
+        return getPage(connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query, where)
     }
 
 }

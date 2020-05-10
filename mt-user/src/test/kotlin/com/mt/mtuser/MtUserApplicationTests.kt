@@ -2,36 +2,28 @@ package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
+import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
+import com.mt.mtuser.service.R2dbcService
+import kotlinx.coroutines.reactor.mono
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.r2dbc.core.awaitRowsUpdated
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.util.*
 
 
-//@SpringBootTest
+@SpringBootTest
 class MtUserApplicationTests {
-    /*@Autowired
-    private lateinit var quartzManager: QuartzManager
-
-    @Test
-    fun contextLoads() {
-        runBlocking {
-            val localTime = LocalTime.now() + LocalTime.parse("00:00:10")
-            val cron = "%d %d %d ? * *".format(localTime.second, localTime.minute, localTime.hour)
-            println("nmka-------- $cron")
-            var timeLong = System.currentTimeMillis()
-            for (i in 0 until 1000) {
-                quartzManager.addJob(RoomEndJobInfo(cron, "test - $i", JobDataMap(mapOf("index" to i)), TestTask::class.java))
-            }
-            println("nmka--------${System.currentTimeMillis() - timeLong}")
-            timeLong = System.currentTimeMillis()
-            delay(20_000)
-            println("nmka--------end")
-        }
-    }*/
+    @Autowired
+    private lateinit var r2dbc: R2dbcService
 
     fun nmka2(user: Mono<User>): Mono<Stockholder> {
         return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
@@ -52,10 +44,27 @@ class MtUserApplicationTests {
     }
 
     @Test
+    fun testR2dbc() {
+        val roomRecord = RoomRecord(id = 1, model = "E", roomId = "D12")
+        r2dbc.dynamicUpdate(roomRecord)
+                .matching(Criteria.where("id").`is`(roomRecord.id!!))
+                .fetch().rowsUpdated().block()
+    }
+
+    @Test
     fun testMono() {
-        val jsonStr = "[]"
-        val list: List<String> = ObjectMapper().readValue(jsonStr)
-        println(list)
+        val m = mono { nmka() }
+        val r = ResponseInfo.ok(m)
+                .map {
+                    println("nmka")
+                    it
+                }.doOnError{ println("error") }
+                .doOnCancel { println("cancel") }
+        println(r.block())
+    }
+
+    suspend fun nmka(): String? {
+        return null
     }
 
     @Test

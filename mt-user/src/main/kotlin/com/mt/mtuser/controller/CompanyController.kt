@@ -160,8 +160,6 @@ class CompanyController {
      * @apiName getCompanys
      * @apiUse PageQuery
      * @apiVersion 0.0.1
-     * @apiParamExample {json} 请求-例子:
-     * {}
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 2,"item": [{"id": 1,"name": "6105",
      * "roomCount": 1,"mode": "[\"C\",\"B\",\"D\"]","createTime": "2020-03-18 15:35:45","licenseUrl": null,
@@ -224,6 +222,7 @@ class CompanyController {
      * @apiDescription  获取交易概述 day 是今天得交易概述，month 是这个月得交易概述
      * @apiName getOverview
      * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
      * @apiSuccess {Long} buyStock=0 买入股数
      * @apiSuccess {Long} sellStock=0 卖出股数
      * @apiSuccess {Decimal} buyMoney=0 买入金额
