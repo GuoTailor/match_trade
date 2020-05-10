@@ -49,7 +49,8 @@ interface BaseRoom : Persistable<String> {
         val record = RoomRecord(
                 roomId = roomId,
                 model = flag,
-                companyId = companyId
+                companyId = companyId,
+                stockId = stockId
         )
         record.duration = time
         record.tradeAmount = numberTrades
