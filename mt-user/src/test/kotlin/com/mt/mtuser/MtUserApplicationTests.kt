@@ -4,15 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
+import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.R2dbcService
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
+import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
@@ -24,6 +28,12 @@ import java.util.*
 class MtUserApplicationTests {
     @Autowired
     private lateinit var r2dbc: R2dbcService
+
+    @Autowired
+    private lateinit var roomRecordDao: RoomRecordDao
+
+    @Autowired
+    protected lateinit var connect: DatabaseClient
 
     fun nmka2(user: Mono<User>): Mono<Stockholder> {
         return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
@@ -49,6 +59,10 @@ class MtUserApplicationTests {
         r2dbc.dynamicUpdate(roomRecord)
                 .matching(Criteria.where("id").`is`(roomRecord.id!!))
                 .fetch().rowsUpdated().block()
+        mono {
+            roomRecordDao.findById(1)
+            connect.select().from<RoomRecord>().matching(Criteria.where("id").`is`(1)).fetch().one().awaitSingle()
+        }.block()
     }
 
     @Test
@@ -58,7 +72,7 @@ class MtUserApplicationTests {
                 .map {
                     println("nmka")
                     it
-                }.doOnError{ println("error") }
+                }.doOnError { println("error") }
                 .doOnCancel { println("cancel") }
         println(r.block())
     }
@@ -91,4 +105,3 @@ class MtUserApplicationTests {
     }
 }
 
-class Info(var message: String? = null, code: String? = null)

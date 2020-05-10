@@ -17,7 +17,7 @@ import java.util.*
  * @apiParam {Date} startTime 启用时间
  * @apiParam {Date} endTime 结束时间
  */
-@Table("mt_room_record ")
+@Table("mt_room_record")
 open class RoomRecord(
         @Id var id: Int? = null,
         open var roomId: String? = null,        // 房间id，四张房间表唯一
@@ -25,15 +25,20 @@ open class RoomRecord(
         open var stockId: Int? = null,          // 股票id
         open var companyId: Int? = null,        // 公司id
         open var startTime: Date? = null,       // 启用时间
-        open var endTime: Date? = null,         // 结束时间,房间结束时会重新计算
-        @org.springframework.data.annotation.Transient
-        open var quoteTime: LocalTime? = LocalTime.MIN,  // 报价和选择身份时间
-        open var secondStage: LocalTime? = null,// 第二阶段时间
-        open var rival: Int? = null,            // 选择对手个数
-        open var tradeAmount: Int? = null,      // 交易数量
-        open var cycle: LocalTime? = null,      // 周期
-        open var duration: LocalTime? = null    // 时长,房间结束时会重新计算
+        open var endTime: Date? = null         // 结束时间,房间结束时会重新计算
 ) {
+    @org.springframework.data.annotation.Transient
+    open var quoteTime: LocalTime? = LocalTime.MIN  // 报价和选择身份时间
+    @org.springframework.data.annotation.Transient
+    open var secondStage: LocalTime? = null// 第二阶段时间
+    @org.springframework.data.annotation.Transient
+    open var rival: Int? = null            // 选择对手个数
+    @org.springframework.data.annotation.Transient
+    open var tradeAmount: Int? = null      // 交易数量
+    @org.springframework.data.annotation.Transient
+    open var cycle: LocalTime? = null      // 周期
+    @org.springframework.data.annotation.Transient
+    open var duration: LocalTime? = null    // 时长,房间结束时会重新计算
 
     open fun computingTime(): RoomRecord {
         duration = startTime?.let { start ->

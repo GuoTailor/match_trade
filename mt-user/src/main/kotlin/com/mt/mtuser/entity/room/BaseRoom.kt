@@ -49,10 +49,10 @@ interface BaseRoom : Persistable<String> {
         val record = RoomRecord(
                 roomId = roomId,
                 model = flag,
-                companyId = companyId,
-                duration = time,
-                tradeAmount = numberTrades
+                companyId = companyId
         )
+        record.duration = time
+        record.tradeAmount = numberTrades
         startTime?.let { sTime ->
             time?.let {
                 record.endTime = (sTime + it).toDate()
