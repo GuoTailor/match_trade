@@ -23,7 +23,7 @@ abstract class BaseUser : UserDetails {
      * @param password 未编码的密码
      * @return 编码后的密码
      */
-    private fun passwordEncoder(password: String?): String? {
+    fun passwordEncoder(password: String?): String? {
         return if (password == null || password.isEmpty()) null else passwordEncoder.encode(password)
     }
 
@@ -34,6 +34,12 @@ abstract class BaseUser : UserDetails {
         password = passwordEncoder(password)
         return this
     }
+
+    /**
+     * 匹配密码，[rawPassword]:未加密的密码
+     * @return true: 密码相同，false：不同
+     */
+    fun matchesPassword(rawPassword: String) = passwordEncoder.matches(rawPassword, this.password)
 
     @JsonIgnore
     override fun getAuthorities(): Collection<GrantedAuthority> {

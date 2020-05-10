@@ -174,13 +174,25 @@ class TradeInfoService {
     }
 
     /**
-     * 查询历史订单
+     * 查询指定时间内的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery, startTime: Date, endTime: Date): PageView<TradeInfo> {
         val where = query.where()
                 .and("room_id").`is`(roomId)
                 .and("trade_time").greaterThan(startTime)
                 .and("trade_time").lessThan(endTime)
+        return getPage(connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query, where)
+    }
+
+    suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
+        val where = query.where()
+                .and("room_id").`is`(roomId)
         return getPage(connect.select()
                 .from<TradeInfo>()
                 .matching(where)

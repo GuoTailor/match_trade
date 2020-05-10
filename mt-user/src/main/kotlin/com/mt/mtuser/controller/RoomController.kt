@@ -294,8 +294,8 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room/order 获取房间的最大报价和最小的报价
-     * @apiDescription  获取房间的最大报价和最小的报价
+     * @api {gut} /room/order 查找指定房间的历史订单
+     * @apiDescription  查找指定房间的历史订单,只能查询房间最近一次开放的交易记录
      * @apiName findOrder
      * @apiVersion 0.0.1
      * @apiUse PageQuery

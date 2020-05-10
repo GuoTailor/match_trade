@@ -98,7 +98,7 @@ class CompanyController {
     }
 
     /**
-     * @api {put} /company/stockholder 添加一个股东
+     * @api {post} /company/stockholder 添加一个股东
      * @apiDescription  为公司添加一个股东
      * @apiName addStockholder
      * @apiVersion 0.0.1
@@ -110,13 +110,13 @@ class CompanyController {
      * @apiPermission admin
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/stockholder")
+    @PostMapping("/stockholder")
     fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addStockholder(stockholderInfo.awaitSingle()) })
     }
 
     /**
-     * @api {put} /company/admin 添加一个公司管理员
+     * @api {post} /company/admin 添加一个公司管理员
      * @apiDescription  为公司添加一个管理员
      * @apiName addCompanyAdmin
      * @apiVersion 0.0.1
@@ -130,7 +130,7 @@ class CompanyController {
      * @apiPermission supperAdmin
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @PutMapping("/admin")
+    @PostMapping("/admin")
     fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addCompanyAdmin(stockholderInfo.awaitSingle()) })
     }
@@ -177,7 +177,7 @@ class CompanyController {
     }
 
     /**
-     * @api {get} /company/shareholder 获取公司所有的股东
+     * @api {get} /company/stockholder 获取公司所有的股东
      * @apiDescription  获取公司所有的股东
      * @apiName getAllShareholder
      * @apiUse PageQuery
@@ -192,9 +192,27 @@ class CompanyController {
      * @apiPermission admin
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/shareholder")
+    @GetMapping("/stockholder")
     fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<Stockholder>>> {
         return ResponseInfo.ok(mono { companyService.getAllShareholder(query) })
+    }
+
+    /**
+     * @api {put} /company/stockholder 修改公司一个股东的信息
+     * @apiDescription  修改公司一个股东的信息
+     * @apiName updateStockholder
+     * @apiUse StockholderInfo
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/stockholder")
+    fun updateStockholder(@RequestBody info: Mono<StockholderInfo>): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(mono { companyService.updateStockholder(info.awaitSingle()) })
     }
 
     /**

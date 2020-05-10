@@ -132,6 +132,42 @@ class CommonController {
     }
 
     /**
+     * @api {put} /common/password 忘记密码
+     * @apiDescription  忘记密码，需先调用发送验证码获取验证码
+     * @apiName forgetPassword
+     * @apiVersion 0.0.1
+     * @apiParam {String} phone 用户的手机号
+     * @apiParam {String} password 用户密码
+     * @apiParam {String} code 短信验证码
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":true}
+     * @apiSuccessExample {json} 验证码错误:
+     * {"code": 1,"msg": "验证码错误","data": null}
+     * @apiGroup Common
+     * @apiPermission none
+     */
+    @PutMapping("/common/password")
+    fun forgetPassword(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
+        val result = map.flatMap {
+            val code = it["code"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入验证码"))
+            val user = User()
+            user.phone = it["phone"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入手机号"))
+            user.password = it["password"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入密码"))
+            logger.info(code)
+            mono { redisUtil.getCode(user.phone!!) }
+                    .filter { localCode -> localCode != null && code == localCode }
+                    .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
+                    .map { user }
+        }.flatMap { user ->
+            mono {
+                redisUtil.deleteCode(user.phone!!)
+                userService.forgetPassword(user)
+            }
+        }
+        return ResponseInfo.ok(result)
+    }
+
+    /**
      * @api {get} /common/getRoles 获取所有的角色
      * @apiDescription  获取所有的角色
      * @apiName getRoles

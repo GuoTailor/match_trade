@@ -55,7 +55,7 @@ class UserController {
 
     /**
      * @api {put} /user 修改用户的信息
-     * @apiDescription  修改用户的信息,不会修改用户的`id`，`phone`
+     * @apiDescription  修改用户的信息,不会修改用户的`id`，`phone`，`password`
      * @apiName alter
      * @apiVersion 0.0.1
      * @apiParamExample {json} 请求-例子:
@@ -75,7 +75,7 @@ class UserController {
                 val currentUser = BaseUser.getcurrentUser().awaitSingle()
                 user.id = currentUser.id
                 user.phone = null
-                user.passwordEncoder()
+                user.password = null
                 ResponseInfo<Int>(userService.save(user), "修改成功")
             } else {
                 ResponseInfo<Int>(userService.save(user), "请至少更新一个属性")
@@ -127,4 +127,28 @@ class UserController {
         })
     }
 
+    /**
+     * @api {put} /user/password 修改用户的密码
+     * @apiDescription  修改用户的密码
+     * @apiName updatePassword
+     * @apiVersion 0.0.1
+     * @apiParam {String} oldPassword 老密码
+     * @apiParam {String} newPassword 新密码
+     * @apiParamExample {json} 请求-例子:
+     * {"oldPassword":"nmka", "newPassword":"admin"}
+     * @apiUse User
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"修改成功","data":true}
+     * @apiGroup User
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @PutMapping("/password")
+    fun updatePassword(@RequestBody data: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(mono {
+            val map = data.awaitSingle()
+            userService.updatePassword(map["oldPassword"] ?: error("oldPassword 不能为空"),
+                    map["newPassword"] ?: error("newPassword 不能为空"))
+        })
+    }
 }

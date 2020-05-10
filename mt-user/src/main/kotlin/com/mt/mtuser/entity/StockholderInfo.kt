@@ -5,6 +5,7 @@ import java.math.BigDecimal
 /**
  * Created by gyh on 2020/4/23.
  * @apiDefine StockholderInfo
+ * @apiParam {Integer} id 股东id
  * @apiParam {Integer} companyId 股票所属公司id
  * @apiParam {Integer} amount 股票数量
  * @apiParam {String} realName 真实姓名
@@ -30,4 +31,19 @@ class StockholderInfo(
             position = position,
             money = money
     )
+
+    fun toStockholder(stockholder: Stockholder) {
+        if (realName != null) {
+            stockholder.realName = realName
+        }
+        if (department != null) {
+            stockholder.department = department
+        }
+        if (position != null) {
+            stockholder.position = position
+        }
+        if (money != null) {
+            stockholder.money = money
+        }
+    }
 }

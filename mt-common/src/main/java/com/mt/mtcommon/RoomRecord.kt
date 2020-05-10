@@ -1,5 +1,6 @@
 package com.mt.mtcommon
 
+import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
@@ -27,18 +28,18 @@ open class RoomRecord(
         open var startTime: Date? = null,       // 启用时间
         open var endTime: Date? = null         // 结束时间,房间结束时会重新计算
 ) {
-    @org.springframework.data.annotation.Transient
+    @Transient
     open var quoteTime: LocalTime? = LocalTime.MIN  // 报价和选择身份时间
-    @org.springframework.data.annotation.Transient
-    open var secondStage: LocalTime? = null// 第二阶段时间
-    @org.springframework.data.annotation.Transient
+    @Transient
+    open var secondStage: LocalTime? = null // 第二阶段时间
+    @Transient
     open var rival: Int? = null            // 选择对手个数
-    @org.springframework.data.annotation.Transient
+    @Transient
     open var tradeAmount: Int? = null      // 交易数量
-    @org.springframework.data.annotation.Transient
+    @Transient
     open var cycle: LocalTime? = null      // 周期
-    @org.springframework.data.annotation.Transient
-    open var duration: LocalTime? = null    // 时长,房间结束时会重新计算
+    @Transient
+    open var duration: LocalTime? = null   // 时长,房间结束时会重新计算
 
     open fun computingTime(): RoomRecord {
         duration = startTime?.let { start ->

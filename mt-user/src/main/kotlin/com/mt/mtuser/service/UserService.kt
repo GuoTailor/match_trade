@@ -2,6 +2,7 @@ package com.mt.mtuser.service
 
 import com.mt.mtuser.dao.UserDao
 import com.mt.mtuser.dao.StockholderDao
+import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.entity.page.PageQuery
@@ -13,8 +14,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Update.update
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
@@ -118,5 +121,24 @@ class UserService {
         } else throw IllegalStateException("用户不存在")
     }
 
+    suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        val user = findById(userId)!!
+        if (user.matchesPassword(oldPassword)) {
+            user.password = user.passwordEncoder(newPassword)
+            return connect.update()
+                    .table(r2dbc.getTable(User::class.java))
+                    .using(update("password", user.password))
+                    .matching(where("id").`is`(user.id!!))
+                    .fetch().awaitRowsUpdated() > 0
+        } else throw IllegalStateException("密码错误")
+    }
 
+    suspend fun forgetPassword(user: User): Boolean {
+        return connect.update()
+                .table(r2dbc.getTable(User::class.java))
+                .using(update("password", user.password))
+                .matching(where("phone").`is`(user.phone!!))
+                .fetch().awaitRowsUpdated() > 0
+    }
 }

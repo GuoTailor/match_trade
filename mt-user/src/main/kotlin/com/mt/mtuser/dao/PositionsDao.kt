@@ -9,8 +9,8 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
  */
 interface PositionsDao : CoroutineCrudRepository<Positions, Int> {
 
-    @Query("select $sql from mt_positions where user_id = :userId and company_id = :companyId")
-    suspend fun findStockByCompanyIdAndUserId(userId: Int, companyId: Int): Positions?
+    @Query("select $sql from mt_positions where user_id = :userId and company_id = :companyId and stock_id = :stockId")
+    suspend fun findStockByCompanyIdAndUserIdAndStockId(userId: Int, companyId: Int, stockId: Int): Positions?
 
     @Query("select COALESCE(sum(amount), 0) from mt_positions where user_id = :userId and company_id = :companyId")
     suspend fun countStockByCompanyIdAndUserId(userId: Int, companyId: Int): Long

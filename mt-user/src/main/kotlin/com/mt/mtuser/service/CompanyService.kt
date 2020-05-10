@@ -12,7 +12,10 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.query.Criteria.where
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.stereotype.Service
 import reactor.kotlin.core.publisher.toMono
 
@@ -91,6 +94,9 @@ class CompanyService {
         return getPage(result, connect, query, query.where().and("id").`in`(roles))
     }
 
+    /**
+     * 查找所有股东
+     */
     suspend fun getAllShareholder(query: PageQuery): PageView<Stockholder> {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         return getPage(connect.select()
@@ -105,6 +111,9 @@ class CompanyService {
 
     suspend fun findAll() = companyDao.findAll()
 
+    /**
+     * 查找所有公司
+     */
     suspend fun findAllByQuery(query: PageQuery): PageView<Company> {
         return getPage(connect.select()
                 .from<Company>()
@@ -127,11 +136,26 @@ class CompanyService {
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
                 positionsDao.save(Positions(companyId = info.companyId, stockId = stockId, userId = user.id, amount = info.amount))
                 val role = info.toStockholder()
+                role.id = null
                 role.userId = user.id
                 role.roleId = roleId
                 return roleService.save(role)
             } else throw IllegalStateException("用户已经是股东 $phone")
         } else throw IllegalStateException("不能为公司 ${info.companyId} 添加股东，没有权限")
+    }
+
+    suspend fun updateStockholder(info: StockholderInfo): Boolean {
+        val stockholder = roleService.findById(info.id!!) ?: throw IllegalStateException("股东不存在")
+        info.toStockholder(stockholder)
+        val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
+        val position = positionsDao.findStockByCompanyIdAndUserIdAndStockId(stockholder.userId!!, stockholder.companyId!!, stockId!!)
+        if (info.amount != null) {
+            position!!.amount = info.amount
+        }
+        positionsDao.save(position!!)
+        return r2dbcService.dynamicUpdate(stockholder)
+                .matching(where("id").`is`(stockholder.id!!))
+                .fetch().awaitRowsUpdated() > 0
     }
 
     /**

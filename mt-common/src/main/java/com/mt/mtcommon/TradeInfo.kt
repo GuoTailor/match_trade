@@ -22,7 +22,7 @@ open class TradeInfo(
         var sellerId: Int? = null,             // 卖方id
         var sellerPrice: BigDecimal? = null,   // 卖方价格
         var tradePrice: BigDecimal? = null,    // 成交价格
-        val tradeAmount: Int? = null,           // 成交数量
+        var tradeAmount: Int? = null,           // 成交数量
         var tradeMoney: BigDecimal? = null,     // 成交金额
         var tradeTime: Date? = null,           // 交易时间
         var tradeState: String? = null,        // 交易状态
