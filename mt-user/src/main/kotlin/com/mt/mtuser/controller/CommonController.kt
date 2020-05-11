@@ -6,22 +6,20 @@ import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
-import com.mt.mtuser.schedule.QuartzManager
-import com.mt.mtuser.schedule.RoomStartJobInfo
-import com.mt.mtuser.schedule.RoomTask
 import com.mt.mtuser.service.*
 import com.mt.mtuser.service.room.RoomService
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
-import org.quartz.JobDataMap
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
-import java.time.LocalTime
 import java.util.*
 
 /**
@@ -52,9 +50,12 @@ class CommonController {
     @Autowired
     lateinit var roomRecordService: RoomRecordService
 
+    @Autowired
+    lateinit var fileService: FileService
+
     /**
      * @api {gut} /common/check 检查用户是否存在
-     * @apiDescription  检查用户是否存在
+     * @apiDescription  检查用户是否存在,当companyId参数不为空是同时检查用户是否为公司股东
      * @apiName checkingPhone
      * @apiVersion 0.0.1
      * @apiParam {String} phone 用户手机号
@@ -196,6 +197,43 @@ class CommonController {
     }
 
     /**
+     * @api {post} /file 上传文件
+     * @apiDescription  上传文件
+     * @apiName uploadFile
+     * @apiVersion 0.0.1
+     * @apiParam {File} img 文件
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": "\\2020\\05\\pictures\\5-661ab0ad-acfe-4c5c-a1b6-a7c419edc961"}
+     * @apiGroup Common
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @PostMapping("/file")
+    fun uploadFile(@RequestPart("img") filePart: FilePart): Mono<ResponseInfo<String>> {
+        logger.info("{}", filePart.filename())
+        return ResponseInfo.ok(fileService.uploadImg(filePart))
+    }
+
+    /**
+     * @api {delete} /file 删除文件
+     * @apiDescription  删除文件
+     * @apiName deleteFile
+     * @apiParam {String} path 文件路径
+     * @apiVersion 0.0.1
+     * @apiParamExample {url} Request-Example:
+     * /file?path=\\2020\\05\\pictures\\5-7d2be6ae-def9-46f9-8078-97a29a788f8b.jpg
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup Common
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @DeleteMapping("/file")
+    fun deleteFile(@RequestParam path: String): Mono<ResponseInfo<Boolean>> {
+        return ResponseInfo.ok(Mono.just(fileService.deleteFile(path)))
+    }
+
+    /**
      * @api {get} /system/info 获取系统信息
      * @apiDescription  获取系统信息
      * @apiName getSystemInfo
@@ -232,4 +270,5 @@ class CommonController {
             data
         }.cache(Duration.ofMinutes(1)))
     }
+
 }

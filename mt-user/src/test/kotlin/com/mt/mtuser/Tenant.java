@@ -1,5 +1,7 @@
 package com.mt.mtuser;
 
+import com.mt.mtuser.common.Util;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,32 +11,9 @@ import java.util.TimerTask;
 public class Tenant {
 
     public static void main(String[] args) {
-        Timer timer = new Timer();
-        TimerTask task1 = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getName() + System.currentTimeMillis() + " nmka11111");
-            }
-        };
-        TimerTask task2 = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getName() + System.currentTimeMillis() + " nmka222");
-            }
-        };
-        System.out.println(Thread.currentThread().getName() + System.currentTimeMillis());
-        timer.schedule(task1, 0);
-        timer.schedule(task2, 100);
+        String yer = Util.createDate("yyyy", System.currentTimeMillis());
+        String m = Util.createDate("MM", System.currentTimeMillis());
+        System.out.println(yer + " - " + m);
     }
 
 }

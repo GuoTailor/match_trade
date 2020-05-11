@@ -1,5 +1,5 @@
 var ws = null;
-var url = "ws://101.37.34.61:85/socket/room";
+var url = "ws://localhost:85/socket/room";
 var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4ODY0ODkw" +
     "MCwiZXhwIjoxNTg5MjUzNzAwfQ.dDvF5esVCtI0Hdne7SZv4udVKGdSCUTHr4OnsacArsU";
 
@@ -10,7 +10,7 @@ function setConnected(connected) {
 }
 
 function connect() {
-    ws = new WebSocket(url + "?roomId=D12&bearer=" + token);
+    ws = new WebSocket(url + "?roomId=27&bearer=" + token);
     ws.onopen = function () {
         setConnected(true);
         log('Info: Connection Established.');

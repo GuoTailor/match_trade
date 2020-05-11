@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.OrderParam
 import com.mt.mtsocket.service.RedisUtil
 import com.mt.mtsocket.socket.SocketSessionStore
@@ -31,6 +33,7 @@ class MtSocketApplicationTests {
 
     @Test
     fun contextLoads() {
+        jacksonObjectMapper().readValue<OrderParam>("{\"price\":1000,\"isBuy\":false,\"number\":100}")
     }
 
     @Test

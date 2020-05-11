@@ -20,6 +20,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
@@ -86,7 +87,8 @@ class RoomService {
     fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
-        if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
+        if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
+            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
             var roomRecord = room.toRoomRecord()
@@ -109,6 +111,7 @@ class RoomService {
                 redisUtil.publishRoomEvent(RoomEvent(roomId, value))
             }
         }
+        logger.info("房间 {} {} 成功", roomId, if (value) "启动" else "关闭")
     }
 
     /**
@@ -136,7 +139,8 @@ class RoomService {
      */
     suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, oldFlag: String): T {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
-        if (isAfterToday(room.time!!)) throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
+        if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
+            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val companyList = roleService.getCompanyList(Stockholder.ADMIN)
         return if (companyList.contains(room.companyId)) {
             if (oldFlag == room.flag) {
@@ -192,7 +196,8 @@ class RoomService {
     suspend fun getEditableRoomList() = getRoomList(Stockholder.ADMIN)
 
     suspend fun getMaxMinPrice(roomId: String): Map<String, BigDecimal> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId) ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
+                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
         return tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
     }
 
@@ -200,7 +205,8 @@ class RoomService {
      * 查找指定房间的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId) ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
+                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
         return tradeInfoService.findOrder(roomId, query, roomRecord.startTime!!, roomRecord.endTime!!)
     }
 
@@ -237,8 +243,8 @@ class RoomService {
         if (room.enable == BaseRoom.DISABLED
                 && room.startTime!! <= LocalTime.now()
                 && (room.startTime!! + room.time!!) > LocalTime.now()) {
-            enableRoom(room.roomId!!, true, room.flag)
-        }
+            enableRoom(room.roomId!!, true, room.flag).awaitSingle()
+        }   // TODO 关闭房间
         quartzManager.addJob(RoomStartJobInfo(room))
         quartzManager.addJob(RoomEndJobInfo(room))
     }

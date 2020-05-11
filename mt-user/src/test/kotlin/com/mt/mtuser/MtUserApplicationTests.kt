@@ -9,6 +9,7 @@ import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.R2dbcService
+import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.junit.jupiter.api.Test
@@ -21,6 +22,7 @@ import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
+import java.time.LocalTime
 import java.util.*
 
 
@@ -34,6 +36,21 @@ class MtUserApplicationTests {
 
     @Autowired
     protected lateinit var connect: DatabaseClient
+
+    @Autowired
+    private lateinit var redisUtil: RedisUtil
+
+    @Test
+    fun testRedis() {
+        mono {
+            val record = RoomRecord(null, "28", "D", 12, 12, null, null)
+            record.duration = LocalTime.now()
+            record.quoteTime = LocalTime.now()
+            redisUtil.saveRoomRecord(record)
+            val nmka = redisUtil.getRoomRecord("28")?.quoteTime
+            println(nmka?.toString())
+        }.block()
+    }
 
     fun nmka2(user: Mono<User>): Mono<Stockholder> {
         return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
