@@ -87,8 +87,6 @@ class RoomService {
     fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
-        if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
-            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
             var roomRecord = room.toRoomRecord()
@@ -244,7 +242,10 @@ class RoomService {
                 && room.startTime!! <= LocalTime.now()
                 && (room.startTime!! + room.time!!) > LocalTime.now()) {
             enableRoom(room.roomId!!, true, room.flag).awaitSingle()
-        }   // TODO 关闭房间
+        }
+        if (room.enable == BaseRoom.ENABLE && room.startTime!! + room.time!! <= LocalTime.now()) {
+            enableRoom(room.roomId!!, false, room.flag).awaitSingle()
+        }
         quartzManager.addJob(RoomStartJobInfo(room))
         quartzManager.addJob(RoomEndJobInfo(room))
     }

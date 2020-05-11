@@ -60,7 +60,9 @@ fun isAfterToday(time: LocalTime) = time.toNanoOfDay() + LocalTime.now().toNanoO
  * LocalTime 加 运算符
  */
 operator fun LocalTime.plus(other: LocalTime): LocalTime {
-    return this.plusNanos(other.toNanoOfDay())
+    return if (this.toNanoOfDay() + other.toNanoOfDay() > LocalTime.MAX.toNanoOfDay()) {
+        LocalTime.MAX
+    } else this.plusNanos(other.toNanoOfDay())
 }
 
 /**

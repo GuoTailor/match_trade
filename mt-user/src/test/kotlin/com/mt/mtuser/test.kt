@@ -88,4 +88,9 @@ fun main3() = runBlocking<Unit> {
     println("Collected in $time ms")
 }
 
-fun main() = main3()
+fun main4() {
+    val time = LocalTime.now() + LocalTime.now()
+    println(time)
+}
+
+fun main() = main4()
