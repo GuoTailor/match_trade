@@ -136,7 +136,6 @@ class UserController {
      * @apiParam {String} newPassword 新密码
      * @apiParamExample {json} 请求-例子:
      * {"oldPassword":"nmka", "newPassword":"admin"}
-     * @apiUse User
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"修改成功","data":true}
      * @apiGroup User

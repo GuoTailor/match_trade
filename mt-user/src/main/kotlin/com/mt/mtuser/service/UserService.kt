@@ -98,6 +98,8 @@ class UserService {
      */
     suspend fun existsUserByPhone(phone: String) = userDao.existsUserByPhone(phone) > 0
 
+    suspend fun findByPhone(phone: String) = userDao.findByPhone(phone)
+
     suspend fun findByIdIn(ids: List<Int>) = userDao.findByIdIn(ids)
 
     suspend fun findAllUser(query: PageQuery): PageView<User> {

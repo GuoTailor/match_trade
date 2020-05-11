@@ -14,10 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
-import org.springframework.data.r2dbc.query.Criteria.where
-import org.springframework.data.relational.core.query.Criteria
+import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
-import reactor.kotlin.core.publisher.toMono
 
 /**
  * Created by gyh on 2020/3/18.

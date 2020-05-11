@@ -4,6 +4,7 @@ import com.mt.mtuser.common.SendSms
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.schedule.QuartzManager
 import com.mt.mtuser.schedule.RoomStartJobInfo
@@ -57,15 +58,25 @@ class CommonController {
      * @apiName checkingPhone
      * @apiVersion 0.0.1
      * @apiParam {String} phone 用户手机号
+     * @apiParam {String} [companyId] 公司Id
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":{"result": true}}
-     * @apiSuccess {String} result 是否存在 true：存在; false：不存在
+     * {"code":0,"msg":"成功","data":{"user": true, "stockholder": true}}
+     * @apiSuccess {String} user 用户是否存在 true：存在; false：不存在
+     * @apiSuccess {String} stockholder 用户是否为公司股东 true：是; false：不是
      * @apiGroup Common
      * @apiPermission none
      */
     @GetMapping("/common/check")
-    fun checkingPhone(@RequestParam phone: String): Mono<ResponseInfo<Map<String, Boolean>>> {
-        return ResponseInfo.ok(mono { mapOf("result" to userService.existsUserByPhone(phone)) })
+    fun checkingPhone(@RequestParam phone: String, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<Map<String, Boolean>>> {
+        return ResponseInfo.ok(mono {
+            val user = userService.findByPhone(phone)
+            var role = 0
+            if (user != null && companyId != null) {
+                val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+                role = roleService.exists(user.id!!, roleId, companyId)
+            }
+            mapOf("user" to (user != null), "stockholder" to (role == 1))
+        })
     }
 
     /**
