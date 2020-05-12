@@ -43,12 +43,8 @@ class MtUserApplicationTests {
     @Test
     fun testRedis() {
         mono {
-            val record = RoomRecord(null, "28", "D", 12, 12, null, null)
-            record.duration = LocalTime.now()
-            record.quoteTime = LocalTime.now()
-            redisUtil.saveRoomRecord(record)
-            val nmka = redisUtil.getRoomRecord("28")?.quoteTime
-            println(nmka?.toString())
+            val record = redisUtil.deleteAndGetRoomRecord("1")
+            println(record?.toString())
         }.block()
     }
 

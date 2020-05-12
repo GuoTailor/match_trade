@@ -3,7 +3,6 @@ package com.mt.mtuser.entity.room
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
 import java.util.*
-import javax.validation.constraints.Null
 import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
 
@@ -31,8 +30,6 @@ class ClickMatch(
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id
         override var name: String? = null,      // 房间名字
-        @get:Null(message = "不能设置房间的当前人数")
-        @set:Null(message = "不能设置房间的当前人数")
         override var people: Int? = null,       // 人数
         var quoteTime: LocalTime? = null,            // 报价和选择身份时间
         var secondStage: LocalTime? = null,          // 第二阶段时间

@@ -1,9 +1,7 @@
 package com.mt.mtsocket.controller
 
-import com.mt.mtcommon.CancelOrder
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
-import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.service.WorkService
 import org.springframework.beans.factory.annotation.Autowired

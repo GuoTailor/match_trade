@@ -6,7 +6,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalTime
 import java.util.*
-import javax.validation.constraints.Null
 
 /**
  * Created by gyh on 2020/3/23.
@@ -29,8 +28,6 @@ class BickerMatch(
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id
         override var name: String? = null,      // 房间名字
-        @get:Null(message = "不能设置房间的当前人数")
-        @set:Null(message = "不能设置房间的当前人数")
         override var people: Int? = null,       // 人数
         override var time: LocalTime? = null,    // 时长
         override var startTime: LocalTime? = null,     // 房间开启时间

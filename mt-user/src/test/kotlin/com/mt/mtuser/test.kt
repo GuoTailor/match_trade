@@ -5,10 +5,12 @@ package com.mt.mtuser
  */
 import com.mt.mtcommon.plus
 import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtuser.common.Util
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.sql.Time
 import java.time.LocalTime
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 fun main1() = runBlocking<Unit> {
@@ -91,6 +93,10 @@ fun main3() = runBlocking<Unit> {
 fun main4() {
     val time = LocalTime.now() + LocalTime.now()
     println(time)
+    val date = Date(1589250420000)
+    println(date)
+    println(Date())
+    println(LocalTime.MIN.toMillisOfDay())
 }
 
 fun main() = main4()

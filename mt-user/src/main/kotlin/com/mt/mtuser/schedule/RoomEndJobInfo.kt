@@ -37,7 +37,8 @@ class RoomEndJobInfo : ScheduleJobInfo {
 
     constructor(room: BaseRoom) {
         val date = room.startTime!! + room.time!!
-        cron = "%d %d %d ? * *".format(date.second, date.minute, date.hour)
+        // 延时2秒关闭，以让engine能消费完mq里的订单
+        cron = "%d %d %d ? * *".format(date.second + 2, date.minute, date.hour)
         this.className = RoomTask::class.java
         this.jobName = room.roomId!!
         this.data = JobDataMap(mapOf(RoomTask.roomIdKey to room.roomId, RoomTask.enableKey to false, RoomTask.roomFlagKey to room.flag))

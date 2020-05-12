@@ -143,4 +143,5 @@ class UserService {
                 .matching(where("phone").`is`(user.phone!!))
                 .fetch().awaitRowsUpdated() > 0
     }
+
 }

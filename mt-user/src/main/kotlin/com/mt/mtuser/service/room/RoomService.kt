@@ -92,9 +92,9 @@ class RoomService {
             var roomRecord = room.toRoomRecord()
             roomEnableMutex.withLock {
                 if (value) {
-                    val startTime = System.currentTimeMillis()
-                    roomRecord.startTime = startTime.toDate()
-                    roomRecord.endTime = (room.time!!.toMillisOfDay() + startTime).toDate()
+                    val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
+                    roomRecord.startTime = room.startTime?.toDate() ?: Date()
+                    roomRecord.endTime = (startTime + room.time!!.toMillisOfDay() + room.startTime!!.toMillisOfDay()).toDate()
                     roomRecordDao.save(roomRecord)
                     redisUtil.saveRoomRecord(roomRecord)
                 } else if (value) {
@@ -170,6 +170,8 @@ class RoomService {
         val company = companyDao.findById(room.companyId!!)
         val dao = getBaseRoomDao<T>(room.flag)
         room.validNull()
+        if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
+            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         if (company!!.getModes().contains(room.flag)) {         // 判断房间模式(权限)
             room.roomId = baseRoomService.getNextRoomId(room)   // 获取全局唯一的房间id
             room.isEnable<T>(false)

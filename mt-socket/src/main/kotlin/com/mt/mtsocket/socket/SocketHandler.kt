@@ -60,7 +60,7 @@ class SocketHandler : WebSocketHandler {
                             .flatMap(sessionHandler::send)
                             .flatMap { Mono.empty<RoomRecord>() }
                 }
-                .flatMap { SocketSessionStore.addUser(sessionHandler, it) }
+                .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.model!!) }
                 .flatMap { sessionHandler.disconnected() }
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
