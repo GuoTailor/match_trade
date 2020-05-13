@@ -2,7 +2,6 @@ package com.mt.mtuser.service
 
 import com.mt.mtcommon.*
 import com.mt.mtuser.dao.TradeInfoDao
-import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.TradeDetails
@@ -13,7 +12,9 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.data.r2dbc.core.from
+import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalTime
@@ -38,19 +39,31 @@ class TradeInfoService {
     @Autowired
     private lateinit var connect: DatabaseClient
 
-    suspend fun countStockByTradeTime(time: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countStockByTradeTime(time)
+    /**
+     * 获取今天的交易量
+     */
+    suspend fun countStockByTradeTime(startTime: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countStockByTradeTime(startTime, Date())
 
-    suspend fun countStockByTradeTimeAndCompanyId(time: Date = LocalTime.MIN.toDate()): Long {
+    /**
+     * 获取公司今天的交易量
+     */
+    suspend fun countStockByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): Long {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         //val stockId = stockService.findByCompanyId(companyId).first()// TODO 替换为股票id
-        return tradeInfoDao.countStockByTradeTimeAndCompanyId(time, companyId)
+        return tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, Date(), companyId)
     }
 
-    suspend fun countMoneyByTradeTime(time: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countMoneyTradeTime(time)
+    /**
+     * 获取今天交易额
+     */
+    suspend fun countMoneyByTradeTime(startTime: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countMoneyTradeTime(startTime, Date())
 
-    suspend fun countMoneyByTradeTimeAndCompanyId(time: Date = LocalTime.MIN.toDate()): Long {
+    /**
+     * h获取公司今天的交易额
+     */
+    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): Long {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(time, companyId)
+        return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, Date(), companyId)
     }
 
     /**
@@ -190,6 +203,9 @@ class TradeInfoService {
                 , connect, query, where)
     }
 
+    /**
+     * 查找指定房间的历史订单
+     */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
         val where = query.where()
                 .and("room_id").`is`(roomId)
@@ -200,6 +216,69 @@ class TradeInfoService {
                 .fetch()
                 .all()
                 , connect, query, where)
+    }
+
+    /**
+     * 查询指定用户的交易记录
+     */
+    suspend fun findOrderByUserId(userId: Int, query: PageQuery): PageView<TradeInfo> {
+        val where = query.where()
+                .and(where("buyer_id").`is`(userId)
+                        .or("seller_id").`is`(userId))
+        return getPage(connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query, where)
+    }
+
+    /**
+     * 按天统计交易详情
+     */
+    suspend fun statisticsOrderByDay() {
+
+    }
+
+    suspend fun statistics(startTime: Date, endTime: Date, companyId: Int) {
+        connect.execute("select DATE(trade_time) as date" +
+                " COALESCE(max(trade_price), 0) as tradesCapacity," +
+                " COALESCE(min(trade_price), 0) as tradesVolume," +
+                " COALESCE(avg(trade_price), 0) as avgPrice " +
+                " from ${TradeInfoDao.table} " +
+                " where trade_time between :startTime and :endTime " +
+                " and company_id = :companyId " +
+                " group by date")
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .bind("companyId", companyId)
+                .map { r, _ ->
+                    mapOf("tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java),
+                            "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
+                            "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
+                            "date" to r.get("avgPrice", Date::class.java))
+                }.awaitOne()
+    }
+
+    suspend fun statisticsOverview(startTime: Date, endTime: Date, companyId: Int): Map<String, *>? {
+        return connect.execute("select DATE(trade_time) as date" +
+                " COALESCE(sum(trade_amount), 0) as tradesCapacity," +
+                " COALESCE(sum(trade_price), 0) as tradesVolume," +
+                " COALESCE(avg(trade_price), 0) as avgPrice " +
+                " from ${TradeInfoDao.table} " +
+                " where trade_time between :startTime and :endTime " +
+                " and company_id = :companyId " +
+                " group by date")
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .bind("companyId", companyId)
+                .map { r, _ ->
+                    mapOf("tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java),
+                            "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
+                            "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
+                            "date" to r.get("avgPrice", Date::class.java))
+                }.awaitOne()
     }
 
 }

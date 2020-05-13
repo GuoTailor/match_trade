@@ -25,7 +25,7 @@ open class OrderParam(
 ) {
 
     fun verify(): Boolean {
-        return (price?.let { it.toDouble() > 0 } ?: false) && number?.let { it > 0 } ?: false
+        return price?.let { it.toDouble() > 0 } ?: false
     }
 
     fun onTrade(tradeInfo: TradeInfo) {

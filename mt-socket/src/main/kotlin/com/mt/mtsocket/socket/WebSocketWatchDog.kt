@@ -13,7 +13,6 @@ class WebSocketWatchDog {
 
     fun start(session: WebSocketSessionHandler, interval: Long): Mono<Void> {
         return session.receive()
-                .doOnNext(logger::info)
                 .timeout(Duration.ofMillis(interval))
                 .doOnError(TimeoutException::class.java) { session.send(it.message ?: "错误").subscribe() }
                 .doOnError(TimeoutException::class.java) { session.connectionClosed() }

@@ -32,6 +32,8 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
         while (roomInfo.orderList.size >= 2) {
             val buyOrder = roomInfo.orderList.pollLast()!!    // 报价最高的为买家
             val sellOrder = roomInfo.orderList.pollFirst()!!
+            buyOrder.isBuy = true
+            sellOrder.isBuy = false
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price != sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
@@ -72,7 +74,6 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
                 orderList.removeIf { it.userId == data.userId }
             } else false
         }
-
     }
 
     override fun createRoomInfo(record: RoomRecord): BickerRoomInfo {

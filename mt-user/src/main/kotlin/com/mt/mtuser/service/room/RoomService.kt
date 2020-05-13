@@ -154,6 +154,7 @@ class RoomService {
                 quartzManager.modifyJobTime(RoomEndJobInfo(newRoom))
                 newRoom
             } else {
+                // TODO 判断是否能更改为该模式的房间
                 val newRoom = changeModel(room, oldFlag)
                 // 修改任务的开始和结束任务名
                 quartzManager.modifyJob(RoomStartJobInfo(newRoom), RoomTask.jobStartGroup, roomId)

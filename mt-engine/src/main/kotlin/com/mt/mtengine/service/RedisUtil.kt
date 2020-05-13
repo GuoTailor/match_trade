@@ -74,7 +74,7 @@ class RedisUtil {
     fun putUserOrder(order: OrderParam, endTime: Date): Mono<Boolean> {
         return redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order)
                 .then(redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}",  // 房间结束时自动过期
-                        Duration.ofSeconds((endTime.time / 1000) - LocalTime.now().toSecondOfDay() + 1L)))
+                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 1L)))
     }
 
     /**

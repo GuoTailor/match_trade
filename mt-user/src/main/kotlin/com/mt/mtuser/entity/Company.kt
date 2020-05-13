@@ -23,6 +23,7 @@ import java.util.*
  * @apiParam {String} unitAddress 单位地址
  * @apiParam {String} unitContactName 单位联系人姓名
  * @apiParam {String} unitContactPhone 单位联系人电话
+ * @apiParam {String} [brief] 公司简介
  */
 @Table("mt_company")
 data class Company(
@@ -55,6 +56,8 @@ data class Company(
     var stock: Long? = null
     @Transient
     var money: BigDecimal? = null
+    @Transient
+    var brief: String? = null
 
     fun getModes(): List<String> {
         return ObjectMapper().readValue(mode ?: "[]")

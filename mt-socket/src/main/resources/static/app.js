@@ -1,7 +1,7 @@
 var ws = null;
-var url = "ws://localhost:85/socket/room";
-var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4ODY0ODkw" +
-    "MCwiZXhwIjoxNTg5MjUzNzAwfQ.dDvF5esVCtI0Hdne7SZv4udVKGdSCUTHr4OnsacArsU";
+var path = "/socket/room";
+var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4OTI2OTY5MywiZXhwIjo" +
+    "xNTg5ODc0NDkzfQ.u5D7OTTiUKp54zcsUeJdJc3qAKlStrekqpSbeX_MI2g";
 
 function setConnected(connected) {
     document.getElementById('connect').disabled = connected;
@@ -10,10 +10,15 @@ function setConnected(connected) {
 }
 
 function connect() {
+    var host = window.location.host;
+    log(host.toString());
+    var url = "ws://" + host.toString() + path
     ws = new WebSocket(url + "?roomId=27&bearer=" + token);
+
     ws.onopen = function () {
         setConnected(true);
         log('Info: Connection Established.');
+        ws.send("{\"order\":\"/order\", \"data\": {}, \"req\":12}")
     };
 
     ws.onmessage = function (event) {

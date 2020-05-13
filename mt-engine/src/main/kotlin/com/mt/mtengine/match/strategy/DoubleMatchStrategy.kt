@@ -32,8 +32,12 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
             val order2 = roomInfo.orderList.pollLast()!!
             val result = if (MatchUtil.verify(order1, order2) && order1.price != order2.price) {
                 if (order1.price!! > order2.price) {
+                    order1.isBuy = true
+                    order2.isBuy = false
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, order1, order2)
                 } else {
+                    order1.isBuy = false
+                    order2.isBuy = true
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, order2, order1)
                 }
             } else {

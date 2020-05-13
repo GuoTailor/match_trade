@@ -31,10 +31,9 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
      * 价格优先、时间优先.
      * 由买价第一档开始向卖价第一档撮合.
      * 报价相同作废
+     * 只撮合一次
      */
     override fun match(roomInfo: TimingRoomInfo) {
-        val buyFailedList = mutableListOf<OrderParam>()
-        val sellFailedList = mutableListOf<OrderParam>()
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
@@ -42,18 +41,12 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
                 if (buyOrder.price!! > sellOrder.price) {
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                             .subscribeOn(Schedulers.elastic()).subscribe()
-                } else {
-                    buyFailedList.add(buyOrder)
-                    sellFailedList.add(sellOrder)
                 }
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
-        // 戳和失败的放到下一次撮合
-        roomInfo.buyOrderList.addAll(buyFailedList)
-        roomInfo.sellOrderList.addAll(sellFailedList)
     }
 
     class TimingRoomInfo(record: RoomRecord) :

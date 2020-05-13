@@ -43,6 +43,9 @@ class CompanyService {
     @Autowired
     private lateinit var tradeInfoService: TradeInfoService
 
+    @Autowired
+    private lateinit var fileService: FileService
+
     /**
      * 无赖使用{@link PostgresqlConnection}
      * 由于r2dbc的sql语句中不支持占位符，
@@ -58,19 +61,43 @@ class CompanyService {
     /**
      * 创建公司，顺便创建一支和公司名同名的股票
      */
-    suspend fun save(company: Company): Company {
+    suspend fun registerCompany(company: Company): Company {
         val newCompany = companyDao.save(company)
+        company.brief?.let { fileService.addCompanyInfo(it, newCompany.id!!).awaitSingle() }
         val stock = Stock(companyId = newCompany.id, name = newCompany.name)
         stockService.save(stock)
         return newCompany
     }
 
-    suspend fun deleteById(id: Int) = companyDao.deleteById(id)
+    /**
+     * 删除公司
+     */
+    suspend fun deleteById(id: Int) {
+        fileService.deleteCompanyInfo(id)
+        return companyDao.deleteById(id)
+    }
 
-    suspend fun update(company: Company) = companyDao.save(company)
+    /**
+     * 更新公司信息
+     */
+    suspend fun update(company: Company): Company {
+        // TODO 判断公司房间模式
+        company.brief?.let { fileService.addCompanyInfo(it, company.id!!).awaitSingle() }
+        return companyDao.save(company)
+    }
 
-    suspend fun findCompany(id: Int) = companyDao.findById(id)
+    /**
+     * 获取一个公司信息
+     */
+    suspend fun findCompany(id: Int): Company? {
+        val company = companyDao.findById(id)
+        company?.let { it.brief = fileService.getCompanyInfo(it.id!!).awaitSingle() }
+        return company
+    }
 
+    /**
+     * 获取自己加入的公司信息
+     */
     suspend fun findCompany(query: PageQuery): PageView<Company> {
         val roles = roleService.getCompanyList()
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
@@ -83,10 +110,14 @@ class CompanyService {
                 .flatMap { company ->
                     val stock = mono { positionsDao.countStockByCompanyIdAndUserId(userId, company.id!!) }
                     val money = mono { roleService.findByUserIdAndCompanyId(userId, company.id!!) }
+                    val brief = fileService.getCompanyInfo(company.id!!)
                     stock.zipWith(money) { s, m ->
                         company.money = m?.money
                         company.stock = s
                         company
+                    }.zipWith(brief) { c, b ->
+                        c.brief = b
+                        c
                     }
                 }
         return getPage(result, connect, query, query.where().and("id").`in`(roles))
@@ -130,18 +161,36 @@ class CompanyService {
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
         if (roleService.getCompanyList().contains(info.companyId)) {
             val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
-            if (roleService.exists(user.id!!, roleId, info.companyId!!) == 0) {
+            val stockholder = roleService.findByUserIdAndRoleId(user.id!!, roleId)
+                    ?: roleService.save(Stockholder(userId = user.id!!, roleId = roleId))
+            if (stockholder.companyId != info.companyId) {
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
                 positionsDao.save(Positions(companyId = info.companyId, stockId = stockId, userId = user.id, amount = info.amount))
-                val role = info.toStockholder()
-                role.id = null
-                role.userId = user.id
-                role.roleId = roleId
-                return roleService.save(role)
-            } else throw IllegalStateException("用户已经是股东 $phone")
+                info.toStockholder(stockholder)
+                stockholder.userId = user.id
+                stockholder.roleId = roleId
+                stockholder.companyId = info.companyId
+                r2dbcService.dynamicUpdate(stockholder)
+                        .matching(where("id").`is`(stockholder.id!!))
+                        .fetch().awaitRowsUpdated()
+                return stockholder
+            } else throw IllegalStateException("用户已经是股东 ${stockholder.realName}")
         } else throw IllegalStateException("不能为公司 ${info.companyId} 添加股东，没有权限")
     }
 
+    suspend fun deleteStockholder(id: Int) {
+        val stockholder = roleService.findById(id) ?: error("错误，股东不存在")
+        if (roleService.getCompanyList().contains(stockholder.companyId)) {
+            val role = roleService.getRoles().find { it.name == Stockholder.USER }
+            if (role!!.id == stockholder.roleId) {
+                roleService.deleteById(id)
+            } else error("不可删除角色 ${role.nameZh}")
+        } else error("不能删除非本公司的股东，没有权限")
+    }
+
+    /**
+     * 更新股东信息
+     */
     suspend fun updateStockholder(info: StockholderInfo): Boolean {
         val stockholder = roleService.findById(info.id!!) ?: throw IllegalStateException("股东不存在")
         info.toStockholder(stockholder)

@@ -30,12 +30,11 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
         while (roomInfo.buyOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!   // 升序排序，最后一个报价最高
             val buyRivals = roomInfo.rivalList[buyOrder.userId]?.rivals ?: arrayOf()    // 获取用户的交易对手
-            val sellOrder = roomInfo.sellOrderList
-                    .stream().filter { buyRivals.contains(it.userId) }  // 过滤用户的交易对手
-                    .filter {
+            val sellOrder = roomInfo.sellOrderList.stream()
+                    .filter { buyRivals.contains(it.userId) }   // 过滤用户的交易对手
+                    .filter {   // 获取对手中也选了自己的订单
                         roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false
-                    }   // 获取对手中也选了自己的订单
-                    .min(MatchUtil.sortPriceAndTime).get()      // 获取对手中卖价最低的订单
+                    }.min(MatchUtil.sortPriceAndTime).get()     // 获取对手中卖价最低的订单
             roomInfo.sellOrderList.remove(sellOrder)
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
@@ -51,7 +50,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
-            matchService.onMatchError(it, null, "失败: 没有可以匹配的报价")
+            matchService.onMatchError(null, it, "失败: 没有可以匹配的报价")
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.buyOrderList.clear()
@@ -59,7 +58,8 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
     }
 
     class ClickRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime
+                    ?: LocalTime.MAX.toDate()) {
         private var count = 0
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = LinkedList<OrderParam>()

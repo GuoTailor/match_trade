@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import java.io.File
 import java.lang.IllegalStateException
+import java.nio.file.Files
 import java.util.*
 
 /**
@@ -22,6 +23,9 @@ class FileService {
 
     @Value("\${HEAD_FILE_PATH}")
     private lateinit var headPath: String
+
+    @Value("\${FILE_HOST}")
+    private lateinit var fileHost: String
     private final val separator = File.separatorChar
     val picture = "${separator}pictures"
     val document = "${separator}documents"
@@ -39,7 +43,7 @@ class FileService {
                 }
                 "$headPath$separator$year$separator$month$pattern$separator$id-$uuid$suffixName"
             }
-            document -> "$headPath$separator$year$separator$month$pattern$separator$id-$uuid.html"
+            document -> "$headPath$separator$year$separator$month$pattern$separator$id.html"
             else -> error("")
         }
         val file = File(path)
@@ -54,18 +58,40 @@ class FileService {
             BaseUser.getcurrentUser()
                     .map { getFile(picture, it.id!!, filePart.filename()) }
                     .flatMap { newFile ->
-                        filePart.transferTo(newFile).then(Mono.just(newFile.absolutePath.replaceFirst(headPath, "").trim()))
+                        filePart.transferTo(newFile).then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
                     }
         } else Mono.error(IllegalStateException("请选择一个文件"))
     }
 
     fun deleteFile(path: String): Boolean {
-        return File("$headPath$path").delete()
+        val filePath = headPath + path.replaceFirst(fileHost, "").trim()
+        return File(filePath).delete()
     }
 
-    fun addCompanyInfo(info: String, companyId: Int) {
+    fun addCompanyInfo(info: String, companyId: Int): Mono<Boolean> {
         val file = getFile(document, companyId, document)
+        return Mono.fromCallable {
+            file.outputStream().use { fos ->
+                fos.write(info.toByteArray())
+                fos.flush()
+                true
+            }
+        }
+    }
 
+    fun getCompanyInfo(companyId: Int): Mono<String> {
+        val file = getFile(document, companyId, document)
+        return Mono.fromCallable {
+            if (file.exists()) {
+                file.inputStream().use { fis ->
+                    FileCopyUtils.copyToString(fis.reader())
+                }
+            } else ""
+        }
+    }
+
+    fun deleteCompanyInfo(companyId: Int) {
+        getFile(document, companyId, document).delete()
     }
 
     fun uploadFile(filePart: FilePart): Mono<String> {

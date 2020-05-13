@@ -10,7 +10,6 @@ import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -50,7 +49,7 @@ class CompanyController {
     fun register(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
         return ResponseInfo.ok(mono {
             if (!Util.isEmpty(company)) {
-                companyService.save(company)
+                companyService.registerCompany(company)
             } else {
                 throw IllegalStateException("请填写属性")
             }
@@ -113,6 +112,24 @@ class CompanyController {
     @PostMapping("/stockholder")
     fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addStockholder(stockholderInfo.awaitSingle()) })
+    }
+
+    /**
+     * @api {delete} /company/stockholder 删除一个股东
+     * @apiDescription  删除一个股东
+     * @apiName addStockholder
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} id 股东id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/stockholder")
+    fun deleteStockholder(id: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { companyService.deleteStockholder(id) })
     }
 
     /**

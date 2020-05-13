@@ -35,8 +35,8 @@ class WebSocketSessionHandler {
         return session.receive()
                 .map { obj -> obj.payloadAsText }
                 .doOnNext { t -> receiveProcessor.onNext(t) }
-                .doOnComplete { logger.info("nmka2 Complete");connectionClosed().subscribe() }
-                .doOnCancel { logger.info("nmka2 Cancel");connectionClosed().subscribe() }
+                .doOnComplete { connectionClosed().subscribe() }
+                .doOnCancel { connectionClosed().subscribe() }
                 .doOnRequest {
                     webSocketConnected = true
                     connectedProcessor.onNext(session)
@@ -46,7 +46,6 @@ class WebSocketSessionHandler {
     fun connected(): Mono<WebSocketSession> {
         return connectedProcessor
                 .doOnError { logger.info("错误 {}", it.message) }
-                .doOnCancel { logger.info("取消") }
     }
 
     fun disconnected(): Mono<WebSocketSession> {
@@ -67,18 +66,17 @@ class WebSocketSessionHandler {
 
     fun getSession() = session
 
-    fun send(message: String?): Mono<Void> {
-        return if (webSocketConnected && message != null) {
-            logger.info("send $message")
+    fun send(message: String): Mono<String> {
+        return if (webSocketConnected) {
             session.send(Mono.just(session.textMessage(message)))
                     .onErrorResume(ClosedChannelException::class.java) { connectionClosed() }
                     .onErrorResume(AbortedException::class.java) { connectionClosed() }
                     .doOnError { logger.info("send error ${it.message}") }
+                    .then(Mono.just(message))
         } else Mono.empty()
     }
 
     fun connectionClosed(): Mono<Void> {
-        logger.info("close")
         webSocketConnected = false
         val result = session.close()
         receiveProcessor.onComplete()

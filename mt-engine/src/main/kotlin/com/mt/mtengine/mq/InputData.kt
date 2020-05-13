@@ -29,6 +29,7 @@ class InputData {
 
     @StreamListener(MatchSink.IN_CANCEL)
     fun inputCancel(@Payload cancelOrder: CancelOrder) {
+        logger.info("撤销订单 {}", cancelOrder)
         MatchManager.cancel(cancelOrder)
     }
 }

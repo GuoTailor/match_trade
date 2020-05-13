@@ -44,8 +44,8 @@ class RoomService {
     open class CompanyStockId(val companyId: Int, val stockId: Int)
 
     @Cacheable("companyAndStockId")
-    fun findCompanyIdByRoomId(roomId: String): Mono<CompanyStockId> {
-        val dao = getBaseRoomDao(roomId)
+    fun findCompanyIdByRoomId(roomId: String, flag: String): Mono<CompanyStockId> {
+        val dao = getBaseRoomDao(flag)
         return dao.findBaseByRoomId(roomId)
                 .map { CompanyStockId(it.companyId!!, it.stockId!!) }
                 .cache(Duration.ofHours(12))
@@ -54,8 +54,8 @@ class RoomService {
     /**
      * 通过房间号号获取对应的dao
      */
-    fun getBaseRoomDao(roomId: String): BaseRoomDao<out BaseRoom, String> {
-        return when (roomId.substring(0, 1)) {
+    fun getBaseRoomDao(flag: String): BaseRoomDao<out BaseRoom, String> {
+        return when (flag) {
             RoomEnum.CLICK.flag -> clickRoomDao
             RoomEnum.BICKER.flag -> bickerRoomDao
             RoomEnum.DOUBLE.flag -> doubleRoomDao

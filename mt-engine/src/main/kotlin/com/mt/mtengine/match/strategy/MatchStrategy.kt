@@ -39,7 +39,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         }
     }
 
-    fun tryAddOrder(order: OrderParam) : Boolean{
+    fun tryAddOrder(order: OrderParam): Boolean {
         var roomInfo = roomMap[order.roomId]
         if (roomInfo == null) {
             synchronized(this) {
@@ -63,15 +63,26 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
     }
 
     fun tryCancelOrder(order: CancelOrder): Boolean {
-        val roomInfo = roomMap[order.roomId]
-        return if (roomInfo == null) {
-            logger.error("交易订单添加错误，不存在的房间号: {}，或房间没开启", order.roomId)
-            false
-        } else {
-            roomInfo.tryCancelOrder(order, packTime)
-            redisUtil.deleteUserOrder(order).block()
-            false
+        var roomInfo = roomMap[order.roomId]
+        if (roomInfo == null) {
+            synchronized(this) {
+                if (roomInfo == null) {
+                    // 房间只有第一次创建才会被锁
+                    val roomRecord = redisUtil.getRoomRecord(order.roomId!!).block()
+                    if (roomRecord == null) {
+                        logger.error("交易订单撤销错误，不存在的房间号: {}，或房间没开启", order.roomId)
+                        return false
+                    } else {
+                        roomInfo = createRoomInfo(roomRecord)
+                        roomMap[order.roomId!!] = roomInfo!!
+                        start()
+                    }
+                }
+            }
         }
+        roomInfo!!.tryCancelOrder(order, packTime)
+        redisUtil.deleteUserOrder(order).block()
+        return true
     }
 
     fun tryAddRival(rival: RivalInfo) {
@@ -131,7 +142,9 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         internal fun addData(): Boolean {
             val data = tempAdd.getAndSet(null)
             // TODO 可以考虑在这个之后推送状态更新
-            return add(data)
+            return if (data != null) {
+                add(data)
+            } else false
         }
 
         /**
@@ -160,16 +173,21 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
             while (true) {
                 count = 0   // 计数清零
                 strategy!!.roomMap.forEach { k, v ->
-                    if (v.canStart()) {
-                        strategy?.startMatch(k)
-                        v.setNextCycle()
-                        count++
-                    }
-                    if (v.addData()) {
-                        count++
-                    }
-                    if (v.isEnd()) {
-                        strategy!!.roomMap.remove(k)
+                    // 单线程很快，因为撮合在reactor的享线程池里完成
+                    try {
+                        if (v.canStart()) {
+                            strategy?.startMatch(k)
+                            v.setNextCycle()
+                            count++
+                        }
+                        if (v.addData()) {
+                            count++
+                        }
+                        if (v.isEnd()) {
+                            strategy!!.roomMap.remove(k)
+                        }
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
                     }
                 }
                 if (count == 0L) {  // 如果计数为0，说明没事可做，休眠一段时间以让出cpu

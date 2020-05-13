@@ -44,7 +44,7 @@ class SocketHandler : WebSocketHandler {
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
-        val sessionHandler = WebSocketSessionHandler(session)
+        val sessionHandler = WebSocketSessionHandler(session)       // TODO 不应该每次都创建
         val watchDog = WebSocketWatchDog().start(sessionHandler, 3000)
         val queryMap = getQueryMap(sessionHandler.getSession().handshakeInfo.uri.query)
         if (queryMap["roomId"] == null) {
@@ -58,30 +58,38 @@ class SocketHandler : WebSocketHandler {
                     ServiceResponseInfo(ResponseInfo.failed("错误: ${it.message}"), -1).getMono()
                             .map { data -> json.writeValueAsString(data) }
                             .flatMap(sessionHandler::send)
+                            .doOnNext { msg -> logger.info("send $msg") }
                             .flatMap { Mono.empty<RoomRecord>() }
-                }
-                .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.model!!) }
-                .flatMap { sessionHandler.disconnected() }
+                }.flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.model!!) }
+        val disconnected = sessionHandler.disconnected()
                 .flatMap { BaseUser.getcurrentUser() }
                 .doOnNext { SocketSessionStore.removeUser(it.id!!) }
 
         val output = sessionHandler.receive()
                 .flatMap {
-                    logger.info("接收到数据${it}")
                     val request = toServiceRequestInfo(it)
-                    val resp = ServiceResponseInfo(req = request.req)
-                    dispatcherServlet.doDispatch(request, resp)
-                    resp.getMono()
+                    if (request.order == "/ping") { // 心跳就不回应
+                        Mono.empty()
+                    } else {
+                        if (request.order != "/echo") {
+                            logger.info("接收到数据${it}")
+                        }
+                        val resp = ServiceResponseInfo(req = request.req)
+                        dispatcherServlet.doDispatch(request, resp)
+                        resp.getMono()
+                    }
                 }.onErrorResume { ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono() }
                 .map { json.writeValueAsString(it) }
                 .doOnError { logger.info("错误") }
                 .flatMap(sessionHandler::send)
+                .doOnNext { logger.info("send $it") }
                 .then()
 
         return sessionHandler.handle()
                 .zipWith(connect)
                 .zipWith(watchDog)
-                .zipWith(output).then()
+                .zipWith(output)
+                .zipWith(disconnected).then()
     }
 
     private fun getQueryMap(queryStr: String): Map<String, String> {

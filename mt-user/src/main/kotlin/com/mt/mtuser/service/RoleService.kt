@@ -63,4 +63,8 @@ class RoleService {
     fun findByCompanyId(companyId: Int) = stockholderDao.findByCompanyId(companyId)
 
     suspend fun findByUserIdAndCompanyId(userId: Int, companyId: Int) = stockholderDao.findByUserIdAndCompanyId(userId, companyId)
+
+    suspend fun findByUserIdAndRoleId(userId: Int, roleId: Int) = stockholderDao.findByUserIdAndRoleId(userId, roleId)
+
+    suspend fun deleteById(id: Int) = stockholderDao.deleteById(id)
 }

@@ -22,7 +22,7 @@ class MatchOutProcessor {
 
     @StreamListener(MatchSink.IN_TRADE)
     fun inTrade(@Payload tradeInfo: TradeInfo) {
-        val data = ServiceResponseInfo.DataResponse(ResponseInfo(0, "交易通知", tradeInfo), -1)
+        val data = ServiceResponseInfo.DataResponse(ResponseInfo(0, "交易通知", tradeInfo), -2)
         val msg = json.writeValueAsString(data)
         logger.info(msg)
         tradeInfo.buyerId?.let { SocketSessionStore.userInfoMap[it]?.session?.send(msg)?.subscribe() }

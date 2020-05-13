@@ -48,15 +48,17 @@ class WorkService {
                                 ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
                         logger.info(userRoomInfo.roomId)
                         redisUtil.getRoomRecord(userRoomInfo.roomId)
-                    }.filter {
+                    }.map {
                         logger.info("1 {}", it.startTime!!.time - 3_000 < System.currentTimeMillis())
-                        it.startTime!!.time - 3_000 < System.currentTimeMillis()    // 可以提前3秒进入房间
-                    }
-                    .filter {
-                        logger.info("2 {}", it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) >= System.currentTimeMillis() )
-                        it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) >= System.currentTimeMillis()
-                    }
-                    .switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
+                        logger.info("2 {}", it.endTime!!.time - (it.secondStage?.toMillisOfDay()
+                                ?: 0) >= System.currentTimeMillis())
+                        if (it.startTime!!.time - 2_000 < System.currentTimeMillis()) {
+                            if (it.endTime!!.time - (it.secondStage?.toMillisOfDay()
+                                            ?: 0) >= System.currentTimeMillis()) {
+                                it
+                            } else error("报价已结束")
+                        } else error("房间未开启")
+                    }.switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
                     .map {
                         price.roomId = it.roomId
                         price.flag = it.model
@@ -73,7 +75,8 @@ class WorkService {
         return BaseUser.getcurrentUser()
                 .flatMap {
                     rival.userId = it.id!!
-                    val userRoomInfo = store.getRoom(it.id!!) ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
+                    val userRoomInfo = store.getRoom(it.id!!)
+                            ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
                     redisUtil.getRoomRecord(userRoomInfo.roomId)
                 }.map { roomRecord ->
                     if (RoomEnum.getRoomEnum(roomRecord.model!!) == RoomEnum.CLICK) {
@@ -98,6 +101,9 @@ class WorkService {
                 }
     }
 
+    /**
+     * 获取报价历史
+     */
     fun getOrderRecord(): Mono<List<OrderParam>> {
         return BaseUser.getcurrentUser()
                 .flatMap {

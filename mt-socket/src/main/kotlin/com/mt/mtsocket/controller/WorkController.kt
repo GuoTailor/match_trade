@@ -33,7 +33,7 @@ class WorkController {
      * @apiPermission none
      */
     @RequestMapping("/echo")
-    fun echo(@RequestParam value: String, @RequestParam(required = false) nmka: Any?): Mono<ResponseInfo<Map<String, String>>> {
+    fun echo(@RequestParam value: String): Mono<ResponseInfo<Map<String, String>>> {
         return ResponseInfo.ok(Mono.just(mapOf("value" to value)))
     }
 
@@ -58,7 +58,7 @@ class WorkController {
      * @apiDescription 报价
      * @apiName addRival
      * @apiVersion 0.0.1
-     * @apiUse OrderParam
+     * @apiUse RivalInfo
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
@@ -74,7 +74,6 @@ class WorkController {
      * @apiDescription 报价
      * @apiName cancel
      * @apiVersion 0.0.1
-     * @apiUse CancelOrder
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
@@ -90,7 +89,6 @@ class WorkController {
      * @apiDescription 获取自己的全部报价，不支持分页
      * @apiName getOrderRecord
      * @apiVersion 0.0.1
-     * @apiUse CancelOrder
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
@@ -100,6 +98,5 @@ class WorkController {
     fun getOrderRecord(): Mono<ResponseInfo<List<OrderParam>>> {
         return ResponseInfo.ok(workService.getOrderRecord())
     }
-
 
 }

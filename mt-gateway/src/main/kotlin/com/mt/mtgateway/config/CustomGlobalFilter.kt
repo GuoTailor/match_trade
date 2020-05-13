@@ -60,9 +60,9 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
             headers.add("Access-Control-Allow-Credentials", "true")
         }
         if (!match(url)) {
-            log.info(request.headers.toString())
+            //log.info(request.headers.toString())
             val authHeader = getAuthToken(request)
-            log.info(authHeader)
+            //log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
                 val authToken = authHeader.replaceFirst(TOKEN_PREFIX, "")
                 val checkPOJO = TokenMgr.validateJWT(authToken)
