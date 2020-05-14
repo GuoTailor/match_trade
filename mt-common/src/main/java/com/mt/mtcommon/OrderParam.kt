@@ -1,5 +1,6 @@
 package com.mt.mtcommon
 
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.util.*
 
@@ -23,7 +24,7 @@ open class OrderParam(
         var stateDetails: String? = null,   // 状态原因
         var tradePrice: BigDecimal? = null  // 成交价格
 ) {
-
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     fun verify(): Boolean {
         return price?.let { it.toDouble() > 0 } ?: false
     }
@@ -39,6 +40,25 @@ open class OrderParam(
         return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, time=$time)"
     }
 
+    /**
+     * 更严格的匹配，主要用于redis匹配历史报价
+     */
+    fun strictEquals(other: OrderParam): Boolean {
+        logger.info(other.toString())
+        logger.info(toString())
+        if (userId != other.userId) return false
+        if (roomId != other.roomId) return false
+        if (price != other.price) return false
+        if (number != other.number) return false
+        if (flag != other.flag) return false
+        if (time != other.time) return false
+
+        return true
+    }
+
+    /**
+     * 只需要用户id和房间号，就可以匹配是否为同已用户报价，主要用于用户的待撮合列表比较
+     */
     override fun equals(other: Any?): Boolean {     // 只需要用户id和房间号就可以唯一标识一个报价
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

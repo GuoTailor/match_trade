@@ -30,8 +30,16 @@ object SocketSessionStore {
         return userInfoMap[userId]
     }
 
+    fun getOnLineSize(roomId: String): Int {
+        return userInfoMap.count { entry -> entry.value.roomId == roomId }
+    }
+
+    fun forEachSend() {
+
+    }
+
     data class UserRoomInfo(val session: WebSocketSessionHandler,
                             val userId: Int,
                             val roomId: String,
-                            val model: String)     // TODO 可能的内存瓶颈，不应该为每个用户保存一个房间记录，而是一个房间号保存一个房间记录
+                            val model: String)
 }

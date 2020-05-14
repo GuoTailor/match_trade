@@ -18,7 +18,7 @@ function connect() {
     ws.onopen = function () {
         setConnected(true);
         log('Info: Connection Established.');
-        ws.send("{\"order\":\"/order\", \"data\": {}, \"req\":12}")
+        //ws.send("{\"order\":\"/order\", \"data\": {}, \"req\":12}")
     };
 
     ws.onmessage = function (event) {

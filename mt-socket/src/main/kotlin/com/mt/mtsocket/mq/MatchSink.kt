@@ -22,8 +22,12 @@ interface MatchSink {
     @Input(IN_TRADE)
     fun inTrade(): SubscribableChannel
 
+    @Input(IN_RESULT)
+    fun inResult(): SubscribableChannel
+
     companion object {
         const val IN_TRADE = "in-trade"
+        const val IN_RESULT = "in-result"
         const val OUT_ORDER = "out-order"
         const val OUT_RIVAL = "out-rival"
         const val OUT_CANCEL = "out-cancel"

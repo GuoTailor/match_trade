@@ -34,8 +34,15 @@ interface MatchSink {
     @Output(OUT_TRADE)
     fun outTrade(): MessageChannel
 
+    /**
+     * 添加订单结果通知
+     */
+    @Output(OUT_RESULT)
+    fun outResult(): MessageChannel
+
     companion object {
         const val OUT_TRADE = "out-trade"
+        const val OUT_RESULT = "out-result"
         const val IN_ORDER = "in-order"
         const val IN_RIVAL = "in-rival"
         const val IN_CANCEL = "in-cancel"

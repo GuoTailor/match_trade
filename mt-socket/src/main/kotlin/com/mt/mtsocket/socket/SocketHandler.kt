@@ -3,6 +3,7 @@ package com.mt.mtsocket.socket
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtcommon.RoomRecord
+import com.mt.mtsocket.common.NotifyReq
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.distribute.ServiceResponseInfo
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import java.util.*
 
 /**
@@ -54,16 +56,20 @@ class SocketHandler : WebSocketHandler {
         val roomId = queryMap["roomId"].toString()
         val connect = sessionHandler.connected()
                 .flatMap { workService.enterRoom(roomId) }
+                .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.model!!) }
                 .onErrorResume {
-                    ServiceResponseInfo(ResponseInfo.failed("错误: ${it.message}"), -1).getMono()
+                    ServiceResponseInfo(ResponseInfo.failed("错误: ${it.message}"), NotifyReq.errorNotify).getMono()
                             .map { data -> json.writeValueAsString(data) }
                             .flatMap(sessionHandler::send)
                             .doOnNext { msg -> logger.info("send $msg") }
-                            .flatMap { Mono.empty<RoomRecord>() }
-                }.flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.model!!) }
+                            .flatMap { Mono.empty<Unit>() }
+                }
+        workService.onNumberChange(roomId).log().subscribeOn(Schedulers.elastic()).subscribe()
         val disconnected = sessionHandler.disconnected()
                 .flatMap { BaseUser.getcurrentUser() }
-                .doOnNext { SocketSessionStore.removeUser(it.id!!) }
+                .map { SocketSessionStore.removeUser(it.id!!) }
+                .flatMap { workService.onNumberChange(roomId) }
+
 
         val output = sessionHandler.receive()
                 .flatMap {
@@ -78,7 +84,7 @@ class SocketHandler : WebSocketHandler {
                         dispatcherServlet.doDispatch(request, resp)
                         resp.getMono()
                     }
-                }.onErrorResume { ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), -1).getMono() }
+                }.onErrorResume { ServiceResponseInfo(ResponseInfo.failed("错误 ${it.message}"), NotifyReq.errorNotify).getMono() }
                 .map { json.writeValueAsString(it) }
                 .doOnError { logger.info("错误") }
                 .flatMap(sessionHandler::send)
@@ -89,7 +95,8 @@ class SocketHandler : WebSocketHandler {
                 .zipWith(connect)
                 .zipWith(watchDog)
                 .zipWith(output)
-                .zipWith(disconnected).then()
+                .zipWith(disconnected)
+                .then()
     }
 
     private fun getQueryMap(queryStr: String): Map<String, String> {

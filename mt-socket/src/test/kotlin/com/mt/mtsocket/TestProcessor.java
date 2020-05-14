@@ -1,5 +1,6 @@
 package com.mt.mtsocket;
 
+import com.mt.mtsocket.socket.SocketSessionStore;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class TestProcessor {
             String s2 = s.remove(0);
             System.out.println(s1 + s2);
         }
+        SocketSessionStore.INSTANCE.getUserInfoMap$mt_socket();
     }
 
     @Test

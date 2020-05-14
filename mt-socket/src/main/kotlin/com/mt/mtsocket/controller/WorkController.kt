@@ -30,7 +30,7 @@ class WorkController {
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":{"value":"123"}},"req":12}
      * @apiGroup Socket
-     * @apiPermission none
+     * @apiPermission user
      */
     @RequestMapping("/echo")
     fun echo(@RequestParam value: String): Mono<ResponseInfo<Map<String, String>>> {
@@ -46,7 +46,7 @@ class WorkController {
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
-     * @apiPermission none
+     * @apiPermission user
      */
     @RequestMapping("/offer")
     fun offer(@RequestBody orderParam: OrderParam): Mono<ResponseInfo<Boolean>> {
@@ -62,7 +62,7 @@ class WorkController {
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
-     * @apiPermission none
+     * @apiPermission user
      */
     @RequestMapping("/rival")
     fun addRival(@RequestBody rival: RivalInfo): Mono<ResponseInfo<Boolean>> {
@@ -77,7 +77,7 @@ class WorkController {
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
-     * @apiPermission none
+     * @apiPermission user
      */
     @RequestMapping("/cancel")
     fun cancel(): Mono<ResponseInfo<Boolean>> {
@@ -92,11 +92,26 @@ class WorkController {
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
      * @apiGroup Socket
-     * @apiPermission none
+     * @apiPermission user
      */
     @RequestMapping("/order")
     fun getOrderRecord(): Mono<ResponseInfo<List<OrderParam>>> {
         return ResponseInfo.ok(workService.getOrderRecord())
+    }
+
+    /**
+     * @api {connect} /number 获取自己当前房间的在线人数
+     * @apiDescription 获取自己当前房间的在线人数
+     * @apiName getRoomNumber
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":1},"req":12}
+     * @apiGroup Socket
+     * @apiPermission user
+     */
+    @RequestMapping("/number")
+    fun getRoomNumber(): Mono<ResponseInfo<Int>> {
+        return ResponseInfo.ok(workService.getOnLineSize())
     }
 
 }

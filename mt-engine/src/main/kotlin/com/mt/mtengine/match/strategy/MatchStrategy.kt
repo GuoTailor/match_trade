@@ -85,11 +85,26 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         return true
     }
 
-    fun tryAddRival(rival: RivalInfo) {
-        val roomInfo = roomMap[rival.roomId]
+    fun tryAddRival(rival: RivalInfo): Boolean {
+        var roomInfo = roomMap[rival.roomId]
         if (roomInfo == null) {
-            logger.error("交易对手添加错误，不存在的房间号: {}，或房间没开启", rival.roomId)
-        } else roomInfo.tryAddRival(rival, packTime)
+            synchronized(this) {
+                if (roomInfo == null) {
+                    // 房间只有第一次创建才会被锁
+                    val roomRecord = redisUtil.getRoomRecord(rival.roomId!!).block()
+                    if (roomRecord == null) {
+                        logger.error("交易对手添加错误，不存在的房间号: {}，或房间没开启", rival.roomId)
+                        return false
+                    } else {
+                        roomInfo = createRoomInfo(roomRecord)
+                        roomMap[rival.roomId!!] = roomInfo!!
+                        start()
+                    }
+                }
+            }
+        }
+        roomInfo!!.tryAddRival(rival, packTime)
+        return true
     }
 
     // TODO 房间提前/延后结束通知

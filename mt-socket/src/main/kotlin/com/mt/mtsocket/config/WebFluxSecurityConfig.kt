@@ -48,16 +48,6 @@ class WebFluxSecurityConfig {
                 .formLogin().disable()
                 .logout().disable()
                 .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-                //.authenticationManager { Mono.just(it) }
-                //.securityContextRepository(ServerHttpBearerSecurityContextRepository())
-                .exceptionHandling()
-                //.authenticationEntryPoint { swe, _ -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED } }
-                .accessDeniedHandler(MyAccessDeniedHandler()).and()
-                .authorizeExchange()
-                .pathMatchers("/login", "/register", "/common/**").permitAll()
-                .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                .anyExchange().authenticated()
-                .and()
                 .build()
     }
 

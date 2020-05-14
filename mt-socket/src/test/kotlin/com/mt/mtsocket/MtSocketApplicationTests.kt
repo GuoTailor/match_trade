@@ -33,7 +33,11 @@ class MtSocketApplicationTests {
 
     @Test
     fun contextLoads() {
-        jacksonObjectMapper().readValue<OrderParam>("{\"price\":1000,\"isBuy\":false,\"number\":100}")
+        Mono.just("nmka")
+                .flatMap { println("nmka2"); Mono.just("") }
+                .then()
+                .doOnEach { println("cnm$it") }
+                .log().block()
     }
 
     @Test

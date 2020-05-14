@@ -21,27 +21,30 @@ object MatchManager {
         strategy.start()
     }
 
-    fun add(order: OrderParam) {
+    fun add(order: OrderParam): Boolean {
         strategyList.forEach {
             if (it.isCan(order.flag ?: "")) {
-                it.tryAddOrder(order)
+                return it.tryAddOrder(order)
             }
         }
+        return false
     }
 
-    fun add(rival: RivalInfo) {
+    fun add(rival: RivalInfo): Boolean {
         strategyList.forEach {
             if (it.isCan(rival.flag ?: "")) {
-                it.tryAddRival(rival)
+                return it.tryAddRival(rival)
             }
         }
+        return false
     }
 
-    fun cancel(cancelOrder: CancelOrder) {
+    fun cancel(cancelOrder: CancelOrder): Boolean {
         strategyList.forEach {
             if (it.isCan(cancelOrder.flag ?: "")) {
-                it.tryCancelOrder(cancelOrder)
+                return it.tryCancelOrder(cancelOrder)
             }
         }
+        return false
     }
 }

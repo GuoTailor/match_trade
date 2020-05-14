@@ -1,7 +1,7 @@
 package com.mt.mtengine.service
 
 import com.mt.mtcommon.*
-import kotlinx.coroutines.reactive.awaitSingle
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.data.redis.listener.ChannelTopic
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
-import java.time.LocalTime
 import java.util.*
+import java.util.function.BiFunction
 
 /**
  * Created by gyh on 2020/3/24.
@@ -19,6 +19,7 @@ import java.util.*
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val closeTopic = ChannelTopic(Consts.roomEvent)
     private val roomKey = Consts.roomKey
     private val roomInfo = Consts.roomInfo
@@ -58,16 +59,6 @@ class RedisUtil {
 
     // -----------------------=====>>用户订单<<=====----------------------------
 
-    fun getOriginalOrder(order: OrderParam): OrderParam {
-        return OrderParam(order.userId,
-                order.price,
-                order.roomId,
-                order.isBuy,
-                order.number,
-                order.flag,
-                order.time)
-    }
-
     /**
      * 添加元素到队列尾部
      */
@@ -81,11 +72,16 @@ class RedisUtil {
      * 更新用户的订单状态
      */
     fun updateUserOrder(order: OrderParam): Mono<Boolean> {
-        val temp = getOriginalOrder(order)
-        return redisTemplate.opsForList().remove("$userOrderKey${order.roomId}:${order.userId}", 0, temp)
-                .flatMap { redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order) }
-                .flatMap { redisTemplate.getExpire("$userOrderKey${order.roomId}:${order.userId}") }
-                .flatMap { redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}", it) }
+        val timeout = redisTemplate.getExpire("$userOrderKey${order.roomId}:${order.userId}")
+        return getUserOrder(order)
+                .filter { it.strictEquals(order) }
+                .take(1)
+                .zipWith(timeout)
+                .flatMap { tuple ->
+                    redisTemplate.opsForList().remove("$userOrderKey${order.roomId}:${order.userId}", 0, tuple.t1)
+                            .flatMap { redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order) }
+                            .flatMap { redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}", tuple.t2) }
+                }.next()
     }
 
     /**
@@ -93,7 +89,8 @@ class RedisUtil {
      */
     fun deleteUserOrder(userId: Int, roomId: String): Mono<Void> {
         return getUserOrder(userId, roomId)
-                .filter { userId == it.userId && roomId == it.roomId }
+                .filter { userId == it.userId && roomId == it.roomId && it.tradeState == TradeState.STAY }
+                .take(1)
                 .flatMap { redisTemplate.opsForList().remove("$userOrderKey${roomId}:${userId}", 0, it) }
                 .then()
     }

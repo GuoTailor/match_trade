@@ -39,16 +39,6 @@ class RedisUtil {
 
     // -----------------------=====>>用户订单<<=====----------------------------
 
-    fun getOriginalOrder(order: OrderParam): OrderParam {
-        return OrderParam(order.userId,
-                order.price,
-                order.roomId,
-                order.isBuy,
-                order.number,
-                order.flag,
-                order.time)
-    }
-
     /**
      * 添加元素到队列尾部
      */
@@ -62,11 +52,16 @@ class RedisUtil {
      * 更新用户的订单状态
      */
     fun updateUserOrder(order: OrderParam): Mono<Boolean> {
-        val temp = getOriginalOrder(order)
-        return redisTemplate.opsForList().remove("$userOrderKey${order.roomId}:${order.userId}", 0, temp)
-                .flatMap { redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order) }
-                .flatMap { redisTemplate.getExpire("$userOrderKey${order.roomId}:${order.userId}") }
-                .flatMap { redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}", it) }
+        val timeout = redisTemplate.getExpire("$userOrderKey${order.roomId}:${order.userId}")
+        return getUserOrder(order)
+                .filter { it.strictEquals(order) }
+                .take(1)
+                .zipWith(timeout)
+                .flatMap { tuple ->
+                    redisTemplate.opsForList().remove("$userOrderKey${order.roomId}:${order.userId}", 0, tuple.t1)
+                            .flatMap { redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order) }
+                            .flatMap { redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}", tuple.t2) }
+                }.next()
     }
 
     /**

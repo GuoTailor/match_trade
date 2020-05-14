@@ -44,6 +44,7 @@ public class Util {
 
     /**
      * 把格式化后的时间字符串解码成时间毫秒值
+     * 格式： yyyy-MM-dd HH:mm:ss
      *
      * @param time 格式化后的时间字符串
      * @return 时间毫秒值
