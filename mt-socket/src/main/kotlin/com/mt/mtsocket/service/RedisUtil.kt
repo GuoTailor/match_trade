@@ -1,8 +1,6 @@
 package com.mt.mtsocket.service
 
-import com.mt.mtcommon.Consts
-import com.mt.mtcommon.OrderParam
-import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Component
@@ -23,6 +21,8 @@ class RedisUtil {
     private val roomKey = Consts.roomKey
     private val roomInfo = Consts.roomInfo
     private val userOrderKey = Consts.userOrder
+    private val rivalInfoKey = Consts.rivalKey
+    private val topThreeKey = Consts.topThree
 
     // -------------------------=======>>>房间<<<=======-------------------------
 
@@ -90,5 +90,27 @@ class RedisUtil {
      */
     fun deleteAllUserOrder(roomId: String): Mono<Long> {
         return redisTemplate.delete("$userOrderKey${roomId}:*")
+    }
+
+    // ------------------------=======>>>对手<<<=====----------------------
+
+    fun putUserRival(rival: RivalInfo, endTime: Date): Mono<Boolean> {
+        return redisTemplate.opsForList().rightPush("$rivalInfoKey${rival.roomId}:${rival.userId}", rival.rivals ?: arrayOf<Int>())
+                .then(redisTemplate.expire("$rivalInfoKey${rival.roomId}:${rival.userId}",  // 房间结束时自动过期
+                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 1L)))
+    }
+
+    fun getUserRival(userId: Int, roomId: String): Flux<Int> {
+        return redisTemplate.opsForList().range("$rivalInfoKey${roomId}:${userId}", 0, -1).cast(Int::class.java)
+    }
+
+    // ------------------------=======>>>前三档<<<=====----------------------
+
+    fun setRoomTopThree(topThree: TopThree): Mono<Boolean> {
+        return redisTemplate.opsForHash<String, TopThree>().put(roomKey + topThree.roomId, topThreeKey, topThree)
+    }
+
+    fun getRoomTopThree(roomId: String): Mono<TopThree> {
+        return redisTemplate.opsForHash<String, TopThree>().get(roomKey + roomId, topThreeKey)
     }
 }

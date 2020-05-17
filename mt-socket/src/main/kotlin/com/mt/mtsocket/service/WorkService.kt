@@ -45,8 +45,8 @@ class WorkService {
     fun onNumberChange(roomId: String): Mono<*> {
         var result: Mono<*>? = null
         store.userInfoMap.forEach { _, info ->
-            val size = store.getOnLineSize(roomId)
             if (info.roomId == roomId) {
+                val size = store.getOnLineSize(roomId)
                 val data = ServiceResponseInfo.DataResponse(ResponseInfo(0, "人数变化", size), NotifyReq.notifyNumberChange)
                 val msg = json.writeValueAsString(data)
                 logger.info(msg)
@@ -98,6 +98,22 @@ class WorkService {
     }
 
     /**
+     * 获取自己选择的对手
+     */
+    fun getRival(): Mono<RivalInfo> {
+        return BaseUser.getcurrentUser().flatMap {
+            val userRoomInfo = store.getRoom(it.id!!) ?: error("错误，用户没有加入房间")
+            val rival = RivalInfo(userId = it.id!!, roomId = userRoomInfo.roomId)
+            if (RoomEnum.getRoomEnum(userRoomInfo.model) == RoomEnum.CLICK) {
+                redisUtil.getUserRival(it.id!!, userRoomInfo.roomId).collectList().map { rivals ->
+                    rival.rivals = rivals.toTypedArray()
+                    rival
+                }
+            } else error("错误，点选成交才能选择对手")
+        }
+    }
+
+    /**
      * 撤单
      */
     fun cancelOrder(): Mono<Boolean> {
@@ -129,12 +145,26 @@ class WorkService {
                 .map { store.getOnLineSize(it.roomId) }
     }
 
+    /**
+     * 获取自己房间的报价前三档
+     */
+    fun getTopThree(): Mono<TopThree> {
+        return BaseUser.getcurrentUser()
+                .flatMap {
+                    val roomId = store.getRoom(it.id!!)?.roomId
+                            ?: return@flatMap Mono.error<TopThree>(IllegalStateException("错误，用户没有加入房间"))
+                    redisUtil.getRoomTopThree(roomId)
+                }
+    }
+
     fun onRoomEvent(event: RoomEvent) {
         if (event.enable) {
             // TODO 添加定时任务通知第二阶段开始
+            logger.info("收到房间开启通知 {}", event.roomId)
             // val roomRecord = redisUtil.getRoomRecord(event.roomId).block()!!
             // quartzManager.addJob(MatchStartJobInfo(roomRecord))
         } else {
+            logger.info("收到房间关闭通知 {}", event.roomId)
             SocketSessionStore.userInfoMap.forEach { _, userRoomInfo ->
                 if (event.roomId == userRoomInfo.roomId) {
                     val data = ServiceResponseInfo(ResponseInfo.ok("房间关闭"), NotifyReq.errorNotify)

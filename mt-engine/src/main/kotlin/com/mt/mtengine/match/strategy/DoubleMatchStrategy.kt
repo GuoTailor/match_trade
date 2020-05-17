@@ -2,6 +2,7 @@ package com.mt.mtengine.match.strategy
 
 import com.mt.mtcommon.*
 import com.mt.mtengine.match.MatchUtil
+import com.mt.mtengine.match.MatchUtil.contain
 import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -26,7 +27,8 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
      * 将用户报价按时间先后排序
      * 一秒钟一次，报价高者为买方，报价低者为卖方，相邻两笔成交，报价相同则该两笔报价作废
      */
-    override fun match(roomInfo: DoubleRoomInfo) {
+    override fun match(roomInfo: DoubleRoomInfo): Boolean {
+        val isMatch = roomInfo.orderList.size >= 2
         while (roomInfo.orderList.size >= 2) {
             val order1 = roomInfo.orderList.pollLast()!!
             val order2 = roomInfo.orderList.pollLast()!!
@@ -46,6 +48,7 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
             result.subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
         }
         // 未成交的订单保留直下一轮
+        return isMatch
     }
 
     class DoubleRoomInfo(record: RoomRecord) :
@@ -61,17 +64,23 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
         override fun isEnd() = System.currentTimeMillis() >= endTime.time
 
         override fun setNextCycle() {
-            nextCycleTime += cycle
+            nextCycleTime += cycle      // TODO 可能最后一次撮合不会执行
         }
 
-        override fun add(data: Any): Boolean {
-            return if (data is OrderParam && !orderList.contains(data)) {
+        override fun addOrder(data: OrderParam): Boolean {
+            return if (!orderList.contain(data)) {
                 orderList.add(data)
-            } else if (data is CancelOrder) {
-                orderList.removeIf { it.userId == data.userId }
             } else false
         }
 
+        override fun cancelOrder(order: CancelOrder): Boolean {
+            return orderList.removeIf { it.userId == order.userId }
+        }
+
+        override fun addRival(rival: RivalInfo): Boolean = false
+        override fun updateTopThree(data: OrderParam): Boolean = false
+        override fun updateTopThree(order: CancelOrder): Boolean = false
+        override fun updateTopThree(): Boolean = false
     }
 
     override fun createRoomInfo(record: RoomRecord): DoubleRoomInfo {

@@ -1,5 +1,6 @@
 package com.mt.mtcommon
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.util.*
@@ -15,6 +16,7 @@ open class OrderParam(
         var userId: Int? = null,        // 用户id
         var price: BigDecimal? = null,  // 报价
         var roomId: String? = null,     // 房间号
+        @set:JsonProperty("isBuy")
         var isBuy: Boolean? = null,     // 是否买家
         var number: Int? = null,        // 交易数量
         var flag: String? = null,       // 房间模式
@@ -36,16 +38,10 @@ open class OrderParam(
         stateDetails = tradeInfo.stateDetails
     }
 
-    override fun toString(): String {
-        return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, time=$time)"
-    }
-
     /**
      * 更严格的匹配，主要用于redis匹配历史报价
      */
     fun strictEquals(other: OrderParam): Boolean {
-        logger.info(other.toString())
-        logger.info(toString())
         if (userId != other.userId) return false
         if (roomId != other.roomId) return false
         if (price != other.price) return false
@@ -75,5 +71,9 @@ open class OrderParam(
         var result = userId ?: 0
         result = 31 * result + (roomId?.hashCode() ?: 0)
         return result
+    }
+
+    override fun toString(): String {
+        return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, flag=$flag, time=$time, tradeTime=$tradeTime, tradeState=$tradeState, stateDetails=$stateDetails, tradePrice=$tradePrice, logger=$logger)"
     }
 }

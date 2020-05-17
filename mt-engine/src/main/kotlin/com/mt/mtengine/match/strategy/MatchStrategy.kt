@@ -1,9 +1,12 @@
 package com.mt.mtengine.match.strategy
 
 import com.mt.mtcommon.*
+import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.RedisUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.support.MessageBuilder
+import reactor.core.scheduler.Schedulers
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
@@ -24,6 +27,9 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
     abstract val roomType: RoomEnum
 
     @Autowired
+    lateinit var sink: MatchSink
+
+    @Autowired
     lateinit var redisUtil: RedisUtil
 
     fun start() = matchWork.start(this)
@@ -35,7 +41,11 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         if (roomInfo == null) {
             logger.error("交易匹配错误，不存在的房间号: {}", roomId)
         } else {
-            match(roomInfo)
+            if (match(roomInfo) && roomInfo.updateTopThree()) {
+                // 更新前三档报价
+                sink.outResult().send(MessageBuilder.withPayload(roomInfo.topThree.toNotifyResult()).build())
+                redisUtil.setRoomTopThree(roomInfo.topThree)
+            }
         }
     }
 
@@ -52,13 +62,11 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     } else {
                         roomInfo = createRoomInfo(roomRecord)
                         roomMap[order.roomId!!] = roomInfo!!
-                        start()
                     }
                 }
             }
         }
         roomInfo!!.tryAddOrder(order, packTime)
-        redisUtil.putUserOrder(order, roomInfo!!.endTime).block()
         return true
     }
 
@@ -75,13 +83,11 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     } else {
                         roomInfo = createRoomInfo(roomRecord)
                         roomMap[order.roomId!!] = roomInfo!!
-                        start()
                     }
                 }
             }
         }
         roomInfo!!.tryCancelOrder(order, packTime)
-        redisUtil.deleteUserOrder(order).block()
         return true
     }
 
@@ -98,7 +104,6 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     } else {
                         roomInfo = createRoomInfo(roomRecord)
                         roomMap[rival.roomId!!] = roomInfo!!
-                        start()
                     }
                 }
             }
@@ -110,9 +115,9 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
     // TODO 房间提前/延后结束通知
 
     /**
-     * 开始撮合
+     * 开始撮合,返回true代表发生了撮合
      */
-    abstract fun match(roomInfo: T)
+    abstract fun match(roomInfo: T): Boolean
 
     abstract fun createRoomInfo(record: RoomRecord): T
 
@@ -122,6 +127,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
             var cycle: Long,    // 周期，单位毫秒
             val endTime: Date   // 不支持提前结束和延迟结束
     ) {
+        val topThree = TopThree(roomId)
         private val tempAdd = AtomicReference<Any>()
 
         /** 判断是否可以开始撮合 */
@@ -134,7 +140,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         abstract fun setNextCycle()
 
         /**
-         * [tryAddOrder]是生产者线程，会有多线程竞争，[add]是消费者线程调用，永远只有一个消费者，不存在线程竞争
+         * [tryAddOrder]是生产者线程，会有多线程竞争，[addData]是消费者线程调用，永远只有一个消费者，不存在线程竞争
          */
         fun tryAddOrder(order: OrderParam, packTime: Long) {
             while (!tempAdd.compareAndSet(null, order)) {
@@ -154,18 +160,62 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
             }
         }
 
-        internal fun addData(): Boolean {
+        internal fun addData(redisUtil: RedisUtil, sink: MatchSink): Boolean {
             val data = tempAdd.getAndSet(null)
-            // TODO 可以考虑在这个之后推送状态更新
             return if (data != null) {
-                add(data)
+                if (data is OrderParam && addOrder(data)) {
+                    redisUtil.putUserOrder(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                    if (updateTopThree(data)) {
+                        sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
+                        redisUtil.setRoomTopThree(topThree)
+                    }
+                    true
+                } else if (data is CancelOrder && cancelOrder(data)) {
+                    redisUtil.deleteUserOrder(data).subscribeOn(Schedulers.elastic()).subscribe()
+                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                    if (updateTopThree(data)) {
+                        sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
+                        redisUtil.setRoomTopThree(topThree)
+                    }
+                    true
+                } else if (data is RivalInfo && addRival(data)) {
+                    redisUtil.putUserRival(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                    true
+                } else false
             } else false
         }
 
         /**
-         * [tryAddOrder]是生产者线程，会有多线程竞争，[add]是消费者线程，永远只有一个消费者，不存在线程竞争
+         * 当放回true时代表添加成功
          */
-        abstract fun add(data: Any): Boolean
+        abstract fun addOrder(data: OrderParam): Boolean
+
+        /**
+         * 当放回true时代表撤单成功
+         */
+        abstract fun cancelOrder(order: CancelOrder): Boolean
+
+        /**
+         * 当放回true时代表添加成功
+         */
+        abstract fun addRival(rival: RivalInfo): Boolean
+
+        /**
+         * 添加元素时更新前三名
+         */
+        abstract fun updateTopThree(data: OrderParam): Boolean
+
+        /**
+         * 撤单时更新前三名
+         */
+        abstract fun updateTopThree(order: CancelOrder): Boolean
+
+        /**
+         * 发送有效撮合后更新前三名
+         */
+        abstract fun updateTopThree(): Boolean
     }
 
     /**
@@ -181,6 +231,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
 
         fun start(strategy: MatchStrategy<T>) {
             this.strategy = strategy
+            name = "matchTask-" + strategy.roomType.flag
             super.start()
         }
 
@@ -195,7 +246,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                             v.setNextCycle()
                             count++
                         }
-                        if (v.addData()) {
+                        if (v.addData(strategy!!.redisUtil, strategy!!.sink)) {
                             count++
                         }
                         if (v.isEnd()) {

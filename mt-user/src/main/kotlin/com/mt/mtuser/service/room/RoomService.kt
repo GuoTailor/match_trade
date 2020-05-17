@@ -8,10 +8,7 @@ import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.BaseRoom
-import com.mt.mtuser.schedule.QuartzManager
-import com.mt.mtuser.schedule.RoomEndJobInfo
-import com.mt.mtuser.schedule.RoomStartJobInfo
-import com.mt.mtuser.schedule.RoomTask
+import com.mt.mtuser.schedule.*
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import com.mt.mtuser.service.RoleService
@@ -92,21 +89,19 @@ class RoomService {
             var roomRecord = room.toRoomRecord()
             roomEnableMutex.withLock {
                 if (value) {
-                    val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-                    roomRecord.startTime = room.startTime?.toDate() ?: Date()
-                    roomRecord.endTime = (startTime + room.time!!.toMillisOfDay() + room.startTime!!.toMillisOfDay()).toDate()
                     roomRecordDao.save(roomRecord)
                     redisUtil.saveRoomRecord(roomRecord)
-                } else if (value) {
+                    redisUtil.publishRoomEvent(RoomEvent(roomId, value))
+                } else {
                     roomRecord = redisUtil.deleteAndGetRoomRecord(roomId)
                             ?: throw IllegalStateException("房间不存在：$roomId")
+                    quartzManager.addJob(PublishJobInfo(room.id!!, LocalTime.now().plusSeconds(59), false))
                     roomRecord.endTime = Date()
                     roomRecord.computingTime()
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
                 }
-                redisUtil.publishRoomEvent(RoomEvent(roomId, value))
             }
         }
         logger.info("房间 {} {} 成功", roomId, if (value) "启动" else "关闭")

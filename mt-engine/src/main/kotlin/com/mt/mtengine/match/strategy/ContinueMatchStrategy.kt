@@ -2,6 +2,7 @@ package com.mt.mtengine.match.strategy
 
 import com.mt.mtcommon.*
 import com.mt.mtengine.match.MatchUtil
+import com.mt.mtengine.match.MatchUtil.contain
 import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -27,16 +28,18 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
      * 一秒钟撮合一次
      * 未撮合订单保留至撮合持续时间结束
      */
-    override fun match(roomInfo: ContinueRoomInfo) {
+    override fun match(roomInfo: ContinueRoomInfo): Boolean {
         val buyFailedList = mutableListOf<OrderParam>()
         val sellFailedList = mutableListOf<OrderParam>()
+        var isMatch = false
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!       // 最后一个报价最高
-            val sellOrder = roomInfo.buyOrderList.pollFirst()!!     // 第一个报价最低
+            val sellOrder = roomInfo.sellOrderList.pollFirst()!!     // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! > sellOrder.price) {
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
                             .subscribeOn(Schedulers.elastic()).subscribe()
+                    isMatch = true
                 } else {
                     buyFailedList.add(buyOrder)
                     sellFailedList.add(sellOrder)
@@ -44,11 +47,13 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                         .subscribeOn(Schedulers.elastic()).subscribe()
+                isMatch = true
             }
         }
         // 戳和失败的放到下一次撮合
         roomInfo.buyOrderList.addAll(buyFailedList)
         roomInfo.sellOrderList.addAll(sellFailedList)
+        return isMatch
     }
 
     class ContinueRoomInfo(record: RoomRecord) :
@@ -68,16 +73,62 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             nextCycleTime += cycle
         }
 
-        override fun add(data: Any): Boolean {
-            return if (data is OrderParam && !buyOrderList.contains(data) && !sellOrderList.contains(data)) {
+        override fun addOrder(data: OrderParam): Boolean {
+            return if (!buyOrderList.contain(data) && !sellOrderList.contain(data)) {
                 if (data.isBuy!!) {
                     buyOrderList.add(data)
                 } else {
                     sellOrderList.add(data)
                 }
-            } else if (data is CancelOrder) {
-                buyOrderList.removeIf { it.userId == data.userId } || sellOrderList.removeIf { it.userId == data.userId }
             } else false
+        }
+
+        override fun cancelOrder(order: CancelOrder): Boolean {
+            return buyOrderList.removeIf { it.userId == order.userId } || sellOrderList.removeIf { it.userId == order.userId }
+        }
+
+        override fun addRival(rival: RivalInfo): Boolean = false
+
+        /**
+         * 添加元素时更新前三名
+         */
+        override fun updateTopThree(data: OrderParam): Boolean {
+            return if (data.isBuy!!) {
+                if (topThree.buyTopThree.size >= 3) {
+                    topThree.buyTopThree.sort()
+                    topThree.buyTopThree.removeAt(2)
+                }
+                topThree.buyTopThree.add(data.toOrderInfo())
+            } else {
+                if (topThree.sellTopThree.size >= 3) {
+                    topThree.sellTopThree.sort()
+                    topThree.sellTopThree.removeAt(2)
+                }
+                topThree.sellTopThree.add(data.toOrderInfo())
+            }
+        }
+
+        /**
+         * 撤单时更新前三名
+         */
+        override fun updateTopThree(order: CancelOrder): Boolean {
+            val isRemove = topThree.buyTopThree.removeIf { it.userId == order.userId }
+                    || topThree.sellTopThree.removeIf { it.userId == order.userId }
+            if (isRemove) {
+                updateTopThree()
+            }
+            return isRemove
+        }
+
+        /**
+         * 发送有效撮合后更新前三名
+         */
+        override fun updateTopThree(): Boolean {
+            topThree.buyTopThree.clear()
+            topThree.sellTopThree.clear()
+            buyOrderList.stream().limit(3).forEach { topThree.buyTopThree.add(it.toOrderInfo()) }
+            sellOrderList.stream().limit(3).forEach { topThree.sellTopThree.add(it.toOrderInfo()) }
+            return true
         }
     }
 

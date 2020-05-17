@@ -47,7 +47,7 @@ class SocketHandler : WebSocketHandler {
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         val sessionHandler = WebSocketSessionHandler(session)       // TODO 不应该每次都创建
-        val watchDog = WebSocketWatchDog().start(sessionHandler, 3000)
+        val watchDog = WebSocketWatchDog().start(sessionHandler, 5000)
         val queryMap = getQueryMap(sessionHandler.getSession().handshakeInfo.uri.query)
         if (queryMap["roomId"] == null) {
             return sessionHandler.send("错误，不支持的参数列表$queryMap")
@@ -64,7 +64,7 @@ class SocketHandler : WebSocketHandler {
                             .doOnNext { msg -> logger.info("send $msg") }
                             .flatMap { Mono.empty<Unit>() }
                 }
-        workService.onNumberChange(roomId).log().subscribeOn(Schedulers.elastic()).subscribe()
+        workService.onNumberChange(roomId).subscribeOn(Schedulers.elastic()).subscribe()
         val disconnected = sessionHandler.disconnected()
                 .flatMap { BaseUser.getcurrentUser() }
                 .map { SocketSessionStore.removeUser(it.id!!) }
@@ -88,8 +88,13 @@ class SocketHandler : WebSocketHandler {
                 .map { json.writeValueAsString(it) }
                 .doOnError { logger.info("错误") }
                 .flatMap(sessionHandler::send)
-                .doOnNext { logger.info("send $it") }
-                .then()
+                .doOnNext {
+                    if (it.length > 1024) {
+                        logger.info("send {}...{}...{}", it.substring(0, 512), it.length - 1024, it.substring(it.length - 512))
+                    } else {
+                        logger.info("send $it")
+                    }
+                }.then()
 
         return sessionHandler.handle()
                 .zipWith(connect)

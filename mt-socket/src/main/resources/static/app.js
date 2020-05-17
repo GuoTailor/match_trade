@@ -1,7 +1,5 @@
 var ws = null;
 var path = "/socket/room";
-var token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4OTI2OTY5MywiZXhwIjo" +
-    "xNTg5ODc0NDkzfQ.u5D7OTTiUKp54zcsUeJdJc3qAKlStrekqpSbeX_MI2g";
 
 function setConnected(connected) {
     document.getElementById('connect').disabled = connected;
@@ -10,6 +8,7 @@ function setConnected(connected) {
 }
 
 function connect() {
+    var token = document.getElementById('token').value;
     var host = window.location.host;
     log(host.toString());
     var url = "ws://" + host.toString() + path
@@ -54,4 +53,9 @@ function log(message) {
     var p = document.createElement('p');
     p.appendChild(document.createTextNode(message));
     console.appendChild(p);
+}
+
+function clean() {
+    var console = document.getElementById('logging');
+    console.innerHTML = "";
 }

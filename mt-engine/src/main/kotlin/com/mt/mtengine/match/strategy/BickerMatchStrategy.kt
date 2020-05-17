@@ -2,6 +2,7 @@ package com.mt.mtengine.match.strategy
 
 import com.mt.mtcommon.*
 import com.mt.mtengine.match.MatchUtil
+import com.mt.mtengine.match.MatchUtil.contain
 import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -27,8 +28,9 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
      * 最高和最低撮合，成交价取平均
      * 报价人数是奇数舍去中间的报价
      */
-    override fun match(roomInfo: BickerRoomInfo) {
+    override fun match(roomInfo: BickerRoomInfo): Boolean {
         // 抬杠撮合报价没有身份，全部存在buy队列里面
+        val isMatch = roomInfo.orderList.size >= 2
         while (roomInfo.orderList.size >= 2) {
             val buyOrder = roomInfo.orderList.pollLast()!!    // 报价最高的为买家
             val sellOrder = roomInfo.orderList.pollFirst()!!
@@ -47,6 +49,7 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.orderList.clear()
+        return isMatch
     }
 
     class BickerRoomInfo(record: RoomRecord) :
@@ -67,13 +70,18 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
             count++
         }
 
-        override fun add(data: Any): Boolean {
-            return if (data is OrderParam && !orderList.contains(data)) {
+        override fun addOrder(data: OrderParam): Boolean {
+            return if (!orderList.contain(data)) {
                 orderList.add(data)
-            } else if (data is CancelOrder) {
-                orderList.removeIf { it.userId == data.userId }
             } else false
         }
+
+        override fun cancelOrder(order: CancelOrder) = orderList.removeIf { it.userId == order.userId }
+
+        override fun addRival(rival: RivalInfo): Boolean = false
+        override fun updateTopThree(data: OrderParam): Boolean = false
+        override fun updateTopThree(order: CancelOrder): Boolean = false
+        override fun updateTopThree(): Boolean = false
     }
 
     override fun createRoomInfo(record: RoomRecord): BickerRoomInfo {

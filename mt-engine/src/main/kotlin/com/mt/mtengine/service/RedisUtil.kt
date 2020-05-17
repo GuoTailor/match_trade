@@ -1,7 +1,6 @@
 package com.mt.mtengine.service
 
 import com.mt.mtcommon.*
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.data.redis.listener.ChannelTopic
@@ -10,7 +9,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.*
-import java.util.function.BiFunction
 
 /**
  * Created by gyh on 2020/3/24.
@@ -19,22 +17,14 @@ import java.util.function.BiFunction
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
-    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val closeTopic = ChannelTopic(Consts.roomEvent)
     private val roomKey = Consts.roomKey
     private val roomInfo = Consts.roomInfo
     private val userOrderKey = Consts.userOrder
+    private val rivalInfoKey = Consts.rivalKey
+    private val topKey = Consts.topThree
 
     // -------------------------=======>>>房间<<<=======-------------------------
-
-    /**
-     * 保存一个房间记录,并通过房间记录的时长设置过期时间
-     */
-    fun saveRoomRecord(roomRecord: RoomRecord): Mono<Boolean> {
-        return redisTemplate.opsForHash<String, RoomRecord>().put(roomKey + roomRecord.roomId, roomInfo, roomRecord)
-                .then(redisTemplate.expire(roomKey + roomRecord.roomId, roomRecord.duration!!.toDuration()))
-
-    }
 
     /**
      * 获取一个房间记录
@@ -43,19 +33,6 @@ class RedisUtil {
         return redisTemplate.opsForHash<String, RoomRecord>().get(roomKey + roomId, roomInfo)
     }
 
-    /**
-     * 获取并删除一个记录<br>
-     * 注意该方法不安全
-     */
-    fun deleteAndGetRoomRecord(roomId: String): Mono<RoomRecord> {
-        // 不安全 也许有更好的办法
-        return redisTemplate.opsForHash<String, RoomRecord>().get(roomKey + roomId, roomInfo)
-                .zipWith(redisTemplate.opsForHash<String, RoomRecord>().delete(roomKey + roomId)) { t1, _ -> t1 }
-    }
-
-    fun getAllRoom() {
-        redisTemplate.keys("$roomKey*")
-    }
 
     // -----------------------=====>>用户订单<<=====----------------------------
 
@@ -64,8 +41,9 @@ class RedisUtil {
      */
     fun putUserOrder(order: OrderParam, endTime: Date): Mono<Boolean> {
         return redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order)
-                .then(redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}",  // 房间结束时自动过期
-                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 1L)))
+                .then(redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}",
+                        // 延迟一分钟关闭，防止那种只撮合一次的房间在撮合时由于房间关闭，在更新用户报价信息时获取不到用户的历史报价导致撮合失败的问题
+                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 59L)))
     }
 
     /**
@@ -130,6 +108,28 @@ class RedisUtil {
         return redisTemplate.delete("$userOrderKey${roomId}:*")
     }
 
+    // ------------------------=======>>>对手<<<=====----------------------
+
+    fun putUserRival(rival: RivalInfo, endTime: Date): Mono<Boolean> {
+        return redisTemplate.opsForList().rightPush("$rivalInfoKey${rival.roomId}:${rival.userId}", rival.rivals
+                ?: arrayOf<Int>())
+                .then(redisTemplate.expire("$rivalInfoKey${rival.roomId}:${rival.userId}",  // 房间结束时自动过期
+                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 1L)))
+    }
+
+    fun getUserRival(userId: Int, roomId: String): Flux<Int> {
+        return redisTemplate.opsForList().range("$rivalInfoKey${roomId}:${userId}", 0, -1).cast(Int::class.java)
+    }
+
+    // ------------------------=======>>>前三档<<<=====----------------------
+
+    fun setRoomTopThree(topThree: TopThree): Mono<Boolean> {
+        return redisTemplate.opsForHash<String, TopThree>().put(roomKey + topThree.roomId, topKey, topThree)
+    }
+
+    fun getRoomTopThree(roomId: String): Mono<TopThree> {
+        return redisTemplate.opsForHash<String, TopThree>().get(roomKey + roomId, topKey)
+    }
 
     // ------------------------=======>>>推送<<<=====----------------------
 

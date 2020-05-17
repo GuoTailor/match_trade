@@ -294,7 +294,7 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room/order 查找指定房间的历史订单
+     * @api {gut} /room/order 查找指定房间最近一次开放的历史订单
      * @apiDescription  查找指定房间的历史订单,只能查询房间最近一次开放的交易记录
      * @apiName findOrder
      * @apiVersion 0.0.1

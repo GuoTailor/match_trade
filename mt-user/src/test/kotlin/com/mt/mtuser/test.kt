@@ -14,6 +14,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.sql.Time
+import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 import kotlin.system.measureTimeMillis
@@ -98,10 +99,14 @@ fun main3() = runBlocking<Unit> {
 fun main4() {
     val time = LocalTime.now() + LocalTime.now()
     println(time)
-    val date = Date(1589428740000)
+    val date = Date(1589640900000)
     println(date)
-    println(Date())
+    println(Date(1589504123171))
     println((12.0 + 15.0) / 2)
+    val t = LocalTime.ofSecondOfDay(3600)
+    println(t.toNanoOfDay())
+    Thread.sleep(1)
+    println(t.toNanoOfDay())
 }
 
 fun main() = main4()

@@ -2,6 +2,7 @@ package com.mt.mtengine.match.strategy
 
 import com.mt.mtcommon.*
 import com.mt.mtengine.match.MatchUtil
+import com.mt.mtengine.match.MatchUtil.contain
 import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -26,23 +27,21 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
      * 从买单最高价开始撮合，在其所有双向选中单子中，卖价最低的优先成交，卖价相同则先提交的成交，只成交一次
      * 撮合完成后所有未成交订单作废
      */
-    override fun match(roomInfo: ClickRoomInfo) {
+    override fun match(roomInfo: ClickRoomInfo): Boolean {
+        val result = roomInfo.buyOrderList.size >= 1
         while (roomInfo.buyOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!   // 升序排序，最后一个报价最高
             val buyRivals = roomInfo.rivalList[buyOrder.userId]?.rivals ?: arrayOf()    // 获取用户的交易对手
             val sellOrder = roomInfo.sellOrderList.stream()
                     .filter { buyRivals.contains(it.userId) }   // 过滤用户的交易对手
-                    .filter {   // 获取对手中也选了自己的订单
-                        roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false
-                    }.min(MatchUtil.sortPriceAndTime).get()     // 获取对手中卖价最低的订单
+                    .filter { roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false }   // 获取对手中也选了自己的订单
+                    .min(MatchUtil.sortPriceAndTime).get()     // 获取对手中卖价最低的订单
             roomInfo.sellOrderList.remove(sellOrder)
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
-                        .subscribeOn(Schedulers.elastic()).subscribe()
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
-                        .subscribeOn(Schedulers.elastic()).subscribe()
-            }
+            }.subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.rivalList.clear()
         roomInfo.buyOrderList.forEach {
@@ -55,6 +54,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
         }
         roomInfo.buyOrderList.clear()
         roomInfo.sellOrderList.clear()
+        return result
     }
 
     class ClickRoomInfo(record: RoomRecord) :
@@ -78,20 +78,31 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
             count++
         }
 
-        override fun add(data: Any): Boolean {
-            return if (data is OrderParam && !buyOrderList.contains(data) && !sellOrderList.contains(data)) {
+        override fun addOrder(data: OrderParam): Boolean {
+            return if (!buyOrderList.contain(data) && !sellOrderList.contains(data)) {
                 if (data.isBuy!!) {
                     buyOrderList.add(data)
                 } else {
                     sellOrderList.add(data)
                 }
-            } else if (data is RivalInfo && !rivalList.containsKey(data.userId!!)) {
-                rivalList[data.userId!!] = data
-                true
-            } else if (data is CancelOrder) {
-                buyOrderList.removeIf { it.userId == data.userId } || sellOrderList.removeIf { it.userId == data.userId }
             } else false
         }
+
+        override fun cancelOrder(order: CancelOrder): Boolean {
+            return if (!rivalList.containsKey(order.userId!!)) {
+                buyOrderList.removeIf { it.userId == order.userId } || sellOrderList.removeIf { it.userId == order.userId }
+            } else false
+        }
+
+        override fun addRival(rival: RivalInfo): Boolean {
+            return if (!rivalList.containsKey(rival.userId!!)) {
+                rivalList[rival.userId!!] = rival
+                true
+            } else false
+        }
+        override fun updateTopThree(data: OrderParam): Boolean = false
+        override fun updateTopThree(order: CancelOrder): Boolean = false
+        override fun updateTopThree(): Boolean = false
     }
 
     override fun createRoomInfo(record: RoomRecord): ClickRoomInfo {

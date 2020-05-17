@@ -95,12 +95,9 @@ class MtSocketApplicationTests {
     @Test
     fun testJson() {
         val om = ObjectMapper()
-        val map = Decimal(BigDecimal("0.2"))
-        val json = om.writeValueAsString(map)
+        val json = om.readValue<OrderParam>("{\"price\":\"100\",\"isBuy\":true}")
         println(json)
-        Thread.sleep(1000)
-        val jsonMap = om.readValue(json, Decimal::class.java)
-        println(jsonMap.time.time)
+        println(om.writeValueAsString(json))
     }
 }
 

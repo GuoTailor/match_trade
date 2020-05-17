@@ -4,6 +4,7 @@ import com.mt.mtengine.dao.StockholderDao
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import java.lang.RuntimeException
 import java.math.BigDecimal
 
 /**
@@ -21,13 +22,13 @@ class StockholderService {
 
     fun addMoney(userId: Int, companyId: Int, money: BigDecimal): Mono<Int> {
         return findByUserIdAndCompanyId(userId, companyId)
-                .switchIfEmpty(Mono.error(IllegalStateException("没有这个 companyId: $companyId userId: $userId")))
+                .switchIfEmpty(Mono.error(RuntimeException("没有这个 companyId: $companyId userId: $userId")))
                 .flatMap { stockholderDao.updateMoney(it.id!!, it.money!!.add(money)) }
     }
 
     fun minusMoney(userId: Int, companyId: Int, money: BigDecimal): Mono<Int> {
         return findByUserIdAndCompanyId(userId, companyId)
-                .switchIfEmpty(Mono.error(IllegalStateException("没有这个 companyId: $companyId userId: $userId")))
+                .switchIfEmpty(Mono.error(RuntimeException("没有这个 companyId: $companyId userId: $userId")))
                 .flatMap { stockholderDao.updateMoney(it.id!!, it.money!!.subtract(money)) }
     }
 }

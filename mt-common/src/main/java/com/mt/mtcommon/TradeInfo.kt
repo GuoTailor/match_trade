@@ -40,4 +40,15 @@ open class TradeInfo(
             sellerPrice = sell?.price,
             tradeTime = Date()
     )
+
+    constructor(buy: OrderParam?, sell: OrderParam?) : this(
+            roomId = buy?.roomId ?: sell?.roomId,
+            model = buy?.flag ?: sell?.flag,
+            tradeAmount = buy?.number ?: sell?.number,
+            buyerId = buy?.userId,
+            buyerPrice = buy?.price,
+            sellerId = sell?.userId,
+            sellerPrice = sell?.price,
+            tradeTime = Date()
+    )
 }

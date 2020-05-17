@@ -31,7 +31,7 @@ class RedisUtil {
      */
     suspend fun saveRoomRecord(roomRecord: RoomRecord) {
         redisTemplate.opsForHash<String, RoomRecord>().putAndAwait(roomKey + roomRecord.roomId, roomInfo, roomRecord)
-        redisTemplate.expireAndAwait(roomKey + roomRecord.roomId, roomRecord.duration!!.toDuration())
+        redisTemplate.expireAndAwait(roomKey + roomRecord.roomId, roomRecord.expire!!)
     }
 
     /**

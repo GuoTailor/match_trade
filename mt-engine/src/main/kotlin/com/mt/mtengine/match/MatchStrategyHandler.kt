@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component
 class MatchStrategyHandler : ApplicationObjectSupport(), InitializingBean {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
+    /**
+     * 加载策略
+     */
     override fun afterPropertiesSet() {
         obtainApplicationContext().getBeansOfType(MatchStrategy::class.java)
                 .values.forEach { MatchManager.register(it) }

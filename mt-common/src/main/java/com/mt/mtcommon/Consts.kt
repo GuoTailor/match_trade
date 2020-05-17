@@ -9,4 +9,6 @@ object Consts {
     const val roomInfo = "info"
     const val codeKey = "CODE:"
     const val userOrder = "ROOM_ORDER_"
+    const val rivalKey = "RIVAL_INFO_"
+    const val topThree = "topThree"
 }

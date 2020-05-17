@@ -10,6 +10,8 @@ import com.mt.mtengine.service.TradeInfoService
 import org.springframework.messaging.support.MessageBuilder
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import java.util.*
+import kotlin.Comparator
 
 /**
  * Created by gyh on 2020/5/3.
@@ -24,6 +26,18 @@ object MatchUtil {
     }
 
     val sortTime = Comparator<OrderParam> { o1, o2 -> o2.time.compareTo(o1.time) }  // 时间降序，越先报价时间越小
+
+    /**
+     * 不能用TreeSet.contains比较，它会用比较器去比较，不会调用OrderParam.equals方法
+     */
+    fun TreeSet<OrderParam>.contain(orderParam: OrderParam): Boolean {
+        this.forEach {
+            if (it == orderParam) {
+                return true
+            }
+        }
+        return false
+    }
 
     /**
      * 基础验证，包括用户id，房间号，报价及数量，

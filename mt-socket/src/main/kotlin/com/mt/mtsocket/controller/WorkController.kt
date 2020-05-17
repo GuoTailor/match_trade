@@ -2,6 +2,7 @@ package com.mt.mtsocket.controller
 
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
+import com.mt.mtcommon.TopThree
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.service.WorkService
 import org.springframework.beans.factory.annotation.Autowired
@@ -97,6 +98,36 @@ class WorkController {
     @RequestMapping("/order")
     fun getOrderRecord(): Mono<ResponseInfo<List<OrderParam>>> {
         return ResponseInfo.ok(workService.getOrderRecord())
+    }
+
+    /**
+     * @api {connect} /getRival 获取自己选择的对手
+     * @apiDescription 获取自己选择的对手，不支持分页
+     * @apiName getRival
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission user
+     */
+    @RequestMapping("/getRival")
+    fun getRival(): Mono<ResponseInfo<RivalInfo>> {
+        return ResponseInfo.ok(workService.getRival())
+    }
+
+    /**
+     * @api {connect} /getTopThree 获取自己房间的报价前三档
+     * @apiDescription 获取自己房间的报价前三档
+     * @apiName getTopThree
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission user
+     */
+    @RequestMapping("/getTopThree")
+    fun getTopThree(): Mono<ResponseInfo<TopThree>> {
+        return ResponseInfo.ok(workService.getTopThree())
     }
 
     /**

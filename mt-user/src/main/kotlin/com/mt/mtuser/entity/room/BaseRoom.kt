@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.mt.mtcommon.*
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
+import java.time.Duration
 import java.time.LocalTime
 import java.util.*
 
@@ -45,6 +46,11 @@ interface BaseRoom : Persistable<String> {
         return this as T
     }
 
+    fun getDelayEndTIme(): LocalTime {
+        // 延迟一分钟，防止那种只撮合一次的房间在撮合时由于房间关闭，在更新用户报价信息时获取不到用户的历史报价导致撮合失败的问题
+        return startTime!!.plusNanos(time!!.toNanoOfDay() + 59_000_000_000)
+    }
+
     fun toRoomRecord(): RoomRecord {
         val record = RoomRecord(
                 roomId = roomId,
@@ -54,11 +60,11 @@ interface BaseRoom : Persistable<String> {
         )
         record.duration = time
         record.tradeAmount = numberTrades
-        startTime?.let { sTime ->
-            time?.let {
-                record.endTime = (sTime + it).toDate()
-            }
-        }
+        record.startTime = startTime!!.toDate()
+        record.endTime = (time!! + startTime!!).toDate()
+        val endTIme = getDelayEndTIme()
+        record.expire = Duration.ofNanos(endTIme.minusNanos(LocalTime.now().toNanoOfDay()).toNanoOfDay())
+
         if (this is ClickMatch) {
             record.quoteTime = quoteTime ?: LocalTime.MIN
             record.secondStage = secondStage
