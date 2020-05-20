@@ -3,11 +3,11 @@ package com.mt.mtsocket.config
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtcommon.Consts
-import com.mt.mtsocket.service.WorkService
-import com.mt.mtsocket.socket.SocketHandler
+import com.mt.mtcommon.RedisConsts
+import com.mt.mtsocket.service.RoomSocketService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,11 +27,11 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 class ReactiveRedisConfiguration {
     private val json = jacksonObjectMapper()
     @Autowired
-    private lateinit var workService: WorkService
+    private lateinit var roomSocketService: RoomSocketService
 
     @Bean
     fun topic(): ChannelTopic {
-        return ChannelTopic(Consts.roomEvent)
+        return ChannelTopic(RedisConsts.roomEvent)
     }
 
     @Bean
@@ -41,6 +41,7 @@ class ReactiveRedisConfiguration {
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         //om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         om.activateDefaultTyping(om.polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
+        om.registerModule(KotlinModule())
         val jackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(om)
         val stringRedisSerializer = StringRedisSerializer()
 
@@ -56,7 +57,7 @@ class ReactiveRedisConfiguration {
     @Bean
     fun redisMessageListenerContainer(factory: ReactiveRedisConnectionFactory): ReactiveRedisMessageListenerContainer {
         val container = ReactiveRedisMessageListenerContainer(factory)
-        container.receive(topic()).subscribe { workService.onRoomEvent(json.readValue(it.message)) }
+        container.receive(topic()).subscribe { roomSocketService.onRoomEvent(json.readValue(it.message)) }
         return container
     }
 

@@ -14,12 +14,13 @@ import java.util.*
  */
 open class OrderParam(
         var userId: Int? = null,        // 用户id
+        var userName: String? = null,   // 用户名
         var price: BigDecimal? = null,  // 报价
         var roomId: String? = null,     // 房间号
         @set:JsonProperty("isBuy")
         var isBuy: Boolean? = null,     // 是否买家
         var number: Int? = null,        // 交易数量
-        var flag: String? = null,       // 房间模式
+        var mode: String? = null,       // 房间模式
         var time: Date = Date(),        // 报价时间，默认当前时间
         var tradeTime: Date? = null,    // 成交时间
         var tradeState: String? = TradeState.STAY,  // 交易状态
@@ -46,7 +47,7 @@ open class OrderParam(
         if (roomId != other.roomId) return false
         if (price != other.price) return false
         if (number != other.number) return false
-        if (flag != other.flag) return false
+        if (mode != other.mode) return false
         if (time != other.time) return false
 
         return true
@@ -74,6 +75,6 @@ open class OrderParam(
     }
 
     override fun toString(): String {
-        return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, flag=$flag, time=$time, tradeTime=$tradeTime, tradeState=$tradeState, stateDetails=$stateDetails, tradePrice=$tradePrice, logger=$logger)"
+        return "OrderParam(userId=$userId, price=$price, roomId=$roomId, isBuy=$isBuy, number=$number, flag=$mode, time=$time, tradeTime=$tradeTime, tradeState=$tradeState, stateDetails=$stateDetails, tradePrice=$tradePrice, logger=$logger)"
     }
 }

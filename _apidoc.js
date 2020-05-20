@@ -43,8 +43,28 @@
  * @apiParam {string} phone 用户名
  * @apiParam {string} password 密码
  * @apiSuccessExample {json} 成功返回:
- * {"code": 0,"data": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IumCk-e-jueQqjEiLCJyb2xlIjpbIlJPTEVfQURNSU4iXSwiZXhwIjoxNTY3Mzk0MjUwfQ.6u_YgQcwitbkCDG91j6ghq7jAwBgYbJS_poc_c_qwhA",
-    "msg": "成功"}
+ * {
+    "code": 0,
+    "msg": "成功",
+    "data": {
+        "id": 10,
+        "phone": "222222",
+        "nickName": null,
+        "idNum": null,
+        "password": null,
+        "userPhoto": null,
+        "roles": [
+            {
+                "name": "ROLE_USER",
+                "companyId": 1,
+                "realName": "nmka"
+            }
+        ],
+        "createTime": "2020-03-29 14:07:02",
+        "lastTime": null,
+        "toke": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTAsInJvbGVzIjoiW1wiVVNFUlwiXSIsIm5iZiI6MTU4OTgwNzk5NiwiZXhwIjoxNTkwNDEyNzk2fQ.brM1kDmyiEqzDZtDtOqznZ8sOivCew7InQ6GaS_GcuQ"
+    }
+}
  * @apiGroup User
  * @apiPermission none
  */

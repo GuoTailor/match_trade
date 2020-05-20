@@ -13,7 +13,7 @@
 
 ## 注意事项：
 - 每次推代码时先拉一下调试没bug再推
-- 该工程使用kotlin + webflux + postgresql + zookeeper
+- 该工程使用kotlin + webflux + postgresql + nacos + rocketmq + redis
 - 启动时请先启动zookeeper和postgresql
 - 访问时请统一访问mt-gateway，85端口，然后由mt-gateway转发请求，<br>
 因为请求的验证是在mt-gateway完成的，其他服务没有配置token解析的模块
@@ -23,7 +23,7 @@
 
 ## 关于学习文档：
 
-<a style="color:red;"> 注意以下文档均需要翻墙访问，且为英文文档，可以用chrome搭配谷歌访问助手访问，chrome支持翻译网页</a>
+<a style="color:red;"> 注意以下文档可能需要翻墙访问，且为英文文档，可以用chrome搭配谷歌访问助手访问，chrome支持翻译网页</a>
 
 - [kotlin文档](https://www.kotlincn.net/docs/reference/)
 - [关于为什么在spring中使用kotlin](https://spring.io/blog/2019/04/12/going-reactive-with-spring-coroutines-and-kotlin-flow)

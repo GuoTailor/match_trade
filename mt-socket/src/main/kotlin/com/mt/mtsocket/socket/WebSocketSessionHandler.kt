@@ -1,5 +1,7 @@
 package com.mt.mtsocket.socket
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.mt.mtsocket.distribute.ServiceResponseInfo
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Flux
@@ -17,7 +19,7 @@ class WebSocketSessionHandler {
     private val receiveProcessor: ReplayProcessor<String>
     private val connectedProcessor: MonoProcessor<WebSocketSession>
     private val disconnectedProcessor: MonoProcessor<WebSocketSession>
-
+    private val json = jacksonObjectMapper()
     private var webSocketConnected = false
     private val session: WebSocketSession
 
@@ -74,6 +76,12 @@ class WebSocketSessionHandler {
                     .doOnError { logger.info("send error ${it.message}") }
                     .then(Mono.just(message))
         } else Mono.empty()
+    }
+
+    fun <T> send(data:  Mono<T>, req: Int): Mono<String> {
+        return ServiceResponseInfo(data, req).getMono()
+                .map { json.writeValueAsString(it) }
+                .flatMap(::send)
     }
 
     fun connectionClosed(): Mono<Void> {

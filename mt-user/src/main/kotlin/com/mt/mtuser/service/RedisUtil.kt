@@ -1,9 +1,8 @@
 package com.mt.mtuser.service
 
-import com.mt.mtcommon.Consts
+import com.mt.mtcommon.RedisConsts
 import com.mt.mtcommon.RoomEvent
 import com.mt.mtcommon.RoomRecord
-import com.mt.mtcommon.toDuration
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
@@ -18,10 +17,10 @@ import java.time.Duration
 class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisOperations<String, Any>
-    private val closeTopic = ChannelTopic(Consts.roomEvent)
-    private val roomKey = Consts.roomKey
-    private val roomInfo = Consts.roomInfo
-    private val codeKey = Consts.codeKey
+    private val closeTopic = ChannelTopic(RedisConsts.roomEvent)
+    private val roomKey = RedisConsts.roomKey
+    private val roomInfo = RedisConsts.roomInfo
+    private val codeKey = RedisConsts.codeKey
     private val codeTime = Duration.ofMinutes(5)
 
     // -------------------------=======>>>房间<<<=======-------------------------

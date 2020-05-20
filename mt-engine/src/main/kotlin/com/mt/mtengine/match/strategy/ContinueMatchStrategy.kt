@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component
 import reactor.core.scheduler.Schedulers
 import java.time.LocalTime
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by gyh on 2020/5/3.
@@ -32,13 +33,17 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
         val buyFailedList = mutableListOf<OrderParam>()
         val sellFailedList = mutableListOf<OrderParam>()
         var isMatch = false
+        val atom = AtomicInteger()
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!       // 最后一个报价最高
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!     // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
-                            .subscribeOn(Schedulers.elastic()).subscribe()
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
+                            .subscribeOn(Schedulers.elastic()).subscribe {
+                                roomInfo.topThree.lastOrder = it.toOrderInfo()
+                                atom.getAndIncrement()
+                            }
                     isMatch = true
                 } else {
                     buyFailedList.add(buyOrder)
@@ -57,7 +62,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
     }
 
     class ContinueRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.cycle!!.toMillisOfDay(), record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.cycle!!.toMillisOfDay(), record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)

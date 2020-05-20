@@ -1,11 +1,8 @@
 package com.mt.mtuser.dao
 
 import com.mt.mtcommon.TradeInfo
-import com.mt.mtuser.entity.Overview
-import com.mt.mtuser.entity.TradeDetails
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import java.math.BigDecimal
 import java.util.*
 
@@ -64,12 +61,13 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
             " and stock_id = :stockId ")
     suspend fun avgPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal
 
-    @Query("select t.*, s.real_name as sellerName from $table t " +
-            " left join mt_stockholder s on s.user_id = t.seller_id and s.company_id = t.company_id " +
+    @Query("select t.* from $table t " +
             " where t.id = :id")
-    suspend fun findDetailsById(id: Int): TradeDetails?
+    suspend fun findDetailsById(id: Int): TradeInfo?
 
     companion object {
         const val table = "mt_trade_info"
+        const val sql = "id,company_id,stock_id,room_id,model,buyer_id,buyer_price,seller_id,seller_price,trade_price,trade_time,trade_state," +
+                "state_details,trade_amount,trade_money,buyer_name,seller_name"
     }
 }

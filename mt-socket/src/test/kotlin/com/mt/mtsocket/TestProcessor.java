@@ -1,5 +1,6 @@
 package com.mt.mtsocket;
 
+import com.mt.mtsocket.common.Util;
 import com.mt.mtsocket.socket.SocketSessionStore;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -32,6 +33,14 @@ public class TestProcessor {
             System.out.println(s1 + s2);
         }
         SocketSessionStore.INSTANCE.getUserInfoMap$mt_socket();
+    }
+
+    @Test
+    public void testQuery() {
+        Util.INSTANCE.getQueryMap("roomId=27&bearer= eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwicm9sZXMiOiJbXCJBRE1JTlwiLFwiVVNFUlwiXSIsIm5iZiI6MTU4OTI2OTY5MywiZXhwIjoxNTg5ODc0NDkzfQ.u5D7OTTiUKp54zcsUeJdJc3qAKlStrekqpSbeX_MI2g&userName=%E8%B4%A6%E5%8A%A1")
+                .forEach((k, v) -> {
+                    System.out.println(k + " " + v);
+                });
     }
 
     @Test

@@ -32,7 +32,7 @@ import java.util.*
 open class RoomRecord(
         @Id var id: Int? = null,
         open var roomId: String? = null,        // 房间id，四张房间表唯一
-        open var model: String? = null,         // 模式对应撮合模式
+        open var mode: String? = null,         // 模式对应撮合模式
         open var stockId: Int? = null,          // 股票id
         open var companyId: Int? = null,        // 公司id
         open var startTime: Date? = null,       // 启用时间

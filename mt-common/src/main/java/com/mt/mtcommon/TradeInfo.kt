@@ -18,8 +18,10 @@ open class TradeInfo(
         var roomId: String? = null,            // 房间id(在那个房间进行的交)
         var model: String? = null,             // 模式对应撮合模式
         var buyerId: Int? = null,              // 买方id
+        var buyerName: String? = null,          // 买方姓名
         var buyerPrice: BigDecimal? = null,    // 买方价格
         var sellerId: Int? = null,             // 卖方id
+        var sellerName: String? = null,         // 卖方姓名
         var sellerPrice: BigDecimal? = null,   // 卖方价格
         var tradePrice: BigDecimal? = null,    // 成交价格
         var tradeAmount: Int? = null,           // 成交数量
@@ -35,20 +37,30 @@ open class TradeInfo(
             model = flag,
             tradeAmount = buy?.number,
             buyerId = buy?.userId,
+            buyerName = buy?.userName,
             buyerPrice = buy?.price,
             sellerId = sell?.userId,
+            sellerName = sell?.userName,
             sellerPrice = sell?.price,
             tradeTime = Date()
     )
 
     constructor(buy: OrderParam?, sell: OrderParam?) : this(
             roomId = buy?.roomId ?: sell?.roomId,
-            model = buy?.flag ?: sell?.flag,
+            model = buy?.mode ?: sell?.mode,
             tradeAmount = buy?.number ?: sell?.number,
             buyerId = buy?.userId,
+            buyerName = buy?.userName,
             buyerPrice = buy?.price,
             sellerId = sell?.userId,
+            sellerName = sell?.userName,
             sellerPrice = sell?.price,
             tradeTime = Date()
     )
+
+    override fun toString(): String {
+        return "TradeInfo(id=$id, companyId=$companyId, stockId=$stockId, roomId=$roomId, model=$model, buyerId=$buyerId, buyerName=$buyerName, buyerPrice=$buyerPrice, sellerId=$sellerId, sellerName=$sellerName, sellerPrice=$sellerPrice, tradePrice=$tradePrice, tradeAmount=$tradeAmount, tradeMoney=$tradeMoney, tradeTime=$tradeTime, tradeState=$tradeState, stateDetails=$stateDetails)"
+    }
+
+
 }

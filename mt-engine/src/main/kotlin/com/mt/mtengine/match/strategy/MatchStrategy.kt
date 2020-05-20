@@ -43,8 +43,9 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         } else {
             if (match(roomInfo) && roomInfo.updateTopThree()) {
                 // 更新前三档报价
-                sink.outResult().send(MessageBuilder.withPayload(roomInfo.topThree.toNotifyResult()).build())
                 redisUtil.setRoomTopThree(roomInfo.topThree)
+                        .map { sink.outResult().send(MessageBuilder.withPayload(roomInfo.topThree.toNotifyResult()).build()) }
+                        .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
     }
@@ -123,11 +124,11 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
 
     abstract class RoomInfo(
             val roomId: String, // 房间号
-            val flag: String,   // 房间模式
+            val mode: String,   // 房间模式
             var cycle: Long,    // 周期，单位毫秒
             val endTime: Date   // 不支持提前结束和延迟结束
     ) {
-        val topThree = TopThree(roomId)
+        val topThree = TopThree(roomId, mode)
         private val tempAdd = AtomicReference<Any>()
 
         /** 判断是否可以开始撮合 */
@@ -168,7 +169,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
                     if (updateTopThree(data)) {
                         sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                        redisUtil.setRoomTopThree(topThree)
+                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
                     }
                     true
                 } else if (data is CancelOrder && cancelOrder(data)) {
@@ -176,7 +177,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
                     if (updateTopThree(data)) {
                         sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                        redisUtil.setRoomTopThree(topThree)
+                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
                     }
                     true
                 } else if (data is RivalInfo && addRival(data)) {
@@ -231,7 +232,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
 
         fun start(strategy: MatchStrategy<T>) {
             this.strategy = strategy
-            name = "matchTask-" + strategy.roomType.flag
+            name = "matchTask-" + strategy.roomType.mode
             super.start()
         }
 

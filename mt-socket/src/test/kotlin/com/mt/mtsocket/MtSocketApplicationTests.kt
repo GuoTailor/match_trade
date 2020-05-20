@@ -5,14 +5,19 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.RivalInfo
+import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.service.RedisUtil
 import com.mt.mtsocket.socket.SocketSessionStore
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -23,7 +28,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-//@SpringBootTest
+@SpringBootTest
 class MtSocketApplicationTests {
     @Autowired
     lateinit var redisUtil: RedisUtil
@@ -31,18 +36,22 @@ class MtSocketApplicationTests {
     @Autowired
     lateinit var redisConnectionFactory: LettuceConnectionFactory
 
+    @Autowired
+    lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
+
     @Test
     fun contextLoads() {
-        Mono.just("nmka")
-                .flatMap { println("nmka2"); Mono.just("") }
-                .then()
-                .doOnEach { println("cnm$it") }
-                .log().block()
+        redisUtil.putUserRival(RivalInfo(roomId = "27", userId = 12, rivals = arrayListOf(1, 2, 3)), Date(1589899960000)).block()
+        redisUtil.getUserRival(12, "27").map { rivals ->
+            rivals.toTypedArray().forEach { println(it) }
+            println(rivals)
+        }.block()
     }
 
     @Test
     fun testRegex() {
         val data = "{\"order\":\"/echo\", \"data\": {\"value\": \"123\"}, \"req\":12}"
+        val jsonOM = jacksonObjectMapper()
         val blankRegex = "\\s".toRegex()
         val orderRegex = "\"order\":(.*?)[,}]".toRegex()
         val dataRegex = "\"data\":(.*?})[,}]".toRegex()
@@ -52,8 +61,28 @@ class MtSocketApplicationTests {
         val orderString = orderRegex.find(json)!!.groups[1]!!.value.replace("\"", "")
         val dataString = dataRegex.find(json)?.groups?.get(1)?.value
         val reqString = reqRegex.find(json)!!.groups[1]!!.value.toInt()
-        println("$orderString $dataString, $reqString")
+        println(ServiceRequestInfo(orderString, dataString, reqString))
+        val nm = jsonOM.readValue(data, TestJson::class.java)
+        println(nm)
+        var time = System.currentTimeMillis()
+        for (i in 0..1000000) {
+            val data2 = "{\"order\":\"/echo\", \"data\": {\"value\": \"${i}m\", \"order\":\"/echo\", \"data\": {\"value\": \"$i\"}, \"req\":$i}, \"req\":12}"
+            jsonOM.readValue(data2, TestJson::class.java)
+        }
+
+        println(System.currentTimeMillis() - time)
+        time = System.currentTimeMillis()
+        for (i in 0..1000000) {
+            val data2 = "{\"order\":\"/echo\", \"data\": {\"value\": \"$i\", \"order\":\"/echo\", \"data\": {\"value\": \"$i\"}, \"req\":$i}, \"req\":12}"
+            val json2 = data2.replace(blankRegex, "")
+            orderRegex.find(json2)!!.groups[1]!!.value.replace("\"", "")
+            dataRegex.find(json2)?.groups?.get(1)?.value
+            reqRegex.find(json2)!!.groups[1]!!.value.toInt()
+        }
+        println(System.currentTimeMillis() - time)
     }
+
+    data class TestJson(var order: String? = null, var data: Any? = null, var req: Int?= null)
 
     @Test
     fun testRedisTemp() {
@@ -95,10 +124,11 @@ class MtSocketApplicationTests {
     @Test
     fun testJson() {
         val om = ObjectMapper()
-        val json = om.readValue<OrderParam>("{\"price\":\"100\",\"isBuy\":true}")
+        om.registerModule(KotlinModule())
+        val json = om.readValue<Decimal>("{\"time\":1589770215786}")
         println(json)
         println(om.writeValueAsString(json))
     }
 }
 
-data class Decimal(val decimal: BigDecimal? = null, val time: Date = Date())
+data class Decimal(val time: Date)

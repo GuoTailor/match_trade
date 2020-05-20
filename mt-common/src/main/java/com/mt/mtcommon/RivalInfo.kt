@@ -6,6 +6,7 @@ package com.mt.mtcommon
  * @apiParam {Array} rivals 对手
  */
 class RivalInfo(var userId: Int? = null,
+                var userName: String? = null,
                 var roomId: String? = null,
                 var flag: String? = null,
-                var rivals: Array<Int>? = null)
+                var rivals: ArrayList<Int>? = null)

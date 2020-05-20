@@ -17,6 +17,7 @@ import java.sql.Time
 import java.time.Duration
 import java.time.LocalTime
 import java.util.*
+import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
 fun main1() = runBlocking<Unit> {
@@ -99,7 +100,7 @@ fun main3() = runBlocking<Unit> {
 fun main4() {
     val time = LocalTime.now() + LocalTime.now()
     println(time)
-    val date = Date(1589640900000)
+    val date = Date(1589859000000)
     println(date)
     println(Date(1589504123171))
     println((12.0 + 15.0) / 2)
@@ -109,4 +110,11 @@ fun main4() {
     println(t.toNanoOfDay())
 }
 
-fun main() = main4()
+fun main5(isB: Boolean?) {
+    println(null == isB)
+    println(true == isB)
+    println(false == isB)
+    println(isB is Boolean)
+}
+
+fun main() = main5(null)

@@ -24,7 +24,6 @@ class MyReactiveUserDetailsService {
     fun findByUsername(username: String): Mono<User> {
         val user = userRepository
                 .findByUsername(username)
-                .switchIfEmpty(Mono.empty<User>())
         val roles = user.flatMapMany {
             roleRepository.findRoleByUserId(it.id!!)
         }

@@ -8,12 +8,17 @@ import java.util.*
  */
 open class TopThree(
         var roomId: String,
+        var mode: String,
         var buyTopThree: ArrayList<OrderInfo> = ArrayList(),
         var sellTopThree: ArrayList<OrderInfo> = ArrayList(),
         var lastOrder: OrderInfo? = null
 )
 
-open class OrderInfo(val userId: Int, val price: BigDecimal, val number: Int, val date: Date) : Comparable<OrderInfo> {
+open class OrderInfo(val userId: Int,
+                     val price: BigDecimal,
+                     val number: Int,
+                     val date: Date
+) : Comparable<OrderInfo> {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -46,5 +51,6 @@ open class OrderInfo(val userId: Int, val price: BigDecimal, val number: Int, va
 }
 
 
-fun OrderParam.toOrderInfo() = OrderInfo(this.userId!!, this.price!!, this.number!!, this.tradeTime!!)
+fun OrderParam.toOrderInfo() = OrderInfo(this.userId!!, this.price!!, this.number!!, this.time)
 
+fun TradeInfo.toOrderInfo() = OrderInfo(-1, this.tradePrice!!, this.tradeAmount!!, this.tradeTime!!)

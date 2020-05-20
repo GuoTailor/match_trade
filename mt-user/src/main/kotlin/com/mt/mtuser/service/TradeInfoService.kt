@@ -4,7 +4,6 @@ import com.mt.mtcommon.*
 import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
-import com.mt.mtuser.entity.TradeDetails
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
@@ -182,7 +181,7 @@ class TradeInfoService {
     /**
      * 获取订单详情
      */
-    suspend fun findDetailsById(id: Int): TradeDetails? {
+    suspend fun findDetailsById(id: Int): TradeInfo? {
         return tradeInfoDao.findDetailsById(id)
     }
 

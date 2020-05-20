@@ -24,35 +24,6 @@ public class Util {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(Util.class);
     private static final Random random = new Random();
 
-
-    /**
-     * 移除两个列表中所有相同的元素
-     *
-     * @param c1  一个列表
-     * @param c2  另一个列表
-     * @param <T> 元素的类型
-     */
-    public static <T> void removeAllSame(Collection<T> c1, Collection<T> c2) {
-        c1.removeIf(c -> {
-            if (c2.contains(c)) {
-                c2.remove(c);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    public static <T> boolean hasAny(List<T> gather, T... element) {
-        for (T t : gather) {
-            for (T e : element) {
-                if (t.equals(e))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-
     /**
      * 将json格式化为map
      *
@@ -106,37 +77,6 @@ public class Util {
             e.printStackTrace();
         }
         return null;
-    }
-
-    /**
-     * 用自己的方法判断{@code} element 是否在{@code} gather 里面出现过<p>
-     *
-     * @param fun     判断方法
-     * @param gather  目标集合
-     * @param element 要检查的集合
-     * @param <T>     目标对象
-     * @param <K>     检查对象
-     * @return 如果 {@code} element 中的任何一个元素在{@code} gather 里面出现过就返回true 否则返回false
-     */
-    @SafeVarargs
-    public static <T, K> boolean hasAny(BiFunction<T, K, Boolean> fun, @NonNull List<T> gather, K... element) {
-        for (T t : gather) {
-            for (K k : element) {
-                if (fun.apply(t, k))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    public static <T> boolean hasAny(T[] array, T t) {
-        if (array == null || array.length == 0)
-            return false;
-        for (T index : array) {
-            if (index.equals(t))
-                return true;
-        }
-        return false;
     }
 
     /**
@@ -203,40 +143,6 @@ public class Util {
             logger.error(e.getMessage());
         }
         return true;
-    }
-
-    public static <N> N max(Collection<N> collection, BiFunction<N, Integer, Integer> fun) {
-        N nn = null;
-        int temp = -1;
-        for (N n : collection) {
-            int t = fun.apply(n, temp);
-            if (t > temp) {
-                temp = t;
-                nn = n;
-            }
-        }
-        return nn;
-    }
-
-    /**
-     * 用用户的自己的判断方法查找集合中的最小值
-     *
-     * @param collection 要查找的集合
-     * @param fun        用户自己的判断方法
-     * @param <N>        集合的类类型
-     * @return 最下值
-     */
-    public static <N> N min(Collection<N> collection, BiFunction<N, Integer, Integer> fun) {
-        N nn = null;
-        int temp = Integer.MAX_VALUE;
-        for (N n : collection) {
-            int t = fun.apply(n, temp);
-            if (t < temp) {
-                temp = t;
-                nn = n;
-            }
-        }
-        return nn;
     }
 
     /**

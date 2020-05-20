@@ -37,7 +37,7 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
             buyOrder.isBuy = true
             sellOrder.isBuy = false
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price != sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
+                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
@@ -53,7 +53,7 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
     }
 
     class BickerRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime ?: LocalTime.MAX.toDate()) {
         val orderList = TreeSet(MatchUtil.sortPriceAndTime)
         private var count = 0
 

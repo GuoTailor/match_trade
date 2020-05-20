@@ -11,20 +11,20 @@ const val updateTopThree = "topThree"   // 前三档报价
 
 data class NotifyResult(var userId: Int? = null,
                         var roomId: String? = null,
-                        var flag: String? = null,
+                        var model: String? = null,
                         var obj: String,    // 通知的对象
                         var result: Boolean, // 操作结果
                         var data: Any? = null   // 结果数据
 )
 
-fun OrderParam.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.flag, addOrderNotify, result)
+fun OrderParam.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.mode, addOrderNotify, result, this)
 
-fun CancelOrder.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.flag, cancelOrderNotify, result)
+fun CancelOrder.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.mode, cancelOrderNotify, result, this)
 
-fun RivalInfo.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.flag, addRivalNotify, result)
+fun RivalInfo.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.flag, addRivalNotify, result, this)
 
-fun OrderParam.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.flag, updateTopThree, true, data)
+fun TopThree.toNotifyResult() = NotifyResult(roomId = this.roomId, model = this.mode, obj = updateTopThree, result = true, data = this)
 
-fun CancelOrder.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.flag, updateTopThree, true,  data)
+fun OrderParam.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.mode, updateTopThree, true, data)
 
-fun TopThree.toNotifyResult() = NotifyResult(roomId = this.roomId, obj = updateTopThree, result = true, data = this)
+fun CancelOrder.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.mode, updateTopThree, true,  data)

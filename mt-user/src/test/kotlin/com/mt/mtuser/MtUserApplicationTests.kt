@@ -1,7 +1,6 @@
 package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.RoomRecordDao
@@ -16,13 +15,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
-import java.time.LocalTime
 import java.util.*
 
 
@@ -68,7 +64,7 @@ class MtUserApplicationTests {
 
     @Test
     fun testR2dbc() {
-        val roomRecord = RoomRecord(id = 1, model = "E", roomId = "D12")
+        val roomRecord = RoomRecord(id = 1, mode = "E", roomId = "D12")
         r2dbc.dynamicUpdate(roomRecord)
                 .matching(Criteria.where("id").`is`(roomRecord.id!!))
                 .fetch().rowsUpdated().block()

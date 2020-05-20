@@ -4,7 +4,7 @@ import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
 import com.mt.mtcommon.TopThree
 import com.mt.mtsocket.entity.ResponseInfo
-import com.mt.mtsocket.service.WorkService
+import com.mt.mtsocket.service.RoomSocketService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,9 +16,9 @@ import reactor.core.publisher.Mono
  * Created by gyh on 2020/4/17.
  */
 @Controller
-class WorkController {
+class RoomSocketController {
     @Autowired
-    private lateinit var workService: WorkService
+    private lateinit var roomSocketService: RoomSocketService
 
     /**
      * @api {connect} /echo 测试接口
@@ -51,7 +51,7 @@ class WorkController {
      */
     @RequestMapping("/offer")
     fun offer(@RequestBody orderParam: OrderParam): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(workService.addOrder(orderParam))
+        return ResponseInfo.ok(roomSocketService.addOrder(orderParam))
     }
 
     /**
@@ -67,7 +67,7 @@ class WorkController {
      */
     @RequestMapping("/rival")
     fun addRival(@RequestBody rival: RivalInfo): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(workService.addRival(rival))
+        return ResponseInfo.ok(roomSocketService.addRival(rival))
     }
 
     /**
@@ -82,7 +82,7 @@ class WorkController {
      */
     @RequestMapping("/cancel")
     fun cancel(): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(workService.cancelOrder())
+        return ResponseInfo.ok(roomSocketService.cancelOrder())
     }
 
     /**
@@ -97,7 +97,7 @@ class WorkController {
      */
     @RequestMapping("/order")
     fun getOrderRecord(): Mono<ResponseInfo<List<OrderParam>>> {
-        return ResponseInfo.ok(workService.getOrderRecord())
+        return ResponseInfo.ok(roomSocketService.getOrderRecord())
     }
 
     /**
@@ -112,7 +112,23 @@ class WorkController {
      */
     @RequestMapping("/getRival")
     fun getRival(): Mono<ResponseInfo<RivalInfo>> {
-        return ResponseInfo.ok(workService.getRival())
+        return ResponseInfo.ok(roomSocketService.getRival())
+    }
+
+    /**
+     * @api {connect} /getAllRival 获取对手
+     * @apiDescription 获取对手，不支持分页
+     * @apiName getAllRival
+     * @apiParam {Boolean} isBuy true：获取买家；false：获取卖家
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission user
+     */
+    @RequestMapping("/getAllRival")
+    fun getAllRival(@RequestParam isBuy: Boolean): Mono<ResponseInfo<List<OrderParam>>> {
+        return ResponseInfo.ok(roomSocketService.getAllRival(isBuy))
     }
 
     /**
@@ -127,7 +143,7 @@ class WorkController {
      */
     @RequestMapping("/getTopThree")
     fun getTopThree(): Mono<ResponseInfo<TopThree>> {
-        return ResponseInfo.ok(workService.getTopThree())
+        return ResponseInfo.ok(roomSocketService.getTopThree())
     }
 
     /**
@@ -142,7 +158,7 @@ class WorkController {
      */
     @RequestMapping("/number")
     fun getRoomNumber(): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(workService.getOnLineSize())
+        return ResponseInfo.ok(roomSocketService.getOnLineSize())
     }
 
 }

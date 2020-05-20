@@ -9,8 +9,13 @@ fun main() {
     println(t)
 }
 
-fun testNull(i : Int): String? {
+fun testNull(i: Int): String? {
+    println(add(2)(3))
     return if (i > 2) {
         null
     } else i.toString()
+}
+
+fun add(x: Int): (Int) -> Int {
+    return fun(y): Int { return x + y }
 }

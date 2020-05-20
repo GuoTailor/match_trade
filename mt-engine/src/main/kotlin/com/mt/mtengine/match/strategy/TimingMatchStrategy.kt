@@ -3,16 +3,9 @@ package com.mt.mtengine.match.strategy
 import com.mt.mtcommon.*
 import com.mt.mtengine.match.MatchUtil
 import com.mt.mtengine.match.MatchUtil.contain
-import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.MatchService
-import com.mt.mtengine.service.PositionsService
-import com.mt.mtengine.service.RoomService
-import com.mt.mtengine.service.TradeInfoService
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
 import org.springframework.stereotype.Component
-import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.scheduler.Schedulers
 import java.time.LocalTime
 import java.util.*
@@ -41,7 +34,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
             val buyOrder = roomInfo.buyOrderList.pollLast()!!
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
+                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             } else {
                 matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
@@ -60,7 +53,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
     }
 
     class TimingRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
@@ -94,9 +87,48 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
         }
 
         override fun addRival(rival: RivalInfo): Boolean = false
-        override fun updateTopThree(data: OrderParam): Boolean = false
-        override fun updateTopThree(order: CancelOrder): Boolean = false
-        override fun updateTopThree(): Boolean = false
+
+        /**
+         * 添加元素时更新前三名
+         */
+        override fun updateTopThree(data: OrderParam): Boolean {
+            return if (data.isBuy!!) {
+                if (topThree.buyTopThree.size >= 3) {
+                    topThree.buyTopThree.sort()
+                    topThree.buyTopThree.removeAt(2)
+                }
+                topThree.buyTopThree.add(data.toOrderInfo())
+            } else {
+                if (topThree.sellTopThree.size >= 3) {
+                    topThree.sellTopThree.sort()
+                    topThree.sellTopThree.removeAt(2)
+                }
+                topThree.sellTopThree.add(data.toOrderInfo())
+            }
+        }
+
+        /**
+         * 撤单时更新前三名
+         */
+        override fun updateTopThree(order: CancelOrder): Boolean {
+            val isRemove = topThree.buyTopThree.removeIf { it.userId == order.userId }
+                    || topThree.sellTopThree.removeIf { it.userId == order.userId }
+            if (isRemove) {
+                updateTopThree()
+            }
+            return isRemove
+        }
+
+        /**
+         * 发送有效撮合后更新前三名
+         */
+        override fun updateTopThree(): Boolean {
+            topThree.buyTopThree.clear()
+            topThree.sellTopThree.clear()
+            buyOrderList.stream().limit(3).forEach { topThree.buyTopThree.add(it.toOrderInfo()) }
+            sellOrderList.stream().limit(3).forEach { topThree.sellTopThree.add(it.toOrderInfo()) }
+            return true
+        }
     }
 
     override fun createRoomInfo(record: RoomRecord): TimingRoomInfo {

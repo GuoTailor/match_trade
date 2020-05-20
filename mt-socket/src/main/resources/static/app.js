@@ -1,5 +1,4 @@
 var ws = null;
-var path = "/socket/room";
 
 function setConnected(connected) {
     document.getElementById('connect').disabled = connected;
@@ -11,13 +10,17 @@ function connect() {
     var token = document.getElementById('token').value;
     var host = window.location.host;
     log(host.toString());
+    var path = document.getElementById('path').value;
     var url = "ws://" + host.toString() + path
-    ws = new WebSocket(url + "?roomId=27&bearer=" + token);
+    ws = new WebSocket(url + "?roomId=27&bearer=" + token + "&userName=账务");
 
     ws.onopen = function () {
         setConnected(true);
         log('Info: Connection Established.');
-        //ws.send("{\"order\":\"/order\", \"data\": {}, \"req\":12}")
+        //ws.send("{\"order\":\"/order\", \"data\": {}, \"req\":12}") {"order":"/offer","data":{"price":"180"},"req":1}
+        setInterval(function () {
+            ws.send("{\"order\":\"/ping\",\"data\":{},\"req\":12}")
+        }, 3000)
     };
 
     ws.onmessage = function (event) {

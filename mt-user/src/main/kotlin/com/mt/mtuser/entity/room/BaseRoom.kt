@@ -54,7 +54,7 @@ interface BaseRoom : Persistable<String> {
     fun toRoomRecord(): RoomRecord {
         val record = RoomRecord(
                 roomId = roomId,
-                model = flag,
+                mode = flag,
                 companyId = companyId,
                 stockId = stockId
         )
@@ -71,11 +71,11 @@ interface BaseRoom : Persistable<String> {
             record.rival = rival
         }
         record.cycle = when (flag) {
-            RoomEnum.CLICK.flag -> LocalTime.MIN
-            RoomEnum.BICKER.flag -> LocalTime.MIN
-            RoomEnum.DOUBLE.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.CONTINUE.flag -> LocalTime.ofSecondOfDay(1)
-            RoomEnum.TIMING.flag -> LocalTime.MIN
+            RoomEnum.CLICK.mode -> LocalTime.MIN
+            RoomEnum.BICKER.mode -> LocalTime.MIN
+            RoomEnum.DOUBLE.mode -> LocalTime.ofSecondOfDay(1)
+            RoomEnum.CONTINUE.mode -> LocalTime.ofSecondOfDay(1)
+            RoomEnum.TIMING.mode -> LocalTime.MIN
             else -> throw IllegalStateException("不支持的房间号模式${roomId}")
         }
         return record

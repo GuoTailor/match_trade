@@ -9,6 +9,6 @@ import reactor.core.publisher.Flux
  * Created by gyh on 2020/3/21.
  */
 interface RoleRepository : ReactiveCrudRepository<Role, Int> {
-    @Query("select name, company_id from mt_stockholder ur, mt_role r where ur.user_id = :userId and ur.role_id = r.id")
+    @Query("select name, company_id, real_name from mt_stockholder ur, mt_role r where ur.user_id = :userId and ur.role_id = r.id")
     fun findRoleByUserId(userId: Int): Flux<Role>
 }

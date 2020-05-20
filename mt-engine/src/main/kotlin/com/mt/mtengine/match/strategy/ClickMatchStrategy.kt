@@ -31,17 +31,23 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
         val result = roomInfo.buyOrderList.size >= 1
         while (roomInfo.buyOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!   // 升序排序，最后一个报价最高
-            val buyRivals = roomInfo.rivalList[buyOrder.userId]?.rivals ?: arrayOf()    // 获取用户的交易对手
-            val sellOrder = roomInfo.sellOrderList.stream()
+            val buyRivals = roomInfo.rivalList[buyOrder.userId]?.rivals ?: arrayListOf()    // 获取用户的交易对手
+            val optional = roomInfo.sellOrderList.stream()
                     .filter { buyRivals.contains(it.userId) }   // 过滤用户的交易对手
                     .filter { roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false }   // 获取对手中也选了自己的订单
-                    .min(MatchUtil.sortPriceAndTime).get()     // 获取对手中卖价最低的订单
-            roomInfo.sellOrderList.remove(sellOrder)
-            if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.flag, buyOrder, sellOrder)
+                    .min(MatchUtil.sortPriceAndTime)            // 获取对手中卖价最低的订单
+            if (optional.isPresent) {
+                val sellOrder = optional.get()
+                roomInfo.sellOrderList.remove(sellOrder)
+                if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
+                } else {
+                    matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
+                }.subscribeOn(Schedulers.elastic()).subscribe()
             } else {
-                matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
-            }.subscribeOn(Schedulers.elastic()).subscribe()
+                matchService.onMatchError(buyOrder, null, "失败:" + MatchUtil.getVerifyInfo(buyOrder, null))
+                        .subscribeOn(Schedulers.elastic()).subscribe()
+            }
         }
         roomInfo.rivalList.clear()
         roomInfo.buyOrderList.forEach {
@@ -58,7 +64,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
     }
 
     class ClickRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.model!!, record.endTime!!.time, record.endTime
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime
                     ?: LocalTime.MAX.toDate()) {
         private var count = 0
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
@@ -100,6 +106,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
                 true
             } else false
         }
+
         override fun updateTopThree(data: OrderParam): Boolean = false
         override fun updateTopThree(order: CancelOrder): Boolean = false
         override fun updateTopThree(): Boolean = false

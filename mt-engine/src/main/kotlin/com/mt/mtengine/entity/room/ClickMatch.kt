@@ -46,7 +46,7 @@ class ClickMatch(
         override var createTime: Date? = null,  // 创建时间
         var rival: Int? = null                  // 选择的对手上限
 ) : BaseRoom {
-    override val flag: String = RoomEnum.CLICK.flag
+    override val flag: String = RoomEnum.CLICK.mode
 
     override fun validNull() {
         people = null

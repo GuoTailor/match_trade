@@ -36,7 +36,7 @@ class DoubleMatch(
         override var enable: String? = null,         // 是否开启（0：关闭，1：开启）
         override var createTime: Date? = null        // 创建时间
 ) : BaseRoom {
-    override val flag: String = RoomEnum.DOUBLE.flag
+    override val flag: String = RoomEnum.DOUBLE.mode
     @org.springframework.data.annotation.Transient
     var oldFlag: String? = null             // 标识符,更改房间时用
     override suspend fun validNull() {

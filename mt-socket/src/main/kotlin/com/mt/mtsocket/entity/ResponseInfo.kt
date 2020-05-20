@@ -34,8 +34,8 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
         }
 
         @JvmStatic
-        fun ok(msg: String): Mono<ResponseInfo<Void>> {
-            return Mono.just(ResponseInfo(0, msg))
+        fun <T> ok(msg: String, data: T): Mono<ResponseInfo<T>> {
+            return Mono.just(ResponseInfo(0, msg, data))
         }
 
         @JvmStatic

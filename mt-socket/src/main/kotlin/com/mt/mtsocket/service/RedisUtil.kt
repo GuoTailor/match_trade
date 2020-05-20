@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalTime
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by gyh on 2020/3/24.
@@ -18,11 +19,12 @@ class RedisUtil {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
 
-    private val roomKey = Consts.roomKey
-    private val roomInfo = Consts.roomInfo
-    private val userOrderKey = Consts.userOrder
-    private val rivalInfoKey = Consts.rivalKey
-    private val topThreeKey = Consts.topThree
+    private val roomKey = RedisConsts.roomKey
+    private val roomInfo = RedisConsts.roomInfo
+    private val userOrderKey = RedisConsts.userOrder
+    private val rivalInfoKey = RedisConsts.rivalKey
+    private val topThreeKey = RedisConsts.topThree
+    private val tradeKey = RedisConsts.tradeInfo
 
     // -------------------------=======>>>房间<<<=======-------------------------
 
@@ -33,8 +35,8 @@ class RedisUtil {
         return redisTemplate.opsForHash<String, RoomRecord>().get(roomKey + roomId, roomInfo)
     }
 
-    fun getAllRoom() {
-        redisTemplate.keys("$roomKey*")
+    fun getAllRoom(): Flux<String> {
+        return redisTemplate.keys("$roomKey*")
     }
 
     // -----------------------=====>>用户订单<<=====----------------------------
@@ -45,7 +47,7 @@ class RedisUtil {
     fun putUserOrder(order: OrderParam, endTime: Date): Mono<Boolean> {
         return redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order)
                 .then(redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}",  // 房间结束时自动过期
-                        Duration.ofSeconds((endTime.time / 1000) - LocalTime.now().toSecondOfDay() + 1L)))
+                        Duration.ofSeconds((endTime.time / 1000) - LocalTime.now().toSecondOfDay() + 59L)))
     }
 
     /**
@@ -79,6 +81,14 @@ class RedisUtil {
     }
 
     /**
+     * 获取指定房间下的全部订单
+     */
+    fun getUserOrder(roomId: String): Flux<OrderParam> {
+        return redisTemplate.keys("$userOrderKey${roomId}:*")
+                .flatMap { redisTemplate.opsForList().range(it, 0, -1).cast(OrderParam::class.java) }
+    }
+
+    /**
      * 获取队列的大小
      */
     fun getUserOrderSize(roomId: String, userId: Int): Mono<Long> {
@@ -95,13 +105,12 @@ class RedisUtil {
     // ------------------------=======>>>对手<<<=====----------------------
 
     fun putUserRival(rival: RivalInfo, endTime: Date): Mono<Boolean> {
-        return redisTemplate.opsForList().rightPush("$rivalInfoKey${rival.roomId}:${rival.userId}", rival.rivals ?: arrayOf<Int>())
-                .then(redisTemplate.expire("$rivalInfoKey${rival.roomId}:${rival.userId}",  // 房间结束时自动过期
-                        Duration.ofSeconds(((endTime.time - System.currentTimeMillis()) / 1000) + 1L)))
+        return redisTemplate.opsForHash<String, ArrayList<Int>>()
+                .put("$roomKey${rival.roomId}", "$rivalInfoKey${rival.userId}", rival.rivals ?: ArrayList())
     }
 
-    fun getUserRival(userId: Int, roomId: String): Flux<Int> {
-        return redisTemplate.opsForList().range("$rivalInfoKey${roomId}:${userId}", 0, -1).cast(Int::class.java)
+    fun getUserRival(userId: Int, roomId: String): Mono<ArrayList<Int>> {
+        return redisTemplate.opsForHash<String, ArrayList<Int>>().get("$roomKey${roomId}", "$rivalInfoKey${userId}")
     }
 
     // ------------------------=======>>>前三档<<<=====----------------------
@@ -112,5 +121,18 @@ class RedisUtil {
 
     fun getRoomTopThree(roomId: String): Mono<TopThree> {
         return redisTemplate.opsForHash<String, TopThree>().get(roomKey + roomId, topThreeKey)
+    }
+
+    // ------------------------=======>>>交易信息<<<=====----------------------
+
+    fun setTradeInfo(tradeInfo: TradeInfo, timedOut: Date): Mono<Boolean> {
+        return redisTemplate.opsForList().leftPush("$tradeKey${tradeInfo.roomId}", tradeInfo)
+                .then(redisTemplate.expire("$tradeKey${tradeInfo.roomId}",
+                        // 延迟一分钟关闭，防止那种只撮合一次的房间在撮合时由于房间关闭，在更新用户报价信息时获取不到用户的历史报价导致撮合失败的问题
+                        Duration.ofSeconds(((timedOut.time - System.currentTimeMillis()) / 1000) + 59L)))
+    }
+
+    fun getTradeInfo(roomId: String): Flux<TradeInfo> {
+        return redisTemplate.opsForList().range("$tradeKey${roomId}", 0, -1).cast(TradeInfo::class.java)
     }
 }

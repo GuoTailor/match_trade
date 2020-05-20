@@ -262,7 +262,12 @@ class RoomController {
      * @apiName getAllRoomList
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data":[]}
+     * {"code": 0,"msg": "成功","data": [{"roomId": "28","companyId": 1,"stockId": 1,"name": "6105","people": 0,"quoteTime":
+     * "14:05:00","secondStage": "00:05:00","time": "14:10:00","startTime": "09:30:00","numberTrades": 100,"lowScope": 0.1,
+     * "highScope": 10.0,"enable": "1","createTime": "2020-04-29 15:03:20","rival": 5,"flag": "C","oldFlag": null,"id": "28",
+     * "new": true,"delayEndTIme": "23:40:59"},{"roomId": "27","companyId": 1,"stockId": 1,"name": "6105","people": 0,"time":
+     * "07:55:00","startTime": "09:00:00","numberTrades": 100,"lowScope": 14.0,"highScope": 100.0,"enable": "0","createTime":
+     * "2020-05-16 11:10:26","flag": "I","oldFlag": null,"id": "27","new": true,"delayEndTIme": "16:55:59"}]}
      * @apiGroup Room
      * @apiUse tokenMsg
      * @apiPermission user

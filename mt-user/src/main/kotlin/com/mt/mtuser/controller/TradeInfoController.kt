@@ -3,11 +3,9 @@ package com.mt.mtuser.controller
 import com.mt.mtcommon.TradeInfo
 import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.ResponseInfo
-import com.mt.mtuser.entity.TradeDetails
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.TradeInfoService
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -35,7 +33,7 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping
-    fun findDetailsById(id: Int): Mono<ResponseInfo<TradeDetails>> {
+    fun findDetailsById(id: Int): Mono<ResponseInfo<TradeInfo>> {
         return ResponseInfo.ok(mono { tradeInfoService.findDetailsById(id) })
     }
 

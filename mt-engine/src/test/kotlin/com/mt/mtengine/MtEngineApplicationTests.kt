@@ -1,6 +1,7 @@
 package com.mt.mtengine
 
 import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.TradeInfo
 import com.mt.mtengine.common.Util
 import com.mt.mtengine.mq.MatchSink
 import com.mt.mtengine.service.RedisUtil
@@ -22,12 +23,11 @@ class MtEngineApplicationTests {
 
     @Test
     fun contextLoads() {
-        val msg = mapOf("12" to 12, "nmka" to "abc")
-        val message = MessageBuilder.withPayload(msg)
-                .setHeader(MessageConst.PROPERTY_TAGS, "testTag")
-                .build()
-        val rest = matchSink.outTrade().send(message)
-        println(rest)
+        val order = OrderParam(roomId = "27", userName = "nmkla",userId = 12, price = BigDecimal(12), number = 120)
+        val tradeInfo = TradeInfo(order, order, 12, 12, "C")
+        redisUtil.setTradeInfo(tradeInfo, Date(1589999000000)).block()
+        redisUtil.setTradeInfo(tradeInfo, Date(1589999000000)).block()
+        redisUtil.getTradeInfo("27").doOnNext { println(it) }.blockLast()
     }
 
     @Test

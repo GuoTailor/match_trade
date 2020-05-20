@@ -7,7 +7,6 @@ import com.mt.mtengine.entity.room.BaseRoom
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.relational.core.query.Criteria
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -56,11 +55,11 @@ class RoomService {
      */
     fun getBaseRoomDao(flag: String): BaseRoomDao<out BaseRoom, String> {
         return when (flag) {
-            RoomEnum.CLICK.flag -> clickRoomDao
-            RoomEnum.BICKER.flag -> bickerRoomDao
-            RoomEnum.DOUBLE.flag -> doubleRoomDao
-            RoomEnum.CONTINUE.flag -> timelyRoomDao
-            RoomEnum.TIMING.flag -> timingRoomDao
+            RoomEnum.CLICK.mode -> clickRoomDao
+            RoomEnum.BICKER.mode -> bickerRoomDao
+            RoomEnum.DOUBLE.mode -> doubleRoomDao
+            RoomEnum.CONTINUE.mode -> timelyRoomDao
+            RoomEnum.TIMING.mode -> timingRoomDao
             else -> throw IllegalStateException("不支持的房间号")
         }
     }

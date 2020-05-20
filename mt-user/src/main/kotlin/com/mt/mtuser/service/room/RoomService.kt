@@ -91,17 +91,15 @@ class RoomService {
                 if (value) {
                     roomRecordDao.save(roomRecord)
                     redisUtil.saveRoomRecord(roomRecord)
-                    redisUtil.publishRoomEvent(RoomEvent(roomId, value))
                 } else {
-                    roomRecord = redisUtil.deleteAndGetRoomRecord(roomId)
-                            ?: throw IllegalStateException("房间不存在：$roomId")
-                    quartzManager.addJob(PublishJobInfo(room.id!!, LocalTime.now().plusSeconds(59), false))
+                    roomRecord = redisUtil.getRoomRecord(roomId) ?: error("房间不存在：$roomId")
                     roomRecord.endTime = Date()
                     roomRecord.computingTime()
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
                 }
+                redisUtil.publishRoomEvent(RoomEvent(roomId, value))
             }
         }
         logger.info("房间 {} {} 成功", roomId, if (value) "启动" else "关闭")
@@ -280,11 +278,11 @@ class RoomService {
     @Suppress("UNCHECKED_CAST")
     fun <T : BaseRoom> getBaseRoomDao(flag: String): BaseRoomDao<T, String> {
         return when (flag) {
-            RoomEnum.CLICK.flag -> clickRoomDao as BaseRoomDao<T, String>
-            RoomEnum.BICKER.flag -> bickerRoomDao as BaseRoomDao<T, String>
-            RoomEnum.DOUBLE.flag -> doubleRoomDao as BaseRoomDao<T, String>
-            RoomEnum.CONTINUE.flag -> continueRoomDao as BaseRoomDao<T, String>
-            RoomEnum.TIMING.flag -> timingRoomDao as BaseRoomDao<T, String>
+            RoomEnum.CLICK.mode -> clickRoomDao as BaseRoomDao<T, String>
+            RoomEnum.BICKER.mode -> bickerRoomDao as BaseRoomDao<T, String>
+            RoomEnum.DOUBLE.mode -> doubleRoomDao as BaseRoomDao<T, String>
+            RoomEnum.CONTINUE.mode -> continueRoomDao as BaseRoomDao<T, String>
+            RoomEnum.TIMING.mode -> timingRoomDao as BaseRoomDao<T, String>
             else -> throw IllegalStateException("不支持的房间号")
         }
     }

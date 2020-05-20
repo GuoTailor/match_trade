@@ -3,6 +3,7 @@ package com.mt.mtengine.config
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.cache.CacheBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.concurrent.ConcurrentMapCache
@@ -31,6 +32,7 @@ class ReactiveRedisConfiguration {
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         //om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         om.activateDefaultTyping(om.polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
+        om.registerModule(KotlinModule())
         val jackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(om)
         val stringRedisSerializer = StringRedisSerializer()
 
