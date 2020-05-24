@@ -33,6 +33,7 @@ class MatchOutProcessor {
         tradeInfo.buyerId?.let { SocketSessionStore.userInfoMap[it]?.session?.send(msg)?.subscribe() }
         tradeInfo.sellerId?.let { SocketSessionStore.userInfoMap[it]?.session?.send(msg)?.subscribe() }
         peekPushService.addTradeInfoEvent(tradeInfo.roomId!!, tradeInfo.model!!)
+        peekPushService.addOrderEvent(tradeInfo.roomId!!, tradeInfo.model!!)    // 同时通知报价发生变化
     }
 
     @StreamListener(MatchSink.IN_RESULT)

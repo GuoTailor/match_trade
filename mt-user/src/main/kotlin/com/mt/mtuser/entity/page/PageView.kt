@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity.page
 
+import com.mt.mtuser.entity.logger
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.relational.core.mapping.Table
@@ -33,6 +34,7 @@ suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseCli
     if (sqlWhere.isNotBlank()) {
         sqlWhere = " where $sqlWhere"
     }
+    logger.info(sqlWhere)
     val count = connect.execute("select count(1) from $tableName $sqlWhere")
             .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one().awaitSingle()
     pageView.total = count?.toLong()

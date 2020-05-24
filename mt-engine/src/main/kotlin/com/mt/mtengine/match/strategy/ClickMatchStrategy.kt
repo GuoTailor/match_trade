@@ -34,28 +34,31 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
             val buyRivals = roomInfo.rivalList[buyOrder.userId]?.rivals ?: arrayListOf()    // 获取用户的交易对手
             val optional = roomInfo.sellOrderList.stream()
                     .filter { buyRivals.contains(it.userId) }   // 过滤用户的交易对手
-                    .filter { roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false }   // 获取对手中也选了自己的订单
-                    .min(MatchUtil.sortPriceAndTime)            // 获取对手中卖价最低的订单
+                    .filter {
+                        roomInfo.rivalList[it.userId]?.rivals?.contains(buyOrder.userId) ?: false   // 获取对手中也选了自己的订单
+                    }.min(MatchUtil.sortPriceAndTime)            // 获取对手中卖价最低的订单
             if (optional.isPresent) {
                 val sellOrder = optional.get()
                 roomInfo.sellOrderList.remove(sellOrder)
                 if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                 } else {
-                    matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
+                    matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
+                            "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
                 }.subscribeOn(Schedulers.elastic()).subscribe()
             } else {
-                matchService.onMatchError(buyOrder, null, "失败:" + MatchUtil.getVerifyInfo(buyOrder, null))
+                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, null,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, null), roomInfo.endTime)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.rivalList.clear()
         roomInfo.buyOrderList.forEach {
-            matchService.onMatchError(it, null, "失败: 没有可以匹配的报价")
+            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, it, null, "失败: 没有可以匹配的报价", roomInfo.endTime)
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
-            matchService.onMatchError(null, it, "失败: 没有可以匹配的报价")
+            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, null, it, "失败: 没有可以匹配的报价", roomInfo.endTime)
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.buyOrderList.clear()

@@ -34,19 +34,22 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
             val buyOrder = roomInfo.buyOrderList.pollLast()!!
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
+                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             } else {
-                matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
+                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.buyOrderList.forEach {
-            matchService.onMatchError(it, null, "失败:" + MatchUtil.getVerifyInfo(it, null))
+            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, it, null,
+                    "失败:" + MatchUtil.getVerifyInfo(it, null), roomInfo.endTime)
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
-            matchService.onMatchError(null, it, "失败:" + MatchUtil.getVerifyInfo(null, it))
+            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, null, it,
+                    "失败:" + MatchUtil.getVerifyInfo(null, it), roomInfo.endTime)
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         return isMatch

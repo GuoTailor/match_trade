@@ -33,8 +33,7 @@ class RoomSocketHandler : SocketHandler() {
                 .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.mode!!, userName) }
                 .onErrorResume {
                     sessionHandler.send(ResponseInfo.failed("错误: ${it.message}"), NotifyReq.errorNotify)
-                            .doOnNext { msg -> logger.info("send $msg") }
-                            .flatMap { Mono.empty<Unit>() }
+                            .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() }
                 }
     }
 

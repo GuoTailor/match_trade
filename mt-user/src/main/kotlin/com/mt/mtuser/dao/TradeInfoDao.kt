@@ -41,10 +41,16 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
             " order by trade_time desc limit 1")
     suspend fun findLastPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal?
 
+    @Query("select trade_price from $table " +
+            " where trade_time between :startTime and :endTime " +
+            " and room_id = :roomId " +
+            " order by trade_time desc limit 1")
+    suspend fun findLastPriceByTradeTimeAndRoomId(startTime: Date, endTime: Date, roomId: String): BigDecimal?
+
     @Query("select COALESCE(max(trade_price), 0) from $table " +
             " where trade_time between :startTime and :endTime " +
             " and room_id = :roomId ")
-    suspend fun findMaxPriceByTradeTimeAndRoomId(roomId: String, startTime: Date, endTime: Date): BigDecimal
+    suspend fun findMaxPriceByTradeTimeAndRoomId(startTime: Date, endTime: Date, roomId: String): BigDecimal
 
     @Query("select COALESCE(min(trade_price), 0) from $table " +
             " where trade_time between :startTime and :endTime " +

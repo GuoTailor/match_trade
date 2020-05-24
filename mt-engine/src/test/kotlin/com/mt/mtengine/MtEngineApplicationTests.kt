@@ -24,7 +24,7 @@ class MtEngineApplicationTests {
     @Test
     fun contextLoads() {
         val order = OrderParam(roomId = "27", userName = "nmkla",userId = 12, price = BigDecimal(12), number = 120)
-        val tradeInfo = TradeInfo(order, order, 12, 12, "C")
+        val tradeInfo = TradeInfo(order, order, "", 12, 12, "C")
         redisUtil.setTradeInfo(tradeInfo, Date(1589999000000)).block()
         redisUtil.setTradeInfo(tradeInfo, Date(1589999000000)).block()
         redisUtil.getTradeInfo("27").doOnNext { println(it) }.blockLast()

@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import java.lang.management.ThreadInfo
 import java.math.BigDecimal
+import java.util.*
 
 /**
  * Created by gyh on 2020/5/6.
@@ -40,9 +40,9 @@ class MatchService {
     @Autowired
     private lateinit var redisUtil: RedisUtil
 
-    fun onMatchSuccess(roomId: String, flag: String, buy: OrderParam, sell: OrderParam): Mono<TradeInfo> = r2dbc.withTransaction {
+    fun onMatchSuccess(roomId: String, flag: String, buy: OrderParam, sell: OrderParam, endTime: Date): Mono<TradeInfo> = r2dbc.withTransaction {
         roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
-            val threadInfo = TradeInfo(buy, sell, info.companyId, info.stockId, flag)
+            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
             threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
             threadInfo.tradeMoney = threadInfo.tradePrice?.multiply(BigDecimal(threadInfo.tradeAmount ?: 0))
             threadInfo.tradeState = TradeState.SUCCESS
@@ -55,15 +55,15 @@ class MatchService {
                     .flatMap { tradeInfoService.save(threadInfo) }
                     .flatMap { redisUtil.updateUserOrder(buy) }
                     .flatMap { redisUtil.updateUserOrder(sell) }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
                     .map { threadInfo }
         }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchFailed(roomId, flag, buy, sell, it.message ?: "失败") }
+                .doOnError { onMatchFailed(roomId, flag, buy, sell, it.message ?: "失败", endTime) }
     }
 
-    fun onMatchFailed(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String) = r2dbc.withTransaction {
-        logger.info("onMatchFailed $fileInfo")
-        roomService.findCompanyIdByRoomId(roomId, flag).flatMap {
-            val threadInfo = TradeInfo(buy, sell, it.companyId, it.stockId, flag)
+    fun onMatchFailed(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String, endTime: Date) = r2dbc.withTransaction {
+        roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
+            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
             if (buy?.price != null && sell?.price != null)
                 threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
             threadInfo.tradeState = TradeState.FAILED
@@ -73,29 +73,33 @@ class MatchService {
             tradeInfoService.save(threadInfo)
                     .flatMap { buy?.let { b -> redisUtil.updateUserOrder(b) } }
                     .flatMap { sell?.let { s -> redisUtil.updateUserOrder(s) } }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
                     .map { threadInfo }
         }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchError(buy, sell, it.message ?: "失败") }
+                .doOnError { onMatchError(roomId, flag, buy, sell, it.message ?: "失败", endTime) }
     }
 
-    fun onMatchError(buy: OrderParam?, sell: OrderParam?, fileInfo: String): Mono<TradeInfo> {
-        val threadInfo = TradeInfo(buy, sell)
-        val buyResult = buy?.let {
-            it.tradeState = TradeState.FAILED
-            it.stateDetails = fileInfo
-            redisUtil.updateUserOrder(it)
-        } ?: Mono.just(false)
-        val sellResult = sell?.let {
-            it.tradeState = TradeState.FAILED
-            it.stateDetails = fileInfo
-            redisUtil.updateUserOrder(it)
-        } ?: Mono.just(false)
-        threadInfo.tradeState = TradeState.FAILED
-        threadInfo.stateDetails = fileInfo
-        logger.error("onMatchError $fileInfo")
-        return buyResult.zipWith(sellResult)
-                .map { sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .map { threadInfo }
+    fun onMatchError(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String, endTime: Date): Mono<TradeInfo> {
+        return roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
+            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
+            val buyResult = buy?.let {
+                it.tradeState = TradeState.FAILED
+                it.stateDetails = fileInfo
+                redisUtil.updateUserOrder(it)
+            } ?: Mono.just(false)
+            val sellResult = sell?.let {
+                it.tradeState = TradeState.FAILED
+                it.stateDetails = fileInfo
+                redisUtil.updateUserOrder(it)
+            } ?: Mono.just(false)
+            threadInfo.tradeState = TradeState.FAILED
+            threadInfo.stateDetails = fileInfo
+            logger.error("onMatchError $fileInfo")
+            buyResult.flatMap { sellResult }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
+                    .map { sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
+                    .map { threadInfo }
+        }
     }
 
 }

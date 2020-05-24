@@ -3,6 +3,7 @@ package com.mt.mtengine.entity.room
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.toDate
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalTime
@@ -33,6 +34,10 @@ interface BaseRoom : Persistable<String> {
     override fun isNew() = true
 
     fun validNull()
+
+    fun getEndTime(): Date {
+        return startTime!!.plusNanos(time!!.toNanoOfDay()).toDate()
+    }
 
     companion object {
         const val ENABLE = "1"

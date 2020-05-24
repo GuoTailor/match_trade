@@ -1,6 +1,7 @@
 package com.mt.mtuser.service
 
 import com.mt.mtcommon.*
+import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.data.r2dbc.core.from
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -77,6 +79,13 @@ class TradeInfoService {
                 ?: BigDecimal(0)
     }
 
+    suspend fun getYesterdayClosingPriceByRoomId(roomId: String): BigDecimal {
+        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay() - LocalTime.MAX.toMillisOfDay()
+        val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
+        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime.toDate(), endTime.toDate(), roomId)
+                ?: BigDecimal(0)
+    }
+
     /**
      * 获取今天的最新一次报价
      */
@@ -100,7 +109,7 @@ class TradeInfoService {
 
     suspend fun buyOverview(startTime: Date, endTime: Date, companyId: Int, buyerId: Int): Overview {
         return connect.execute("select COALESCE(sum(trade_amount), 0) as buyStock," +
-                " COALESCE(sum(trade_price), 0) as buyMoney," +
+                " COALESCE(sum(trade_money), 0) as buyMoney," +
                 " COALESCE(avg(trade_price), 0) as avgBuyMoney " +
                 " from ${TradeInfoDao.table} " +
                 " where trade_time >= :startTime " +
@@ -116,14 +125,13 @@ class TradeInfoService {
                     val buyMoney = r.get("buyMoney", BigDecimal::class.java)
                     val avgBuyMoney = r.get("avgBuyMoney", BigDecimal::class.java)
                     Overview(buyStock = buyStock!!.toLong(), buyMoney = buyMoney, avgBuyMoney = avgBuyMoney)
-                }
-                .one()
+                }.one()
                 .awaitSingle()
     }
 
     suspend fun sellOverview(startTime: Date, endTime: Date, companyId: Int, sellId: Int): Overview {
         return connect.execute("select COALESCE(sum(trade_amount), 0) as sellStock," +
-                " COALESCE(sum(trade_price), 0) as sellMoney," +
+                " COALESCE(sum(trade_money), 0) as sellMoney," +
                 " COALESCE(avg(trade_price), 0) as avgSellMoney " +
                 " from ${TradeInfoDao.table} " +
                 " where trade_time >= :startTime " +
@@ -173,9 +181,7 @@ class TradeInfoService {
      * 获取指定时间范围的最大和最小报价
      */
     suspend fun getMaxMinPrice(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
-        val max = tradeInfoDao.findMaxPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
-        val min = tradeInfoDao.findMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
-        return mapOf("maxPrice" to max, "minPrice" to min)
+        return finMaxMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
     }
 
     /**
@@ -206,8 +212,7 @@ class TradeInfoService {
      * 查找指定房间的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
-        val where = query.where()
-                .and("room_id").`is`(roomId)
+        val where = query.where().and("room_id").`is`(roomId)
         return getPage(connect.select()
                 .from<TradeInfo>()
                 .matching(where)
@@ -220,17 +225,28 @@ class TradeInfoService {
     /**
      * 查询指定用户的交易记录
      */
-    suspend fun findOrderByUserId(userId: Int, query: PageQuery): PageView<TradeInfo> {
-        val where = query.where()
-                .and(where("buyer_id").`is`(userId)
-                        .or("seller_id").`is`(userId))
+    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?, date: Date): PageView<TradeInfo> {
+        val endTime = Date(date.time + LocalTime.MAX.toMillisOfDay())
+        val where = when {
+            isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
+            isBuy -> query.where().and(where("buyer_id").`is`(userId))
+            else -> query.where().and(where("seller_id").`is`(userId))
+        }.and(where("trade_time").between(date, endTime))
+        // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
+        // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
+        val countWhere = when {
+            isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
+            isBuy -> query.where().and(where("buyer_id").`is`(userId))
+            else -> query.where().and(where("seller_id").`is`(userId))
+        }.and(where("trade_time").between("'${Util.createDate(date)}'", "'${Util.createDate(endTime)}'"))
+
         return getPage(connect.select()
                 .from<TradeInfo>()
                 .matching(where)
                 .page(query.page())
                 .fetch()
                 .all()
-                , connect, query, where)
+                , connect, query, countWhere)
     }
 
     /**
@@ -238,6 +254,20 @@ class TradeInfoService {
      */
     suspend fun statisticsOrderByDay() {
 
+    }
+
+    suspend fun finMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
+        return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
+                " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
+                " where trade_time between :startTime and :endTime " +
+                " and room_id = :roomId ")
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .bind("roomId", roomId)
+                .map { r, _ ->
+                    mapOf("minPrice" to r.get("minPrice", BigDecimal::class.java)!!,
+                            "maxPrice" to r.get("maxPrice", BigDecimal::class.java)!!)
+                }.awaitOne()
     }
 
     suspend fun statistics(startTime: Date, endTime: Date, companyId: Int) {

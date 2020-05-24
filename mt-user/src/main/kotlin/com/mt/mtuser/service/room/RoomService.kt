@@ -219,6 +219,11 @@ class RoomService {
         doubleList.await().toList(restList)
         timelyList.await().toList(restList)
         timingList.await().toList(restList)
+        restList.forEach {
+            val closePrice = tradeInfoService.getYesterdayClosingPriceByRoomId(it.roomId!!)
+            it.highScope = closePrice.multiply(BigDecimal(2)).toDouble()
+            it.lowScope = closePrice.multiply(BigDecimal(0.5)).toDouble()
+        }
         restList
     }
 

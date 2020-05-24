@@ -29,11 +29,8 @@ class PeekSocketHandler : SocketHandler() {
                 .then(sessionHandler.connectionClosed())
         return redisUtil.getRoomRecord(roomId).flatMap {
             SocketSessionStore.addPeek(sessionHandler, it.roomId!!, it.mode!!)  // TODO 缺少权限判断
-        }.switchIfEmpty(
-                sessionHandler.send(ResponseInfo.failed("错误: 房间还没开启"), NotifyReq.errorNotify)
-                        .doOnNext { msg -> logger.info("send $msg") }
-                        .flatMap { Mono.empty<Unit>() }
-        )
+        }.switchIfEmpty(sessionHandler.send(ResponseInfo.failed("错误: 房间还没开启"), NotifyReq.errorNotify)
+                .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() })
     }
 
     override fun onDisconnected(queryMap: Map<String, String>, sessionHandler: WebSocketSessionHandler): Mono<*> {

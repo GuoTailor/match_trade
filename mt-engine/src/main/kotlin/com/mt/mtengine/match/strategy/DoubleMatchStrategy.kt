@@ -36,14 +36,15 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
                 if (order1.price!! > order2.price) {
                     order1.isBuy = true
                     order2.isBuy = false
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order1, order2)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order1, order2, roomInfo.endTime)
                 } else {
                     order1.isBuy = false
                     order2.isBuy = true
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order2, order1)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order2, order1, roomInfo.endTime)
                 }
             } else {
-                matchService.onMatchError(order1, order2, "失败:" + MatchUtil.getVerifyInfo(order1, order2))
+                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, order1, order2,
+                        "失败:" + MatchUtil.getVerifyInfo(order1, order2), roomInfo.endTime)
             }
             result.subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
         }

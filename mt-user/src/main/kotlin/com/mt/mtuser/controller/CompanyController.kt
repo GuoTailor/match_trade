@@ -117,7 +117,7 @@ class CompanyController {
     /**
      * @api {delete} /company/stockholder 删除一个股东
      * @apiDescription  删除一个股东
-     * @apiName addStockholder
+     * @apiName deleteStockholder
      * @apiVersion 0.0.1
      * @apiParam {Integer} id 股东id
      * @apiSuccessExample {json} 成功返回:
@@ -254,7 +254,7 @@ class CompanyController {
 
     /**
      * @api {get} /company/overview 获取交易概述
-     * @apiDescription  获取交易概述 day 是今天得交易概述，month 是这个月得交易概述
+     * @apiDescription  获取交易概述 day 是今天的交易概述，month 是这个月的交易概述
      * @apiName getOverview
      * @apiVersion 0.0.1
      * @apiParam {Integer} companyId 公司id
@@ -296,7 +296,7 @@ class CompanyController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @GetMapping("/data")
     fun getTodayData(): Mono<ResponseInfo<HashMap<String, Any>>> {
         return ResponseInfo.ok(mono {

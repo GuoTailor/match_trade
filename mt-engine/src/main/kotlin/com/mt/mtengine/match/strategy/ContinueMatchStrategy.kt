@@ -39,7 +39,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!     // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder)
+                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                             .subscribeOn(Schedulers.elastic()).subscribe {
                                 roomInfo.topThree.lastOrder = it.toOrderInfo()
                                 atom.getAndIncrement()
@@ -50,7 +50,8 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
                     sellFailedList.add(sellOrder)
                 }
             } else {
-                matchService.onMatchError(buyOrder, sellOrder, "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
+                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
                         .subscribeOn(Schedulers.elastic()).subscribe()
                 isMatch = true
             }

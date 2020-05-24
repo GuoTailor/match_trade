@@ -54,7 +54,7 @@ class PeekPushService {
                 .collectList()
                 .flatMap {
                     Flux.fromStream(idList).flatMap { info ->
-                        info.session.send(ResponseInfo.ok("定单发生变化", it), NotifyReq.pushBuyOrder)
+                        info.session.send(ResponseInfo.ok("报价发生变化", it), NotifyReq.pushBuyOrder)
                     }.then()
                 }.subscribeOn(Schedulers.elastic()).subscribe()
     }

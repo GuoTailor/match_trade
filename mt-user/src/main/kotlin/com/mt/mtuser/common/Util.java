@@ -60,6 +60,10 @@ public class Util {
         return createDate("yyyy-MM-dd HH:mm:ss", time);
     }
 
+    public static String createDate(Date time) {
+        return createDate("yyyy-MM-dd HH:mm:ss", time.getTime());
+    }
+
     public static String createDate(String pattern, long time) {
         return new SimpleDateFormat(pattern).format(time);
     }
