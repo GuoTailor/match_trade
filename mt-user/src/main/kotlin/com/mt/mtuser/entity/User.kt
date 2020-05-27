@@ -56,6 +56,11 @@ class User : BaseUser() {
     var userPhoto: String? = null
 
     /**
+     * 最后拉取消息时间
+     */
+    var readTime: Date? = null
+
+    /**
      * 注册时间
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")

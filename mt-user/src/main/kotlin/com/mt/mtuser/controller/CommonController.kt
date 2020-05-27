@@ -98,17 +98,18 @@ class CommonController {
     @PostMapping("/register")
     fun register(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Unit>> {
         val result = map.flatMap {
-            val code = it["code"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入验证码"))
+            val code = it["code"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入验证码"))
             val user = User()
-            user.phone = it["phone"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入手机号"))
-            user.password = it["password"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入密码"))
+            user.phone = it["phone"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入手机号"))
+            user.password = it["password"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入密码"))
             logger.info(code)
-            mono { redisUtil.getCode(user.phone!!) }
-                    .filter { localCode -> localCode != null && code == localCode }
+            mono {
+                if (!userService.existsUserByPhone(user.phone!!)) {
+                    redisUtil.getCode(user.phone!!)
+                } else error("用户已存在")
+            }.filter { localCode -> localCode != null && code == localCode }
                     .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
-                    .map { user }
-        }.flatMap { user ->
-            mono { redisUtil.deleteCode(user.phone!!) }
+                    .flatMap { mono { redisUtil.deleteCode(user.phone!!) } }
                     .flatMap { userService.register(user) }
         }
         return ResponseInfo.ok(result)
@@ -124,23 +125,45 @@ class CommonController {
      * /common/sendCode?phone=12459874125
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
-     * @apiSuccessExample {json} 用户已存在:
-     * {"code":1,"msg":"用户已存在","data":null}
      * @apiGroup Common
      * @apiPermission none
      */
     @GetMapping("/common/sendCode")
     fun sendCode(@RequestParam phone: String): Mono<ResponseInfo<String>> {
         return ResponseInfo.ok(mono {
-            if (!userService.existsUserByPhone(phone)) {
-                val smsCode = Util.getRandomInt(4)
-                val (code, msg) = SendSms.send(phone, smsCode, 5)
-                if (code == "0") {
-                    redisUtil.saveCode(phone, smsCode)
-                    msg
-                } else throw IllegalStateException(msg)
-            } else throw IllegalStateException("用户已存在")
+            val smsCode = Util.getRandomInt(4)
+            val (code, msg) = SendSms.send(phone, smsCode, 5)
+            if (code == "0") {
+                redisUtil.saveCode(phone, smsCode)
+                msg
+            } else throw IllegalStateException(msg)
         })
+    }
+
+    /**
+     * @api {get} /common/verifyCode 验证验证码
+     * @apiDescription  验证验证码
+     * @apiName verifyCode
+     * @apiVersion 0.0.1
+     * @apiParam {String} phone 用户的手机号
+     * @apiParam {String} code 验证码
+     * @apiParamExample {url} Request-Example:
+     * /common/sendCode?phone=12459874125&code=1234
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiSuccessExample {json} 验证码错误:
+     * {"code":1,"msg":"验证码错误","data":null}
+     * @apiGroup Common
+     * @apiPermission none
+     */
+    @GetMapping("/common/verifyCode")
+    fun verifyCode(@RequestParam phone: String, @RequestParam code: String): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { redisUtil.getCode(phone) }
+                .filter { localCode -> localCode != null && code == localCode }
+                .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
+                .flatMap { mono { redisUtil.deleteCode(phone) } }
+                .flatMap { mono { redisUtil.saveVerifyResult(phone) } }
+        )
     }
 
     /**
@@ -150,31 +173,30 @@ class CommonController {
      * @apiVersion 0.0.1
      * @apiParam {String} phone 用户的手机号
      * @apiParam {String} password 用户密码
-     * @apiParam {String} code 短信验证码
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":true}
-     * @apiSuccessExample {json} 验证码错误:
-     * {"code": 1,"msg": "验证码错误","data": null}
+     * @apiSuccessExample {json} 过期:
+     * {"code": 1,"msg": "过期","data": null}
      * @apiGroup Common
      * @apiPermission none
      */
     @PutMapping("/common/password")
     fun forgetPassword(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
         val result = map.flatMap {
-            val code = it["code"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入验证码"))
             val user = User()
-            user.phone = it["phone"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入手机号"))
-            user.password = it["password"] ?: return@flatMap Mono.error<User>(IllegalStateException("请输入密码"))
-            logger.info(code)
-            mono { redisUtil.getCode(user.phone!!) }
-                    .filter { localCode -> localCode != null && code == localCode }
+            user.phone = it["phone"] ?: return@flatMap Mono.error<Boolean>(IllegalStateException("请输入手机号"))
+            user.password = it["password"] ?: return@flatMap Mono.error<Boolean>(IllegalStateException("请输入密码"))
+            user.passwordEncoder()
+            mono { redisUtil.getVerify(user.phone!!) }
+                    .filter { any -> any != null }
                     .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
-                    .map { user }
-        }.flatMap { user ->
-            mono {
-                redisUtil.deleteCode(user.phone!!)
-                userService.forgetPassword(user)
-            }
+                    .flatMap {
+                        mono {
+                            redisUtil.deleteCode(user.phone!!)
+                            redisUtil.deleteVerify(user.phone!!)
+                            userService.forgetPassword(user)
+                        }
+                    }
         }
         return ResponseInfo.ok(result)
     }

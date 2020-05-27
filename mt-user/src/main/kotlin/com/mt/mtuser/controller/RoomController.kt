@@ -254,6 +254,24 @@ class RoomController {
         })
     }
 
+    /**
+     * @api {gut} /room/scope 获取指定房间报价范围
+     * @apiDescription  获取指定房间报价范围
+     * @apiName getRoomScope
+     * @apiVersion 0.0.1
+     * @apiParam {String} roomId 房间id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data":[]}
+     * @apiGroup Room
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/scope")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun getRoomScope(roomId: String): Mono<ResponseInfo<Map<String, String>>> {
+        return ResponseInfo.ok(mono { roomService.getRoomScope(roomId) })
+    }
+
     //--------------------------------不需要管理员权限-------------------------------------
 
     /**

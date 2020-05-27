@@ -28,6 +28,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
     private val ALLOWED_METHODS = "*"
     private val ALLOWED_ORIGIN = "*"
     private val ALLOWED_Expose = "*"
+    private val MAX_AGE = "18000L"
     val log = LoggerFactory.getLogger(this.javaClass.simpleName)!!
     val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
@@ -55,6 +56,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
             val headers: HttpHeaders = response.headers
             headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
             headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS)
+            headers.add("Access-Control-Max-Age", MAX_AGE)
             headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS)
             headers.add("Access-Control-Expose-Headers", ALLOWED_Expose)
             headers.add("Access-Control-Allow-Credentials", "true")

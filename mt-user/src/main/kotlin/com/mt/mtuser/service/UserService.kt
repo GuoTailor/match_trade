@@ -52,7 +52,7 @@ class UserService {
                 user.passwordEncoder()
                 user.id = null
                 val newUser = userDao.save(user)
-                stockholderDao.save(Stockholder(userId = newUser.id, roleId=roleService.getRoles().find { it.name == Stockholder.USER }!!.id))
+                stockholderDao.save(Stockholder(userId = newUser.id, roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id))
                 Unit
             } else throw IllegalStateException("用户已存在")
         } else throw IllegalStateException("请正确填写用户名或密码")
@@ -121,6 +121,32 @@ class UserService {
                 stockholderDao.save(user.id!!, roleService.getRoles().find { it.name == Stockholder.USER }?.id!!, companyId)
             }
         } else throw IllegalStateException("用户不存在")
+    }
+
+    /**
+     * 获取全部的观察员
+     */
+    suspend fun getAllAnalystRole(query: PageQuery) {
+        val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
+        val where = query.where().and("role_id").`is`(roleId)
+        getPage(connect.select()
+                .from<Stockholder>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all(), connect, query, where)
+    }
+
+    /**
+     * 删除一个观察员
+     */
+    suspend fun deleteAnalyst(stockholderId: Int) {
+        val stockholder = stockholderDao.findById(stockholderId) ?: error("不存在该观察员: $stockholderId")
+        stockholder.roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id
+        stockholder.cleanCompany()
+        r2dbc.dynamicUpdate(stockholder)
+                .matching(where("id").`is`(stockholder.id!!))
+                .fetch().awaitRowsUpdated()
     }
 
     suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {

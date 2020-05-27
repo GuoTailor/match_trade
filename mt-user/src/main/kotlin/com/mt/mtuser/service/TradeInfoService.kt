@@ -60,7 +60,7 @@ class TradeInfoService {
     suspend fun countMoneyByTradeTime(startTime: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countMoneyTradeTime(startTime, Date())
 
     /**
-     * h获取公司今天的交易额
+     * 获取公司今天的交易额
      */
     suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): Long {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
@@ -84,6 +84,10 @@ class TradeInfoService {
         val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
         return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime.toDate(), endTime.toDate(), roomId)
                 ?: BigDecimal(0)
+    }
+
+    suspend fun getClosingPriceByRoomId(roomId: String, startTime: Date, endTime: Date): BigDecimal {
+        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime, endTime, roomId) ?: BigDecimal(0)
     }
 
     /**

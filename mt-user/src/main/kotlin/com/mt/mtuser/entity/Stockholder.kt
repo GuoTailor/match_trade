@@ -40,6 +40,14 @@ class Stockholder(
         return "Role(id=$id, userId=$userId, roleId=$roleId, companyId=$companyId, name=$name, nameZh=$nameZh)"
     }
 
+    fun cleanCompany() {
+        companyId = null
+        realName = null
+        department = null
+        position = null
+        money = null
+    }
+
     companion object {
         const val SUPER_ADMIN = "ROLE_SUPER_ADMIN"
         const val ANALYST = "ROLE_ANALYST"

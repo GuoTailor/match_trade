@@ -22,6 +22,8 @@ class RedisUtil {
     private val roomInfo = RedisConsts.roomInfo
     private val codeKey = RedisConsts.codeKey
     private val codeTime = Duration.ofMinutes(5)
+    private val verifyTime = Duration.ofMinutes(60)
+    private val verifyKey = "VERIFY:"
 
     // -------------------------=======>>>房间<<<=======-------------------------
 
@@ -95,6 +97,18 @@ class RedisUtil {
 
     suspend fun deleteCode(phone: String) {
         redisTemplate.opsForValue().deleteAndAwait(codeKey + phone)
+    }
+
+    suspend fun saveVerifyResult(phone: String) {
+        redisTemplate.opsForValue().setAndAwait(verifyKey + phone, phone, verifyTime)
+    }
+
+    suspend fun getVerify(phone: String): Any? {
+        return redisTemplate.opsForValue().getAndAwait(verifyKey + phone)
+    }
+
+    suspend fun deleteVerify(phone: String): Boolean {
+        return redisTemplate.opsForValue().deleteAndAwait(verifyKey + phone)
     }
 
     // ------------------------=======>>>推送<<<=====----------------------

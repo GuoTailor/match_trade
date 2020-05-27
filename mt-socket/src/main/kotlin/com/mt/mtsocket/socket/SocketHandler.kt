@@ -39,7 +39,7 @@ abstract class SocketHandler : WebSocketHandler {
                     val info = toServiceRequestInfo(it)
                     if (info.order != "/echo" && info.order != "/ping") logger.info("接收到数据${it}")
                     info
-                }.filter { it.order != "/ping" }
+                }.filter { it.order != "/ping" }    // 心跳就不回应
                 .flatMap {
                     val resp = ServiceResponseInfo(req = it.req)
                     getServlet().doDispatch(it, resp)

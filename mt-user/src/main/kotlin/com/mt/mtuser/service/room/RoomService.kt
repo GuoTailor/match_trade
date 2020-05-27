@@ -219,12 +219,23 @@ class RoomService {
         doubleList.await().toList(restList)
         timelyList.await().toList(restList)
         timingList.await().toList(restList)
-        restList.forEach {
-            val closePrice = tradeInfoService.getYesterdayClosingPriceByRoomId(it.roomId!!)
-            it.highScope = closePrice.multiply(BigDecimal(2)).toDouble()
-            it.lowScope = closePrice.multiply(BigDecimal(0.5)).toDouble()
-        }
         restList
+    }
+
+    suspend fun getRoomScope(roomId: String): Map<String, String> {
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
+        val highScope: String
+        val lowScope: String
+        if (roomRecord == null) {
+            highScope = "0"
+            lowScope = "0"
+            logger.info("-------------- 第一次交交易 -----------")
+        } else {
+            val closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+            highScope = closePrice.multiply(BigDecimal(2.0)).toPlainString()
+            lowScope = closePrice.multiply(BigDecimal(0.5)).toPlainString()
+        }
+        return mapOf("highScope" to highScope, "lowScope" to lowScope)
     }
 
     /**
