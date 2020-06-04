@@ -7,6 +7,7 @@ import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
+import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.reactive.awaitSingle
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils

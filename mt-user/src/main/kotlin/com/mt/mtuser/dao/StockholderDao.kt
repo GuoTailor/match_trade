@@ -5,13 +5,15 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import org.springframework.data.repository.query.Param
+import java.math.BigDecimal
 
 /**
  * Created by gyh on 2020/3/17.
  */
 interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
     @Query("select" +
-            " ur.id, user_id, role_id, company_id, name, name_zh" +
+            " ur.id, ur.real_name, ur.department, ur.position, ur.money, user_id, role_id, company_id, name, name_zh" +
             " from mt_stockholder ur" +
             " left join mt_role r on ur.role_id = r.id" +
             " where user_id = $1")
@@ -20,6 +22,12 @@ interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
     @Modifying
     @Query("insert into mt_stockholder(user_id, role_id, company_id) values(:userId, :roleId, :companyId)")
     suspend fun save(userId: Int, roleId: Int, companyId: Int): Int
+
+    @Modifying
+    @Query("UPDATE mt_stockholder SET user_id = :userId, role_id = :roleId, company_id = :companyId," +
+            " real_name = :realName, department = :department, position = :position, money = :money" +
+            " WHERE mt_stockholder.id = :id ")
+    suspend fun update(id: Int, userId: Int?, roleId: Int?, companyId: Int?, realName: String?, department: String?, position: String?, money: BigDecimal): Int
 
     @Query("select count(*) from mt_stockholder where user_id = :userId and role_id = :roleId and company_id = :companyId limit 1")
     suspend fun exists(userId: Int, roleId: Int, companyId : Int): Int

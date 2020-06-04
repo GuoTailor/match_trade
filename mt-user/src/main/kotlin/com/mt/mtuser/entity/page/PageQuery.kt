@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
+import java.lang.StringBuilder
 
 /**
  * Created by gyh on 2020/3/20.
@@ -21,17 +22,18 @@ import org.springframework.util.StringUtils
  */
 class PageQuery(val pageNum: Int = 0,
                 val pageSize: Int = 30,
-                private val searchField: String? = null,    // 查找字段 :name
-                private val searchOper: String? = null,     // 查找方式 :"[['cn', '包含'], ['eq', '等于'], ['nc', '不包含'], ['ne', '不等于'], ['gt', '大于'], ['lt', '小于'], ['bw', '开始于'], ['bn', '不开始于'], ['ew', '结束于'], ['en', '不结束于']]")
-                private val searchString: String? = null,   // 查找的字符 :张
-                private val order: String? = null,          // 排序字段 :id
-                private val direction: String? = null       // 排序方向 :asc
+                val searchField: String? = null,    // 查找字段 :name
+                val searchOper: String? = null,     // 查找方式 :"[['cn', '包含'], ['eq', '等于'], ['nc', '不包含'], ['ne', '不等于'], ['gt', '大于'], ['lt', '小于'], ['bw', '开始于'], ['bn', '不开始于'], ['ew', '结束于'], ['en', '不结束于']]")
+                val searchString: String? = null,   // 查找的字符 :张
+                var order: String? = null,          // 排序字段 :id
+                var direction: String? = null       // 排序方向 :asc
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val oper = arrayOf(arrayOf("cn", "like", "%%%s%%"), arrayOf("eq", "=", "%s"),
             arrayOf("nc", "not like", "%%%s%%"), arrayOf("ne", "<>", "%s"), arrayOf("gt", ">", "%s"),
             arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
             arrayOf("ew", "like", "%%%s"), arrayOf("en", "not like", "%%%s"))
+
     fun where(): Criteria {
         var criteria = Criteria.empty()
         if (searchField != null && searchOper != null && searchString != null) {
@@ -62,6 +64,22 @@ class PageQuery(val pageNum: Int = 0,
             }
         }
         return pageable
+    }
+
+    fun toPageSql(): String {
+        val sb = StringBuilder()
+        if (order != null) {
+            if (direction.equals("asc", true) || direction.equals("desc", true)) {
+                sb.append(" order by ").append(order).append(" ").append(direction).append(" ")
+            }
+        }
+        if (pageNum == 0) {
+            sb.append(" limit ").append(pageSize)
+        } else {
+            val offset = pageNum * pageSize
+            sb.append(" limit ").append(pageSize).append(" OFFSET ").append(offset).append(" ")
+        }
+        return sb.toString()
     }
 
     private fun buildSubSql(): Criteria {

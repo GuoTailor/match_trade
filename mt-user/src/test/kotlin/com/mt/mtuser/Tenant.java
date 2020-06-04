@@ -1,6 +1,7 @@
 package com.mt.mtuser;
 
 import com.mt.mtuser.common.Util;
+import com.mt.mtuser.entity.Stockholder;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,6 +15,10 @@ public class Tenant {
         String yer = Util.createDate("yyyy", System.currentTimeMillis());
         String m = Util.createDate("MM", System.currentTimeMillis());
         System.out.println(yer + " - " + m);
+        Stockholder sh = new Stockholder();
+        sh.getUserId();
+        sh.getDepartment();
+        sh.getRealName();
     }
 
 }

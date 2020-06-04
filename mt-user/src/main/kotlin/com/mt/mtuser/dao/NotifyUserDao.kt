@@ -15,10 +15,16 @@ interface NotifyUserDao : CoroutineCrudRepository<NotifyUser, Int> {
     @Query("select count(1) from mt_notify_user where user_id = :userID and status = 'unread'")
     suspend fun countByUnread(userId: Int): Long
 
-    @Query("select * from mt_notify_user where user_id = :userID")
+    @Query("select * from mt_notify_user where user_id = :userId")
     fun findAllByUserId(userId: Int): Flow<NotifyUser>
+
+    @Query("select msg_id from mt_notify_user where user_id = :userId and status = 'unread'")
+    fun findAllUnreadByUserId(userId: Int): Flow<Int>
 
     @Modifying
     @Query("update mt_notify_user set status = :status where id in (:id)")
     suspend fun setStatusById(id: Iterable<Int>, status: String): Int
+
+    @Query("update mt_notify_user set status = :status where user_id = :userId and msg_id = :msgId")
+    suspend fun setStatusByUserIdAndMsgId(userId: Int, msgId: Int, status: String): Int
 }

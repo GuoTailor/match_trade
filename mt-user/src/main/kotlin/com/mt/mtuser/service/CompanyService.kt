@@ -100,6 +100,9 @@ class CompanyService {
      */
     suspend fun findCompany(query: PageQuery): PageView<Company> {
         val roles = roleService.getCompanyList()
+        if (roles.isEmpty()) {
+            return PageView()
+        }
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val result = connect.select()
                 .from<Company>()
@@ -126,16 +129,19 @@ class CompanyService {
     /**
      * 查找所有股东
      */
-    suspend fun getAllShareholder(query: PageQuery): PageView<Stockholder> {
+    suspend fun getAllShareholder(query: PageQuery): PageView<StockholderInfo> {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        return getPage(connect.select()
-                .from<Stockholder>()
-                .project("id", "user_id", "role_id", "company_id", "real_name", "department", "position")
-                .matching(query.where().and("company_id").`is`(companyId))
-                .page(query.page())
+        val where = query.where().and("s.company_id").`is`(companyId)
+        return getPage(connect.execute(
+                "select s.id, s.user_id, s.company_id, s.real_name, s.department, s.position, s.money, sum(p.amount) as amount " +
+                " from mt_stockholder s" +
+                " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
+                " where $where group by s.id" +
+                query.toPageSql())
+                .`as`(StockholderInfo::class.java)
                 .fetch()
                 .all()
-                , connect, query, query.where().and("company_id").`is`(companyId))
+                , connect, query, "mt_stockholder s", where)
     }
 
     suspend fun findAll() = companyDao.findAll()
@@ -183,7 +189,13 @@ class CompanyService {
         if (roleService.getCompanyList().contains(stockholder.companyId)) {
             val role = roleService.getRoles().find { it.name == Stockholder.USER }
             if (role!!.id == stockholder.roleId) {
-                roleService.deleteById(id)
+                val stockId = stockService.findByCompanyId(stockholder.companyId!!).first().id!!
+                val positions = positionsDao.findStockByCompanyIdAndUserIdAndStockId(stockholder.userId!!, stockholder.companyId!!, stockId)
+                stockholder.cleanCompany()
+                roleService.update(stockholder)
+                if (positions != null) {
+                    positionsDao.deleteById(positions.id!!)
+                }
             } else error("不可删除角色 ${role.nameZh}")
         } else error("不能删除非本公司的股东，没有权限")
     }

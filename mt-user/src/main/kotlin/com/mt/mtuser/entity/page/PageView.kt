@@ -1,7 +1,8 @@
 package com.mt.mtuser.entity.page
 
-import com.mt.mtuser.entity.logger
 import kotlinx.coroutines.reactive.awaitSingle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.relational.core.query.Criteria
@@ -23,13 +24,19 @@ class PageView<T : Any> {
     var item: List<T>? = null
 }
 
+val logger: Logger = LoggerFactory.getLogger(PageView::class.java)
+
 /**
  * 如果指定了[where] 使用[where], 放弃使用[pageQuery.where()],如果没有指定[where]，则使用[pageQuery.where()]作为条件
  */
 suspend inline fun <reified T : Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery, where: Criteria? = null): PageView<T> {
-    val pageView = PageView<T>()
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName
     ?: throw IllegalStateException("不支持的匿名类 ${T::class}")
+    return getPage(data, connect, pageQuery, tableName, where)
+}
+
+suspend fun <T: Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery, tableName: String, where: Criteria? = null): PageView<T> {
+    val pageView = PageView<T>()
     var sqlWhere = (where?.toString() ?: pageQuery.where().toString())
     if (sqlWhere.isNotBlank()) {
         sqlWhere = " where $sqlWhere"

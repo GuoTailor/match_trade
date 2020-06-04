@@ -200,17 +200,19 @@ class CompanyController {
      * @apiUse PageQuery
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 5,"item": [{"id": 7,"userId": 1,"roleId": 10,
-     * "companyId": 1,"realName": "nmka","department": null,"position": null,"name": null,"nameZh": null,"authority": null},
-     * {"id": 1,"userId": 5,"roleId": 3,"companyId": 1,"realName": "张三","department": null,"position": null,"name": null,
-     * "nameZh": null,"authority": null}]}}
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 4,"item": [{"id": 1,"companyId": 1,"userId":
+     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000},{"id": 7,
+     * "companyId": 1,"userId": 1,"amount": null,"realName": null,"department": null,"position": null,"phone": null,"money":
+     * 0.0000},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
+     * "phone": null,"money": -87499.7700},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
+     * "测试","position": "跳舞","phone": null,"money": 10.0000}]}}
      * @apiGroup Company
      * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stockholder")
-    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<Stockholder>>> {
+    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<StockholderInfo>>> {
         return ResponseInfo.ok(mono { companyService.getAllShareholder(query) })
     }
 

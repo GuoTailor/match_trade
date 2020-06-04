@@ -17,6 +17,7 @@ import java.math.BigDecimal
 class StockholderInfo(
         var id: Int? = null,
         var companyId: Int? = null,     // 股票所属公司id
+        var userId: Int? = null,        // 用户id
         var amount: Int? = null,        // 数量, 该字段用于绑定股东时添加默认股票
         var realName: String? = null,   // 真实姓名
         var department: String? = null, // 所在部门

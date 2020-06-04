@@ -199,6 +199,10 @@ class TradeInfoService {
      * 查询指定时间内的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery, startTime: Date, endTime: Date): PageView<TradeInfo> {
+        if (query.order == null) {
+            query.order = "trade_time"
+            query.direction = "desc"
+        }
         val where = query.where()
                 .and("room_id").`is`(roomId)
                 .and("trade_time").greaterThan(startTime)

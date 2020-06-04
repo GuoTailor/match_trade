@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 
 /**
  * Created by gyh on 2020/3/18.
@@ -53,6 +54,9 @@ class RoleService {
     }
 
     suspend fun save(stockholder: Stockholder) = stockholderDao.save(stockholder)
+
+    suspend fun update(sh: Stockholder) = stockholderDao.update(sh.id!!, sh.userId, sh.roleId, sh.companyId, sh.realName,
+            sh.department, sh.position, sh.money ?: BigDecimal(0))
 
     suspend fun exists(userId: Int, roleId: Int, companyId: Int) = stockholderDao.exists(userId, roleId, companyId)
 

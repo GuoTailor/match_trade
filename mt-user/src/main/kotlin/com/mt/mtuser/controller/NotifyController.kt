@@ -78,4 +78,20 @@ class NotifyController {
     fun addMsg(@RequestBody msg: Mono<Notify>): Mono<ResponseInfo<Unit>> {
         return ResponseInfo.ok(mono { notifyService.addMsg(msg.awaitSingle()) })
     }
+
+    /**
+     * @api {get} /notify/announce 获取公告
+     * @apiDescription  获取公告，只能获取一条
+     * @apiName getAnnounce
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {}}
+     * @apiGroup Notify
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/announce")
+    fun getAnnounce(): Mono<ResponseInfo<Notify>> {
+        return ResponseInfo.ok(mono { notifyService.getAnnounce() })
+    }
 }

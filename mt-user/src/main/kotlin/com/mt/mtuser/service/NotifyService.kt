@@ -13,6 +13,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
@@ -54,6 +55,10 @@ class NotifyService {
         return notifyDao.countByCreateTime(lastTime) + notifyUserDao.countByUnread(userId)
     }
 
+    /**
+     * 获取了就标记为已读了，通过标记读取时间来看新消息是否为已读
+     * 假如消息的发布时间大于读取时间就未读，假如消息读取时间大于消息发布时间就已读
+     */
     suspend fun getAllMsg(query: PageQuery): PageView<Notify> {
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val notifyUserList = notifyUserDao.findAllByUserId(userId).toList()
@@ -62,8 +67,7 @@ class NotifyService {
         val lastReadTime = fundReadTime(userId)
         var where = query.where()
         where = if (msgIdList.isNotEmpty()) {
-            where.and(where("id").`in`(msgIdList)
-                    .or(where("send_type").`is`("mass")))
+            where.and(where("id").`in`(msgIdList).or(where("send_type").`is`("mass")))
         } else {
             where.and(where("send_type").`is`("mass"))
         }
@@ -75,7 +79,7 @@ class NotifyService {
                 .all()
                 .map { notify ->
                     HtmlUtils.htmlUnescape(notify.content ?: notify.title!!)
-                    val notifyUser = notifyUserList.find { it.msgId == notify.id}
+                    val notifyUser = notifyUserList.find { it.msgId == notify.id }
                     if ((notifyUser != null && notifyUser.status == NotifyUser.unread) || notify.createTime!! > lastReadTime) {
                         notify.readStatus = NotifyUser.unread
                     } else notify.readStatus = NotifyUser.read
@@ -105,5 +109,29 @@ class NotifyService {
             }
             jobList.forEach { it.await() }
         }
+    }
+
+    suspend fun getAnnounce(): Notify? {
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        val announceList = notifyUserDao.findAllUnreadByUserId(userId).toList()
+        val lastReadTime = fundReadTime(userId)
+        val sql = "select * from mt_notify " +
+                " where ((create_time > :createTime and send_type = 'mass')" +
+                if (announceList.isEmpty()) ") " else " or id in (:idList))" +
+                " and msg_type = 'announce' order by create_time desc limit 2"
+        val notifyList = connect.execute(sql)
+                .bind("createTime", lastReadTime)
+                .run { if (announceList.isNotEmpty()) this.bind("idList", announceList) else this }
+                .`as`(Notify::class.java)
+                .fetch().all().collectList().awaitSingle()
+        // 当公告只有一条时才能设置为已读，
+        // 当有多条时不能设置最新的读取时间来标记为已读，因为他实际只读了一条
+        if (notifyList.size == 1) {
+            userDao.setReadTimeByUserId(userId, Date())
+            if (announceList.contains(notifyList[0].id)) {
+                notifyUserDao.setStatusByUserIdAndMsgId(userId, notifyList[0].id!!, NotifyUser.read)
+            }
+        }
+        return if (notifyList.isEmpty()) null else notifyList[0]
     }
 }

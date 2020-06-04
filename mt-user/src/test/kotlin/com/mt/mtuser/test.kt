@@ -5,11 +5,14 @@ package com.mt.mtuser
  */
 import com.mt.mtcommon.plus
 import com.mt.mtcommon.toMillisOfDay
+import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -111,10 +114,9 @@ fun main4() {
 }
 
 fun main5(isB: Boolean?) {
-    println(null == isB)
-    println(true == isB)
-    println(false == isB)
-    println(isB is Boolean)
+    val page = PageRequest.of(0, 30, Sort.by(Sort.Direction.ASC, "nmka"))
+    println(page.sort.toString())
+    println(Sort.Direction.ASC.name)
 }
 
 fun main() = main5(null)
