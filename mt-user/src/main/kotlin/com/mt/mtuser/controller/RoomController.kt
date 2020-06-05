@@ -299,6 +299,7 @@ class RoomController {
 
     /**
      * @api {gut} /room/maxMinPrice 获取房间的最大报价和最小的报价
+     * @apiDeprecated 弃用，使用 (#Room:getHomepageData)替代
      * @apiDescription  获取房间的最大报价和最小的报价
      * @apiName getMaxMinPrice
      * @apiVersion 0.0.1
@@ -314,6 +315,28 @@ class RoomController {
         return ResponseInfo.ok(mono {
             roomService.getMaxMinPrice(roomId)
         })
+    }
+
+    /**
+     * @api {gut} /room/homepage 获取房间的主页数据
+     * @apiDescription 获取房间的成交最高价和最低价， 最新收盘价，相对昨日收盘价的涨跌幅和开盘次数
+     * @apiName getHomepageData
+     * @apiVersion 0.0.1
+     * @apiParam {String} roomId 房间id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"closePrice": 0,"tradesNumber": 199,"difference": 0,"minPrice": 0,"maxPrice": 0}}
+     * @apiSuccess (成功返回) {Decimal} closePrice 收盘价
+     * @apiSuccess (成功返回) {Long} tradesNumber 开盘次数
+     * @apiSuccess (成功返回) {Decimal} difference 涨跌幅（用收盘价 - 昨日收盘价 可能为负数）
+     * @apiSuccess (成功返回) {Decimal} minPrice 最低价
+     * @apiSuccess (成功返回) {Decimal} maxPrice 最高价
+     * @apiGroup Room
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/homepage")
+    fun getHomepageData(roomId: String): Mono<ResponseInfo<Map<String, Any>>> {
+        return ResponseInfo.ok(mono { roomService.getHomepageData(roomId) })
     }
 
     /**

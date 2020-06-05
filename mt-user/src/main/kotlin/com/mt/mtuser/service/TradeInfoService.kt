@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.data.r2dbc.core.from
-import org.springframework.data.relational.core.query.Criteria
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -185,7 +184,7 @@ class TradeInfoService {
      * 获取指定时间范围的最大和最小报价
      */
     suspend fun getMaxMinPrice(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
-        return finMaxMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
+        return findMaxMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
     }
 
     /**
@@ -199,10 +198,6 @@ class TradeInfoService {
      * 查询指定时间内的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery, startTime: Date, endTime: Date): PageView<TradeInfo> {
-        if (query.order == null) {
-            query.order = "trade_time"
-            query.direction = "desc"
-        }
         val where = query.where()
                 .and("room_id").`is`(roomId)
                 .and("trade_time").greaterThan(startTime)
@@ -264,7 +259,10 @@ class TradeInfoService {
 
     }
 
-    suspend fun finMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
+    /**
+     * 获取指定时间范围的最大和最小报价
+     */
+    suspend fun findMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
         return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
                 " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
                 " where trade_time between :startTime and :endTime " +

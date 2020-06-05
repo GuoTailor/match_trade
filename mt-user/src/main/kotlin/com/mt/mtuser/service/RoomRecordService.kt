@@ -26,4 +26,6 @@ class RoomRecordService {
         return roomRecordDao.countByStartTimeAndCompanyId(time, companyId)
     }
 
+    suspend fun countByCompanyId(companyId: Int) = roomRecordDao.countByCompanyId(companyId)
+
 }

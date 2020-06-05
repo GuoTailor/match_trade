@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component
 class MatchOutProcessor {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val json = jacksonObjectMapper()
+
     @Autowired
     private lateinit var peekPushService: PeekPushService
 
@@ -47,7 +48,13 @@ class MatchOutProcessor {
             }
         } else {
             notifyResult.userId?.let {
-                SocketSessionStore.userInfoMap[it]?.session?.send(ResponseInfo.ok("操作结果通知", notifyResult), NotifyReq.notifyResult)
+                val req = when (notifyResult.obj) {
+                    addOrderNotify -> NotifyReq.offerResult
+                    cancelOrderNotify -> NotifyReq.cancelResult
+                    addRivalNotify -> NotifyReq.rivalResult
+                    else -> error("不支持的通知的对象 ${notifyResult.obj}")
+                }
+                SocketSessionStore.userInfoMap[it]?.session?.send(ResponseInfo.ok("操作结果通知", notifyResult), req)
                         ?.doOnNext { msg -> logger.info(msg) }?.subscribe()
             }
             if (notifyResult.obj == addOrderNotify || notifyResult.obj == cancelOrderNotify) {

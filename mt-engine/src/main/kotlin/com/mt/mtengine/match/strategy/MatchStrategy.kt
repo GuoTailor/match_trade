@@ -164,26 +164,41 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         internal fun addData(redisUtil: RedisUtil, sink: MatchSink): Boolean {
             val data = tempAdd.getAndSet(null)
             return if (data != null) {
-                if (data is OrderParam && addOrder(data)) {
-                    redisUtil.putUserOrder(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
-                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
-                    if (updateTopThree(data)) {
-                        sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                if (data is OrderParam) {
+                    val result = addOrder(data)
+                    if (result) {
+                        redisUtil.putUserOrder(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                        if (updateTopThree(data)) {
+                            sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
+                            redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                        }
+                    } else {
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())
                     }
-                    true
-                } else if (data is CancelOrder && cancelOrder(data)) {
-                    redisUtil.deleteUserOrder(data).subscribeOn(Schedulers.elastic()).subscribe()
-                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
-                    if (updateTopThree(data)) {
-                        sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                    result
+                } else if (data is CancelOrder) {
+                    val result = cancelOrder(data)
+                    if (result) {
+                        redisUtil.deleteUserOrder(data).subscribeOn(Schedulers.elastic()).subscribe()
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                        if (updateTopThree(data)) {
+                            sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
+                            redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                        }
+                    } else {
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())
                     }
-                    true
+                    result
                 } else if (data is RivalInfo && addRival(data)) {
-                    redisUtil.putUserRival(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
-                    sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
-                    true
+                    val result = addRival(data)
+                    if (result) {
+                        redisUtil.putUserRival(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
+                    } else {
+                        sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())
+                    }
+                    result
                 } else false
             } else false
         }

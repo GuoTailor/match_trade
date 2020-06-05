@@ -12,8 +12,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.extra.math.max
+import java.math.BigDecimal
 
 /**
  * Created by gyh on 2020/4/14.
@@ -40,17 +44,15 @@ class RoomSocketService {
     /**
      * 当有用户上下线是通知人数变化
      */
-    fun onNumberChange(roomId: String): Mono<*> {
-        var result: Mono<*>? = null
-        store.userInfoMap.forEach { _, info ->
-            if (info.roomId == roomId) {
-                val size = store.getOnLineSize(roomId)
-                val temp = info.session.send(ResponseInfo.ok("人数变化", size), NotifyReq.notifyNumberChange)
-                        .doOnNext { logger.info(it) }
-                result = if (result == null) temp else result!!.zipWith(temp)
-            }
-        }
-        return result ?: Mono.empty<Any>()
+    fun onNumberChange(roomId: String): Mono<Unit> {
+        return Flux.fromIterable(store.userInfoMap.entries)
+                .filter { it.value.roomId == roomId }
+                .flatMap { entry ->
+                    val size = store.getOnLineSize(roomId)
+                    entry.value.session.send(ResponseInfo.ok("人数变化", size), NotifyReq.notifyNumberChange)
+                            .doOnNext { logger.info(it) }
+                }.then(Mono.just(Unit))
+                .defaultIfEmpty(Unit)
     }
 
     /**
@@ -114,12 +116,16 @@ class RoomSocketService {
     /**
      * 获取对手
      */
-    fun getAllRival(isBuy: Boolean): Mono<List<OrderParam>> {
+    fun getAllRival(): Mono<List<OrderParam>> {
         return BaseUser.getcurrentUser().flatMap { user ->
             val userRoomInfo = store.getRoomInfo(user.id!!) ?: error("错误，用户没有加入房间")
-            redisUtil.getUserOrder(userRoomInfo.roomId)
-                    .filter { it.isBuy == isBuy }
-                    .collectList()
+            val lostOrder = redisUtil.getLastUserOrder(user.id!!, userRoomInfo.roomId)
+            val orderList = fun(price: BigDecimal, isBuy: Boolean): Mono<MutableList<OrderParam>> {
+                return redisUtil.getUserOrder(userRoomInfo.roomId)
+                        .filter { it.isBuy != isBuy && if (isBuy) price > it.price else price < it.price }
+                        .collectList()
+            }
+            lostOrder.flatMap { orderList(it.price ?: BigDecimal(0), it.isBuy!!) }
         }
     }
 
@@ -135,7 +141,7 @@ class RoomSocketService {
             redisUtil.getRoomRecord(userRoomInfo.roomId)
         }.map {
             if (it.mode == RoomEnum.CLICK.mode || it.mode == RoomEnum.TIMING.mode || it.mode == RoomEnum.BICKER.mode) {
-                if (it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) - 60_000 >= System.currentTimeMillis()) {
+                if (it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) - 60_000 <= System.currentTimeMillis()) {
                     error("定时撮合类房间结束前一分钟不能撤单")
                 }
             }
@@ -186,20 +192,15 @@ class RoomSocketService {
             // quartzManager.addJob(MatchStartJobInfo(roomRecord))
         } else {
             logger.info("收到房间关闭通知 {}", event.roomId)
-            SocketSessionStore.userInfoMap.forEach { _, userRoomInfo ->
+            val roomCloseNotify = fun(userRoomInfo: SocketSessionStore.UserRoomInfo) {
                 if (event.roomId == userRoomInfo.roomId) {
                     userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyReq.notifyRoomClose)
                             .doOnNext { logger.info(it) }
                             .subscribeOn(Schedulers.elastic()).subscribe()
                 }
             }
-            SocketSessionStore.peekInfoMap.forEach { _, userRoomInfo ->
-                if (event.roomId == userRoomInfo.roomId) {
-                    userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyReq.notifyRoomClose)
-                            .doOnNext { logger.info(it) }
-                            .subscribeOn(Schedulers.elastic()).subscribe()
-                }
-            }
+            SocketSessionStore.userInfoMap.forEach { _, userRoomInfo -> roomCloseNotify(userRoomInfo) }
+            SocketSessionStore.peekInfoMap.forEach { _, userRoomInfo -> roomCloseNotify(userRoomInfo) }
         }
     }
 

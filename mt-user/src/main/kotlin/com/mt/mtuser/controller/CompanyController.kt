@@ -288,7 +288,7 @@ class CompanyController {
      * @apiVersion 0.0.1
      * @apiSuccess {Long} tradesCapacity 今日交易量
      * @apiSuccess {Long} tradesVolume 今日交易金额
-     * @apiSuccess {Integer} tradesNumber 今日交易次数
+     * @apiSuccess {Integer} tradesNumber 今日开盘次数
      * @apiSuccess {Decimal} closingPrice 收盘价
      * @apiSuccess {Decimal} openingPrice 开盘价
      * @apiSuccess {Decimal} avgPrice 平均价
@@ -305,7 +305,7 @@ class CompanyController {
             val data = HashMap<String, Any>()   // TODO 想办法为每个公司加缓存，可以考虑替换协程为Mono
             data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId()   // 交易量
             data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId()     // 交易金额
-            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId()         // 交易次数
+            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId()         // 开盘次数
             data["closingPrice"] = tradeInfoService.getTodayOpeningPriceByCompanyId()       // 收盘价
             data["openingPrice"] = tradeInfoService.getYesterdayClosingPriceByCompanyId()   // 开盘价
             data["avgPrice"] = tradeInfoService.getAvgPriceByCompanyId()                    // 平均价

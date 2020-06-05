@@ -9,12 +9,16 @@ import org.apache.rocketmq.common.message.MessageConst
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.messaging.support.MessageBuilder
 import java.math.BigDecimal
 import java.util.*
 
 @SpringBootTest
 class MtEngineApplicationTests {
+    @Autowired
+    lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
+
     @Autowired
     lateinit var matchSink: MatchSink
 
@@ -36,6 +40,14 @@ class MtEngineApplicationTests {
         redisUtil.putUserOrder(OrderParam(userId = 1, roomId = "nm", price = BigDecimal(0), time = date), Util.encoderDate("2020-5-15 00:00:01"))
                 .flatMap { redisUtil.updateUserOrder(OrderParam(userId = 1, roomId = "nm", price = BigDecimal(0), time = date, tradePrice = BigDecimal(223))) }
                 .log().block()
+    }
+
+    @Test
+    fun testTack() {
+        val s = redisTemplate.opsForList().range("nmka_12:1", -1, -1)
+                .cast(Integer::class.java)
+                .next().block()
+        println(s)
     }
 
 }

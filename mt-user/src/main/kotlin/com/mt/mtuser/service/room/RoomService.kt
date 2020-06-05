@@ -9,10 +9,7 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.schedule.*
-import com.mt.mtuser.service.R2dbcService
-import com.mt.mtuser.service.RedisUtil
-import com.mt.mtuser.service.RoleService
-import com.mt.mtuser.service.TradeInfoService
+import com.mt.mtuser.service.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
@@ -62,6 +59,9 @@ class RoomService {
 
     @Autowired
     private lateinit var tradeInfoService: TradeInfoService
+
+    @Autowired
+    lateinit var roomRecordService: RoomRecordService
 
     @Autowired
     private lateinit var roomRecordDao: RoomRecordDao
@@ -191,8 +191,25 @@ class RoomService {
 
     suspend fun getMaxMinPrice(roomId: String): Map<String, BigDecimal> {
         val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
-                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")  // TODO 返回0
         return tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+    }
+
+    suspend fun getHomepageData(roomId: String): Map<String, Any> {
+        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
+                ?: return mapOf("minPrice" to 0, "maxPrice" to 0, "closePrice" to 0,
+                        "tradesNumber" to 0, "difference" to 0)
+        val maxMinPrice = tradeInfoService.findMaxMinPriceByTradeTimeAndRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+        val closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+        val tradesNumber = roomRecordService.countByCompanyId(roomRecord.companyId!!)
+        val yesterdayClosingPrice = tradeInfoService.getYesterdayClosingPriceByRoomId(roomId)
+        val result = mutableMapOf(
+                "closePrice" to closePrice,
+                "tradesNumber" to tradesNumber,
+                "difference" to closePrice.subtract(yesterdayClosingPrice)
+        )
+        result.putAll(maxMinPrice)
+        return result
     }
 
     /**
@@ -201,6 +218,7 @@ class RoomService {
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
         val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
                 ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
+        getBaseRoomDao<BaseRoom>(roomRecord.mode!!).findByRoomId(roomId) ?: return PageView()   // 如果更改了模式就返回空
         return tradeInfoService.findOrder(roomId, query, roomRecord.startTime!!, roomRecord.endTime!!)
     }
 
@@ -222,6 +240,9 @@ class RoomService {
         restList
     }
 
+    /**
+     * 获取房间报价范围
+     */
     suspend fun getRoomScope(roomId: String): Map<String, String> {
         val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
         val highScope: String
@@ -229,7 +250,6 @@ class RoomService {
         if (roomRecord == null) {
             highScope = "0"
             lowScope = "0"
-            logger.info("-------------- 第一次交交易 -----------")
         } else {
             val closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
             highScope = closePrice.multiply(BigDecimal(2.0)).toPlainString()

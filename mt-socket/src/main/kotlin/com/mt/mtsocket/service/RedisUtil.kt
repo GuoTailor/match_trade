@@ -67,6 +67,15 @@ class RedisUtil {
     }
 
     /**
+     * 获取队列的最后一个元素，也就是最后一个报价
+     */
+    fun getLastUserOrder(userId: Int, roomId: String) : Mono<OrderParam> {
+        return redisTemplate.opsForList().range("$userOrderKey${roomId}:${userId}", -1, -1)
+                .cast(OrderParam::class.java)
+                .next()
+    }
+
+    /**
      * 获取全部元素
      */
     fun getUserOrder(order: OrderParam): Flux<OrderParam> {

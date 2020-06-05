@@ -40,8 +40,8 @@ object MatchUtil {
     }
 
     /**
-     * 基础验证，包括用户id，房间号，报价及数量，
-     * 不验证买卖身份和报价时间
+     * 基础验证，包括用户id，房间号，报价是否为空及数量，
+     * 不验证买卖身份、报价时间和报价是否满足需求
      */
     fun verify(buy: OrderParam?, sell: OrderParam?): Boolean {
         if (buy != null && sell != null) {

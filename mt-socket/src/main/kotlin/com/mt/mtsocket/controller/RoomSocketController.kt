@@ -119,7 +119,6 @@ class RoomSocketController {
      * @api {connect} /getAllRival 获取对手
      * @apiDescription 获取对手，不支持分页
      * @apiName getAllRival
-     * @apiParam {Boolean} isBuy true：获取买家；false：获取卖家
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"data":{"code":0,"msg":"成功","data":null},"req":12}
@@ -127,8 +126,8 @@ class RoomSocketController {
      * @apiPermission user
      */
     @RequestMapping("/getAllRival")
-    fun getAllRival(@RequestParam isBuy: Boolean): Mono<ResponseInfo<List<OrderParam>>> {
-        return ResponseInfo.ok(roomSocketService.getAllRival(isBuy))
+    fun getAllRival(): Mono<ResponseInfo<List<OrderParam>>> {
+        return ResponseInfo.ok(roomSocketService.getAllRival())
     }
 
     /**

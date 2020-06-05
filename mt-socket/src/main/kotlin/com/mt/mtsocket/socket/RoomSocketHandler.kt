@@ -31,6 +31,7 @@ class RoomSocketHandler : SocketHandler() {
                 .then(sessionHandler.connectionClosed())
         return roomSocketService.enterRoom(roomId)
                 .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.mode!!, userName) }
+                .flatMap { roomSocketService.onNumberChange(roomId) }
                 .onErrorResume {
                     sessionHandler.send(ResponseInfo.failed("错误: ${it.message}"), NotifyReq.errorNotify)
                             .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() }
@@ -39,7 +40,7 @@ class RoomSocketHandler : SocketHandler() {
 
     override fun onDisconnected(queryMap: Map<String, String>, sessionHandler: WebSocketSessionHandler): Mono<*> {
         val roomId = queryMap["roomId"].toString()
-        return  BaseUser.getcurrentUser()
+        return BaseUser.getcurrentUser()
                 .map { SocketSessionStore.removeUser(it.id!!) }
                 .flatMap { roomSocketService.onNumberChange(roomId) }
     }

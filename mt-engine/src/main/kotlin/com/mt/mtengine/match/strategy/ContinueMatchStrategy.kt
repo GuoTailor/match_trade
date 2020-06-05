@@ -38,7 +38,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             val buyOrder = roomInfo.buyOrderList.pollLast()!!       // 最后一个报价最高
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!     // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
-                if (buyOrder.price!! > sellOrder.price) {
+                if (buyOrder.price!! >= sellOrder.price) {          // 特殊需求，报价相同也成交
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                             .subscribeOn(Schedulers.elastic()).subscribe {
                                 roomInfo.topThree.lastOrder = it.toOrderInfo()
