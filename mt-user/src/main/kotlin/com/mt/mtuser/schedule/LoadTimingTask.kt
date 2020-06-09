@@ -17,9 +17,16 @@ class LoadTimingTask : ApplicationRunner {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     @Autowired
     private lateinit var roomService: RoomService
+    @Autowired
+    private lateinit var quartzManager: QuartzManager
 
     override fun run(args: ApplicationArguments?) = runBlocking {
-        roomService.loadTimingTask()
+        try {
+            roomService.loadTimingTask()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        quartzManager.addJob(ComputeKlineJobInfo())
         logger.info("启动完成》》")
     }
 }

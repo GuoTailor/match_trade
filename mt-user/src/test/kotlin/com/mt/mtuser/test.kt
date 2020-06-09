@@ -3,24 +3,22 @@ package com.mt.mtuser
 /**
  * Created by gyh on 2020/3/26.
  */
+import com.mt.mtcommon.minus
 import com.mt.mtcommon.plus
+import com.mt.mtcommon.toDate
 import com.mt.mtcommon.toMillisOfDay
-import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.common.Util
+import com.mt.mtuser.entity.logger
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.sql.Time
-import java.time.Duration
 import java.time.LocalTime
+import java.time.temporal.ChronoField
 import java.util.*
-import kotlin.concurrent.thread
+import java.util.concurrent.CountDownLatch
+import javax.swing.UIManager.get
 import kotlin.system.measureTimeMillis
 
 fun main1() = runBlocking<Unit> {
@@ -101,22 +99,71 @@ fun main3() = runBlocking<Unit> {
 }
 
 fun main4() {
-    val time = LocalTime.now() + LocalTime.now()
-    println(time)
+    val time = System.currentTimeMillis()
+    val c = Calendar.getInstance()
+    c.timeInMillis = Util.encoderDate("2020-06-9 15:00:00")
+    c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) / 15 * 15)    // 15的倍数
+    c.set(Calendar.SECOND, 0)
+    c.set(Calendar.MILLISECOND, 0)
+
+    println(c.timeInMillis)
+    println(c.get(Calendar.MINUTE) % 15 == 0)
+    println(Date(c.timeInMillis))
+
+    for (i in 0..5 step 2) {
+        println(i)
+    }
+
+    println()
     val date = Date(1591340280000)
     println(date)
     println(Date(1589504123171))
-    println((12.0 + 15.0) / 2)
-    val t = LocalTime.ofSecondOfDay(3600)
-    println(t.toNanoOfDay())
-    Thread.sleep(1)
-    println(t.toNanoOfDay())
 }
 
-fun main5(isB: Boolean?) {
-    val page = PageRequest.of(0, 30, Sort.by(Sort.Direction.ASC, "nmka"))
-    println(page.sort.toString())
-    println(Sort.Direction.ASC.name)
+// 模仿事件流
+fun events(): Flow<Int> = (1..3).asFlow().onEach { delay(100) }
+
+fun main5() = runBlocking {
+    events().collect { event ->
+        launch(Dispatchers.Default) {
+            delay(1000)
+            println("Event: $event ${Thread.currentThread().name}")
+        }
+    }
+    println("Done")
 }
 
-fun main() = main4()
+fun main6() = runBlocking {
+    val list = events().toList()
+    val count = CountDownLatch(list.size)
+    list.forEach { event ->
+        launch(Dispatchers.Default) {
+            delay(1000)
+            println("Event: $event ${Thread.currentThread().name}")
+            count.countDown()
+        }
+    }
+    println("Done")
+    count.await()
+    println("Done")
+}
+
+fun main7() {
+    val lastTime = 1591689060000
+    val now = 1591689120033
+    println(Util.createDate(lastTime))
+    println(Util.createDate(now))
+    for (time in lastTime..now step 60_000) {
+        logger.info("计算k线 {}", Util.createDate(time))
+    }
+    val list = listOf(12, 13, 14)
+    list.forEach {
+        if (it == 13) {
+            return@forEach
+        }
+        println(it)
+    }
+    println(Date(1589616000000))
+}
+
+fun main() = main7()

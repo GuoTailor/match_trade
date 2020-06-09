@@ -32,7 +32,7 @@ object MatchManager {
 
     fun add(rival: RivalInfo): Boolean {
         strategyList.forEach {
-            if (it.isCan(rival.flag ?: "")) {
+            if (it.isCan(rival.mode ?: "")) {
                 return it.tryAddRival(rival)
             }
         }

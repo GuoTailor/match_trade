@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : postgres_localhost
+ Source Server         : localhost_5432
  Source Server Type    : PostgreSQL
  Source Server Version : 120002
  Source Host           : localhost:5432
@@ -12,9 +12,65 @@
  Target Server Version : 120002
  File Encoding         : 65001
 
- Date: 27/05/2020 17:21:09
+ Date: 09/06/2020 22:19:12
 */
 
+
+-- ----------------------------
+-- Sequence structure for mt_15m_kline_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."mt_15m_kline_id_seq";
+CREATE SEQUENCE "public"."mt_15m_kline_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for mt_1d_kline_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."mt_1d_kline_id_seq";
+CREATE SEQUENCE "public"."mt_1d_kline_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for mt_1h_kline_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."mt_1h_kline_id_seq";
+CREATE SEQUENCE "public"."mt_1h_kline_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for mt_1m_kline_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."mt_1m_kline_id_seq";
+CREATE SEQUENCE "public"."mt_1m_kline_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+-- ----------------------------
+-- Sequence structure for mt_4h_kline_id_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."mt_4h_kline_id_seq";
+CREATE SEQUENCE "public"."mt_4h_kline_id_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1
+CYCLE ;
 
 -- ----------------------------
 -- Sequence structure for mt_company_id_seq
@@ -32,17 +88,6 @@ CACHE 1;
 -- ----------------------------
 DROP SEQUENCE IF EXISTS "public"."mt_company_room_id_seq";
 CREATE SEQUENCE "public"."mt_company_room_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
-
--- ----------------------------
--- Sequence structure for mt_kline_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."mt_kline_id_seq";
-CREATE SEQUENCE "public"."mt_kline_id_seq" 
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
@@ -160,6 +205,161 @@ START 1
 CACHE 1;
 
 -- ----------------------------
+-- Table structure for mt_15m_kline
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_15m_kline";
+CREATE TABLE "public"."mt_15m_kline" (
+  "id" int8 NOT NULL DEFAULT nextval('mt_15m_kline_id_seq'::regclass),
+  "stock_id" int4 NOT NULL,
+  "time" timestamp(6) NOT NULL,
+  "trades_capacity" int8 NOT NULL,
+  "trades_volume" float8 NOT NULL,
+  "trades_number" int4 NOT NULL,
+  "avg_price" float8 NOT NULL,
+  "max_price" float8 NOT NULL,
+  "min_price" float8 NOT NULL,
+  "open_price" float8 NOT NULL,
+  "close_price" float8 NOT NULL,
+  "company_id" int4 NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_15m_kline"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_15m_kline"."time" IS '值的生成时间';
+COMMENT ON COLUMN "public"."mt_15m_kline"."trades_capacity" IS '交易量';
+COMMENT ON COLUMN "public"."mt_15m_kline"."trades_volume" IS '交易金额';
+COMMENT ON COLUMN "public"."mt_15m_kline"."trades_number" IS '交易次数';
+COMMENT ON COLUMN "public"."mt_15m_kline"."avg_price" IS '平均价格';
+COMMENT ON COLUMN "public"."mt_15m_kline"."max_price" IS '最高价';
+COMMENT ON COLUMN "public"."mt_15m_kline"."min_price" IS '最低价';
+COMMENT ON COLUMN "public"."mt_15m_kline"."open_price" IS '开盘价';
+COMMENT ON COLUMN "public"."mt_15m_kline"."close_price" IS '收盘价';
+COMMENT ON COLUMN "public"."mt_15m_kline"."company_id" IS '公司id';
+
+-- ----------------------------
+-- Table structure for mt_1d_kline
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_1d_kline";
+CREATE TABLE "public"."mt_1d_kline" (
+  "id" int8 NOT NULL DEFAULT nextval('mt_1d_kline_id_seq'::regclass),
+  "stock_id" int4 NOT NULL,
+  "time" timestamp(6) NOT NULL,
+  "trades_capacity" int8 NOT NULL,
+  "trades_volume" float8 NOT NULL,
+  "trades_number" int4 NOT NULL,
+  "avg_price" float8 NOT NULL,
+  "max_price" float8 NOT NULL,
+  "min_price" float8 NOT NULL,
+  "open_price" float8 NOT NULL,
+  "close_price" float8 NOT NULL,
+  "company_id" int4 NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_1d_kline"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_1d_kline"."time" IS '值的生成时间';
+COMMENT ON COLUMN "public"."mt_1d_kline"."trades_capacity" IS '交易量';
+COMMENT ON COLUMN "public"."mt_1d_kline"."trades_volume" IS '交易金额';
+COMMENT ON COLUMN "public"."mt_1d_kline"."trades_number" IS '交易次数';
+COMMENT ON COLUMN "public"."mt_1d_kline"."avg_price" IS '平均价格';
+COMMENT ON COLUMN "public"."mt_1d_kline"."max_price" IS '最高价';
+COMMENT ON COLUMN "public"."mt_1d_kline"."min_price" IS '最低价';
+COMMENT ON COLUMN "public"."mt_1d_kline"."open_price" IS '开盘价';
+COMMENT ON COLUMN "public"."mt_1d_kline"."close_price" IS '收盘价';
+COMMENT ON COLUMN "public"."mt_1d_kline"."company_id" IS '公司id';
+
+-- ----------------------------
+-- Table structure for mt_1h_kline
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_1h_kline";
+CREATE TABLE "public"."mt_1h_kline" (
+  "id" int8 NOT NULL DEFAULT nextval('mt_1h_kline_id_seq'::regclass),
+  "stock_id" int4 NOT NULL,
+  "time" timestamp(6) NOT NULL,
+  "trades_capacity" int8 NOT NULL,
+  "trades_volume" float8 NOT NULL,
+  "trades_number" int4 NOT NULL,
+  "avg_price" float8 NOT NULL,
+  "max_price" float8 NOT NULL,
+  "min_price" float8 NOT NULL,
+  "open_price" float8 NOT NULL,
+  "close_price" float8 NOT NULL,
+  "company_id" int4 NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_1h_kline"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_1h_kline"."time" IS '值的生成时间';
+COMMENT ON COLUMN "public"."mt_1h_kline"."trades_capacity" IS '交易量';
+COMMENT ON COLUMN "public"."mt_1h_kline"."trades_volume" IS '交易金额';
+COMMENT ON COLUMN "public"."mt_1h_kline"."trades_number" IS '交易次数';
+COMMENT ON COLUMN "public"."mt_1h_kline"."avg_price" IS '平均价格';
+COMMENT ON COLUMN "public"."mt_1h_kline"."max_price" IS '最高价';
+COMMENT ON COLUMN "public"."mt_1h_kline"."min_price" IS '最低价';
+COMMENT ON COLUMN "public"."mt_1h_kline"."open_price" IS '开盘价';
+COMMENT ON COLUMN "public"."mt_1h_kline"."close_price" IS '收盘价';
+COMMENT ON COLUMN "public"."mt_1h_kline"."company_id" IS '公司id';
+
+-- ----------------------------
+-- Table structure for mt_1m_kline
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_1m_kline";
+CREATE TABLE "public"."mt_1m_kline" (
+  "id" int8 NOT NULL DEFAULT nextval('mt_1m_kline_id_seq'::regclass),
+  "stock_id" int4 NOT NULL,
+  "time" timestamp(6) NOT NULL,
+  "trades_capacity" int8 NOT NULL,
+  "trades_volume" float8 NOT NULL,
+  "trades_number" int4 NOT NULL,
+  "avg_price" float8 NOT NULL,
+  "max_price" float8 NOT NULL,
+  "min_price" float8 NOT NULL,
+  "open_price" float8 NOT NULL,
+  "close_price" float8 NOT NULL,
+  "company_id" int4 NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_1m_kline"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_1m_kline"."time" IS '值的生成时间';
+COMMENT ON COLUMN "public"."mt_1m_kline"."trades_capacity" IS '交易量';
+COMMENT ON COLUMN "public"."mt_1m_kline"."trades_volume" IS '交易金额';
+COMMENT ON COLUMN "public"."mt_1m_kline"."trades_number" IS '交易次数';
+COMMENT ON COLUMN "public"."mt_1m_kline"."avg_price" IS '平均价格';
+COMMENT ON COLUMN "public"."mt_1m_kline"."max_price" IS '最高价';
+COMMENT ON COLUMN "public"."mt_1m_kline"."min_price" IS '最低价';
+COMMENT ON COLUMN "public"."mt_1m_kline"."open_price" IS '开盘价';
+COMMENT ON COLUMN "public"."mt_1m_kline"."close_price" IS '收盘价';
+COMMENT ON COLUMN "public"."mt_1m_kline"."company_id" IS '公司id';
+
+-- ----------------------------
+-- Table structure for mt_4h_kline
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."mt_4h_kline";
+CREATE TABLE "public"."mt_4h_kline" (
+  "id" int8 NOT NULL DEFAULT nextval('mt_4h_kline_id_seq'::regclass),
+  "stock_id" int4 NOT NULL,
+  "time" timestamp(6) NOT NULL,
+  "trades_capacity" int8 NOT NULL,
+  "trades_volume" float8 NOT NULL,
+  "trades_number" int4 NOT NULL,
+  "avg_price" float8 NOT NULL,
+  "max_price" float8 NOT NULL,
+  "min_price" float8 NOT NULL,
+  "open_price" float8 NOT NULL,
+  "close_price" float8 NOT NULL,
+  "company_id" int4 NOT NULL
+)
+;
+COMMENT ON COLUMN "public"."mt_4h_kline"."stock_id" IS '股票id';
+COMMENT ON COLUMN "public"."mt_4h_kline"."time" IS '值的生成时间';
+COMMENT ON COLUMN "public"."mt_4h_kline"."trades_capacity" IS '交易量';
+COMMENT ON COLUMN "public"."mt_4h_kline"."trades_volume" IS '交易金额';
+COMMENT ON COLUMN "public"."mt_4h_kline"."trades_number" IS '交易次数';
+COMMENT ON COLUMN "public"."mt_4h_kline"."avg_price" IS '平均价格';
+COMMENT ON COLUMN "public"."mt_4h_kline"."max_price" IS '最高价';
+COMMENT ON COLUMN "public"."mt_4h_kline"."min_price" IS '最低价';
+COMMENT ON COLUMN "public"."mt_4h_kline"."open_price" IS '开盘价';
+COMMENT ON COLUMN "public"."mt_4h_kline"."close_price" IS '收盘价';
+COMMENT ON COLUMN "public"."mt_4h_kline"."company_id" IS '公司id';
+
+-- ----------------------------
 -- Table structure for mt_company
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_company";
@@ -210,28 +410,6 @@ COMMENT ON COLUMN "public"."mt_company_room"."room_id" IS '房间id';
 COMMENT ON TABLE "public"."mt_company_room" IS '公司房间关系表';
 
 -- ----------------------------
--- Table structure for mt_kline
--- ----------------------------
-DROP TABLE IF EXISTS "public"."mt_kline";
-CREATE TABLE "public"."mt_kline" (
-  "id" int4 NOT NULL DEFAULT nextval('mt_kline_id_seq'::regclass),
-  "stock_id" int4 NOT NULL,
-  "opening_price" numeric(11,4) NOT NULL,
-  "closing_price" numeric(11,4) NOT NULL,
-  "top_price" numeric(11,4) NOT NULL,
-  "bottom_pice" numeric(11,4) NOT NULL,
-  "time" timestamp(6) NOT NULL DEFAULT now()
-)
-;
-COMMENT ON COLUMN "public"."mt_kline"."stock_id" IS '股票id';
-COMMENT ON COLUMN "public"."mt_kline"."opening_price" IS '开盘价';
-COMMENT ON COLUMN "public"."mt_kline"."closing_price" IS '收盘价';
-COMMENT ON COLUMN "public"."mt_kline"."top_price" IS '最高价';
-COMMENT ON COLUMN "public"."mt_kline"."bottom_pice" IS '最低价';
-COMMENT ON COLUMN "public"."mt_kline"."time" IS '创建时间';
-COMMENT ON TABLE "public"."mt_kline" IS '股票k值';
-
--- ----------------------------
 -- Table structure for mt_notify
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."mt_notify";
@@ -242,7 +420,8 @@ CREATE TABLE "public"."mt_notify" (
   "send_id" int4 NOT NULL,
   "send_type" varchar(8) COLLATE "pg_catalog"."default" NOT NULL,
   "status" varchar(8) COLLATE "pg_catalog"."default" NOT NULL,
-  "create_time" timestamp(0) NOT NULL DEFAULT now()
+  "create_time" timestamp(0) NOT NULL DEFAULT now(),
+  "msg_type" varchar(8) COLLATE "pg_catalog"."default" NOT NULL
 )
 ;
 COMMENT ON COLUMN "public"."mt_notify"."content" IS '消息内容';
@@ -251,6 +430,7 @@ COMMENT ON COLUMN "public"."mt_notify"."send_id" IS '发送者id';
 COMMENT ON COLUMN "public"."mt_notify"."send_type" IS '发送类型 mass：群发或assign：指定';
 COMMENT ON COLUMN "public"."mt_notify"."status" IS '消息状态 progress：发送中或cancel：取消发送';
 COMMENT ON COLUMN "public"."mt_notify"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."mt_notify"."msg_type" IS '消息类型 notify：通知 announce：公告';
 
 -- ----------------------------
 -- Table structure for mt_notify_user
@@ -602,9 +782,44 @@ COMMENT ON COLUMN "public"."mt_user"."read_time" IS '最后拉取消息时间';
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
+ALTER SEQUENCE "public"."mt_15m_kline_id_seq"
+OWNED BY "public"."mt_15m_kline"."id";
+SELECT setval('"public"."mt_15m_kline_id_seq"', 2, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."mt_1d_kline_id_seq"
+OWNED BY "public"."mt_1d_kline"."id";
+SELECT setval('"public"."mt_1d_kline_id_seq"', 8, true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."mt_1h_kline_id_seq"
+OWNED BY "public"."mt_1h_kline"."id";
+SELECT setval('"public"."mt_1h_kline_id_seq"', 2, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."mt_1m_kline_id_seq"
+OWNED BY "public"."mt_1m_kline"."id";
+SELECT setval('"public"."mt_1m_kline_id_seq"', 2, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+ALTER SEQUENCE "public"."mt_4h_kline_id_seq"
+OWNED BY "public"."mt_4h_kline"."id";
+SELECT setval('"public"."mt_4h_kline_id_seq"', 2, false);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
 ALTER SEQUENCE "public"."mt_company_id_seq"
 OWNED BY "public"."mt_company"."id";
-SELECT setval('"public"."mt_company_id_seq"', 3, true);
+SELECT setval('"public"."mt_company_id_seq"', 4, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -616,30 +831,23 @@ SELECT setval('"public"."mt_company_room_id_seq"', 2, false);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-ALTER SEQUENCE "public"."mt_kline_id_seq"
-OWNED BY "public"."mt_kline"."id";
-SELECT setval('"public"."mt_kline_id_seq"', 2, false);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
 ALTER SEQUENCE "public"."mt_notify_id_seq"
 OWNED BY "public"."mt_notify"."id";
-SELECT setval('"public"."mt_notify_id_seq"', 7, true);
+SELECT setval('"public"."mt_notify_id_seq"', 10, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_notify_user_id_seq"
 OWNED BY "public"."mt_notify_user"."id";
-SELECT setval('"public"."mt_notify_user_id_seq"', 4, true);
+SELECT setval('"public"."mt_notify_user_id_seq"', 5, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_positions_id_seq"
 OWNED BY "public"."mt_positions"."id";
-SELECT setval('"public"."mt_positions_id_seq"', 10, true);
+SELECT setval('"public"."mt_positions_id_seq"', 58, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -653,7 +861,7 @@ SELECT setval('"public"."mt_role_id_seq"', 3, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_room_record _id_seq"
 OWNED BY "public"."mt_room_record"."id";
-SELECT setval('"public"."mt_room_record _id_seq"', 46, true);
+SELECT setval('"public"."mt_room_record _id_seq"', 235, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -665,28 +873,88 @@ SELECT setval('"public"."mt_room_seq"', 28, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_stockholder_id_seq"
 OWNED BY "public"."mt_stockholder"."id";
-SELECT setval('"public"."mt_stockholder_id_seq"', 19, true);
+SELECT setval('"public"."mt_stockholder_id_seq"', 73, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_trade_info_id_seq"
 OWNED BY "public"."mt_trade_info"."id";
-SELECT setval('"public"."mt_trade_info_id_seq"', 19, true);
+SELECT setval('"public"."mt_trade_info_id_seq"', 255, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."stock_id_seq"
 OWNED BY "public"."mt_stock"."id";
-SELECT setval('"public"."stock_id_seq"', 2, true);
+SELECT setval('"public"."stock_id_seq"', 3, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."user_id_seq"
 OWNED BY "public"."mt_user"."id";
-SELECT setval('"public"."user_id_seq"', 19, true);
+SELECT setval('"public"."user_id_seq"', 35, true);
+
+-- ----------------------------
+-- Indexes structure for table mt_15m_kline
+-- ----------------------------
+CREATE INDEX "mt_15m_kline_time_idx" ON "public"."mt_15m_kline" USING btree (
+  "time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_15m_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_15m_kline" ADD CONSTRAINT "mt_sec_kline_copy1_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table mt_1d_kline
+-- ----------------------------
+CREATE INDEX "mt_1d_kline_time_idx" ON "public"."mt_1d_kline" USING btree (
+  "time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_1d_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1d_kline" ADD CONSTRAINT "mt_1m_kline_copy1_pkey1" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table mt_1h_kline
+-- ----------------------------
+CREATE INDEX "mt_1h_kline_time_idx" ON "public"."mt_1h_kline" USING btree (
+  "time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_1h_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1h_kline" ADD CONSTRAINT "mt_1m_kline_copy1_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table mt_1m_kline
+-- ----------------------------
+CREATE INDEX "mt_1m_kline_time_idx" ON "public"."mt_1m_kline" USING btree (
+  "time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_1m_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1m_kline" ADD CONSTRAINT "mt_sec_kline_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Indexes structure for table mt_4h_kline
+-- ----------------------------
+CREATE INDEX "mt_4h_kline_time_idx" ON "public"."mt_4h_kline" USING btree (
+  "time" "pg_catalog"."timestamp_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
+-- Primary Key structure for table mt_4h_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_4h_kline" ADD CONSTRAINT "mt_1h_kline_copy1_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Uniques structure for table mt_company
@@ -702,11 +970,6 @@ ALTER TABLE "public"."mt_company" ADD CONSTRAINT "mt_company_pkey" PRIMARY KEY (
 -- Primary Key structure for table mt_company_room
 -- ----------------------------
 ALTER TABLE "public"."mt_company_room" ADD CONSTRAINT "mt_company_room_pkey" PRIMARY KEY ("id");
-
--- ----------------------------
--- Primary Key structure for table mt_kline
--- ----------------------------
-ALTER TABLE "public"."mt_kline" ADD CONSTRAINT "mt_kline_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Primary Key structure for table mt_notify
@@ -831,14 +1094,39 @@ ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_pkey" PRIMARY
 ALTER TABLE "public"."mt_user" ADD CONSTRAINT "user_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
+-- Foreign Keys structure for table mt_15m_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_15m_kline" ADD CONSTRAINT "mt_15m_kline_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_15m_kline" ADD CONSTRAINT "mt_15m_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table mt_1d_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1d_kline" ADD CONSTRAINT "mt_1d_kline_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_1d_kline" ADD CONSTRAINT "mt_1d_kline_stock_id_fkey1" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table mt_1h_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1h_kline" ADD CONSTRAINT "mt_1h_kline_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_1h_kline" ADD CONSTRAINT "mt_1h_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table mt_1m_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_1m_kline" ADD CONSTRAINT "mt_1m_kline_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_1m_kline" ADD CONSTRAINT "mt_1m_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table mt_4h_kline
+-- ----------------------------
+ALTER TABLE "public"."mt_4h_kline" ADD CONSTRAINT "mt_4h_kline_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_4h_kline" ADD CONSTRAINT "mt_4h_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
 -- Foreign Keys structure for table mt_company_room
 -- ----------------------------
 ALTER TABLE "public"."mt_company_room" ADD CONSTRAINT "mt_company_room_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- ----------------------------
--- Foreign Keys structure for table mt_kline
--- ----------------------------
-ALTER TABLE "public"."mt_kline" ADD CONSTRAINT "mt_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_notify

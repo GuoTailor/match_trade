@@ -2,11 +2,13 @@ package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Company
+import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stock
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.StockService
+import com.mt.mtuser.service.kline.KlineService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
@@ -23,6 +25,8 @@ class StockController {
 
     @Autowired
     private lateinit var stockService: StockService
+    @Autowired
+    private lateinit var klineService: KlineService
 
     /**
      * @api {post} /stock/{id} 获取一支股票的详情
@@ -88,7 +92,7 @@ class StockController {
     /**
      * @api {put} /stock 修改公司的一支股票
      * @apiDescription  修改公司的一支股票
-     * @apiName addStock
+     * @apiName updateStock
      * @apiVersion 0.0.1
      * @apiUse Stock
      * @apiParamExample {json} 请求-例子:
@@ -132,5 +136,28 @@ class StockController {
         return ResponseInfo.ok(mono { stockService.deleteById(id) })
     }
 
+    /**
+     * @api {get} /stock/kline 获取一只股票的k线
+     * @apiDescription  获取一只股票的k线
+     * @apiName findKline
+     * @apiVersion 0.0.1
+     * @apiParam {String} timeline 取值[1m:一分钟的k线；15m:十五分钟的k线；1h:一小时的k线；4h:四小时的k线；1d:日k]
+     * @apiParam {Integer} stockId 股票id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 2,"total": 43,"item": [{"id": 395,"stockId": 1,
+     * "companyId": 1,"time": "2020-05-13T11:23:00.000+00:00","tradesCapacity": 100,"tradesVolume": 25000.0,"tradesNumber"
+     * : 1,"avgPrice": 250.0,"maxPrice": 250.0,"minPrice": 250.0,"openPrice": 250.0,"closePrice": 250.0,"empty": false}
+     * ,{"id": 396,"stockId": 1,"companyId": 1,"time": "2020-05-14T05:11:00.000+00:00","tradesCapacity": 100,"tradesVolume":
+     * 15250.0,"tradesNumber": 1,"avgPrice": 152.5,"maxPrice": 152.5,"minPrice": 152.5,"openPrice": 152.5,"closePrice":
+     * 152.5,"empty": false}]}}
+     * @apiUse Kline
+     * @apiGroup Stock
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("kline")
+    fun findKline(timeline: String, stockId: Int, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
+        return ResponseInfo.ok(mono { klineService.findKline(timeline, stockId, page) })
+    }
 
 }

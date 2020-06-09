@@ -21,7 +21,7 @@ fun OrderParam.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.
 
 fun CancelOrder.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.mode, cancelOrderNotify, result, this)
 
-fun RivalInfo.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.flag, addRivalNotify, result, this)
+fun RivalInfo.toNotifyResult(result: Boolean) = NotifyResult(this.userId, this.roomId, this.mode, addRivalNotify, result, this)
 
 fun TopThree.toNotifyResult() = NotifyResult(roomId = this.roomId, model = this.mode, obj = updateTopThree, result = true, data = this)
 

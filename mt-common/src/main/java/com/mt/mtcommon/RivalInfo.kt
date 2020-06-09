@@ -8,5 +8,5 @@ package com.mt.mtcommon
 class RivalInfo(var userId: Int? = null,
                 var userName: String? = null,
                 var roomId: String? = null,
-                var flag: String? = null,
+                var mode: String? = null,
                 var rivals: ArrayList<Int>? = null)

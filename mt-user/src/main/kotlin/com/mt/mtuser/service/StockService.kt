@@ -23,6 +23,8 @@ class StockService {
 
     suspend fun findById(id: Int) = stockDao.findById(id)
 
+    fun findAll() = stockDao.findAll()
+
     fun findByCompanyId(companyId: Int) = stockDao.findByCompanyId(companyId)
 
     suspend fun findByName(stockName: String) = stockDao.findByName(stockName)

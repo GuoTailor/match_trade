@@ -121,4 +121,14 @@ class RedisUtil {
     suspend fun publishRoomEvent(event: RoomEvent): Long {
         return redisTemplate.convertAndSend(closeTopic.topic, event).awaitSingle()
     }
+
+    // ------------------------=======>>>k线<<<=====----------------------
+
+    suspend fun getKlineLastTime(tableName: String, stockId: Int): Long? {
+        return redisTemplate.opsForValue().getAndAwait("$tableName:$stockId") as? Long
+    }
+
+    suspend fun setKlineLastTime(tableName: String, stockId: Int, time: Long): Boolean {
+        return redisTemplate.opsForValue().setAndAwait("$tableName:$stockId", time)
+    }
 }

@@ -61,7 +61,7 @@ class TradeInfoService {
     /**
      * 获取公司今天的交易额
      */
-    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): Long {
+    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, Date(), companyId)
     }
@@ -270,6 +270,20 @@ class TradeInfoService {
                 .bind("startTime", startTime)
                 .bind("endTime", endTime)
                 .bind("roomId", roomId)
+                .map { r, _ ->
+                    mapOf("minPrice" to r.get("minPrice", BigDecimal::class.java)!!,
+                            "maxPrice" to r.get("maxPrice", BigDecimal::class.java)!!)
+                }.awaitOne()
+    }
+
+    suspend fun findMaxMinPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): Map<String, BigDecimal> {
+        return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
+                " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
+                " where trade_time between :startTime and :endTime " +
+                " and stock_id = :stockId ")
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .bind("stockId", stockId)
                 .map { r, _ ->
                     mapOf("minPrice" to r.get("minPrice", BigDecimal::class.java)!!,
                             "maxPrice" to r.get("maxPrice", BigDecimal::class.java)!!)

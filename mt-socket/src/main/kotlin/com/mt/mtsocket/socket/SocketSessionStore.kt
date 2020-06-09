@@ -1,5 +1,6 @@
 package com.mt.mtsocket.socket
 
+import com.mt.mtcommon.RivalInfo
 import com.mt.mtsocket.common.NotifyReq
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
@@ -67,5 +68,16 @@ object SocketSessionStore {
                             val userId: Int,
                             val userName: String,
                             val roomId: String,
-                            val mode: String)
+                            val mode: String) {
+        fun toRivalInfo(): RivalInfo {
+            return RivalInfo(userId, userName, roomId, mode)
+        }
+
+        fun toRivalInfo(rival: RivalInfo) {
+            rival.userId = userId
+            rival.userName = userName
+            rival.roomId = roomId
+            rival.mode = mode
+        }
+    }
 }

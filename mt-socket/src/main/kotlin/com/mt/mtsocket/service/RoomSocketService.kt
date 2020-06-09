@@ -3,7 +3,6 @@ package com.mt.mtsocket.service
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtcommon.*
 import com.mt.mtsocket.common.NotifyReq
-import com.mt.mtsocket.distribute.ServiceResponseInfo
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.mq.MatchSink
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import reactor.kotlin.core.publisher.switchIfEmpty
-import reactor.kotlin.extra.math.max
 import java.math.BigDecimal
 
 /**
@@ -88,10 +85,7 @@ class RoomSocketService {
         return BaseUser.getcurrentUser().map {
             val userRoomInfo = store.getRoomInfo(it.id!!) ?: error("错误，用户没有加入房间")
             if (RoomEnum.getRoomEnum(userRoomInfo.mode) == RoomEnum.CLICK) {
-                rival.userId = it.id!!
-                rival.userName = it.username
-                rival.roomId = userRoomInfo.roomId
-                rival.flag = userRoomInfo.mode
+                userRoomInfo.toRivalInfo(rival)
             } else error("错误，点选成交才能选择对手")
             matchSink.outRival().send(MessageBuilder.withPayload(rival).build())
         }
@@ -103,12 +97,14 @@ class RoomSocketService {
     fun getRival(): Mono<RivalInfo> {
         return BaseUser.getcurrentUser().flatMap {
             val userRoomInfo = store.getRoomInfo(it.id!!) ?: error("错误，用户没有加入房间")
-            val rival = RivalInfo(userId = it.id!!, roomId = userRoomInfo.roomId)
+            val rival = userRoomInfo.toRivalInfo()
             if (RoomEnum.getRoomEnum(userRoomInfo.mode) == RoomEnum.CLICK) {
-                redisUtil.getUserRival(it.id!!, userRoomInfo.roomId).map { rivals ->
-                    rival.rivals = rivals
-                    rival
-                }
+                redisUtil.getUserRival(it.id!!, userRoomInfo.roomId)
+                        .switchIfEmpty(Mono.just(arrayListOf()))
+                        .map { rivals ->
+                            rival.rivals = rivals
+                            rival
+                        }
             } else error("错误，点选成交才能选择对手")
         }
     }

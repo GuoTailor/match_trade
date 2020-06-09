@@ -35,7 +35,6 @@ fun LocalTime.toDate(): Date = Date(System.currentTimeMillis() - LocalTime.now()
  */
 fun minDay(): Date {
     val c = Calendar.getInstance()
-    c.add(Calendar.MONTH, 0)
     c.set(Calendar.DAY_OF_MONTH, 1)
     return c.time
 }

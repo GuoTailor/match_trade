@@ -266,7 +266,7 @@ class CommonController {
      * @apiSuccess {Integer} userCount 用户数量
      * @apiSuccess {Integer} roomCount 房间数量
      * @apiSuccess {Long} tradesCapacity 交易量
-     * @apiSuccess {Long} tradesVolume 交易金额
+     * @apiSuccess {Decimal} tradesVolume 交易金额
      * @apiSuccess {Integer} tradesNumber 交易次数
      * @apiGroup Common
      * @apiUse tokenMsg

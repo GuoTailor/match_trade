@@ -190,7 +190,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())
                     }
                     result
-                } else if (data is RivalInfo && addRival(data)) {
+                } else if (data is RivalInfo) {
                     val result = addRival(data)
                     if (result) {
                         redisUtil.putUserRival(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()

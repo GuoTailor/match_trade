@@ -21,13 +21,13 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
     suspend fun countStockByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): Long
 
     @Query("select COALESCE(sum(trade_money), 0) from $table where trade_time between :startTime and :endTime")
-    suspend fun countMoneyTradeTime(startTime: Date, endTime: Date): Long
+    suspend fun countMoneyTradeTime(startTime: Date, endTime: Date): BigDecimal
 
     @Query("select COALESCE(sum(trade_money), 0) from $table where trade_time between :startTime and :endTime and company_id = :companyId")
-    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date, endTime: Date, companyId: Int): Long
+    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date, endTime: Date, companyId: Int): BigDecimal
 
     @Query("select COALESCE(sum(trade_money), 0) from $table where trade_time between :startTime and :endTime and stock_id = :stockId")
-    suspend fun countMoneyByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): Long
+    suspend fun countMoneyByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal
 
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +
@@ -40,6 +40,12 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
             " and stock_id = :stockId " +
             " order by trade_time desc limit 1")
     suspend fun findLastPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal?
+
+    @Query("select trade_price from $table " +
+            " where trade_time between :startTime and :endTime " +
+            " and stock_id = :stockId " +
+            " order by trade_time asc limit 1")
+    suspend fun findFirstPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal?
 
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +
@@ -70,6 +76,9 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
     @Query("select t.* from $table t " +
             " where t.id = :id")
     suspend fun findDetailsById(id: Int): TradeInfo?
+
+    @Query("select count(1) from $table where trade_time between :startTime and :endTime and stock_id = :stockId")
+    suspend fun countByStockId(startTime: Date, endTime: Date, stockId: Int): Long
 
     companion object {
         const val table = "mt_trade_info"
