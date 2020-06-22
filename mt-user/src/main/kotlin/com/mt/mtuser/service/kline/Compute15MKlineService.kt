@@ -45,24 +45,14 @@ class Compute15MKlineService : ComputeKline() {
 
     override suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline {
         val startTime = Date(time - step)
-        val endTime = Date(time - 1)
+        val endTime = Date(time)
         val kline = Kline()
         kline.stockId = stockId
         kline.companyId = companyId
         kline.time = Date(time)
         // TODO 也许获取开盘价和收盘价有更好的方法
-        connect.execute("select open_price from mt_1m_kline where time between :startTime and :endTime and stock_id = :stockId order by time asc limit 1")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("stockId", stockId)
-                .map { r, _ -> kline.openPrice = r.get("open_price", BigDecimal::class.java) }
-                .awaitOneOrNull()
-        connect.execute("select close_price from mt_1m_kline where time between :startTime and :endTime and stock_id = :stockId order by time desc limit 1")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("stockId", stockId)
-                .map { r, _ -> kline.closePrice = r.get("close_price", BigDecimal::class.java) }
-                .awaitOneOrNull()
+        kline.openPrice = klineService.getClosePriceByTableName(startTime, stockId, "mt_1m_kline")
+        kline.closePrice = klineService.getClosePriceByTableName(endTime, stockId, "mt_1m_kline")
         return connect.execute("select" +
                 " COALESCE(sum(trades_capacity), 0) as tradesCapacity," +
                 " COALESCE(sum(trades_volume), 0) as tradesVolume," +

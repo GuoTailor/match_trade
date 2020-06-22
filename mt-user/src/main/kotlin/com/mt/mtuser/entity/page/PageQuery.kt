@@ -34,10 +34,10 @@ class PageQuery(val pageNum: Int = 0,
             arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
             arrayOf("ew", "like", "%%%s"), arrayOf("en", "not like", "%%%s"))
 
-    fun where(): Criteria {
+    fun where(alias: String = ""): Criteria {
         var criteria = Criteria.empty()
         if (searchField != null && searchOper != null && searchString != null) {
-            with(Criteria.where(searchField)) {
+            with(Criteria.where("$alias.$searchField")) {
                 criteria = when (searchOper) {
                     "eq" -> `is`(searchString)
                     "ne" -> not(searchString)
@@ -45,7 +45,7 @@ class PageQuery(val pageNum: Int = 0,
                     "gt;=" -> greaterThanOrEquals(searchString)
                     "lt" -> lessThan(searchString)
                     "lt;=" -> lessThanOrEquals(searchString)
-                    "cn", "bw", "ew" -> buildSubSql()
+                    "cn", "bw", "ew" -> buildSubSql(alias)
                     "nc", "bn", "en" -> throw IllegalStateException("暂不支持的查找方式$searchOper")
                     else -> throw IllegalStateException("不支持的查找方式$searchOper")
                 }
@@ -82,11 +82,11 @@ class PageQuery(val pageNum: Int = 0,
         return sb.toString()
     }
 
-    private fun buildSubSql(): Criteria {
+    private fun buildSubSql(alias: String = ""): Criteria {
         if (searchField != null && searchOper != null && searchString != null) {
             for (strings in oper) { //判断指令是否在允许范围内
                 if (strings[0] == searchOper) {
-                    return Criteria.where(searchField).like(String.format(strings[2], searchString))
+                    return Criteria.where("$alias.$searchField").like(String.format(strings[2], searchString))
                 }
             }
         }

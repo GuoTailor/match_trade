@@ -25,6 +25,7 @@ class StockController {
 
     @Autowired
     private lateinit var stockService: StockService
+
     @Autowired
     private lateinit var klineService: KlineService
 
@@ -142,7 +143,9 @@ class StockController {
      * @apiName findKline
      * @apiVersion 0.0.1
      * @apiParam {String} timeline 取值[1m:一分钟的k线；15m:十五分钟的k线；1h:一小时的k线；4h:四小时的k线；1d:日k]
-     * @apiParam {Integer} stockId 股票id
+     * @apiParam {String} roomId 房间id
+     * @apiParam {String} mode 房间类型
+     * @apiUse PageQuery
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 2,"total": 43,"item": [{"id": 395,"stockId": 1,
      * "companyId": 1,"time": "2020-05-13T11:23:00.000+00:00","tradesCapacity": 100,"tradesVolume": 25000.0,"tradesNumber"
@@ -156,8 +159,8 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("kline")
-    fun findKline(timeline: String, stockId: Int, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
-        return ResponseInfo.ok(mono { klineService.findKline(timeline, stockId, page) })
+    fun findKline(@RequestParam roomId: String, @RequestParam mode: String, @RequestParam timeline: String, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
+        return ResponseInfo.ok(mono { klineService.findKline(roomId, mode, timeline, page) })
     }
 
 }

@@ -92,7 +92,8 @@ class UserController {
      * @apiParamExample {url} 请求-例子:
      * /user?pageSize=10&pageNum=1
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105",
+     * "roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
      * @apiGroup User
      * @apiUse tokenMsg
      * @apiPermission user
@@ -103,8 +104,8 @@ class UserController {
     }
 
     /**
-     * @api {put} /user/role/analyst 修改用户的企业观察员角色
-     * @apiDescription  修改用户为企业观察员角色
+     * @api {put} /user/role/analyst 为企业添加观察员
+     * @apiDescription  为企业添加观察员
      * @apiName addAnalystRole
      * @apiVersion 0.0.1
      * @apiParamExample {json} 请求-例子:
@@ -149,5 +150,40 @@ class UserController {
             userService.updatePassword(map["oldPassword"] ?: error("oldPassword 不能为空"),
                     map["newPassword"] ?: error("newPassword 不能为空"))
         })
+    }
+
+    /**
+     * @api {get} /user/role/analyst 取全部的观察员
+     * @apiDescription  取全部的观察员
+     * @apiName getAllAnalystRole
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup User
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/role/analyst")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun getAllAnalystRole(query: PageQuery): Mono<ResponseInfo<PageView<Stockholder>>> {
+        return ResponseInfo.ok(mono { userService.getAllAnalystRole(query) })
+    }
+
+    /**
+     * @api {delete} /user/role/analyst 删除一个观察员
+     * @apiDescription  删除一个观察员
+     * @apiName deleteAnalyst
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} stockholderId 观察员id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup User
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @DeleteMapping("/role/analyst")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun deleteAnalyst(stockholderId: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { userService.deleteAnalyst(stockholderId) })
     }
 }

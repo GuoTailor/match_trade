@@ -42,8 +42,8 @@ class Compute1MKlineService : ComputeKline() {
         kline.stockId = stockId
         kline.companyId = companyId
         kline.time = Date(time)
-        kline.openPrice = tradeInfoDao.findFirstPriceByTradeTimeAndStockId(startTime, endTime, stockId)
-        kline.closePrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(startTime, endTime, stockId)
+        kline.openPrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(startTime, stockId)
+        kline.closePrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(endTime, stockId)
         return kline
     }
 

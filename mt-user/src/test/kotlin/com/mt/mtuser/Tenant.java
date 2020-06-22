@@ -19,6 +19,9 @@ public class Tenant {
         sh.getUserId();
         sh.getDepartment();
         sh.getRealName();
+        int i = 0;
+        i = i + + + + +10;
+        System.out.println(i);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.math.BigDecimal
 import java.util.*
 
@@ -7,18 +8,18 @@ private val zero = BigDecimal(0)
 
 /**
  * @apiDefine Kline
- * @apiSuccess (成功返回) {Long} id
- * @apiSuccess (成功返回) {Int} stockId 股票id
- * @apiSuccess (成功返回) {Int} companyId 公司id
- * @apiSuccess (成功返回) {Date} time 值的生成时间
- * @apiSuccess (成功返回) {Long} tradesCapacity 交易量
- * @apiSuccess (成功返回) {Decimal} tradesVolume 交易金额
- * @apiSuccess (成功返回) {Long} tradesNumber 交易次数
- * @apiSuccess (成功返回) {Decimal} avgPrice 平均价格
- * @apiSuccess (成功返回) {Decimal} maxPrice 最高价
- * @apiSuccess (成功返回) {Decimal} minPrice 最低价
- * @apiSuccess (成功返回) {Decimal} openPrice 开盘价
- * @apiSuccess (成功返回) {Decimal} closePrice 收盘价
+ * @apiSuccess (返回) {Long} id
+ * @apiSuccess (返回) {Int} stockId 股票id
+ * @apiSuccess (返回) {Int} companyId 公司id
+ * @apiSuccess (返回) {Date} time 值的生成时间
+ * @apiSuccess (返回) {Long} tradesCapacity 交易量
+ * @apiSuccess (返回) {Decimal} tradesVolume 交易金额
+ * @apiSuccess (返回) {Long} tradesNumber 交易次数
+ * @apiSuccess (返回) {Decimal} avgPrice 平均价格
+ * @apiSuccess (返回) {Decimal} maxPrice 最高价
+ * @apiSuccess (返回) {Decimal} minPrice 最低价
+ * @apiSuccess (返回) {Decimal} openPrice 开盘价
+ * @apiSuccess (返回) {Decimal} closePrice 收盘价
  */
 class Kline(
         var id: Long? = null,
@@ -27,6 +28,7 @@ class Kline(
         /** 公司id */
         var companyId: Int? = null,
         /*** 值的生成时间*/
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
         var time: Date? = null,
         /*** 交易量*/
         var tradesCapacity: Long? = null,
@@ -52,7 +54,5 @@ class Kline(
                 && (avgPrice == null || avgPrice == zero)
                 && (maxPrice == null || maxPrice == zero)
                 && (minPrice == null || minPrice == zero)
-                && (openPrice == null || openPrice == zero)
-                && (closePrice == null || closePrice == zero)
     }
 }

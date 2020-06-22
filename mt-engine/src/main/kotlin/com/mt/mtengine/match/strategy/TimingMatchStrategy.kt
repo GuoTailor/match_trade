@@ -33,7 +33,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
-            if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
+            if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! >= sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             } else {

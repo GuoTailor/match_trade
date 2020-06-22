@@ -9,10 +9,12 @@ import com.mt.mtcommon.toDate
 import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.logger
+import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import java.math.BigDecimal
 import java.sql.Time
 import java.time.LocalTime
 import java.time.temporal.ChronoField
@@ -149,21 +151,12 @@ fun main6() = runBlocking {
 }
 
 fun main7() {
-    val lastTime = 1591689060000
-    val now = 1591689120033
-    println(Util.createDate(lastTime))
-    println(Util.createDate(now))
-    for (time in lastTime..now step 60_000) {
-        logger.info("计算k线 {}", Util.createDate(time))
-    }
-    val list = listOf(12, 13, 14)
-    list.forEach {
-        if (it == 13) {
-            return@forEach
-        }
-        println(it)
-    }
-    println(Date(1589616000000))
+    val page = PageQuery(pageNum = 10, pageSize = 10)
+    println(page.where().toString())
+    println(page.toPageSql())
+    println(BigDecimal("5.5").divide(BigDecimal("45.5"), 4, BigDecimal.ROUND_HALF_EVEN).toPlainString())
+    println(BigDecimal("0.0") == BigDecimal(0))
+    println(Date(1592233200000))
 }
 
 fun main() = main7()

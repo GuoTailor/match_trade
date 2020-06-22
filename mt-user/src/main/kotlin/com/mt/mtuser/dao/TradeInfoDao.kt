@@ -30,22 +30,22 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
     suspend fun countMoneyByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal
 
     @Query("select trade_price from $table " +
-            " where trade_time between :startTime and :endTime " +
+            " where trade_time < :endTime " +
             " and company_id = :companyId " +
             " order by trade_time desc limit 1")
-    suspend fun findLastPriceByTradeTimeAndCompanyId(startTime: Date, endTime: Date, companyId: Int): BigDecimal?
+    suspend fun findLastPriceByTradeTimeAndCompanyId(endTime: Date, companyId: Int): BigDecimal?
 
     @Query("select trade_price from $table " +
-            " where trade_time between :startTime and :endTime " +
+            " where trade_time < :endTime " +
             " and stock_id = :stockId " +
             " order by trade_time desc limit 1")
-    suspend fun findLastPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal?
+    suspend fun findLastPriceByTradeTimeAndStockId(endTime: Date, stockId: Int): BigDecimal?
 
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +
-            " and stock_id = :stockId " +
+            " and room_id = :roomId " +
             " order by trade_time asc limit 1")
-    suspend fun findFirstPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): BigDecimal?
+    suspend fun findFirstPriceByTradeTimeAndRoomId(startTime: Date, endTime: Date, roomId: String): BigDecimal?
 
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +

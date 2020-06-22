@@ -1,17 +1,14 @@
 package com.mt.mtcommon
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer
-import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.format.annotation.DateTimeFormat
+import java.math.BigDecimal
 import java.time.Duration
 import java.time.LocalTime
 import java.util.*
@@ -27,16 +24,25 @@ import java.util.*
  * @apiParam {Integer} companyId 公司id
  * @apiParam {Date} startTime 启用时间
  * @apiParam {Date} endTime 结束时间
+ * @apiParam {Decimal} maxPrice 最高价
+ * @apiParam {Decimal} minPrice 最低价
+ * @apiParam {Decimal} openPrice 开盘价
+ * @apiParam {Decimal} closePrice 收盘价
  */
 @Table("mt_room_record")
+// 必须open，用于redis的json反序列化
 open class RoomRecord(
         @Id var id: Int? = null,
         open var roomId: String? = null,        // 房间id，四张房间表唯一
-        open var mode: String? = null,         // 模式对应撮合模式
+        open var mode: String? = null,          // 模式对应撮合模式
         open var stockId: Int? = null,          // 股票id
         open var companyId: Int? = null,        // 公司id
         open var startTime: Date? = null,       // 启用时间
-        open var endTime: Date? = null         // 结束时间,房间结束时会重新计算
+        open var endTime: Date? = null,         // 结束时间,房间结束时会重新计算
+        open var maxPrice: BigDecimal? = null,  // 最高价
+        open var minPrice: BigDecimal? = null,  // 最低价
+        open var openPrice: BigDecimal? = null, // 开盘价
+        open var closePrice: BigDecimal? = null // 收盘价
 ) {
     @JsonDeserialize(using = LocalTimeDeserializer::class)
     @JsonSerialize(using = LocalTimeSerializer::class)

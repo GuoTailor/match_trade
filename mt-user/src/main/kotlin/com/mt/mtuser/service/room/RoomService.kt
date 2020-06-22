@@ -79,7 +79,7 @@ class RoomService {
 
     /**
      * 使能一个房间
-     * @param value 1：启用一个房间 0 关闭一个房间
+     * @param value true：启用一个房间 false:关闭一个房间
      */
     fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(flag)
@@ -92,9 +92,24 @@ class RoomService {
                     roomRecordDao.save(roomRecord)
                     redisUtil.saveRoomRecord(roomRecord)
                 } else {
-                    roomRecord = redisUtil.getRoomRecord(roomId) ?: error("房间不存在：$roomId")
+                    roomRecord = redisUtil.getRoomRecord(roomId) ?: roomRecordDao.findLastRecordByRoomId(roomId)
+                            ?: error("房间不存在：$roomId")
+                    val previousRecord = roomRecordDao.findLastRecordByRoomId(roomRecord.startTime!!, roomId)
                     roomRecord.endTime = Date()
                     roomRecord.computingTime()
+                    roomRecord.closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+                    if (roomRecord.closePrice == null) {
+                        roomRecord.maxPrice = previousRecord?.maxPrice ?: BigDecimal(0)
+                        roomRecord.minPrice = previousRecord?.minPrice ?: BigDecimal(0)
+                        roomRecord.openPrice = previousRecord?.openPrice ?: BigDecimal(0)
+                        roomRecord.closePrice = previousRecord?.closePrice ?: BigDecimal(0)
+                    } else {
+                        val map = tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+                        roomRecord.maxPrice = map["maxPrice"]
+                        roomRecord.minPrice = map["minPrice"]
+                        roomRecord.openPrice = previousRecord?.closePrice
+                                ?: tradeInfoService.getOpenPriceByRoomId(roomRecord.startTime!!, roomRecord.endTime!!, roomId)
+                    }
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
@@ -189,37 +204,29 @@ class RoomService {
      */
     suspend fun getEditableRoomList() = getRoomList(Stockholder.ADMIN)
 
-    suspend fun getMaxMinPrice(roomId: String): Map<String, BigDecimal> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
-                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")  // TODO 返回0
-        return tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
-    }
-
     suspend fun getHomepageData(roomId: String): Map<String, Any> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
+        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, Date())
                 ?: return mapOf("minPrice" to 0, "maxPrice" to 0, "closePrice" to 0,
                         "tradesNumber" to 0, "difference" to 0)
-        val maxMinPrice = tradeInfoService.findMaxMinPriceByTradeTimeAndRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
-        val closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+        val secondRecord = roomRecordDao.findSecondRecordByRoomId(roomId, Date())
+        val closePrice = if (roomRecord.closePrice == null || roomRecord.closePrice == BigDecimal(0)) null else roomRecord.closePrice
         val tradesNumber = roomRecordService.countByCompanyId(roomRecord.companyId!!)
-        val yesterdayClosingPrice = tradeInfoService.getYesterdayClosingPriceByRoomId(roomId)
-        val result = mutableMapOf(
-                "closePrice" to closePrice,
+        val secondClosingPrice = secondRecord?.closePrice ?: BigDecimal(0)
+        return mutableMapOf(
+                "closePrice" to (closePrice ?: BigDecimal(0)).toPlainString(),
                 "tradesNumber" to tradesNumber,
-                "difference" to closePrice.subtract(yesterdayClosingPrice)
+                "difference" to (closePrice?.subtract(secondClosingPrice)?.divide(closePrice, 4, BigDecimal.ROUND_HALF_EVEN)
+                        ?: BigDecimal(0)).toPlainString(),
+                "minPrice" to (roomRecord.minPrice ?: BigDecimal(0)).toPlainString(),
+                "maxPrice" to (roomRecord.maxPrice ?: BigDecimal(0)).toPlainString()
         )
-        result.putAll(maxMinPrice)
-        return result
     }
 
     /**
      * 查找指定房间的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
-                ?: throw IllegalStateException("没有找到改房间号{$roomId}的记录")
-        getBaseRoomDao<BaseRoom>(roomRecord.mode!!).findByRoomId(roomId) ?: return PageView()   // 如果更改了模式就返回空
-        return tradeInfoService.findOrder(roomId, query, roomRecord.startTime!!, roomRecord.endTime!!)
+        return tradeInfoService.findOrder(roomId, query, Date())
     }
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
@@ -244,16 +251,13 @@ class RoomService {
      * 获取房间报价范围
      */
     suspend fun getRoomScope(roomId: String): Map<String, String> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomId(roomId)
-        val highScope: String
-        val lowScope: String
-        if (roomRecord == null) {
-            highScope = "0"
-            lowScope = "0"
-        } else {
-            val closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
-            highScope = closePrice.multiply(BigDecimal(2.0)).toPlainString()
-            lowScope = closePrice.multiply(BigDecimal(0.5)).toPlainString()
+        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, Date())
+        var highScope = "0"
+        var lowScope = "0"
+        if (roomRecord != null) {
+            val closePrice = roomRecord.closePrice
+            highScope = closePrice?.multiply(BigDecimal(2.0))?.toPlainString() ?: "0"
+            lowScope = closePrice?.multiply(BigDecimal(0.5))?.toPlainString() ?: "0"
         }
         return mapOf("highScope" to highScope, "lowScope" to lowScope)
     }

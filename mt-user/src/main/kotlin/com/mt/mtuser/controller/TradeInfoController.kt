@@ -10,6 +10,7 @@ import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import java.util.*
@@ -46,7 +47,6 @@ class TradeInfoController {
      * @apiName findOrderDetails
      * @apiVersion 0.0.1
      * @apiUse PageQuery
-     * @apiParam {String} roomId 房间id
      * @apiParam {String} roomId 房间id
      * @apiParamExample {url} Request-Example:
      * /room/order/101?pageSize=2
@@ -94,4 +94,27 @@ class TradeInfoController {
         })
     }
 
+    /**
+     * @api {gut} /trade/statistics 查找房间的每日交易概述
+     * @apiDescription  查找房间的每日交易概述
+     * @apiName statisticsOrderByDay
+     * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 2,"total": 7,"item": [{"id": 3,"stockId": 1,"time":
+     * "2020-05-19 00:00:00","tradesCapacity": 400,"tradesVolume": 63250,"tradesNumber": 4,"avgPrice": 153.41875,
+     * "maxPrice": 189.5,"minPrice": 112.5,"openPrice": 186.5,"closePrice": 144,"companyId": 1,"openNumber": 20},{"id":
+     * 5,"stockId": 1,"time": "2020-05-21 00:00:00","tradesCapacity": 200,"tradesVolume": 38650,"tradesNumber": 2,
+     * "avgPrice": 193.25,"maxPrice": 220,"minPrice": 166.5,"openPrice": 220,"closePrice": 166.5,"companyId": 1,"openNumber": 3}]}}
+     * @apiUse Kline
+     * @apiSuccess (成功返回) {Integer} openNumber 开盘次数
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun statisticsOrderByDay(page: PageQuery): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
+        return ResponseInfo.ok(mono { tradeInfoService.statisticsOrderByDay(page) })
+    }
 }

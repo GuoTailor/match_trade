@@ -6,7 +6,9 @@ import com.mt.mtuser.entity.logger
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
+import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.service.StockService
+import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -14,8 +16,10 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
+import org.springframework.data.r2dbc.core.awaitOneOrNull
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.locks.ReentrantLock
@@ -30,6 +34,9 @@ class KlineService {
 
     @Autowired
     private lateinit var stockService: StockService
+
+    @Autowired
+    private lateinit var roomService: RoomService
 
     val klineServiceList = TreeSet<ComputeKline>()
     val lock = ReentrantLock()
@@ -113,7 +120,9 @@ class KlineService {
                 .fetch().awaitRowsUpdated()
     }
 
-    suspend fun findKline(timeline: String, stockId: Int, page: PageQuery): PageView<Kline> {
+    suspend fun findKline(roomId: String, mode: String, timeline: String, page: PageQuery): PageView<Kline> {
+        val baseDao = roomService.getBaseRoomDao<BaseRoom>(mode)
+        val baseRoom = baseDao.findByRoomId(roomId) ?: error("没有该房间号：$roomId-$mode")
         val table = when(timeline) {
             "1m" -> "mt_1m_kline"
             "15m" -> "mt_15m_kline"
@@ -122,7 +131,7 @@ class KlineService {
             "1d" -> "mt_1d_kline"
             else -> error("不支持的timeline: $timeline")
         }
-        val where = page.where().and("stock_id").`is`(stockId)
+        val where = page.where().and("stock_id").`is`(baseRoom.stockId!!)
         return getPage(connect.select()
                 .from(table)
                 .matching(where)
@@ -131,6 +140,17 @@ class KlineService {
                 .fetch()
                 .all()
                 , connect, page, table, where)
+    }
+
+    /**
+     * 获取收盘价，这次的收盘价也可以用于下一次开盘的开盘价
+     */
+    suspend fun getClosePriceByTableName(endTime: Date, stockId: Int, tableName: String): BigDecimal? {
+        return connect.execute("select open_price from $tableName where time < :endTime and stock_id = :stockId order by time desc limit 1")
+                .bind("endTime", endTime)
+                .bind("stockId", stockId)
+                .map { r, _ -> r.get("open_price", BigDecimal::class.java) }
+                .awaitOneOrNull()
     }
 
 }

@@ -46,7 +46,9 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
                 matchService.onMatchError(roomInfo.roomId, roomInfo.mode, order1, order2,
                         "失败:" + MatchUtil.getVerifyInfo(order1, order2), roomInfo.endTime)
             }
-            result.subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
+            result.subscribeOn(Schedulers.elastic()).subscribe {
+                roomInfo.topThree.lastOrder = it.toOrderInfo()  // TODO 无法实时更新
+            }    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
         }
         // 未成交的订单保留直下一轮
         return isMatch
@@ -81,7 +83,7 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
         override fun addRival(rival: RivalInfo): Boolean = false
         override fun updateTopThree(data: OrderParam): Boolean = false
         override fun updateTopThree(order: CancelOrder): Boolean = false
-        override fun updateTopThree(): Boolean = false
+        override fun updateTopThree(): Boolean = true
     }
 
     override fun createRoomInfo(record: RoomRecord): DoubleRoomInfo {

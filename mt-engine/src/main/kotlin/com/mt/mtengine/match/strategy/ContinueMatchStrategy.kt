@@ -33,16 +33,14 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
         val buyFailedList = mutableListOf<OrderParam>()
         val sellFailedList = mutableListOf<OrderParam>()
         var isMatch = false
-        val atom = AtomicInteger()
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!       // 最后一个报价最高
-            val sellOrder = roomInfo.sellOrderList.pollFirst()!!     // 第一个报价最低
+            val sellOrder = roomInfo.sellOrderList.pollFirst()!!    // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! >= sellOrder.price) {          // 特殊需求，报价相同也成交
                     matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
                             .subscribeOn(Schedulers.elastic()).subscribe {
-                                roomInfo.topThree.lastOrder = it.toOrderInfo()
-                                atom.getAndIncrement()
+                                roomInfo.topThree.lastOrder = it.toOrderInfo()  // TODO 无法实时更新
                             }
                     isMatch = true
                 } else {

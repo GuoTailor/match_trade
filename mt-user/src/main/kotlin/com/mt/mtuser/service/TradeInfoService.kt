@@ -3,12 +3,15 @@ package com.mt.mtuser.service
 import com.mt.mtcommon.*
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.TradeInfoDao
+import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
@@ -38,6 +41,9 @@ class TradeInfoService {
 
     @Autowired
     private lateinit var connect: DatabaseClient
+
+    @Autowired
+    private lateinit var roomRecordService: RoomRecordService
 
     /**
      * 获取今天的交易量
@@ -72,10 +78,9 @@ class TradeInfoService {
     suspend fun getYesterdayClosingPriceByCompanyId(): BigDecimal {
         // TODO 交易失败的不计入计算
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay() - LocalTime.MAX.toMillisOfDay()
+        // 今天凌晨
         val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
-                ?: BigDecimal(0)
+        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(endTime.toDate(), companyId) ?: BigDecimal(0)
     }
 
     suspend fun getYesterdayClosingPriceByRoomId(roomId: String): BigDecimal {
@@ -85,19 +90,19 @@ class TradeInfoService {
                 ?: BigDecimal(0)
     }
 
-    suspend fun getClosingPriceByRoomId(roomId: String, startTime: Date, endTime: Date): BigDecimal {
-        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime, endTime, roomId) ?: BigDecimal(0)
+    suspend fun getClosingPriceByRoomId(roomId: String, startTime: Date, endTime: Date): BigDecimal? {
+        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime, endTime, roomId)
     }
+
+    suspend fun getOpenPriceByRoomId(startTime: Date, endTime: Date, roomId: String) =
+            tradeInfoDao.findFirstPriceByTradeTimeAndRoomId(startTime, endTime, roomId) ?: BigDecimal(0)
 
     /**
      * 获取今天的最新一次报价
      */
     suspend fun getTodayOpeningPriceByCompanyId(): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        val endTime = System.currentTimeMillis()
-        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
-                ?: BigDecimal(0)
+        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(Date(), companyId) ?: BigDecimal(0)
     }
 
     /**
@@ -197,10 +202,9 @@ class TradeInfoService {
     /**
      * 查询指定时间内的历史订单
      */
-    suspend fun findOrder(roomId: String, query: PageQuery, startTime: Date, endTime: Date): PageView<TradeInfo> {
+    suspend fun findOrder(roomId: String, query: PageQuery, endTime: Date): PageView<TradeInfo> {
         val where = query.where()
                 .and("room_id").`is`(roomId)
-                .and("trade_time").greaterThan(startTime)
                 .and("trade_time").lessThan(endTime)
         return getPage(connect.select()
                 .from<TradeInfo>()
@@ -255,8 +259,32 @@ class TradeInfoService {
     /**
      * 按天统计交易详情
      */
-    suspend fun statisticsOrderByDay() {
-
+    suspend fun statisticsOrderByDay(page: PageQuery): PageView<Map<String, Any?>> {
+        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+        val stockId = stockService.findByCompanyId(companyId).first().id!!
+        val where = page.where("k").and("k.stock_id").`is`(stockId)
+        val pageSql = page.toPageSql()
+        val sql = "select k.*, count(rr.id) as openNumber from mt_1d_kline k " +
+                " left join mt_room_record rr " +
+                " on rr.stock_id = k.stock_id " +
+                " and rr.start_time between k.time - INTERVAL'1 day' and k.time - INTERVAL'1 sec' " +
+                " where $where group by k.id $pageSql"
+        return getPage(connect.execute(sql)
+                .map { r, _ ->
+                    mapOf("id" to r.get("id", java.lang.Long::class.java),
+                            "stockId" to r.get("stock_id", java.lang.Integer::class.java),
+                            "time" to Util.createDate(r.get("time", Date::class.java)),
+                            "tradesCapacity" to r.get("trades_capacity", java.lang.Long::class.java),
+                            "tradesVolume" to r.get("trades_volume", BigDecimal::class.java),
+                            "tradesNumber" to r.get("trades_number", java.lang.Integer::class.java),
+                            "avgPrice" to r.get("avg_price", BigDecimal::class.java),
+                            "maxPrice" to r.get("max_price", BigDecimal::class.java),
+                            "minPrice" to r.get("min_price", BigDecimal::class.java),
+                            "openPrice" to r.get("open_price", BigDecimal::class.java),
+                            "closePrice" to r.get("close_price", BigDecimal::class.java),
+                            "companyId" to r.get("company_id", java.lang.Integer::class.java),
+                            "openNumber" to r.get("openNumber", java.lang.Integer::class.java))
+                }.all(), connect, page, "mt_1d_kline k", where)
     }
 
     /**
@@ -290,44 +318,5 @@ class TradeInfoService {
                 }.awaitOne()
     }
 
-    suspend fun statistics(startTime: Date, endTime: Date, companyId: Int) {
-        connect.execute("select DATE(trade_time) as date" +
-                " COALESCE(max(trade_price), 0) as tradesCapacity," +
-                " COALESCE(min(trade_price), 0) as tradesVolume," +
-                " COALESCE(avg(trade_price), 0) as avgPrice " +
-                " from ${TradeInfoDao.table} " +
-                " where trade_time between :startTime and :endTime " +
-                " and company_id = :companyId " +
-                " group by date")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("companyId", companyId)
-                .map { r, _ ->
-                    mapOf("tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java),
-                            "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
-                            "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
-                            "date" to r.get("avgPrice", Date::class.java))
-                }.awaitOne()
-    }
-
-    suspend fun statisticsOverview(startTime: Date, endTime: Date, companyId: Int): Map<String, *>? {
-        return connect.execute("select DATE(trade_time) as date" +
-                " COALESCE(sum(trade_amount), 0) as tradesCapacity," +
-                " COALESCE(sum(trade_price), 0) as tradesVolume," +
-                " COALESCE(avg(trade_price), 0) as avgPrice " +
-                " from ${TradeInfoDao.table} " +
-                " where trade_time between :startTime and :endTime " +
-                " and company_id = :companyId " +
-                " group by date")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("companyId", companyId)
-                .map { r, _ ->
-                    mapOf("tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java),
-                            "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
-                            "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
-                            "date" to r.get("avgPrice", Date::class.java))
-                }.awaitOne()
-    }
 
 }
