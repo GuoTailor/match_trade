@@ -1,7 +1,7 @@
 package com.mt.mtcommon
 
-import java.time.Duration
-import java.time.LocalTime
+import java.time.*
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 /**
@@ -15,6 +15,35 @@ import java.util.*
  */
 fun Long.toDate(): Date = Date(this)
 
+val zoneOffset: ZoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
+
+fun Long.toLocalDateTime(): LocalDateTime {
+    val instant = Instant.ofEpochMilli(this)
+    return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+}
+
+fun LocalDateTime.toEpochMilli(): Long = this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+fun LocalTime.toLocalDateTime(): LocalDateTime = LocalDateTime.of(LocalDate.now(), this)
+
+/**
+ * 返回此LocalDateTime的副本，并减去指定的毫秒数。
+ * 此实例是不可变的，不受此方法调用的影响。
+ */
+fun LocalDateTime.minusMilli(milli: Long): LocalDateTime = this.minusNanos(milli * 1000_000)
+
+/**
+ * 获取本月的第一天
+ */
+fun firstDay(): LocalDateTime = LocalDate.now().withDayOfMonth(1).atStartOfDay()
+
+/**
+ * 获取本月的最后一天
+ */
+fun lastDay(): LocalDateTime = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()).atStartOfDay()
+
+
+
 /**
  * 返回LocalTime表示的毫秒值,注意可能的精度损失
  */
@@ -23,7 +52,7 @@ fun LocalTime.toMillisOfDay(): Long = this.toNanoOfDay() / 1000_000
 /**
  * 把LocalTime转换为Duration
  */
-fun LocalTime.toDuration(): Duration = Duration.ofNanos(this.toNanoOfDay())
+fun LocalTime?.toDuration(): Duration = if (this == null) Duration.ZERO else Duration.ofNanos(this.toNanoOfDay())
 
 /**
  * 把LocalTime转换为Date

@@ -13,6 +13,8 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -62,6 +64,27 @@ class TradeInfoController {
     }
 
     /**
+     * @api {gut} /trade/order/company/{companyId} 查找指定公司的全部历史订单
+     * @apiDescription  查找指定公司的全部历史订单
+     * @apiName findOrderByCompany
+     * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {Date} date 时间，格式yyyy-MM-dd：
+     * @apiParamExample {url} Request-Example:
+     * /room/order/101?pageSize=2
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": []}
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/order/company/{companyId}")
+    fun findOrderByCompany(@PathVariable companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") date: LocalDate, query: PageQuery): Mono<ResponseInfo<PageView<TradeInfo>>> {
+        return ResponseInfo.ok(mono { tradeInfoService.findOrderByCompany(companyId, date, query) })
+    }
+
+    /**
      * @api {gut} /trade/order 查询指定用户的历史订单
      * @apiDescription 查询指定用户的历史订单
      * @apiName findOrderByUserId
@@ -87,7 +110,7 @@ class TradeInfoController {
     fun findOrderByUserId(@RequestParam(required = false) userId: Int?, query: PageQuery,
                           @RequestParam(required = false) isBuy: Boolean? = null,
                           @DateTimeFormat(pattern = "yyyy-MM-dd")
-                          @RequestParam date: Date): Mono<ResponseInfo<PageView<TradeInfo>>> {
+                          @RequestParam date: LocalDate): Mono<ResponseInfo<PageView<TradeInfo>>> {
         logger.info(" {} {}", isBuy, date)
         return ResponseInfo.ok(BaseUser.getcurrentUser().flatMap {
             mono { tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy, date) }

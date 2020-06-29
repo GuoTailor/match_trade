@@ -6,6 +6,7 @@ import com.mt.mtcommon.RoomRecord
 import com.mt.mtcommon.toDate
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -27,17 +28,13 @@ interface BaseRoom : Persistable<String> {
 
     @set:DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
     @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    var createTime: Date?        // 创建时间
+    var createTime: LocalDateTime?        // 创建时间
     @get:org.springframework.data.annotation.Transient
     val flag: String            // 标识符
     override fun getId() = roomId
     override fun isNew() = true
 
     fun validNull()
-
-    fun getEndTime(): Date {
-        return startTime!!.plusNanos(time!!.toNanoOfDay()).toDate()
-    }
 
     companion object {
         const val ENABLE = "1"

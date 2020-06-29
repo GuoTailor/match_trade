@@ -41,24 +41,24 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
                 val sellOrder = optional.get()
                 roomInfo.sellOrderList.remove(sellOrder)
                 if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! > sellOrder.price) {
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
+                    matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder)
                 } else {
-                    matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
-                            "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
+                    matchService.onMatchError(roomInfo, buyOrder, sellOrder,
+                            "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                 }.subscribeOn(Schedulers.elastic()).subscribe()
             } else {
-                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, null,
-                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, null), roomInfo.endTime)
+                matchService.onMatchError(roomInfo, buyOrder, null,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, null))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.rivalList.clear()
         roomInfo.buyOrderList.forEach {
-            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, it, null, "失败: 没有可以匹配的报价", roomInfo.endTime)
+            matchService.onMatchError(roomInfo, it, null, "失败: 没有可以匹配的报价")
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
-            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, null, it, "失败: 没有可以匹配的报价", roomInfo.endTime)
+            matchService.onMatchError(roomInfo, null, it, "失败: 没有可以匹配的报价")
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.buyOrderList.clear()
@@ -67,8 +67,8 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
     }
 
     class ClickRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime
-                    ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.toEpochMilli(), record.endTime
+                    ?: LocalTime.MAX.toLocalDateTime()) {
         private var count = 0
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = LinkedList<OrderParam>()
@@ -88,7 +88,7 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
         }
 
         override fun addOrder(data: OrderParam): Boolean {
-            return if (!buyOrderList.contain(data) && !sellOrderList.contains(data)) {
+            return if (!buyOrderList.contain(data) && !sellOrderList.contains(data) && data.isBuy != null) {
                 if (data.isBuy!!) {
                     buyOrderList.add(data)
                 } else {

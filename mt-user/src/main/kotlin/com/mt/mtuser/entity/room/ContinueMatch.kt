@@ -3,6 +3,8 @@ package com.mt.mtuser.entity.room
 import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import org.springframework.format.annotation.DateTimeFormat
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -34,7 +36,7 @@ class ContinueMatch(
         override var highScope: Double? = null,      // 报价最高值
         override var lowScope: Double? = null,       // 报价最低值
         override var enable: String? = null,         // 是否开启（0：关闭，1：开启）
-        override var createTime: Date? = null        // 创建时间
+        override var createTime: LocalDateTime? = null        // 创建时间
 ) : BaseRoom {
     override val flag: String = RoomEnum.CONTINUE.mode
     @org.springframework.data.annotation.Transient

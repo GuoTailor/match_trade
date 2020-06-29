@@ -1,5 +1,6 @@
 package com.mt.mtsocket.controller
 
+import com.mt.mtcommon.OrderInfo
 import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RivalInfo
 import com.mt.mtcommon.TopThree
@@ -143,6 +144,22 @@ class RoomSocketController {
     @RequestMapping("/getTopThree")
     fun getTopThree(): Mono<ResponseInfo<TopThree>> {
         return ResponseInfo.ok(roomSocketService.getTopThree())
+    }
+
+    /**
+     * @api {connect} /getLastOrderInfo 获取房间的最后一次成交价
+     * @apiDescription 获取房间的最后一次成交价
+     * @apiName getLastOrderInfo
+     * @apiVersion 0.0.1
+     * @apiUse OrderInfo
+     * @apiSuccessExample {json} 成功返回:
+     * {"data":{"code":0,"msg":"成功","data":null},"req":12}
+     * @apiGroup Socket
+     * @apiPermission user
+     */
+    @RequestMapping("/getLastOrderInfo")
+    fun getLastOrderInfo(): Mono<ResponseInfo<OrderInfo>> {
+        return ResponseInfo.ok(roomSocketService.getLastOrderInfo())
     }
 
     /**

@@ -8,6 +8,7 @@ const val addOrderNotify = "order"      // 报价结果通知
 const val cancelOrderNotify = "cancel"  // 撤单结果通知
 const val addRivalNotify = "rival"      // 添加对手结果通知
 const val updateTopThree = "topThree"   // 前三档报价
+const val updateFirstOrder = "firstOrder"   // 最新一笔报价
 
 data class NotifyResult(var userId: Int? = null,
                         var roomId: String? = null,
@@ -28,3 +29,5 @@ fun TopThree.toNotifyResult() = NotifyResult(roomId = this.roomId, model = this.
 fun OrderParam.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.mode, updateTopThree, true, data)
 
 fun CancelOrder.toTopThreeNotify(data: Any) = NotifyResult(this.userId, this.roomId, this.mode, updateTopThree, true,  data)
+
+fun OrderInfo.toFirstOrder(roomId: String, mode: String) = NotifyResult(this.userId, roomId, mode, updateFirstOrder, true,  this)

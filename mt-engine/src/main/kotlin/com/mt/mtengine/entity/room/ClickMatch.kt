@@ -6,6 +6,7 @@ import java.util.*
 import javax.validation.constraints.Null
 import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/3/23.
@@ -43,7 +44,7 @@ class ClickMatch(
         override var lowScope: Double? = null,  // 报价最低值
         override var highScope: Double? = null, // 报价最高值
         override var enable: String? = null,    // 是否开启（0：关闭，1：开启）
-        override var createTime: Date? = null,  // 创建时间
+        override var createTime: LocalDateTime? = null,  // 创建时间
         var rival: Int? = null                  // 选择的对手上限
 ) : BaseRoom {
     override val flag: String = RoomEnum.CLICK.mode

@@ -11,5 +11,6 @@ object RedisConsts {
     const val userOrder = "ROOM_ORDER:"
     const val rivalKey = "rival_info_"
     const val topThree = "topThree"
+    const val lastOrder = "lastOrder"
     const val tradeInfo = "TRADE_INFO:"
 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -22,9 +23,9 @@ interface UserDao : CoroutineCrudRepository<User, Int> {
     suspend fun findByPhone(phone: String): User?
 
     @Query("select read_time from mt_user where id = :userId")
-    suspend fun findReadTimeByUserId(userId: Int): Date
+    suspend fun findReadTimeByUserId(userId: Int): LocalDateTime
 
     @Modifying
     @Query("UPDATE mt_user set read_time = :readTime where id = :userId")
-    suspend fun setReadTimeByUserId(userId: Int, readTime: Date): Int
+    suspend fun setReadTimeByUserId(userId: Int, readTime: LocalDateTime): Int
 }

@@ -1,13 +1,22 @@
 package com.mt.mtengine
 
+import reactor.core.publisher.Mono
+
 /**
  * Created by gyh on 2020/5/5.
  */
 
-fun main() {
-    val t = testNull(3)?.let { "$it---" } ?: "nu"
-    println(t)
+fun testMono() {
+    val mo = Mono.just("")
+            .filter { it.length > 2 }
+            .map { "123" }
+            .thenReturn("---")
+            .doOnSuccess { println(it) }
+            .doOnEach { println(it) }
+    println(mo.block())
 }
+
+fun main() = testMono()
 
 fun testNull(i: Int): String? {
     println(add(2)(3))

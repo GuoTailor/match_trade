@@ -1,12 +1,15 @@
 package com.mt.mtuser.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.mt.mtcommon.*
+import com.mt.mtcommon.RoomEnum
+import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.plus
+import com.mt.mtcommon.toLocalDateTime
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
 
 /**
  * Created by gyh on 2020/3/24.
@@ -24,9 +27,9 @@ interface BaseRoom : Persistable<String> {
     var lowScope: Double?        // 报价最低值
     var enable: String?          // 是否开启（0：关闭，1：开启）
 
-    @set:DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
-    @get:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    var createTime: Date?        // 创建时间
+    @set:DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS", iso = DateTimeFormat.ISO.DATE_TIME)
+    @set:JsonFormat(pattern = "YYYY-MM-dd HH:mm:SS")
+    var createTime: LocalDateTime?        // 创建时间
 
     @get:org.springframework.data.annotation.Transient
     val flag: String            // 标识符
@@ -60,8 +63,8 @@ interface BaseRoom : Persistable<String> {
         )
         record.duration = time
         record.tradeAmount = numberTrades
-        record.startTime = startTime!!.toDate()
-        record.endTime = (time!! + startTime!!).toDate()
+        record.startTime = startTime!!.toLocalDateTime()
+        record.endTime = (time!! + startTime!!).toLocalDateTime()
         val endTIme = getDelayEndTIme()
         record.expire = Duration.ofNanos(endTIme.minusNanos(LocalTime.now().toNanoOfDay()).toNanoOfDay())
 

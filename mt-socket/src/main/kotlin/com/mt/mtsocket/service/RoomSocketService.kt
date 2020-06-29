@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/4/14.
@@ -65,8 +66,8 @@ class RoomSocketService {
                 logger.info(userRoomInfo.roomId)
                 redisUtil.getRoomRecord(userRoomInfo.roomId)
             }.map {
-                if (it.startTime!!.time - 2_000 < System.currentTimeMillis()) {
-                    if (it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) >= System.currentTimeMillis()) {
+                if (it.startTime!!.minusSeconds(2) < LocalDateTime.now()) {
+                    if (it.endTime!!.minus(it.secondStage.toDuration()) >= LocalDateTime.now()) {
                         price.roomId = it.roomId
                         price.mode = it.mode
                         price.number = it.tradeAmount
@@ -137,7 +138,7 @@ class RoomSocketService {
             redisUtil.getRoomRecord(userRoomInfo.roomId)
         }.map {
             if (it.mode == RoomEnum.CLICK.mode || it.mode == RoomEnum.TIMING.mode || it.mode == RoomEnum.BICKER.mode) {
-                if (it.endTime!!.time - (it.secondStage?.toMillisOfDay() ?: 0) - 60_000 <= System.currentTimeMillis()) {
+                if (it.endTime!!.minus(it.secondStage.toDuration()).minusSeconds(60) <= LocalDateTime.now()) {
                     error("定时撮合类房间结束前一分钟不能撤单")
                 }
             }
@@ -176,8 +177,22 @@ class RoomSocketService {
                 .flatMap {
                     val roomInfo = store.getRoomInfo(it.id!!)
                             ?: return@flatMap Mono.error<TopThree>(IllegalStateException("错误，用户没有加入房间"))
-                    redisUtil.getRoomTopThree(roomInfo.roomId).switchIfEmpty(Mono.just(TopThree(roomInfo.roomId, roomInfo.mode)))
+                    redisUtil.getRoomTopThree(roomInfo.roomId).defaultIfEmpty(TopThree(roomInfo.roomId, roomInfo.mode))
                 }
+    }
+
+    /**
+     * 获取房间的最后一次成交价
+     */
+    fun getLastOrderInfo(): Mono<OrderInfo> {
+        return BaseUser.getcurrentUser()
+                .flatMap {
+                    val roomInfo = store.getRoomInfo(it.id!!)
+                            ?: return@flatMap Mono.error<OrderInfo>(IllegalStateException("错误，用户没有加入房间"))
+                    redisUtil.getRoomLastOrder(roomInfo.roomId)
+                            .defaultIfEmpty(OrderInfo(it.id!!, roomInfo.roomId, BigDecimal.ZERO, 0, LocalDateTime.now()))
+                }
+
     }
 
     fun onRoomEvent(event: RoomEvent) {

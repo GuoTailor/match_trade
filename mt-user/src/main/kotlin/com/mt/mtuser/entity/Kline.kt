@@ -2,6 +2,7 @@ package com.mt.mtuser.entity
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 private val zero = BigDecimal(0)
@@ -28,8 +29,7 @@ class Kline(
         /** 公司id */
         var companyId: Int? = null,
         /*** 值的生成时间*/
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        var time: Date? = null,
+        var time: LocalDateTime? = null,
         /*** 交易量*/
         var tradesCapacity: Long? = null,
         /*** 交易金额*/

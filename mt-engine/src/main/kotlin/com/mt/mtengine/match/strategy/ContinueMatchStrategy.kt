@@ -7,6 +7,7 @@ import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import reactor.core.scheduler.Schedulers
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -33,25 +34,26 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
         val buyFailedList = mutableListOf<OrderParam>()
         val sellFailedList = mutableListOf<OrderParam>()
         var isMatch = false
+        var pushTopThree = true
         while (roomInfo.buyOrderList.size >= 1 && roomInfo.sellOrderList.size >= 1) {
             val buyOrder = roomInfo.buyOrderList.pollLast()!!       // 最后一个报价最高
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!    // 第一个报价最低
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! >= sellOrder.price) {          // 特殊需求，报价相同也成交
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
-                            .subscribeOn(Schedulers.elastic()).subscribe {
-                                roomInfo.topThree.lastOrder = it.toOrderInfo()  // TODO 无法实时更新
-                            }
+                    matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder, pushTopThree)
+                            .subscribeOn(Schedulers.elastic()).subscribe()
                     isMatch = true
+                    pushTopThree = false
                 } else {
                     buyFailedList.add(buyOrder)
                     sellFailedList.add(sellOrder)
                 }
             } else {
-                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
-                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
+                matchService.onMatchError(roomInfo, buyOrder, sellOrder,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), pushTopThree)
                         .subscribeOn(Schedulers.elastic()).subscribe()
                 isMatch = true
+                pushTopThree = false
             }
         }
         // 戳和失败的放到下一次撮合
@@ -62,23 +64,23 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
 
     class ContinueRoomInfo(record: RoomRecord) :
             MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.cycle!!.toMillisOfDay(), record.endTime
-                    ?: LocalTime.MAX.toDate()) {
+                    ?: LocalTime.MAX.toLocalDateTime()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = TreeSet(MatchUtil.sortPriceAndTime)
 
         override fun canStart(): Boolean {
-            return System.currentTimeMillis() >= nextCycleTime && System.currentTimeMillis() < endTime.time
+            return System.currentTimeMillis() >= nextCycleTime && LocalDateTime.now() < endTime
         }
 
-        override fun isEnd() = System.currentTimeMillis() >= endTime.time
+        override fun isEnd() = LocalDateTime.now() >= endTime
 
         override fun setNextCycle() {
             nextCycleTime += cycle
         }
 
         override fun addOrder(data: OrderParam): Boolean {
-            return if (!buyOrderList.contain(data) && !sellOrderList.contain(data)) {
+            return if (!buyOrderList.contain(data) && !sellOrderList.contain(data) && data.isBuy != null) {
                 if (data.isBuy!!) {
                     buyOrderList.add(data)
                 } else {

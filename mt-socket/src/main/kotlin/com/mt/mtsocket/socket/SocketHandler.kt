@@ -1,7 +1,11 @@
 package com.mt.mtsocket.socket
 
-import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtsocket.common.NotifyReq
 import com.mt.mtsocket.common.Util
 import com.mt.mtsocket.distribute.DispatcherServlet
@@ -12,6 +16,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Created by gyh on 2020/5/19.
@@ -26,6 +32,20 @@ abstract class SocketHandler : WebSocketHandler {
 
     init {
         json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        val javaTimeModule = JavaTimeModule()
+        javaTimeModule.addSerializer(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>() {
+            override fun serialize(value: LocalDateTime, gen: JsonGenerator, serializers: SerializerProvider) {
+                val timestamp = value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                gen.writeNumber(timestamp)
+            }
+        })
+        javaTimeModule.addDeserializer(LocalDateTime::class.java, object : JsonDeserializer<LocalDateTime>() {
+            override fun deserialize(p: JsonParser, ctxt: DeserializationContext): LocalDateTime {
+                val temp = p.valueAsLong
+                return temp.toLocalDateTime()
+            }
+        })
+        json.registerModule(javaTimeModule)
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {

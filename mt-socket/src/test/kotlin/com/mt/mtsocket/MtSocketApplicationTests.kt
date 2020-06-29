@@ -8,8 +8,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtcommon.OrderParam
-import com.mt.mtcommon.RivalInfo
+import com.mt.mtcommon.*
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.service.RedisUtil
 import com.mt.mtsocket.socket.SocketSessionStore
@@ -24,11 +23,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-@SpringBootTest
+//@SpringBootTest
 class MtSocketApplicationTests {
     @Autowired
     lateinit var redisUtil: RedisUtil
@@ -41,11 +44,6 @@ class MtSocketApplicationTests {
 
     @Test
     fun contextLoads() {
-        redisUtil.putUserRival(RivalInfo(roomId = "27", userId = 12, rivals = arrayListOf(1, 2, 3)), Date(1589899960000)).block()
-        redisUtil.getUserRival(12, "27").map { rivals ->
-            rivals.toTypedArray().forEach { println(it) }
-            println(rivals)
-        }.block()
     }
 
     @Test
@@ -125,10 +123,17 @@ class MtSocketApplicationTests {
     fun testJson() {
         val om = ObjectMapper()
         om.registerModule(KotlinModule())
-        val json = om.readValue<Decimal>("{\"time\":1589770215786}")
+        val json = om.readValue<RoomRecord>("{\"id\":null,\"roomId\":null,\"mode\":null,\"stockId\":null,\"companyId\":null,\"startTime\":[2020,6,25,15,35,15,355000000],\"endTime\":null,\"maxPrice\":null,\"minPrice\":null,\"openPrice\":null,\"closePrice\":null,\"quoteTime\":[0,0],\"secondStage\":null,\"rival\":null,\"tradeAmount\":null,\"cycle\":null,\"duration\":null}\n")
         println(json)
         println(om.writeValueAsString(json))
+        println(LocalTime.MIN.toLocalDateTime().minusDays(1))
+        val formatter = DateTimeFormatter.ofPattern("yyyy-M-d")
+        val formattedDateTime = LocalDate.parse("2020-12-2", formatter)
+        println(formattedDateTime)
+        println(formattedDateTime.format(formatter))
+        val nmka: LocalTime? = null
+        println(nmka?.toDuration())
     }
 }
 
-data class Decimal(val time: Date)
+data class Decimal(val time: LocalDateTime)

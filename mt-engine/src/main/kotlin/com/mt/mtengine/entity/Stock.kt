@@ -2,6 +2,7 @@ package com.mt.mtengine.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -19,5 +20,5 @@ data class Stock(@Id var id: Int? = null,
                  var companyId: Int? = null,
                  var name: String? = null,
                  var price: Double? = null,
-                 var createTime: Date? = null
+                 var createTime: LocalDateTime? = null
 )

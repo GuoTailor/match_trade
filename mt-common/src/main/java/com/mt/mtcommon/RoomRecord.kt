@@ -3,13 +3,16 @@ package com.mt.mtcommon
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -37,8 +40,12 @@ open class RoomRecord(
         open var mode: String? = null,          // 模式对应撮合模式
         open var stockId: Int? = null,          // 股票id
         open var companyId: Int? = null,        // 公司id
-        open var startTime: Date? = null,       // 启用时间
-        open var endTime: Date? = null,         // 结束时间,房间结束时会重新计算
+        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+        @JsonSerialize(using = LocalDateTimeSerializer::class)
+        open var startTime: LocalDateTime? = null,       // 启用时间
+        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+        @JsonSerialize(using = LocalDateTimeSerializer::class)
+        open var endTime: LocalDateTime? = null,         // 结束时间,房间结束时会重新计算
         open var maxPrice: BigDecimal? = null,  // 最高价
         open var minPrice: BigDecimal? = null,  // 最低价
         open var openPrice: BigDecimal? = null, // 开盘价
@@ -80,7 +87,7 @@ open class RoomRecord(
     open fun computingTime(): RoomRecord {
         duration = startTime?.let { start ->
             endTime?.let { end ->
-                LocalTime.ofSecondOfDay((end.time - start.time) / 1000 - (quoteTime ?: LocalTime.MIN).toSecondOfDay())
+                LocalTime.ofSecondOfDay((end.toEpochMilli() - start.toEpochMilli()) / 1000 - (quoteTime ?: LocalTime.MIN).toSecondOfDay())
             }
         }
         return this

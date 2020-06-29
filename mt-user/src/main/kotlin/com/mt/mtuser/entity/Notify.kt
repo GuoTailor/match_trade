@@ -3,6 +3,7 @@ package com.mt.mtuser.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -38,7 +39,7 @@ class Notify {
     var msgType: String? = null
 
     /*** 创建时间*/
-    var createTime: Date? = null
+    var createTime: LocalDateTime? = null
 
     @Transient
     var idList: List<Int>? = null

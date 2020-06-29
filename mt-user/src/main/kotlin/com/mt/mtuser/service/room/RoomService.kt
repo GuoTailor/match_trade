@@ -23,6 +23,7 @@ import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -95,7 +96,7 @@ class RoomService {
                     roomRecord = redisUtil.getRoomRecord(roomId) ?: roomRecordDao.findLastRecordByRoomId(roomId)
                             ?: error("房间不存在：$roomId")
                     val previousRecord = roomRecordDao.findLastRecordByRoomId(roomRecord.startTime!!, roomId)
-                    roomRecord.endTime = Date()
+                    roomRecord.endTime = LocalDateTime.now()
                     roomRecord.computingTime()
                     roomRecord.closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
                     if (roomRecord.closePrice == null) {
@@ -205,11 +206,11 @@ class RoomService {
     suspend fun getEditableRoomList() = getRoomList(Stockholder.ADMIN)
 
     suspend fun getHomepageData(roomId: String): Map<String, Any> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, Date())
+        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, LocalDateTime.now())
                 ?: return mapOf("minPrice" to 0, "maxPrice" to 0, "closePrice" to 0,
                         "tradesNumber" to 0, "difference" to 0)
-        val secondRecord = roomRecordDao.findSecondRecordByRoomId(roomId, Date())
-        val closePrice = if (roomRecord.closePrice == null || roomRecord.closePrice == BigDecimal(0)) null else roomRecord.closePrice
+        val secondRecord = roomRecordDao.findSecondRecordByRoomId(roomId, LocalDateTime.now())
+        val closePrice = if (roomRecord.closePrice == null || roomRecord.closePrice?.compareTo(BigDecimal(0)) == 0) null else roomRecord.closePrice
         val tradesNumber = roomRecordService.countByCompanyId(roomRecord.companyId!!)
         val secondClosingPrice = secondRecord?.closePrice ?: BigDecimal(0)
         return mutableMapOf(
@@ -226,7 +227,7 @@ class RoomService {
      * 查找指定房间的历史订单
      */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
-        return tradeInfoService.findOrder(roomId, query, Date())
+        return tradeInfoService.findOrder(roomId, query, LocalDateTime.now())
     }
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
@@ -251,7 +252,7 @@ class RoomService {
      * 获取房间报价范围
      */
     suspend fun getRoomScope(roomId: String): Map<String, String> {
-        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, Date())
+        val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, LocalDateTime.now())
         var highScope = "0"
         var lowScope = "0"
         if (roomRecord != null) {

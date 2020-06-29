@@ -1,6 +1,7 @@
 package com.mt.mtcommon
 
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -10,14 +11,22 @@ open class TopThree(
         var roomId: String,
         var mode: String,
         var buyTopThree: ArrayList<OrderInfo> = ArrayList(),
-        var sellTopThree: ArrayList<OrderInfo> = ArrayList(),
-        var lastOrder: OrderInfo? = null
+        var sellTopThree: ArrayList<OrderInfo> = ArrayList()
 )
 
+/**
+ * @apiDefine OrderInfo
+ * @apiSuccess (返回) {Long} userId 用户id
+ * @apiSuccess (返回) {String} roomId 房间id
+ * @apiSuccess (返回) {Decimal} price 价格
+ * @apiSuccess (返回) {Integer} number 数量
+ * @apiSuccess (返回) {Date} date 时间
+ */
 open class OrderInfo(val userId: Int,
+                     val roomId: String,
                      val price: BigDecimal,
                      val number: Int,
-                     val date: Date
+                     val date: LocalDateTime
 ) : Comparable<OrderInfo> {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -51,6 +60,6 @@ open class OrderInfo(val userId: Int,
 }
 
 
-fun OrderParam.toOrderInfo() = OrderInfo(this.userId!!, this.price!!, this.number!!, this.time)
+fun OrderParam.toOrderInfo() = OrderInfo(this.userId!!, this.roomId!!, this.price!!, this.number!!, this.time)
 
-fun TradeInfo.toOrderInfo() = OrderInfo(-1, this.tradePrice!!, this.tradeAmount!!, this.tradeTime!!)
+fun TradeInfo.toOrderInfo() = OrderInfo(-1, this.roomId!! , this.tradePrice!!, this.tradeAmount!!, this.tradeTime!!)

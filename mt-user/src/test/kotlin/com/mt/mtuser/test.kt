@@ -3,25 +3,25 @@ package com.mt.mtuser
 /**
  * Created by gyh on 2020/3/26.
  */
-import com.mt.mtcommon.minus
+
 import com.mt.mtcommon.plus
-import com.mt.mtcommon.toDate
+import com.mt.mtcommon.toEpochMilli
+import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.entity.logger
 import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import java.math.BigDecimal
 import java.sql.Time
-import java.time.LocalTime
+import java.time.*
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import javax.swing.UIManager.get
 import kotlin.system.measureTimeMillis
+
 
 fun main1() = runBlocking<Unit> {
     val time = measureTimeMillis {
@@ -31,7 +31,6 @@ fun main1() = runBlocking<Unit> {
     println(Thread.currentThread().name)
 }
 
-//ip:39.108.187.54     用户名：root          密码：zelfly737218.       lian.yaolong.top Yin7372175240000
 suspend fun concurrentSum(): Int = coroutineScope {
     val one = async { doSomethingUsefulOne() }
     val two = async { doSomethingUsefulTwo() }
@@ -155,8 +154,31 @@ fun main7() {
     println(page.where().toString())
     println(page.toPageSql())
     println(BigDecimal("5.5").divide(BigDecimal("45.5"), 4, BigDecimal.ROUND_HALF_EVEN).toPlainString())
-    println(BigDecimal("0.0") == BigDecimal(0))
+    println(BigDecimal("0.0").compareTo(BigDecimal(0)) == 0)
     println(Date(1592233200000))
 }
 
-fun main() = main7()
+fun main8() {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m:s.SSS")
+    val formattedDateTime = LocalDateTime.parse("2020-12-2 2:3:4", formatter)
+    val instant = Instant.ofEpochMilli(System.currentTimeMillis())
+    val time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    println(formattedDateTime)
+    println(time)
+    val systemZone = ZoneId.systemDefault() // my timezone
+    val currentOffsetForMyZone = systemZone.rules.getOffset(instant)
+    println(currentOffsetForMyZone)
+    println(LocalDateTime.ofEpochSecond(System.currentTimeMillis() / 1000, 0, ZonedDateTime.now(ZoneId.systemDefault()).offset))
+    println(LocalDateTime.of(LocalDate.now(), LocalTime.MIN))
+    println(LocalDateTime.of(LocalDate.now(), LocalTime.MAX))
+    println(LocalDateTime.now().toInstant(currentOffsetForMyZone).toEpochMilli())
+    println(System.currentTimeMillis())
+    println(LocalDate.now().atStartOfDay())
+    println(LocalDateTime.now().withYear(2019).withNano(123000000).withMinute(57 / 15 * 15))
+    println(LocalDate.now().withDayOfMonth(1).atStartOfDay())
+    println(LocalDate.of(2020, 2, 1).with(TemporalAdjusters.lastDayOfMonth()).atStartOfDay())
+    println(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
+    println(LocalTime.MIN.toLocalDateTime().toEpochMilli())
+}
+
+fun main() = main8()

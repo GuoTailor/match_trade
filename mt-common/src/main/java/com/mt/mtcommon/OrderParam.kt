@@ -1,8 +1,13 @@
 package com.mt.mtcommon
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -21,8 +26,8 @@ open class OrderParam(
         var isBuy: Boolean? = null,     // 是否买家
         var number: Int? = null,        // 交易数量
         var mode: String? = null,       // 房间模式
-        var time: Date = Date(),        // 报价时间，默认当前时间
-        var tradeTime: Date? = null,    // 成交时间
+        var time: LocalDateTime = LocalDateTime.now(),        // 报价时间，默认当前时间
+        var tradeTime: LocalDateTime? = null,    // 成交时间
         var tradeState: String? = TradeState.STAY,  // 交易状态
         var stateDetails: String? = null,   // 状态原因
         var tradePrice: BigDecimal? = null  // 成交价格

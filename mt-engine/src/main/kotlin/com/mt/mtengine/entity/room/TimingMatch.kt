@@ -3,6 +3,7 @@ package com.mt.mtengine.entity.room
 import com.mt.mtcommon.RoomEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -36,7 +37,7 @@ class TimingMatch(
         override var lowScope: Double? = null,  // 最低报价
         override var highScope: Double? = null, // 最高报价
         override var enable: String? = null,    // 是否启用（0：关闭，1：开启）
-        override var createTime: Date? = null   // 创建时间
+        override var createTime: LocalDateTime? = null   // 创建时间
 ) : BaseRoom {
     override val flag: String = RoomEnum.TIMING.mode
     override fun validNull() {

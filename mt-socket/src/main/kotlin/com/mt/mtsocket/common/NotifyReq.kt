@@ -13,6 +13,7 @@ object NotifyReq {
     const val pushTradeInfo = -7        // 推送交易信息更新
     const val notifyRoomClose = -6      // 房间关闭通知
     const val notifyTopThree = -5       // 前三档报价通知
+    const val notifyFirstOrder = -4     // 最新一笔报价通知
     const val notifyNumberChange = -3   // 房间人数变化通知
     const val notifyTrade = -2          // 订单消费通知
     const val errorNotify = -1          // 错误通知

@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.kline
 
+import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
@@ -7,6 +8,7 @@ import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.data.r2dbc.core.awaitOneOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -35,21 +37,21 @@ class Compute15MKlineService : ComputeKline() {
         return c.timeInMillis
     }
 
-    override suspend fun getMinComputeTime(): Date? {
+    override suspend fun getMinComputeTime(): LocalDateTime? {
         return connect.execute("select min(time) as time from mt_1m_kline")
-                .map { t, _ -> Optional.ofNullable(t.get("time", Date::class.java)) }
+                .map { t, _ -> Optional.ofNullable(t.get("time", LocalDateTime::class.java)) }
                 .awaitOne().orElse(null)
     }
 
     override fun step(): Long = step
 
     override suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline {
-        val startTime = Date(time - step)
-        val endTime = Date(time)
+        val startTime = (time - step).toLocalDateTime()
+        val endTime = time.toLocalDateTime()
         val kline = Kline()
         kline.stockId = stockId
         kline.companyId = companyId
-        kline.time = Date(time)
+        kline.time = time.toLocalDateTime()
         // TODO 也许获取开盘价和收盘价有更好的方法
         kline.openPrice = klineService.getClosePriceByTableName(startTime, stockId, "mt_1m_kline")
         kline.closePrice = klineService.getClosePriceByTableName(endTime, stockId, "mt_1m_kline")

@@ -3,6 +3,7 @@ package com.mt.mtcommon
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -26,7 +27,7 @@ open class TradeInfo(
         var tradePrice: BigDecimal? = null,    // 成交价格
         var tradeAmount: Int? = null,           // 成交数量
         var tradeMoney: BigDecimal? = null,     // 成交金额
-        var tradeTime: Date? = null,           // 交易时间
+        var tradeTime: LocalDateTime? = null,   // 交易时间
         var tradeState: String? = null,        // 交易状态
         var stateDetails: String? = null       // 状态原因
 ) {
@@ -42,7 +43,7 @@ open class TradeInfo(
             sellerId = sell?.userId,
             sellerName = sell?.userName,
             sellerPrice = sell?.price,
-            tradeTime = Date()
+            tradeTime = LocalDateTime.now()
     )
 
     constructor(buy: OrderParam?, sell: OrderParam?) : this(
@@ -55,7 +56,7 @@ open class TradeInfo(
             sellerId = sell?.userId,
             sellerName = sell?.userName,
             sellerPrice = sell?.price,
-            tradeTime = Date()
+            tradeTime = LocalDateTime.now()
     )
 
     override fun toString(): String {

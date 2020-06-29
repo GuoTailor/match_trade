@@ -7,6 +7,8 @@ import com.mt.mtengine.service.MatchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import reactor.core.scheduler.Schedulers
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
@@ -29,6 +31,7 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
      */
     override fun match(roomInfo: DoubleRoomInfo): Boolean {
         val isMatch = roomInfo.orderList.size >= 2
+        var i = 0
         while (roomInfo.orderList.size >= 2) {
             val order1 = roomInfo.orderList.pollLast()!!
             val order2 = roomInfo.orderList.pollLast()!!
@@ -36,35 +39,31 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
                 if (order1.price!! > order2.price) {
                     order1.isBuy = true
                     order2.isBuy = false
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order1, order2, roomInfo.endTime)
+                    matchService.onMatchSuccess(roomInfo, order1, order2, i++ == 0)
                 } else {
                     order1.isBuy = false
                     order2.isBuy = true
-                    matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, order2, order1, roomInfo.endTime)
+                    matchService.onMatchSuccess(roomInfo, order2, order1, i++ == 0)
                 }
             } else {
-                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, order1, order2,
-                        "失败:" + MatchUtil.getVerifyInfo(order1, order2), roomInfo.endTime)
+                matchService.onMatchError(roomInfo, order1, order2, "失败:" + MatchUtil.getVerifyInfo(order1, order2), i++ == 0)
             }
-            result.subscribeOn(Schedulers.elastic()).subscribe {
-                roomInfo.topThree.lastOrder = it.toOrderInfo()  // TODO 无法实时更新
-            }    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
+            result.subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
         }
-        // 未成交的订单保留直下一轮
         return isMatch
     }
 
     class DoubleRoomInfo(record: RoomRecord) :
             MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.cycle!!.toMillisOfDay(), record.endTime
-                    ?: LocalTime.MAX.toDate()) {
+                    ?: LocalTime.MAX.toLocalDateTime()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val orderList = TreeSet(MatchUtil.sortTime)
 
         override fun canStart(): Boolean {
-            return System.currentTimeMillis() >= nextCycleTime && System.currentTimeMillis() < endTime.time
+            return System.currentTimeMillis() >= nextCycleTime && LocalDateTime.now() < endTime
         }
 
-        override fun isEnd() = System.currentTimeMillis() >= endTime.time
+        override fun isEnd() = LocalDateTime.now() >= endTime
 
         override fun setNextCycle() {
             nextCycleTime += cycle      // TODO 可能最后一次撮合不会执行

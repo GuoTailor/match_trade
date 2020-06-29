@@ -37,17 +37,16 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
             buyOrder.isBuy = true
             sellOrder.isBuy = false
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price != sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
+                matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
             } else {
-                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
-                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
+                matchService.onMatchError(roomInfo, buyOrder, sellOrder,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.orderList.forEach {
-            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, it, null,
-                    "失败: 没有可以匹配的报价", roomInfo.endTime)
+            matchService.onMatchError(roomInfo, it, null, "失败: 没有可以匹配的报价")
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.orderList.clear()
@@ -55,8 +54,8 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
     }
 
     class BickerRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime
-                    ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.toEpochMilli(), record.endTime
+                    ?: LocalTime.MAX.toLocalDateTime()) {
         val orderList = TreeSet(MatchUtil.sortPriceAndTime)
         private var count = 0
 

@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.kline
 
+import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
@@ -7,6 +8,7 @@ import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -36,26 +38,26 @@ class Compute1MKlineService : ComputeKline() {
     }
 
     override suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline {
-        val startTime = Date(time - millisOfMinute) // 包括 :00
-        val endTime = Date(time - 1)                // 不包括 :00
+        val startTime = (time - millisOfMinute).toLocalDateTime() // 包括 :00
+        val endTime = (time - 1).toLocalDateTime()                // 不包括 :00
         val kline = selectMinuteKline(startTime, endTime, stockId)
         kline.stockId = stockId
         kline.companyId = companyId
-        kline.time = Date(time)
+        kline.time = time.toLocalDateTime()
         kline.openPrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(startTime, stockId)
         kline.closePrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(endTime, stockId)
         return kline
     }
 
-    override suspend fun getMinComputeTime(): Date? {
+    override suspend fun getMinComputeTime(): LocalDateTime? {
         return connect.execute("select min(trade_time) as tradeTime from mt_trade_info")
-                .map { t, _ -> Optional.ofNullable(t.get("tradeTime", Date::class.java)) }
+                .map { t, _ -> Optional.ofNullable(t.get("tradeTime", LocalDateTime::class.java)) }
                 .awaitOne().orElse(null)
     }
 
     override fun step(): Long = millisOfMinute
 
-    suspend fun selectMinuteKline(startTime: Date, endTime: Date, stockId: Int): Kline {
+    suspend fun selectMinuteKline(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Kline {
         val kline = Kline()
         return connect.execute("select count(1) as tradesNumber," +
                 " COALESCE(sum(trade_amount), 0) as tradesCapacity, " +

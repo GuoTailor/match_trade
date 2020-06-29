@@ -2,7 +2,7 @@ package com.mt.mtgateway.bean
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.format.annotation.DateTimeFormat
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/3/15.
@@ -17,9 +17,9 @@ data class User(
         var roles: Collection<Role> = mutableListOf(),
         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        var createTime: Date? = null,
+        var createTime: LocalDateTime? = null,
         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-        var lastTime: Date? = null,
+        var lastTime: LocalDateTime? = null,
         var toke: String? = null
 )

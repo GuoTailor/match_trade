@@ -34,30 +34,28 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
             val buyOrder = roomInfo.buyOrderList.pollLast()!!
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! >= sellOrder.price) {
-                matchService.onMatchSuccess(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder, roomInfo.endTime)
+                matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder)
                         .subscribeOn(Schedulers.elastic()).subscribe()
             } else {
-                matchService.onMatchError(roomInfo.roomId, roomInfo.mode, buyOrder, sellOrder,
-                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), roomInfo.endTime)
+                matchService.onMatchError(roomInfo, buyOrder, sellOrder,
+                        "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
                         .subscribeOn(Schedulers.elastic()).subscribe()
             }
         }
         roomInfo.buyOrderList.forEach {
-            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, it, null,
-                    "失败:" + MatchUtil.getVerifyInfo(it, null), roomInfo.endTime)
+            matchService.onMatchError(roomInfo, it, null, "失败:" + MatchUtil.getVerifyInfo(it, null))
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
-            matchService.onMatchError(roomInfo.roomId, roomInfo.mode, null, it,
-                    "失败:" + MatchUtil.getVerifyInfo(null, it), roomInfo.endTime)
+            matchService.onMatchError(roomInfo, null, it, "失败:" + MatchUtil.getVerifyInfo(null, it))
                     .subscribeOn(Schedulers.elastic()).subscribe()
         }
         return isMatch
     }
 
     class TimingRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.time, record.endTime
-                    ?: LocalTime.MAX.toDate()) {
+            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.toEpochMilli(), record.endTime
+                    ?: LocalTime.MAX.toLocalDateTime()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val buyOrderList = TreeSet(MatchUtil.sortPriceAndTime)
         val sellOrderList = TreeSet(MatchUtil.sortPriceAndTime)
@@ -74,7 +72,7 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
         }
 
         override fun addOrder(data: OrderParam): Boolean {
-            return if (!buyOrderList.contain(data) && !sellOrderList.contain(data)) {
+            return if (!buyOrderList.contain(data) && !sellOrderList.contain(data) && data.isBuy != null) {
                 if (data.isBuy!!) {
                     buyOrderList.add(data)
                 } else {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -25,6 +26,7 @@ class RedisUtil {
     private val rivalInfoKey = RedisConsts.rivalKey
     private val topThreeKey = RedisConsts.topThree
     private val tradeKey = RedisConsts.tradeInfo
+    private val lastOrderKey = RedisConsts.lastOrder
 
     // -------------------------=======>>>房间<<<=======-------------------------
 
@@ -44,10 +46,10 @@ class RedisUtil {
     /**
      * 添加元素到队列尾部
      */
-    fun putUserOrder(order: OrderParam, endTime: Date): Mono<Boolean> {
+    fun putUserOrder(order: OrderParam, endTime: LocalDateTime): Mono<Boolean> {
         return redisTemplate.opsForList().rightPush("$userOrderKey${order.roomId}:${order.userId}", order)
                 .then(redisTemplate.expire("$userOrderKey${order.roomId}:${order.userId}",  // 房间结束时自动过期
-                        Duration.ofSeconds((endTime.time / 1000) - LocalTime.now().toSecondOfDay() + 59L)))
+                        Duration.ofMillis(endTime.toEpochMilli() - System.currentTimeMillis() + 59_000L)))
     }
 
     /**
@@ -113,7 +115,7 @@ class RedisUtil {
 
     // ------------------------=======>>>对手<<<=====----------------------
 
-    fun putUserRival(rival: RivalInfo, endTime: Date): Mono<Boolean> {
+    fun putUserRival(rival: RivalInfo, endTime: LocalDateTime): Mono<Boolean> {
         return redisTemplate.opsForHash<String, ArrayList<Int>>()
                 .put("$roomKey${rival.roomId}", "$rivalInfoKey${rival.userId}", rival.rivals ?: ArrayList())
     }
@@ -122,6 +124,13 @@ class RedisUtil {
         return redisTemplate.opsForHash<String, ArrayList<Int>>().get("$roomKey${roomId}", "$rivalInfoKey${userId}")
     }
 
+    fun setRoomLastOrder(orderInfo: OrderInfo): Mono<Boolean> {
+        return redisTemplate.opsForHash<String, OrderInfo>().put(roomKey + orderInfo.roomId, lastOrderKey, orderInfo)
+    }
+
+    fun getRoomLastOrder(roomId: String): Mono<OrderInfo> {
+        return redisTemplate.opsForHash<String, OrderInfo>().get(roomKey + roomId, lastOrderKey)
+    }
     // ------------------------=======>>>前三档<<<=====----------------------
 
     fun setRoomTopThree(topThree: TopThree): Mono<Boolean> {
@@ -134,11 +143,11 @@ class RedisUtil {
 
     // ------------------------=======>>>交易信息<<<=====----------------------
 
-    fun setTradeInfo(tradeInfo: TradeInfo, timedOut: Date): Mono<Boolean> {
+    fun setTradeInfo(tradeInfo: TradeInfo, timedOut: LocalDateTime): Mono<Boolean> {
         return redisTemplate.opsForList().leftPush("$tradeKey${tradeInfo.roomId}", tradeInfo)
                 .then(redisTemplate.expire("$tradeKey${tradeInfo.roomId}",
                         // 延迟一分钟关闭，防止那种只撮合一次的房间在撮合时由于房间关闭，在更新用户报价信息时获取不到用户的历史报价导致撮合失败的问题
-                        Duration.ofSeconds(((timedOut.time - System.currentTimeMillis()) / 1000) + 59L)))
+                        Duration.ofMillis(timedOut.toEpochMilli() - System.currentTimeMillis() + 59_000L)))
     }
 
     fun getTradeInfo(roomId: String): Flux<TradeInfo> {

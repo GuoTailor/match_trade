@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import reactor.core.scheduler.Schedulers
-import java.util.*
+import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.LockSupport
@@ -41,7 +41,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         if (roomInfo == null) {
             logger.error("交易匹配错误，不存在的房间号: {}", roomId)
         } else {
-            if (match(roomInfo) && roomInfo.updateTopThree()) {
+            if (match(roomInfo) && roomInfo.updateTopThree()) { // TODO 剔除
                 // 更新前三档报价
                 redisUtil.setRoomTopThree(roomInfo.topThree)
                         .map { sink.outResult().send(MessageBuilder.withPayload(roomInfo.topThree.toNotifyResult()).build()) }
@@ -126,7 +126,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
             val roomId: String, // 房间号
             val mode: String,   // 房间模式
             var cycle: Long,    // 周期，单位毫秒
-            val endTime: Date   // 不支持提前结束和延迟结束
+            val endTime: LocalDateTime   // 不支持提前结束和延迟结束
     ) {
         val topThree = TopThree(roomId, mode)
         private val tempAdd = AtomicReference<Any>()
@@ -193,7 +193,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                 } else if (data is RivalInfo) {
                     val result = addRival(data)
                     if (result) {
-                        redisUtil.putUserRival(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                        redisUtil.putUserRival(data).subscribeOn(Schedulers.elastic()).subscribe()
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
                     } else {
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())

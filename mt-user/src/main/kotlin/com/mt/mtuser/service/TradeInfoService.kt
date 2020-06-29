@@ -1,9 +1,7 @@
 package com.mt.mtuser.service
 
 import com.mt.mtcommon.*
-import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.TradeInfoDao
-import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
@@ -11,7 +9,6 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
@@ -20,8 +17,10 @@ import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
+import java.time.format.DateTimeFormatter
 
 /**
  * Created by gyh on 2020/5/7.
@@ -48,28 +47,30 @@ class TradeInfoService {
     /**
      * 获取今天的交易量
      */
-    suspend fun countStockByTradeTime(startTime: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countStockByTradeTime(startTime, Date())
+    suspend fun countStockByTradeTime(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()) =
+            tradeInfoDao.countStockByTradeTime(startTime, LocalDateTime.now())
 
     /**
      * 获取公司今天的交易量
      */
-    suspend fun countStockByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): Long {
+    suspend fun countStockByTradeTimeAndCompanyId(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()): Long {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         //val stockId = stockService.findByCompanyId(companyId).first()// TODO 替换为股票id
-        return tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, Date(), companyId)
+        return tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
     }
 
     /**
      * 获取今天交易额
      */
-    suspend fun countMoneyByTradeTime(startTime: Date = LocalTime.MIN.toDate()) = tradeInfoDao.countMoneyTradeTime(startTime, Date())
+    suspend fun countMoneyByTradeTime(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()) =
+            tradeInfoDao.countMoneyTradeTime(startTime, LocalDateTime.now())
 
     /**
      * 获取公司今天的交易额
      */
-    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: Date = LocalTime.MIN.toDate()): BigDecimal {
+    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, Date(), companyId)
+        return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
     }
 
     /**
@@ -79,22 +80,22 @@ class TradeInfoService {
         // TODO 交易失败的不计入计算
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         // 今天凌晨
-        val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(endTime.toDate(), companyId) ?: BigDecimal(0)
+        val endTime = LocalTime.MIN.toLocalDateTime()
+        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(endTime, companyId) ?: BigDecimal(0)
     }
 
     suspend fun getYesterdayClosingPriceByRoomId(roomId: String): BigDecimal {
-        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay() - LocalTime.MAX.toMillisOfDay()
-        val endTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime.toDate(), endTime.toDate(), roomId)
+        val startTime = LocalTime.MIN.toLocalDateTime().minusDays(1)
+        val endTime = LocalTime.MIN.toLocalDateTime()
+        return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime, endTime, roomId)
                 ?: BigDecimal(0)
     }
 
-    suspend fun getClosingPriceByRoomId(roomId: String, startTime: Date, endTime: Date): BigDecimal? {
+    suspend fun getClosingPriceByRoomId(roomId: String, startTime: LocalDateTime, endTime: LocalDateTime): BigDecimal? {
         return tradeInfoDao.findLastPriceByTradeTimeAndRoomId(startTime, endTime, roomId)
     }
 
-    suspend fun getOpenPriceByRoomId(startTime: Date, endTime: Date, roomId: String) =
+    suspend fun getOpenPriceByRoomId(startTime: LocalDateTime, endTime: LocalDateTime, roomId: String) =
             tradeInfoDao.findFirstPriceByTradeTimeAndRoomId(startTime, endTime, roomId) ?: BigDecimal(0)
 
     /**
@@ -102,7 +103,7 @@ class TradeInfoService {
      */
     suspend fun getTodayOpeningPriceByCompanyId(): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(Date(), companyId) ?: BigDecimal(0)
+        return tradeInfoDao.findLastPriceByTradeTimeAndCompanyId(LocalDateTime.now(), companyId) ?: BigDecimal(0)
     }
 
     /**
@@ -110,12 +111,12 @@ class TradeInfoService {
      */
     suspend fun getAvgPriceByCompanyId(): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        val endTime = System.currentTimeMillis()
-        return tradeInfoDao.avgPriceByTradeTimeAndCompanyId(startTime.toDate(), endTime.toDate(), companyId)
+        val startTime = LocalTime.MIN.toLocalDateTime()
+        val endTime = LocalDateTime.now()
+        return tradeInfoDao.avgPriceByTradeTimeAndCompanyId(startTime, endTime, companyId)
     }
 
-    suspend fun buyOverview(startTime: Date, endTime: Date, companyId: Int, buyerId: Int): Overview {
+    suspend fun buyOverview(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int, buyerId: Int): Overview {
         return connect.execute("select COALESCE(sum(trade_amount), 0) as buyStock," +
                 " COALESCE(sum(trade_money), 0) as buyMoney," +
                 " COALESCE(avg(trade_price), 0) as avgBuyMoney " +
@@ -137,7 +138,7 @@ class TradeInfoService {
                 .awaitSingle()
     }
 
-    suspend fun sellOverview(startTime: Date, endTime: Date, companyId: Int, sellId: Int): Overview {
+    suspend fun sellOverview(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int, sellId: Int): Overview {
         return connect.execute("select COALESCE(sum(trade_amount), 0) as sellStock," +
                 " COALESCE(sum(trade_money), 0) as sellMoney," +
                 " COALESCE(avg(trade_price), 0) as avgSellMoney " +
@@ -163,10 +164,10 @@ class TradeInfoService {
      * 获取今日成交概述
      */
     suspend fun dayOverview(userId: Int, companyId: Int): Overview {
-        val startTime = System.currentTimeMillis() - LocalTime.now().toMillisOfDay()
-        val endTime = System.currentTimeMillis()
-        val buyOverview = buyOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
-        val sellOverview = sellOverview(startTime.toDate(), endTime.toDate(), companyId, userId)
+        val startTime = LocalTime.MIN.toLocalDateTime()
+        val endTime = LocalDateTime.now()
+        val buyOverview = buyOverview(startTime, endTime, companyId, userId)
+        val sellOverview = sellOverview(startTime, endTime, companyId, userId)
         buyOverview.copyNotNullField(sellOverview)
         buyOverview.computeNetBuy()
         return buyOverview
@@ -176,8 +177,8 @@ class TradeInfoService {
      * 获取本月成交概述
      */
     suspend fun monthOverview(userId: Int, companyId: Int): Overview {
-        val startTime = minDay()
-        val endTime = maxDay()
+        val startTime = firstDay()
+        val endTime = lastDay()
         val buyOverview = buyOverview(startTime, endTime, companyId, userId)
         val sellOverview = sellOverview(startTime, endTime, companyId, userId)
         buyOverview.copyNotNullField(sellOverview)
@@ -188,7 +189,7 @@ class TradeInfoService {
     /**
      * 获取指定时间范围的最大和最小报价
      */
-    suspend fun getMaxMinPrice(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
+    suspend fun getMaxMinPrice(roomId: String, startTime: LocalDateTime, endTime: LocalDateTime): Map<String, BigDecimal> {
         return findMaxMinPriceByTradeTimeAndRoomId(roomId, startTime, endTime)
     }
 
@@ -202,7 +203,7 @@ class TradeInfoService {
     /**
      * 查询指定时间内的历史订单
      */
-    suspend fun findOrder(roomId: String, query: PageQuery, endTime: Date): PageView<TradeInfo> {
+    suspend fun findOrder(roomId: String, query: PageQuery, endTime: LocalDateTime): PageView<TradeInfo> {
         val where = query.where()
                 .and("room_id").`is`(roomId)
                 .and("trade_time").lessThan(endTime)
@@ -230,22 +231,42 @@ class TradeInfoService {
     }
 
     /**
+     * 查找指定公司的历史订单
+     */
+    suspend fun findOrderByCompany(companyId: Int, date: LocalDate, query: PageQuery): PageView<TradeInfo> {
+        val startTime = date.minusDays(1)
+        val where = query.where().and("company_id").`is`(companyId).and("trade_time").between(startTime, date)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
+        // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
+        val countWhere = query.where().and("company_id").`is`(companyId).and("trade_time").between("'${startTime.format(formatter)}'", "'${date.format(formatter)}'")
+        return getPage(connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query, countWhere)
+    }
+
+    /**
      * 查询指定用户的交易记录
      */
-    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?, date: Date): PageView<TradeInfo> {
-        val endTime = Date(date.time + LocalTime.MAX.toMillisOfDay())
+    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?, date: LocalDate): PageView<TradeInfo> {
+        val startTime = date.minusDays(1)
         val where = when {
             isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
             else -> query.where().and(where("seller_id").`is`(userId))
-        }.and(where("trade_time").between(date, endTime))
+        }.and(where("trade_time").between(startTime, date))
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
         // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
         val countWhere = when {
             isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
             else -> query.where().and(where("seller_id").`is`(userId))
-        }.and(where("trade_time").between("'${Util.createDate(date)}'", "'${Util.createDate(endTime)}'"))
+        }.and(where("trade_time").between("'${startTime.format(formatter)}'", "'${date.format(formatter)}'"))
 
         return getPage(connect.select()
                 .from<TradeInfo>()
@@ -273,7 +294,7 @@ class TradeInfoService {
                 .map { r, _ ->
                     mapOf("id" to r.get("id", java.lang.Long::class.java),
                             "stockId" to r.get("stock_id", java.lang.Integer::class.java),
-                            "time" to Util.createDate(r.get("time", Date::class.java)),
+                            "time" to r.get("time", LocalDateTime::class.java)?.toEpochMilli(),
                             "tradesCapacity" to r.get("trades_capacity", java.lang.Long::class.java),
                             "tradesVolume" to r.get("trades_volume", BigDecimal::class.java),
                             "tradesNumber" to r.get("trades_number", java.lang.Integer::class.java),
@@ -290,7 +311,7 @@ class TradeInfoService {
     /**
      * 获取指定时间范围的最大和最小报价
      */
-    suspend fun findMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: Date, endTime: Date): Map<String, BigDecimal> {
+    suspend fun findMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: LocalDateTime, endTime: LocalDateTime): Map<String, BigDecimal> {
         return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
                 " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
                 " where trade_time between :startTime and :endTime " +
@@ -304,7 +325,7 @@ class TradeInfoService {
                 }.awaitOne()
     }
 
-    suspend fun findMaxMinPriceByTradeTimeAndStockId(startTime: Date, endTime: Date, stockId: Int): Map<String, BigDecimal> {
+    suspend fun findMaxMinPriceByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Map<String, BigDecimal> {
         return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
                 " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
                 " where trade_time between :startTime and :endTime " +

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.format.annotation.DateTimeFormat
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -58,21 +59,17 @@ class User : BaseUser() {
     /**
      * 最后拉取消息时间
      */
-    var readTime: Date? = null
+    var readTime: LocalDateTime? = null
 
     /**
      * 注册时间
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    var createTime: Date? = null
+    var createTime: LocalDateTime? = null
 
     /**
      * 最后一次登录时间
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    var lastTime: Date? = null
+    var lastTime: LocalDateTime? = null
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     override fun getPassword(): String? {

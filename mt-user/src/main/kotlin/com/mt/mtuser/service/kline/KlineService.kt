@@ -1,5 +1,6 @@
 package com.mt.mtuser.service.kline
 
+import com.mt.mtcommon.toEpochMilli
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.logger
@@ -20,6 +21,7 @@ import org.springframework.data.r2dbc.core.awaitOneOrNull
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.locks.ReentrantLock
@@ -52,7 +54,7 @@ class KlineService {
             val now = System.currentTimeMillis()
             if (lastTime == null) { // 如果是刚启动就查表获取该k线图的最后一次计算时间
                 // 如果该k线没有参与计算过就从头开始计算
-                lastTime = getLastTimeByKline(it.tableName)?.time ?: it.getMinComputeTime()?.time ?: return@forEach
+                lastTime = getLastTimeByKline(it.tableName)?.toEpochMilli() ?: it.getMinComputeTime()?.toEpochMilli() ?: return@forEach
                 // 加一个步长，用于计算当前时间的k线，比如计算5-18 00:00的日k就应该计算5-18 00:00 到 5-18 23:59,而不是5-17 00:00 到 5-17 23:59
                 lastTime = it.formatDate(lastTime) + it.step()
                 for (time in lastTime..now step it.step()) {
@@ -98,9 +100,9 @@ class KlineService {
         klineServiceList.add(computeKline)
     }
 
-    suspend fun getLastTimeByKline(tableName: String): Date? {
+    suspend fun getLastTimeByKline(tableName: String): LocalDateTime? {
         return connect.execute("select max(time) as time from $tableName")
-                .map { t, _ -> Optional.ofNullable(t.get("time", Date::class.java)) }
+                .map { t, _ -> Optional.ofNullable(t.get("time", LocalDateTime::class.java)) }
                 .awaitOne().orElse(null)
     }
 
@@ -145,7 +147,7 @@ class KlineService {
     /**
      * 获取收盘价，这次的收盘价也可以用于下一次开盘的开盘价
      */
-    suspend fun getClosePriceByTableName(endTime: Date, stockId: Int, tableName: String): BigDecimal? {
+    suspend fun getClosePriceByTableName(endTime: LocalDateTime, stockId: Int, tableName: String): BigDecimal? {
         return connect.execute("select open_price from $tableName where time < :endTime and stock_id = :stockId order by time desc limit 1")
                 .bind("endTime", endTime)
                 .bind("stockId", stockId)

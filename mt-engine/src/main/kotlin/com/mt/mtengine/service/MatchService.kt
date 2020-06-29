@@ -1,8 +1,7 @@
 package com.mt.mtengine.service
 
-import com.mt.mtcommon.OrderParam
-import com.mt.mtcommon.TradeInfo
-import com.mt.mtcommon.TradeState
+import com.mt.mtcommon.*
+import com.mt.mtengine.match.strategy.MatchStrategy
 import com.mt.mtengine.mq.MatchSink
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,9 +39,9 @@ class MatchService {
     @Autowired
     private lateinit var redisUtil: RedisUtil
 
-    fun onMatchSuccess(roomId: String, flag: String, buy: OrderParam, sell: OrderParam, endTime: Date): Mono<TradeInfo> = r2dbc.withTransaction {
-        roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
-            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
+    fun <T: MatchStrategy.RoomInfo> onMatchSuccess(roomInfo: T, buy: OrderParam, sell: OrderParam, isTopThree: Boolean = false) = r2dbc.withTransaction {
+        roomService.findCompanyIdByRoomId(roomInfo.roomId, roomInfo.mode).flatMap { info ->
+            val threadInfo = TradeInfo(buy, sell, roomInfo.roomId, info.companyId, info.stockId, roomInfo.mode)
             threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
             threadInfo.tradeMoney = threadInfo.tradePrice?.multiply(BigDecimal(threadInfo.tradeAmount ?: 0))
             threadInfo.tradeState = TradeState.SUCCESS
@@ -55,50 +54,60 @@ class MatchService {
                     .flatMap { tradeInfoService.save(threadInfo) }
                     .flatMap { redisUtil.updateUserOrder(buy) }
                     .flatMap { redisUtil.updateUserOrder(sell) }
-                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
-                    .map { threadInfo }
-        }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchFailed(roomId, flag, buy, sell, it.message ?: "失败", endTime) }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, roomInfo.endTime) }
+                    .filter { isTopThree }
+                    .flatMap { redisUtil.setRoomLastOrder(threadInfo.toOrderInfo()) }
+                    .map { sink.outResult().send(MessageBuilder.withPayload(threadInfo.toOrderInfo().toFirstOrder(roomInfo.roomId, roomInfo.mode)).build()) }
+                    .thenReturn(threadInfo)
+        }.doOnSuccess { threadInfo ->
+            sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build())
+        }.doOnError { onMatchFailed(roomInfo, buy, sell, it.message ?: "失败", isTopThree) }
     }
 
-    fun onMatchFailed(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String, endTime: Date) = r2dbc.withTransaction {
-        roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
-            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
+    fun <T: MatchStrategy.RoomInfo> onMatchFailed(roomInfo: T, buy: OrderParam?, sell: OrderParam?, failedInfo: String, isTopThree: Boolean = false) = r2dbc.withTransaction {
+        roomService.findCompanyIdByRoomId(roomInfo.roomId, roomInfo.mode).flatMap { info ->
+            val threadInfo = TradeInfo(buy, sell, roomInfo.roomId, info.companyId, info.stockId, roomInfo.mode)
             if (buy?.price != null && sell?.price != null)
                 threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
             threadInfo.tradeState = TradeState.FAILED
-            threadInfo.stateDetails = fileInfo
+            threadInfo.stateDetails = failedInfo
             buy?.onTrade(threadInfo)
             sell?.onTrade(threadInfo)
             tradeInfoService.save(threadInfo)
                     .flatMap { buy?.let { b -> redisUtil.updateUserOrder(b) } }
                     .flatMap { sell?.let { s -> redisUtil.updateUserOrder(s) } }
-                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
-                    .map { threadInfo }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, roomInfo.endTime) }
+                    .filter { isTopThree }
+                    .flatMap { redisUtil.setRoomLastOrder(threadInfo.toOrderInfo()) }
+                    .map { sink.outResult().send(MessageBuilder.withPayload(threadInfo.toOrderInfo().toFirstOrder(roomInfo.roomId, roomInfo.mode)).build()) }
+                    .thenReturn(threadInfo)
         }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchError(roomId, flag, buy, sell, it.message ?: "失败", endTime) }
+                .doOnError { onMatchError(roomInfo, buy, sell, it.message ?: "失败", isTopThree) }
     }
 
-    fun onMatchError(roomId: String, flag: String, buy: OrderParam?, sell: OrderParam?, fileInfo: String, endTime: Date): Mono<TradeInfo> {
-        return roomService.findCompanyIdByRoomId(roomId, flag).flatMap { info ->
-            val threadInfo = TradeInfo(buy, sell, roomId, info.companyId, info.stockId, flag)
+    fun <T: MatchStrategy.RoomInfo> onMatchError(roomInfo: T, buy: OrderParam?, sell: OrderParam?, failedInfo: String, isTopThree: Boolean = false): Mono<TradeInfo> {
+        return roomService.findCompanyIdByRoomId(roomInfo.roomId, roomInfo.mode).flatMap { info ->
+            val threadInfo = TradeInfo(buy, sell, roomInfo.roomId, info.companyId, info.stockId, roomInfo.mode)
             val buyResult = buy?.let {
                 it.tradeState = TradeState.FAILED
-                it.stateDetails = fileInfo
+                it.stateDetails = failedInfo
                 redisUtil.updateUserOrder(it)
             } ?: Mono.just(false)
             val sellResult = sell?.let {
                 it.tradeState = TradeState.FAILED
-                it.stateDetails = fileInfo
+                it.stateDetails = failedInfo
                 redisUtil.updateUserOrder(it)
             } ?: Mono.just(false)
             threadInfo.tradeState = TradeState.FAILED
-            threadInfo.stateDetails = fileInfo
-            logger.error("onMatchError $fileInfo")
+            threadInfo.stateDetails = failedInfo
+            logger.error("onMatchError $failedInfo")
             buyResult.flatMap { sellResult }
-                    .flatMap { redisUtil.setTradeInfo(threadInfo, endTime) }
+                    .flatMap { redisUtil.setTradeInfo(threadInfo, roomInfo.endTime) }
                     .map { sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                    .map { threadInfo }
+                    .filter { isTopThree }
+                    .flatMap { redisUtil.setRoomLastOrder(threadInfo.toOrderInfo()) }
+                    .map { sink.outResult().send(MessageBuilder.withPayload(threadInfo.toOrderInfo().toFirstOrder(roomInfo.roomId, roomInfo.mode)).build()) }
+                    .thenReturn(threadInfo)
         }
     }
 

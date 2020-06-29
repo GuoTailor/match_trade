@@ -22,6 +22,7 @@ import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import org.springframework.web.util.HtmlUtils
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -42,10 +43,10 @@ class NotifyService {
     @Autowired
     private lateinit var connect: DatabaseClient
 
-    suspend fun fundReadTime(userId: Int): Date {
+    suspend fun fundReadTime(userId: Int): LocalDateTime {
         return connect.execute("select read_time from mt_user where id = :userId")
                 .bind("userId", userId)
-                .map { row, _ -> row.get("read_time", Date::class.java) }
+                .map { row, _ -> row.get("read_time", LocalDateTime::class.java) }
                 .awaitOne()!!
     }
 
@@ -85,7 +86,7 @@ class NotifyService {
                     } else notify.readStatus = NotifyUser.read
                     notify
                 }, connect, query, where)
-        userDao.setReadTimeByUserId(userId, Date())
+        userDao.setReadTimeByUserId(userId, LocalDateTime.now())
         if (idList.isNotEmpty()) {
             notifyUserDao.setStatusById(idList, NotifyUser.read)
         }
@@ -127,7 +128,7 @@ class NotifyService {
         // 当公告只有一条时才能设置为已读，
         // 当有多条时不能设置最新的读取时间来标记为已读，因为他实际只读了一条
         if (notifyList.size == 1) {
-            userDao.setReadTimeByUserId(userId, Date())
+            userDao.setReadTimeByUserId(userId, LocalDateTime.now())
             if (announceList.contains(notifyList[0].id)) {
                 notifyUserDao.setStatusByUserIdAndMsgId(userId, notifyList[0].id!!, NotifyUser.read)
             }

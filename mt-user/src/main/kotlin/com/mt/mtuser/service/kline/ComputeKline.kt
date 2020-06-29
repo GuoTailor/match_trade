@@ -5,6 +5,7 @@ import com.mt.mtuser.service.RedisUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -32,7 +33,7 @@ abstract class ComputeKline : ApplicationRunner, Comparable<ComputeKline> {
      * 计算k线
      */
     abstract suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline
-    abstract suspend fun getMinComputeTime(): Date?
+    abstract suspend fun getMinComputeTime(): LocalDateTime?
     abstract fun step(): Long
 
     suspend fun getLastTime(stockId: Int): Long? {

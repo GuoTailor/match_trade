@@ -1,5 +1,9 @@
 package com.mt.mtsocket.socket
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import org.slf4j.LoggerFactory
@@ -10,6 +14,8 @@ import reactor.core.publisher.MonoProcessor
 import reactor.core.publisher.ReplayProcessor
 import reactor.netty.channel.AbortedException
 import java.nio.channels.ClosedChannelException
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Created by gyh on 2020/4/7.
@@ -30,6 +36,14 @@ class WebSocketSessionHandler {
         connectedProcessor = MonoProcessor.create()
         disconnectedProcessor = MonoProcessor.create()
         webSocketConnected = true
+        val javaTimeModule = JavaTimeModule()
+        javaTimeModule.addSerializer(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>() {
+            override fun serialize(value: LocalDateTime, gen: JsonGenerator, serializers: SerializerProvider) {
+                val timestamp = value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                gen.writeNumber(timestamp)
+            }
+        })
+        json.registerModule(javaTimeModule)
         this.session = session
     }
 
