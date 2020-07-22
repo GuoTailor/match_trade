@@ -1,10 +1,13 @@
 package com.mt.mtgateway.config
 
-import com.mt.mtgateway.token.TokenMgr
+import com.mt.mtgateway.server.RedisService
+import com.mt.mtgateway.token.TokenManger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -33,6 +36,12 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
     val urlPatten: MutableList<Pattern> = mutableListOf()
     val TOKEN_PREFIX = "Bearer "
 
+    @Autowired
+    private lateinit var redisService: RedisService
+
+    @Autowired
+    private lateinit var tokenManger: TokenManger
+
     init {
         skipAuthUrls.forEach {
             urlPatten.add(Pattern.compile(it))
@@ -51,39 +60,35 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
         val url = request.path.value()
-        if (CorsUtils.isCorsRequest(request)) {
-            val response: ServerHttpResponse = exchange.response
-            val headers: HttpHeaders = response.headers
-            headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
-            headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS)
-            headers.add("Access-Control-Max-Age", MAX_AGE)
-            headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS)
-            headers.add("Access-Control-Expose-Headers", ALLOWED_Expose)
-            headers.add("Access-Control-Allow-Credentials", "true")
-        }
-        if (!match(url)) {
+        val response: ServerHttpResponse = exchange.response
+        val headers: HttpHeaders = response.headers
+        headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS)
+        headers.add("Access-Control-Max-Age", MAX_AGE)
+        headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS)
+        headers.add("Access-Control-Expose-Headers", ALLOWED_Expose)
+        headers.add("Access-Control-Allow-Credentials", "true")
+
+        if (!match(url) && request.method != HttpMethod.OPTIONS) {
             //log.info(request.headers.toString())
             val authHeader = getAuthToken(request)
             //log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
                 val authToken = authHeader.replaceFirst(TOKEN_PREFIX, "")
-                val checkPOJO = TokenMgr.validateJWT(authToken)
-                if (checkPOJO.isSuccess) {
-                    val claims = checkPOJO.claims
-                    val id = claims["id"]
-                    //val username = claims["username"].toString()
-                    val authorities = claims["roles"].toString()
-                    log.info("验证 $id : $authorities")
-                    val host = request.mutate() // TODO url去掉token字段
-                            .header("id", id.toString())
-                            //.header("username", username)
-                            .header("roles", authorities)
-                            .header("Authorization")
-                            .build()
-                    val build = exchange.mutate().request(host).build()
-                    return chain.filter(build)
-                }
-                return authError(exchange, "token 已失效")
+                val tokenInfo = tokenManger.parseToken(authToken)
+                return redisService.getUserByToken(tokenInfo.id)
+                        .filter { it.toke == authToken }
+                        .flatMap {
+                            val host = request.mutate()
+                                    .header("id", it.id?.toString())
+                                    .header("roles", it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
+                                    .header("Authorization")
+                                    .build()
+                            println(it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
+                            val build = exchange.mutate().request(host).build()
+                            chain.filter(build)
+                        }.switchIfEmpty(authError(exchange, "登录已过期",
+                                if (tokenInfo.time.before(Date())) HttpStatus.UNAUTHORIZED else HttpStatus.FORBIDDEN))
             }
             return authError(exchange, "无权访问 $url")
         }
@@ -92,8 +97,8 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
 
     private fun getAuthToken(request: ServerHttpRequest): String? {
         val headers = request.headers
-        if (headers.getFirst("Connection") == "Upgrade") {
-            if (headers.getFirst("Upgrade") == "websocket") {
+        if (headers.getFirst(HttpHeaders.CONNECTION) == "Upgrade") {
+            if (headers.getFirst(HttpHeaders.UPGRADE) == "websocket") {
                 val queryMap = getQueryMap(request.uri.query)
                 return TOKEN_PREFIX + queryMap[TOKEN_PREFIX.trim().toLowerCase()]
             }
@@ -120,10 +125,9 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
      * @param mess 错误信息
      * @return
      */
-    private fun authError(swe: ServerWebExchange, mess: String): Mono<Void> {
-        log.info(mess)
+    private fun authError(swe: ServerWebExchange, mess: String, statusCode: HttpStatus = HttpStatus.UNAUTHORIZED): Mono<Void> {
         val resp = swe.response
-        resp.statusCode = HttpStatus.UNAUTHORIZED
+        resp.statusCode = statusCode
         resp.headers.add("Content-Type", "application/json;charset=UTF-8")
         val returnStr = "{" +
                 "\"code\":1," +

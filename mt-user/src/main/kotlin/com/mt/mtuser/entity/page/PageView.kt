@@ -51,3 +51,14 @@ suspend fun <T: Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: 
     return pageView
 }
 
+suspend fun  <T: Any> getPage(data: Flux<T>, connect: DatabaseClient, pageQuery: PageQuery, from: String, where: String): PageView<T> {
+    val pageView = PageView<T>()
+    val count = connect.execute("select count(1) from $from where $where")
+            .map { r, _ -> r.get(0, java.lang.Long::class.java) }.one().awaitSingle()
+    pageView.total = count?.toLong()
+    pageView.item = data.collectList().awaitSingle()
+    pageView.pageNum = pageQuery.pageNum
+    pageView.pageSize = pageQuery.pageSize
+    return pageView
+}
+

@@ -23,6 +23,9 @@ interface RoomRecordDao : CoroutineCrudRepository<RoomRecord, Int> {
     @Query("select count(1) form mt_room_record where start_time between :startTime and :endTime and company_id = :companyId")
     suspend fun countByStartTimeAndEndTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int): Long
 
+    @Query("select count(*) from (select count(1) from mt_room_record where start_time > :time group by company_id) a")
+    suspend fun countCompanyIdByStartTime(time: LocalDateTime): Long?
+
     @Query("select * from mt_room_record where room_id = :roomId order by start_time desc limit 1")
     suspend fun findLastRecordByRoomId(roomId: String): RoomRecord?
 

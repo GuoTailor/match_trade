@@ -8,27 +8,24 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mt.mtcommon.*
+import com.mt.mtcommon.OrderParam
+import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.toDuration
+import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtsocket.distribute.ServiceRequestInfo
 import com.mt.mtsocket.service.RedisUtil
-import com.mt.mtsocket.socket.SocketSessionStore
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 //@SpringBootTest
@@ -133,6 +130,35 @@ class MtSocketApplicationTests {
         println(formattedDateTime.format(formatter))
         val nmka: LocalTime? = null
         println(nmka?.toDuration())
+    }
+
+    fun nmka(): Mono<String> {
+        return Mono.fromCallable { println("nmka"); "nmka2" }
+    }
+
+    @Test
+    fun testMono() {
+        val mono = Mono.just("12")
+                .flatMap {
+                    println(it)
+                    Mono.just("2")
+                }.doOnSuccess { println("success") }
+                .zipWith(nmka()) { t1, t2 ->
+                    println("$t1-$t2")
+                    t1
+                }
+        println(mono.block())
+    }
+
+    @Test
+    fun testTime() {
+        val time = LocalDateTime.now()
+        val newTime = time.withSecond(time.second)
+        println(time)
+        println(newTime)
+        println(time.isBefore(newTime))
+
+        println(LocalTime.MAX.plusNanos(1))
     }
 }
 

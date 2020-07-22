@@ -3,7 +3,9 @@ package com.mt.mtgateway.config
 import com.mt.mtgateway.bean.RespBody
 import com.mt.mtgateway.bean.User
 import com.mt.mtgateway.server.MyReactiveUserDetailsService
-import com.mt.mtgateway.token.TokenMgr
+import com.mt.mtgateway.server.RedisService
+import com.mt.mtgateway.token.Constant
+import com.mt.mtgateway.token.TokenManger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -28,6 +30,12 @@ class AuthHandler {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
+    @Autowired
+    private lateinit var redisService: RedisService
+
+    @Autowired
+    private lateinit var tokenManger: TokenManger
+
     fun login(request: ServerRequest): Mono<ServerResponse> {
         val body: Mono<Map<*, *>> = request.bodyToMono(MutableMap::class.java)
         return body.flatMap {
@@ -37,13 +45,15 @@ class AuthHandler {
             return@flatMap userRepository.findByUsername(username).flatMap { user ->
                 val resp: RespBody<User> = if (passwordEncoder.matches(password, user.password)) {
                     user.password = null
-                    user.toke = TokenMgr.createJWT(user)    // TODO 包装阻塞代码
+                    user.toke = tokenManger.createToken(user.id!!)
                     RespBody(0, "成功", user)
-                } else { RespBody(1, "无效凭据") }
+                } else RespBody(1, "无效凭据")
                 ServerResponse.ok().contentType(APPLICATION_JSON)
                         .body(BodyInserters.fromValue(resp))
+                        .doOnSubscribe { resp.data?.let { u -> redisService.setUserToken(u, Constant.JWT_TTL) }?.subscribe() }
             }.switchIfEmpty(ServerResponse.ok().contentType(APPLICATION_JSON)
                     .body(BodyInserters.fromValue(RespBody<Void>(1, "用户不存在"))))
         }
     }
+
 }

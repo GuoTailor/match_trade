@@ -1,11 +1,8 @@
 package com.mt.mtuser.entity
 
-import com.fasterxml.jackson.annotation.JsonFormat
+import org.springframework.data.annotation.Id
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.*
-
-private val zero = BigDecimal(0)
 
 /**
  * @apiDefine Kline
@@ -23,6 +20,7 @@ private val zero = BigDecimal(0)
  * @apiSuccess (返回) {Decimal} closePrice 收盘价
  */
 class Kline(
+        @Id
         var id: Long? = null,
         /*** 股票id*/
         var stockId: Int? = null,
@@ -49,10 +47,10 @@ class Kline(
 ) {
     fun isEmpty(): Boolean {
         return (tradesCapacity == null || tradesCapacity == 0L)
-                && (tradesVolume == null || tradesVolume == zero)
+                && (tradesVolume == null || tradesVolume == BigDecimal.ZERO)
                 && (tradesNumber == null || tradesNumber == 0L)
-                && (avgPrice == null || avgPrice == zero)
-                && (maxPrice == null || maxPrice == zero)
-                && (minPrice == null || minPrice == zero)
+                && (avgPrice == null || avgPrice == BigDecimal.ZERO)
+                && (maxPrice == null || maxPrice == BigDecimal.ZERO)
+                && (minPrice == null || minPrice == BigDecimal.ZERO)
     }
 }

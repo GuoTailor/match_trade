@@ -1,13 +1,10 @@
 package com.mt.mtuser.entity
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * Created by gyh on 2020/3/6.
@@ -24,7 +21,7 @@ import java.util.*
  * @apiParam {Date} updateTime 最后修改日期
  */
 @Table("mt_user")
-class User : BaseUser() {
+open class User : BaseUser() {
     /**
      * 自增id
      */

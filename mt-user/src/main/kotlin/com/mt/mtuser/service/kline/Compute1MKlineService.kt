@@ -1,6 +1,5 @@
 package com.mt.mtuser.service.kline
 
-import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +16,8 @@ import java.util.*
 @Service
 class Compute1MKlineService : ComputeKline() {
     override val tableName: String = "mt_1m_kline"
-    val millisOfMinute = 60 * 1000L
+
+    val stepOfSeconds = 60L
 
     @Autowired
     private lateinit var connect: DatabaseClient
@@ -25,26 +25,21 @@ class Compute1MKlineService : ComputeKline() {
     @Autowired
     private lateinit var tradeInfoDao: TradeInfoDao
 
-    override fun handlerRequest(time: Long): Boolean {
-        return true
+    override fun formatDate(time: LocalDateTime): LocalDateTime {
+        return time.withSecond(0)
+                .withNano(0)
     }
 
-    override fun formatDate(time: Long): Long {
-        val c = Calendar.getInstance()
-        c.timeInMillis = time
-        c.set(Calendar.SECOND, 0)
-        c.set(Calendar.MILLISECOND, 0)
-        return c.timeInMillis
-    }
+    override fun handlerRequest(time: LocalDateTime): Boolean = time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
 
-    override suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline {
-        val startTime = (time - millisOfMinute).toLocalDateTime() // 包括 :00
-        val endTime = (time - 1).toLocalDateTime()                // 不包括 :00
+    override suspend fun compute(stockId: Int, companyId: Int, time: LocalDateTime, offset: Long): Kline {
+        val startTime = time.plusNanos(1)       // 不包含开头
+        val endTime = time.plusSeconds(stepOfSeconds)   // 包含结尾
         val kline = selectMinuteKline(startTime, endTime, stockId)
         kline.stockId = stockId
         kline.companyId = companyId
-        kline.time = time.toLocalDateTime()
-        kline.openPrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(startTime, stockId)
+        kline.time = endTime
+        kline.openPrice = tradeInfoDao.findFirstPriceByTradeTimeAndStockId(startTime, endTime, stockId)
         kline.closePrice = tradeInfoDao.findLastPriceByTradeTimeAndStockId(endTime, stockId)
         return kline
     }
@@ -55,10 +50,11 @@ class Compute1MKlineService : ComputeKline() {
                 .awaitOne().orElse(null)
     }
 
-    override fun step(): Long = millisOfMinute
+    override fun step() = stepOfSeconds
+
+    override suspend fun isExist(time: LocalDateTime, stockId: Int, companyId: Int): Boolean = false
 
     suspend fun selectMinuteKline(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Kline {
-        val kline = Kline()
         return connect.execute("select count(1) as tradesNumber," +
                 " COALESCE(sum(trade_amount), 0) as tradesCapacity, " +
                 " COALESCE(sum(trade_money), 0) as tradesVolume," +
@@ -72,6 +68,7 @@ class Compute1MKlineService : ComputeKline() {
                 .bind("endTime", endTime)
                 .bind("stockId", stockId)
                 .map { r, _ ->
+                    val kline = Kline()
                     kline.tradesNumber = r.get("tradesNumber", java.lang.Long::class.java)?.toLong()
                     kline.tradesCapacity = r.get("tradesCapacity", java.lang.Long::class.java)?.toLong()
                     kline.tradesVolume = r.get("tradesVolume", BigDecimal::class.java)

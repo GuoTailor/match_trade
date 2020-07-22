@@ -2,7 +2,9 @@ package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.SendSms
 import com.mt.mtuser.common.Util
+import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.entity.MtRole
+import com.mt.mtuser.entity.AppUpdate
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
@@ -33,28 +35,16 @@ class CommonController {
     lateinit var roleService: RoleService
 
     @Autowired
-    lateinit var roomService: RoomService
-
-    @Autowired
-    lateinit var companyService: CompanyService
-
-    @Autowired
     lateinit var userService: UserService
 
     @Autowired
     lateinit var redisUtil: RedisUtil
 
     @Autowired
-    lateinit var tradeInfoService: TradeInfoService
-
-    @Autowired
-    lateinit var roomRecordService: RoomRecordService
-
-    @Autowired
     lateinit var fileService: FileService
 
     /**
-     * @api {gut} /common/check 检查用户是否存在
+     * @api {get} /common/check 检查用户是否存在
      * @apiDescription  检查用户是否存在,当companyId参数不为空是同时检查用户是否为公司股东
      * @apiName checkingPhone
      * @apiVersion 0.0.1
@@ -233,7 +223,7 @@ class CommonController {
     @PostMapping("/file")
     fun uploadFile(@RequestPart("img") filePart: FilePart): Mono<ResponseInfo<String>> {
         logger.info("{}", filePart.filename())
-        return ResponseInfo.ok(fileService.uploadImg(filePart))
+        return ResponseInfo.ok(fileService.uploadFile(filePart))
     }
 
     /**
@@ -256,41 +246,36 @@ class CommonController {
     }
 
     /**
-     * @api {get} /system/info 获取系统信息
-     * @apiDescription  获取系统信息
-     * @apiName getSystemInfo
+     * @api {post} /wgt 上传wgt文件
+     * @apiDescription  上传wgt文件
+     * @apiName uploadWgt
+     * @apiParam {File} file wgt文件
+     * @apiUse AppUpdate
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
-     * {"code":0,"msg":"成功","data":[]}
-     * @apiSuccess {Integer} companyCount 公司数量
-     * @apiSuccess {Integer} userCount 用户数量
-     * @apiSuccess {Integer} roomCount 房间数量
-     * @apiSuccess {Long} tradesCapacity 交易量
-     * @apiSuccess {Decimal} tradesVolume 交易金额
-     * @apiSuccess {Integer} tradesNumber 交易次数
+     * {"code": 0,"msg": "成功","data": true}
      * @apiGroup Common
-     * @apiUse tokenMsg
-     * @apiHeaderExample {json} 请求头例子:
-     *     {
-     *       "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwicm9sZXMiOiJbW1wiU1VQRVJfQURNSU5cIixudWxsXSxbXCJVU
-     *       0VSXCIsMV1dIiwibmJmIjoxNTg3NTU5NTQ0LCJleHAiOjE1ODk2MzMxNDR9.zyppWBmaF0l6ezljR1bTWUkAon50KF-VTrge1-W2hsM"
-     *     }
-     * @apiPermission superAdmin
+     * @apiPermission none
      */
-    @GetMapping("/system/info")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @Cacheable(cacheNames = ["getSystemInfo"])
-    fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Number>>> {
-        return ResponseInfo.ok(mono {
-            val data: MutableMap<String, Number> = HashMap()
-            data["companyCount"] = companyService.count()
-            data["userCount"] = userService.count()
-            data["roomCount"] = roomService.getAllRoomCount()
-            data["tradesCapacity"] = tradeInfoService.countStockByTradeTime() // 交易量
-            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTime() // 交易金额
-            data["tradesNumber"] = roomRecordService.countByStartTime() // 交易次数
-            data
-        }.cache(Duration.ofMinutes(1)))
+    @PostMapping("/wgt")
+    fun uploadWgt(@RequestPart("file") filePart: FilePart, appUpdate: AppUpdate): Mono<ResponseInfo<AppUpdate>> {
+        return ResponseInfo.ok(fileService.uploadWgt(filePart, appUpdate))
     }
 
+    /**
+     * @api {get} /wgt 查询跟新信息
+     * @apiDescription  查询跟新信息
+     * @apiName appVersion
+     * @apiParam {File} file wgt文件
+     * @apiUse AppUpdate
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup Common
+     * @apiPermission none
+     */
+    @GetMapping("/wgt")
+    fun appVersion(@RequestParam version: String, @RequestParam type: String) {
+        ResponseInfo.ok(fileService.appVersion(version, type))
+    }
 }

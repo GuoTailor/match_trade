@@ -18,6 +18,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
+import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
@@ -42,6 +43,9 @@ class NotifyService {
 
     @Autowired
     private lateinit var connect: DatabaseClient
+
+    @Autowired
+    lateinit var r2dbcService: R2dbcService
 
     suspend fun fundReadTime(userId: Int): LocalDateTime {
         return connect.execute("select read_time from mt_user where id = :userId")
@@ -79,7 +83,7 @@ class NotifyService {
                 .fetch()
                 .all()
                 .map { notify ->
-                    HtmlUtils.htmlUnescape(notify.content ?: notify.title!!)
+                    notify.content = HtmlUtils.htmlUnescape(notify.content ?: "")
                     val notifyUser = notifyUserList.find { it.msgId == notify.id }
                     if ((notifyUser != null && notifyUser.status == NotifyUser.unread) || notify.createTime!! > lastReadTime) {
                         notify.readStatus = NotifyUser.unread
@@ -124,7 +128,14 @@ class NotifyService {
                 .bind("createTime", lastReadTime)
                 .run { if (announceList.isNotEmpty()) this.bind("idList", announceList) else this }
                 .`as`(Notify::class.java)
-                .fetch().all().collectList().awaitSingle()
+                .fetch()
+                .all()
+                .map {
+                    it.content = HtmlUtils.htmlUnescape(it.content ?: "")
+                    it
+                }
+                .collectList()
+                .awaitSingle()
         // 当公告只有一条时才能设置为已读，
         // 当有多条时不能设置最新的读取时间来标记为已读，因为他实际只读了一条
         if (notifyList.size == 1) {
@@ -134,5 +145,14 @@ class NotifyService {
             }
         }
         return if (notifyList.isEmpty()) null else notifyList[0]
+    }
+
+    suspend fun deleteMsg(msgId: Int) = notifyDao.deleteById(msgId)
+
+    suspend fun updateMsg(msg: Notify): Int {
+        return r2dbcService.dynamicUpdate(msg)
+                .matching(where("id").`is`(msg.id!!))
+                .fetch().awaitRowsUpdated()
+
     }
 }

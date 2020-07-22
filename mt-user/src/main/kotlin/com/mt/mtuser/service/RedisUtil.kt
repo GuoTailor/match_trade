@@ -1,14 +1,13 @@
 package com.mt.mtuser.service
 
-import com.mt.mtcommon.RedisConsts
-import com.mt.mtcommon.RoomEvent
-import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.*
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.*
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.stereotype.Component
 import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/3/24.
@@ -124,11 +123,11 @@ class RedisUtil {
 
     // ------------------------=======>>>k线<<<=====----------------------
 
-    suspend fun getKlineLastTime(tableName: String, stockId: Int): Long? {
-        return redisTemplate.opsForValue().getAndAwait("$tableName:$stockId") as? Long
+    suspend fun getKlineLastTime(tableName: String, stockId: Int): LocalDateTime? {
+        return (redisTemplate.opsForValue().getAndAwait("$tableName:$stockId") as? Long)?.toLocalDateTime()
     }
 
-    suspend fun setKlineLastTime(tableName: String, stockId: Int, time: Long): Boolean {
-        return redisTemplate.opsForValue().setAndAwait("$tableName:$stockId", time)
+    suspend fun setKlineLastTime(tableName: String, stockId: Int, time: LocalDateTime): Boolean {
+        return redisTemplate.opsForValue().setAndAwait("$tableName:$stockId", time.toEpochMilli())
     }
 }

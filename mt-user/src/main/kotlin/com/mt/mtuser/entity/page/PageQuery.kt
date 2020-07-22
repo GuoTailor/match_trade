@@ -37,7 +37,8 @@ class PageQuery(val pageNum: Int = 0,
     fun where(alias: String = ""): Criteria {
         var criteria = Criteria.empty()
         if (searchField != null && searchOper != null && searchString != null) {
-            with(Criteria.where("$alias.$searchField")) {
+            val column = if (alias.isBlank()) searchField else "$alias.$searchField"
+            with(Criteria.where(column)) {
                 criteria = when (searchOper) {
                     "eq" -> `is`(searchString)
                     "ne" -> not(searchString)
@@ -57,11 +58,7 @@ class PageQuery(val pageNum: Int = 0,
     fun page(): Pageable {
         var pageable = PageRequest.of(pageNum, pageSize)
         if (order != null) {
-            if (direction.equals("asc", true)) {
-                pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.ASC, order))
-            } else if (direction.equals("desc", true)) {
-                pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, order))
-            }
+            pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.fromString(direction ?: Sort.Direction.ASC.name), order))
         }
         return pageable
     }
@@ -86,7 +83,8 @@ class PageQuery(val pageNum: Int = 0,
         if (searchField != null && searchOper != null && searchString != null) {
             for (strings in oper) { //判断指令是否在允许范围内
                 if (strings[0] == searchOper) {
-                    return Criteria.where("$alias.$searchField").like(String.format(strings[2], searchString))
+                    val column = if (alias.isBlank()) searchField else "$alias.$searchField"
+                    return Criteria.where(column).like(String.format(strings[2], searchString))
                 }
             }
         }

@@ -1,6 +1,5 @@
 package com.mt.mtuser.service.room
 
-import com.mt.mtcommon.RoomEnum
 import com.mt.mtuser.entity.room.BaseRoom
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,12 +16,12 @@ class BaseRoomService {
     @Autowired
     protected lateinit var connect: DatabaseClient
 
-    suspend fun getNextRoomId(room: BaseRoom) = getNextRoomId(RoomEnum.getRoomEnum(room.flag))
+    suspend fun getNextRoomId(room: BaseRoom) = getNextRoomId()
 
     /**
      * 获取下一个自增id
      */
-    suspend fun getNextRoomId(roomFlag: RoomEnum): String {
+    suspend fun getNextRoomId(): String {
         val result = connect.execute("select nextval('mt_room_seq')")
                 .map { t, _ -> t.get("nextval", Integer::class.java) }
                 .awaitOne()

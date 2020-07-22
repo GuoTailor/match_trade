@@ -16,6 +16,7 @@ import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/3/18.
@@ -66,6 +67,9 @@ class CompanyService {
         company.brief?.let { fileService.addCompanyInfo(it, newCompany.id!!).awaitSingle() }
         val stock = Stock(companyId = newCompany.id, name = newCompany.name)
         stockService.save(stock)
+        company.analystId?.let {
+            addCompanyAnalyst(it, newCompany.id!!)
+        }
         return newCompany
     }
 
@@ -83,6 +87,7 @@ class CompanyService {
     suspend fun update(company: Company): Company {
         // TODO 判断公司房间模式
         company.brief?.let { fileService.addCompanyInfo(it, company.id!!).awaitSingle() }
+        company.analystId?.let { addCompanyAnalyst(it, company.id!!) }
         return companyDao.save(company)
     }
 
@@ -134,29 +139,45 @@ class CompanyService {
         val where = query.where().and("s.company_id").`is`(companyId)
         return getPage(connect.execute(
                 "select s.id, s.user_id, s.company_id, s.real_name, s.department, s.position, s.money, sum(p.amount) as amount " +
-                " from mt_stockholder s" +
-                " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
-                " where $where group by s.id" +
-                query.toPageSql())
+                        " from mt_stockholder s" +
+                        " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
+                        " where $where group by s.id" +
+                        query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
                 .all()
                 , connect, query, "mt_stockholder s", where)
     }
 
-    suspend fun findAll() = companyDao.findAll()
-
     /**
      * 查找所有公司
      */
     suspend fun findAllByQuery(query: PageQuery): PageView<Company> {
-        return getPage(connect.select()
-                .from<Company>()
-                .matching(query.where())
-                .page(query.page())
-                .fetch()
-                .all()
-                , connect, query)
+        val where = query.where("mc")
+        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId " +
+                " from mt_company mc " +
+                " LEFT JOIN mt_stockholder ms on ms.company_id = mc.id and ms.role_id = 2 " +
+                " LEFT JOIN mt_user mu on ms.user_id = mu.id" +
+                " where $where " + query.toPageSql())
+                .map { r, _ ->
+                    val company = Company()
+                    company.id = r.get("id", java.lang.Integer::class.java)?.toInt()
+                    company.name = r.get("name", String::class.java)
+                    company.roomCount = r.get("room_count", java.lang.Integer::class.java)?.toInt()
+                    company.mode = r.get("mode", String::class.java)
+                    company.createTime = r.get("create_time", LocalDateTime::class.java)
+                    company.licenseUrl = r.get("license_url", String::class.java)
+                    company.creditUnionCode = r.get("credit_union_code", String::class.java)
+                    company.legalPerson = r.get("legal_person", String::class.java)
+                    company.unitAddress = r.get("unit_address", String::class.java)
+                    company.unitContactName = r.get("unit_contact_name", String::class.java)
+                    company.unitContactPhone = r.get("unit_contact_phone", String::class.java)
+                    company.analystName = r.get("nick_name", String::class.java)
+                    company.analystId = r.get("analystId", java.lang.Integer::class.java)?.toInt()
+                    company.analystPhone = r.get("phone", String::class.java)
+                    company
+                }.all()
+                , connect, query, "mt_company")
     }
 
     /**
@@ -164,7 +185,7 @@ class CompanyService {
      */
     suspend fun addStockholder(info: StockholderInfo): Stockholder {
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
-        val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
+        val user = userDao.findByPhone(phone) ?: throw IllegalStateException("用户不存在 $phone")
         if (roleService.getCompanyList().contains(info.companyId)) {
             val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
             val stockholder = roleService.findByUserIdAndRoleId(user.id!!, roleId)
@@ -230,6 +251,20 @@ class CompanyService {
         role.roleId = adminRoleId
         role.realName = info.realName
         return roleService.save(role)
+    }
+
+    /**
+     * 为公司添加一个分析员
+     */
+    suspend fun addCompanyAnalyst(userId: Int, companyId: Int) {
+        val user = userDao.findById(userId) ?: error("用户不存在 $userId")
+        val userRoleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
+        val stockholder = roleService.find(userId, userRoleId) ?: error("用户：${user.phone}不是分析员")
+        if (roleService.exists(userRoleId, companyId) == 0) {
+            stockholder.id = null
+            stockholder.companyId = companyId
+            roleService.save(stockholder)
+        } else error("该公司：$companyId 已有分析员")
     }
 
     /**

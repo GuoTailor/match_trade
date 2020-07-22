@@ -12,6 +12,9 @@ import java.util.*
  */
 interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
 
+    @Query("select COALESCE(sum(trade_amount), 0) from $table")
+    suspend fun countStock(): Long
+
     @Query("select COALESCE(sum(trade_amount), 0) from $table where trade_time between :startTime and :endTime")
     suspend fun countStockByTradeTime(startTime: LocalDateTime, endTime: LocalDateTime): Long
 
@@ -21,6 +24,9 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
     @Query("select COALESCE(sum(trade_amount), 0) from $table where trade_time between :startTime and :endTime and stock_id = :stockId")
     suspend fun countStockByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Long
 
+    @Query("select COALESCE(sum(trade_money), 0) from $table")
+    suspend fun countMoney(): BigDecimal
+
     @Query("select COALESCE(sum(trade_money), 0) from $table where trade_time between :startTime and :endTime")
     suspend fun countMoneyTradeTime(startTime: LocalDateTime, endTime: LocalDateTime): BigDecimal
 
@@ -29,6 +35,9 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
 
     @Query("select COALESCE(sum(trade_money), 0) from $table where trade_time between :startTime and :endTime and stock_id = :stockId")
     suspend fun countMoneyByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): BigDecimal
+
+    @Query("select count(*) from (select count(1) from $table where trade_time > :time group by buyer_id) a")
+    suspend fun countUserByTradeTime(time: LocalDateTime): Long
 
     @Query("select trade_price from $table " +
             " where trade_time < :endTime " +
@@ -45,14 +54,20 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +
             " and room_id = :roomId " +
+            " order by trade_time desc limit 1")
+    suspend fun findLastPriceByTradeTimeAndRoomId(startTime: LocalDateTime, endTime: LocalDateTime, roomId: String): BigDecimal?
+
+    @Query("select trade_price from $table " +
+            " where trade_time between :startTime and :endTime " +
+            " and room_id = :roomId " +
             " order by trade_time asc limit 1")
     suspend fun findFirstPriceByTradeTimeAndRoomId(startTime: LocalDateTime, endTime: LocalDateTime, roomId: String): BigDecimal?
 
     @Query("select trade_price from $table " +
             " where trade_time between :startTime and :endTime " +
-            " and room_id = :roomId " +
-            " order by trade_time desc limit 1")
-    suspend fun findLastPriceByTradeTimeAndRoomId(startTime: LocalDateTime, endTime: LocalDateTime, roomId: String): BigDecimal?
+            " and stock_id = :stockId " +
+            " order by trade_time asc limit 1")
+    suspend fun findFirstPriceByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): BigDecimal?
 
     @Query("select COALESCE(max(trade_price), 0) from $table " +
             " where trade_time between :startTime and :endTime " +

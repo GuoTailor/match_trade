@@ -1,14 +1,10 @@
 package com.mt.mtengine.entity.room
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.mt.mtcommon.RoomEnum
-import com.mt.mtcommon.RoomRecord
-import com.mt.mtcommon.toDate
 import org.springframework.data.domain.Persistable
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
 
 /**
  * Created by gyh on 2020/3/24.

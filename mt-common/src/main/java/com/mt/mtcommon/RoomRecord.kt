@@ -19,7 +19,7 @@ import java.util.*
 /**
  * Created by gyh on 2020/3/26.
  * 房间启用记录
- * @apiDefine ClickMatch
+ * @apiDefine RoomRecord
  * @apiParam {Integer} id
  * @apiParam {Integer} roomId 房间id
  * @apiParam {String} model 模式对应撮合模式

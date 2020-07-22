@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.RoomRecordDao
+import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
-import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.service.FileService
 import com.mt.mtuser.service.R2dbcService
 import com.mt.mtuser.service.RedisUtil
 import kotlinx.coroutines.reactive.awaitSingle
@@ -16,11 +17,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -38,12 +39,22 @@ class MtUserApplicationTests {
     @Autowired
     private lateinit var redisUtil: RedisUtil
 
+    @Autowired
+    private lateinit var fileService: FileService
+
     @Test
     fun testRedis() {
         mono {
             val record = redisUtil.deleteAndGetRoomRecord("1")
             println(record?.toString())
         }.block()
+    }
+
+    @Test
+    fun testName() {
+        println(fileService.userName)
+        val p = System.getProperties()
+        p.forEach { k: Any, v: Any -> println("$k  $v") }
     }
 
     fun nmka2(user: Mono<User>): Mono<Stockholder> {
@@ -66,14 +77,8 @@ class MtUserApplicationTests {
 
     @Test
     fun testR2dbc() {
-        val roomRecord = RoomRecord(id = 1, mode = "E", roomId = "D12")
-        r2dbc.dynamicUpdate(roomRecord)
-                .matching(Criteria.where("id").`is`(roomRecord.id!!))
-                .fetch().rowsUpdated().block()
-        mono {
-            roomRecordDao.findById(1)
-            connect.select().from<RoomRecord>().matching(Criteria.where("id").`is`(1)).fetch().one().awaitSingle()
-        }.block()
+        val update = r2dbc.getUpdate(Kline(1, 2, 3, LocalDateTime.now(), 5))
+        println(update.toString())
     }
 
     @Test

@@ -1,11 +1,9 @@
 package com.mt.mtuser.service.kline
 
-import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
-import org.springframework.data.r2dbc.core.awaitOneOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -17,24 +15,20 @@ import java.util.*
 @Service
 class Compute1HKlineService : ComputeKline() {
     override val tableName: String = "mt_1h_kline"
-    val step = 60 * 60 * 1000L
+
+    override fun handlerRequest(time: LocalDateTime): Boolean {
+        return time.minute == 0 && time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
+    }
+
+    val stepOfSeconds = 60 * 60L
 
     @Autowired
     private lateinit var connect: DatabaseClient
 
-    override fun handlerRequest(time: Long): Boolean {
-        val c = Calendar.getInstance()
-        c.timeInMillis = time
-        return c.get(Calendar.MINUTE) == 0
-    }
-
-    override fun formatDate(time: Long): Long {
-        val c = Calendar.getInstance()
-        c.timeInMillis = time
-        c.set(Calendar.MINUTE, 0)
-        c.set(Calendar.SECOND, 0)
-        c.set(Calendar.MILLISECOND, 0)
-        return c.timeInMillis
+    override fun formatDate(time: LocalDateTime): LocalDateTime {
+        return time.withMinute(0)
+                .withSecond(0)
+                .withNano(0)
     }
 
     override suspend fun getMinComputeTime(): LocalDateTime? {
@@ -43,16 +37,17 @@ class Compute1HKlineService : ComputeKline() {
                 .awaitOne().orElse(null)
     }
 
-    override fun step(): Long = step
+    override fun step(): Long = stepOfSeconds
+    override suspend fun isExist(time: LocalDateTime, stockId: Int, companyId: Int): Boolean = false
 
-    override suspend fun compute(stockId: Int, companyId: Int, time: Long): Kline {
-        val startTime = (time - step).toLocalDateTime()
-        val endTime = time.toLocalDateTime()
+    override suspend fun compute(stockId: Int, companyId: Int, time: LocalDateTime, offset: Long): Kline {
+        val startTime = time.plusSeconds(offset)
+        val endTime = time.plusSeconds(stepOfSeconds)
         val kline = Kline()
         kline.stockId = stockId
         kline.companyId = companyId
-        kline.time = time.toLocalDateTime()
-        kline.openPrice = klineService.getClosePriceByTableName(startTime, stockId, "mt_15m_kline")
+        kline.time = endTime
+        kline.openPrice = klineService.getOpenPriceByTableName(startTime, endTime, stockId, "mt_15m_kline")
         kline.closePrice = klineService.getClosePriceByTableName(endTime, stockId, "mt_15m_kline")
         return connect.execute("select" +
                 " COALESCE(sum(trades_capacity), 0) as tradesCapacity," +

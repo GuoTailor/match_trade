@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.security.core.GrantedAuthority
 import java.math.BigDecimal
+import org.springframework.data.annotation.Transient
 
 /**
  * Created by gyh on 2020/3/7.
@@ -20,20 +21,27 @@ class Stockholder(
         var companyId: Int? = null,
         /*** 真实姓名 */
         var realName: String? = null,
-        /*** 所在部门 */
-        var department: String? = null,
-        /*** 职位 */
-        var position: String? = null,
+        var dpId: Int? = null,
         /** 资金 */
-        var money: BigDecimal? = null,
-        /*** 角色名 */
-        var name: String? = null,
-        /*** 角色中文名 */
-        var nameZh: String? = null
+        var money: BigDecimal? = null
+
 ) : GrantedAuthority {
+
+    /*** 角色名 */
+    @Transient
+    var name: String? = null
+
+    /*** 角色中文名 */
+    @Transient
+    var nameZh: String? = null
 
     override fun getAuthority(): String? {
         return name
+    }
+
+    fun setName(name: String): Stockholder {
+        this.name = name
+        return this
     }
 
     override fun toString(): String {
@@ -43,8 +51,7 @@ class Stockholder(
     fun cleanCompany() {
         companyId = null
         realName = null
-        department = null
-        position = null
+        dpId = null
         money = null
     }
 

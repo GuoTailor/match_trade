@@ -23,7 +23,9 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
             val id: String? = request.headers.getFirst("id")
             val role: String = request.headers.getFirst("roles") ?: "[]"
             val data: List<String> = json.readValue(role)
-            val roles = data.map { list -> Stockholder(name = "ROLE_$list") }
+            val roles = data.map { list -> Stockholder().setName(list) }
+            println(role)
+            roles.forEach { println(it) }
             UsernamePasswordAuthenticationToken(id, id, roles)
         }
     }

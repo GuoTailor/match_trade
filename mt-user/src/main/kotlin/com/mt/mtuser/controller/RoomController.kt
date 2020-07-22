@@ -236,7 +236,7 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room/editable 获取全部可编辑的房间
+     * @api {get} /room/editable 获取全部可编辑的房间
      * @apiDescription  获取全部可编辑的房间，就是自己管理的房间
      * @apiName getEditableRoomList
      * @apiVersion 0.0.1
@@ -257,7 +257,7 @@ class RoomController {
     //--------------------------------不需要管理员权限-------------------------------------
 
     /**
-     * @api {gut} /room/scope 获取指定房间报价范围
+     * @api {get} /room/scope 获取指定房间报价范围
      * @apiDescription  获取指定房间报价范围
      * @apiName getRoomScope
      * @apiVersion 0.0.1
@@ -274,7 +274,7 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room 获取全部的房间
+     * @api {get} /room 获取全部的房间
      * @apiDescription  获取全部的房间，就是自己能加入的房间
      * @apiName getAllRoomList
      * @apiVersion 0.0.1
@@ -297,7 +297,7 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room/homepage 获取房间的主页数据
+     * @api {get} /room/homepage 获取房间的主页数据
      * @apiDescription 获取房间的成交最高价和最低价， 最新收盘价，相对昨日收盘价的涨跌幅和开盘次数
      * @apiName getHomepageData
      * @apiVersion 0.0.1
@@ -319,7 +319,7 @@ class RoomController {
     }
 
     /**
-     * @api {gut} /room/order 查找指定房间最近一次开放的历史订单
+     * @api {get} /room/order 查找指定房间最近一次开放的历史订单
      * @apiDescription  查找指定房间的历史订单,只能查询房间最近一次开放的交易记录
      * @apiName findOrder
      * @apiVersion 0.0.1

@@ -35,6 +35,7 @@ class CompanyController {
      * @apiDescription  注册公司
      * @apiName registerCompany
      * @apiVersion 0.0.1
+     * @apiParam {String} analystId 观察员id
      * @apiParamExample {json} 请求-例子:
      * {"name":"15306科技有限公司", "roomCount":2, "mode": "2"}
      * @apiUse Company
@@ -150,6 +151,25 @@ class CompanyController {
     @PostMapping("/admin")
     fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
         return ResponseInfo.ok(mono { companyService.addCompanyAdmin(stockholderInfo.awaitSingle()) })
+    }
+
+    /**
+     * @api {post} /company/analyst 为公司添加一个分析员
+     * @apiDescription  为公司添加一个分析员
+     * @apiName addCompanyAnalyst
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {Integer} userId 用户id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission supperAdmin
+     */
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PostMapping("/analyst")
+    fun addCompanyAnalyst(userId: Int, companyId: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { companyService.addCompanyAnalyst(userId, companyId) })
     }
 
     /**

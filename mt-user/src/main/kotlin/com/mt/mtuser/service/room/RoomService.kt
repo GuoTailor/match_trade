@@ -10,6 +10,8 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.BaseRoom
 import com.mt.mtuser.schedule.*
 import com.mt.mtuser.service.*
+import com.mt.mtuser.service.kline.Compute1DKlineService
+import com.mt.mtuser.service.kline.KlineService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
@@ -17,12 +19,14 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
@@ -32,7 +36,7 @@ import java.util.*
  */
 @Service
 class RoomService {
-    val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+    val logger: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
     @Autowired
     private lateinit var baseRoomService: BaseRoomService
@@ -75,6 +79,12 @@ class RoomService {
 
     @Autowired
     private lateinit var quartzManager: QuartzManager
+
+    @Autowired
+    private lateinit var klineService: KlineService
+
+    @Autowired
+    private lateinit var compute1DKlineService: Compute1DKlineService
     private val roomEnableMutex = Mutex()   // 房间启用和禁用的互斥锁
     private val roomCreateMutex = Mutex()   // 房间进入和退出的互斥锁
 
@@ -100,10 +110,10 @@ class RoomService {
                     roomRecord.computingTime()
                     roomRecord.closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
                     if (roomRecord.closePrice == null) {
-                        roomRecord.maxPrice = previousRecord?.maxPrice ?: BigDecimal(0)
-                        roomRecord.minPrice = previousRecord?.minPrice ?: BigDecimal(0)
-                        roomRecord.openPrice = previousRecord?.openPrice ?: BigDecimal(0)
-                        roomRecord.closePrice = previousRecord?.closePrice ?: BigDecimal(0)
+                        roomRecord.maxPrice = previousRecord?.maxPrice ?: BigDecimal.ZERO
+                        roomRecord.minPrice = previousRecord?.minPrice ?: BigDecimal.ZERO
+                        roomRecord.openPrice = previousRecord?.openPrice ?: BigDecimal.ZERO
+                        roomRecord.closePrice = previousRecord?.closePrice ?: BigDecimal.ZERO
                     } else {
                         val map = tradeInfoService.getMaxMinPrice(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
                         roomRecord.maxPrice = map["maxPrice"]
@@ -114,6 +124,7 @@ class RoomService {
                     r2dbc.dynamicUpdate(roomRecord)
                             .matching(where("id").`is`(roomRecord.id!!))
                             .fetch().awaitRowsUpdated()
+                    compute1DKlineService.computeCurrent(roomRecord.stockId!!, roomRecord.companyId!!)
                 }
                 redisUtil.publishRoomEvent(RoomEvent(roomId, value))
             }
@@ -256,9 +267,9 @@ class RoomService {
         var highScope = "0"
         var lowScope = "0"
         if (roomRecord != null) {
-            val closePrice = roomRecord.closePrice
-            highScope = closePrice?.multiply(BigDecimal(2.0))?.toPlainString() ?: "0"
-            lowScope = closePrice?.multiply(BigDecimal(0.5))?.toPlainString() ?: "0"
+            val closePrice = klineService.getClosePriceByTableName(LocalDate.now().atStartOfDay(), roomRecord.stockId!!, "mt_1d_kline")
+            highScope = closePrice.multiply(BigDecimal(2.0)).toPlainString()
+            lowScope = closePrice.multiply(BigDecimal(0.5)).toPlainString()
         }
         return mapOf("highScope" to highScope, "lowScope" to lowScope)
     }

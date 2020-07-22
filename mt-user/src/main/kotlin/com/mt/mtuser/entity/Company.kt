@@ -40,17 +40,17 @@ data class Company(
         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
         var createTime: LocalDateTime? = null,
         /*** 营业执照图片地址*/
-        val licenseUrl: String? = null,
+        var licenseUrl: String? = null,
         /*** 统一信用社代码*/
-        val creditUnionCode: String? = null,
+        var creditUnionCode: String? = null,
         /*** 企业法人*/
-        val legalPerson: String? = null,
+        var legalPerson: String? = null,
         /*** 单位地址*/
-        val unitAddress: String? = null,
+        var unitAddress: String? = null,
         /*** 单位联系人姓名*/
-        val unitContactName: String? = null,
+        var unitContactName: String? = null,
         /*** 单位联系人电话*/
-        val unitContactPhone: String? = null
+        var unitContactPhone: String? = null
 ) {
     @Transient
     var stock: Long? = null
@@ -58,6 +58,12 @@ data class Company(
     var money: BigDecimal? = null
     @Transient
     var brief: String? = null
+    @Transient
+    var analystId: Int? = null
+    @Transient
+    var analystName: String? = null
+    @Transient
+    var analystPhone: String? = null
 
     fun getModes(): List<String> {
         return ObjectMapper().readValue(mode ?: "[]")

@@ -22,7 +22,7 @@ class NotifyController {
     private lateinit var notifyService: NotifyService
 
     /**
-     * @api {gut} /notify/count 获取未读消息的计数
+     * @api {get} /notify/count 获取未读消息的计数
      * @apiDescription  获取未读消息的计数
      * @apiName getUnreadCount
      * @apiVersion 0.0.1
@@ -38,7 +38,7 @@ class NotifyController {
     }
 
     /**
-     * @api {gut} /notify 获取全部消息
+     * @api {get} /notify 获取全部消息
      * @apiDescription  获取全部消息
      * @apiName getAllMsg
      * @apiVersion 0.0.1
@@ -73,7 +73,7 @@ class NotifyController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PostMapping
     fun addMsg(@RequestBody msg: Mono<Notify>): Mono<ResponseInfo<Unit>> {
         return ResponseInfo.ok(mono { notifyService.addMsg(msg.awaitSingle()) })
@@ -94,4 +94,41 @@ class NotifyController {
     fun getAnnounce(): Mono<ResponseInfo<Notify>> {
         return ResponseInfo.ok(mono { notifyService.getAnnounce() })
     }
+
+    /**
+     * @api {delete} /notify 删除消息
+     * @apiDescription  删除消息
+     * @apiName deleteMsg
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} id 消息id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {}}
+     * @apiGroup Notify
+     * @apiUse tokenMsg
+     * @apiPermission supperAdmin
+     */
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @DeleteMapping
+    fun deleteMsg(id: Int): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(mono { notifyService.deleteMsg(id) })
+    }
+
+    /**
+     * @api {put} /notify 更新消息
+     * @apiDescription  更新消息
+     * @apiName updateMsg
+     * @apiVersion 0.0.1
+     * @apiUse Notify
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {}}
+     * @apiGroup Notify
+     * @apiUse tokenMsg
+     * @apiPermission supperAdmin
+     */
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PutMapping
+    fun updateMsg(@RequestBody msg: Notify): Mono<ResponseInfo<Int>> {
+        return ResponseInfo.ok(mono { notifyService.updateMsg(msg) })
+    }
+
 }

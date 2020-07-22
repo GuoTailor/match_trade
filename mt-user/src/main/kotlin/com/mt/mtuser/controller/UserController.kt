@@ -27,7 +27,7 @@ class UserController {
     private lateinit var roleService: RoleService
 
     /**
-     * @api {gut} /user/info 获取用户的信息
+     * @api {get} /user/info 获取用户的信息
      * @apiDescription  获取用户的信息
      * @apiName getUserInfo
      * @apiVersion 0.0.1
@@ -104,27 +104,26 @@ class UserController {
     }
 
     /**
-     * @api {put} /user/role/analyst 为企业添加观察员
-     * @apiDescription  为企业添加观察员
+     * @api {post} /user/role/analyst 添加一个观察员
+     * @apiDescription  添加一个观察员
      * @apiName addAnalystRole
      * @apiVersion 0.0.1
-     * @apiParamExample {json} 请求-例子:
-     * {"userId":110, "companyList": [1, 2, 3, 4]}
-     * @apiParam {Integer} userId 用户id
-     * @apiParam {List} companyList 公司列表
+     * @apiParam {String} phone 电话
+     * @apiParam {String} nickName 用户名
+     * @apiParam {String} idNum 身份证号码
+     * @apiParam {String} password 密码
+     * @apiParam {String} userPhoto 头像url地址
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"修改成功","data":null}
      * @apiGroup User
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PutMapping("/role/analyst")
+    @PostMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun addAnalystRole(@RequestBody map: Mono<Map<String, Any>>): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(map.flatMap {
-            val userId = it["userId"] as Int
-            val companyList = (it["companyList"] as List<*>).filterIsInstance<Int>()
-            mono { userService.addAnalystRole(userId, companyList) }
+    fun addAnalystRoleTest(@RequestBody user: Mono<User>): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(user.flatMap {
+            mono { userService.addAnalystRole(it) }
         })
     }
 
@@ -157,15 +156,28 @@ class UserController {
      * @apiDescription  取全部的观察员
      * @apiName getAllAnalystRole
      * @apiVersion 0.0.1
+     * @apiUse PageQuery
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":null}
+     * @apiSuccess (返回) {Integer} id 用户id
+     * @apiSuccess (返回) {String} phone 电话
+     * @apiSuccess (返回) {String} nickName 用户名
+     * @apiSuccess (返回) {String} idNum 身份证号码
+     * @apiSuccess (返回) {String} password 密码
+     * @apiSuccess (返回) {String} userPhoto 头像url地址
+     * @apiSuccess (返回) {List} roles 角色信息
+     * @apiSuccess (返回) {Date} createTime 注册日期
+     * @apiSuccess (返回) {Date} lastTime 注册日期
+     * @apiSuccess (返回) {Date} updateTime 最后修改日期
+     * @apiSuccess (返回) {Integer} companyCount 公司数
+     * @apiSuccess (返回) {Integer} reportCount 报告数
      * @apiGroup User
      * @apiUse tokenMsg
      * @apiPermission admin
      */
     @GetMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getAllAnalystRole(query: PageQuery): Mono<ResponseInfo<PageView<Stockholder>>> {
+    fun getAllAnalystRole(query: PageQuery): Mono<ResponseInfo<PageView<Analyst>>> {
         return ResponseInfo.ok(mono { userService.getAllAnalystRole(query) })
     }
 
@@ -185,5 +197,29 @@ class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     fun deleteAnalyst(stockholderId: Int): Mono<ResponseInfo<Unit>> {
         return ResponseInfo.ok(mono { userService.deleteAnalyst(stockholderId) })
+    }
+
+    /**
+     * @api {put} /user/role/analyst 修改一个观察员
+     * @apiDescription  修改一个观察员
+     * @apiName updateAnalyst
+     * @apiVersion 0.0.1
+     * @apiParamExample {json} 请求-例子:
+     * {"phone":"110"}
+     * @apiParam {String} [phone] 电话
+     * @apiParam {String} [nickName] 用户名
+     * @apiParam {String} [idNum] 身份证号码
+     * @apiParam {String} [password] 密码
+     * @apiParam {String} [userPhoto] 头像url地址
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"修改成功","data":null}
+     * @apiGroup User
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PutMapping("/role/analyst")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun updateAnalyst(@RequestBody user: Mono<User>): Mono<ResponseInfo<Unit>> {
+        return ResponseInfo.ok(user.flatMap { mono { userService.updateAnalyst(it) } })
     }
 }

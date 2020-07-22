@@ -9,9 +9,14 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.reactive.function.server.ServerResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -44,7 +49,7 @@ class TradeInfoController {
     }
 
     /**
-     * @api {gut} /trade/order/{roomId} 查找指定房间的全部历史订单
+     * @api {get} /trade/order/{roomId} 查找指定房间的全部历史订单
      * @apiDescription  查找指定房间的全部历史订单
      * @apiName findOrderDetails
      * @apiVersion 0.0.1
@@ -64,7 +69,7 @@ class TradeInfoController {
     }
 
     /**
-     * @api {gut} /trade/order/company/{companyId} 查找指定公司的全部历史订单
+     * @api {get} /trade/order/company/{companyId} 查找指定公司的全部历史订单
      * @apiDescription  查找指定公司的全部历史订单
      * @apiName findOrderByCompany
      * @apiVersion 0.0.1
@@ -85,7 +90,7 @@ class TradeInfoController {
     }
 
     /**
-     * @api {gut} /trade/order 查询指定用户的历史订单
+     * @api {get} /trade/order 查询指定用户的历史订单
      * @apiDescription 查询指定用户的历史订单
      * @apiName findOrderByUserId
      * @apiVersion 0.0.1
@@ -118,7 +123,7 @@ class TradeInfoController {
     }
 
     /**
-     * @api {gut} /trade/statistics 查找房间的每日交易概述
+     * @api {get} /trade/statistics 查找房间的每日交易概述
      * @apiDescription  查找房间的每日交易概述
      * @apiName statisticsOrderByDay
      * @apiVersion 0.0.1
@@ -139,5 +144,25 @@ class TradeInfoController {
     @PreAuthorize("hasRole('ADMIN')")
     fun statisticsOrderByDay(page: PageQuery): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
         return ResponseInfo.ok(mono { tradeInfoService.statisticsOrderByDay(page) })
+    }
+
+    /**
+     * @api {get} /trade/excel 导出excel
+     * @apiDescription  导出excel
+     * @apiName outExcel
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {String} data 日期；格式：yyyy-M-d
+     * @apiSuccessExample {json} 成功返回:
+     * 文件
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     * @apiPermission supperAdmin
+     */
+    @GetMapping("/excel")
+    //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    fun outExcel(companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate, response: ServerHttpResponse): Mono<Void> {
+        return tradeInfoService.outExcel(companyId, data, response)
     }
 }

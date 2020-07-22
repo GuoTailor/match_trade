@@ -2,6 +2,7 @@ package com.mt.mtuser.service
 
 import com.mt.mtuser.dao.UserDao
 import com.mt.mtuser.dao.StockholderDao
+import com.mt.mtuser.entity.Analyst
 import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
+import java.time.LocalDateTime
 
 /**
  * Created by gyh on 2020/3/18.
@@ -114,27 +116,36 @@ class UserService {
     /**
      * 添加一个企业观察员
      */
-    suspend fun addAnalystRole(userId: Int, companyList: List<Int>) {
-        val user = userDao.findById(userId)
-        if (user != null) {
-            companyList.forEach { companyId ->
-                stockholderDao.save(user.id!!, roleService.getRoles().find { it.name == Stockholder.ANALYST }?.id!!, companyId)
-            }
-        } else throw IllegalStateException("用户不存在")
+    suspend fun addAnalystRole(user: User) {
+        user.passwordEncoder()
+        val newUser = userDao.save(user)
+        stockholderDao.save(newUser.id!!, roleService.getRoles().find { it.name == Stockholder.ANALYST }?.id!!, null)
     }
 
     /**
      * 获取全部的观察员
      */
-    suspend fun getAllAnalystRole(query: PageQuery): PageView<Stockholder> {
+    suspend fun getAllAnalystRole(query: PageQuery): PageView<Analyst> {
         val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
-        val where = query.where().and("role_id").`is`(roleId)
-        return getPage(connect.select()
-                .from<Stockholder>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, where)
+        val where = query.where("mu").toString()
+        val sqlWhere = "mu.id = ms.user_id and ms.role_id = $roleId" + if (where.isNotBlank()) " and $where" else ""
+        val data = connect.execute("select mu.* , count(ms.*) as companyCount " +
+                " from mt_user mu, mt_stockholder ms " +
+                " where $sqlWhere" +
+                " GROUP BY mu.id ${query.toPageSql()}")
+                .map { r, _ ->
+                    val analyst = Analyst()
+                    analyst.id = r.get("id", java.lang.Integer::class.java)?.toInt()
+                    analyst.phone = r.get("phone", String::class.java)
+                    analyst.nickName = r.get("nick_name", String::class.java)
+                    analyst.idNum = r.get("id_num", String::class.java)
+                    analyst.userPhoto = r.get("user_photo", String::class.java)
+                    analyst.createTime = r.get("create_time", LocalDateTime::class.java)
+                    // 减一用于去除创建观察员角色时创建的默认的角色信息
+                    analyst.companyCount = r.get("companyCount", java.lang.Integer::class.java)?.toInt()?.minus(1) ?: 0
+                    analyst
+                }.all()
+        return getPage(data, connect, query, "mt_user mu, mt_stockholder ms", sqlWhere)
     }
 
     /**
@@ -142,6 +153,16 @@ class UserService {
      */
     suspend fun deleteAnalyst(stockholderId: Int) {
         stockholderDao.deleteById(stockholderId)
+    }
+
+    /**
+     * 更新一个企业观察员
+     */
+    suspend fun updateAnalyst(user: User) {
+        user.passwordEncoder()
+        r2dbc.dynamicUpdate(user)
+                .matching(where("id").`is`(user.id!!))
+                .fetch().awaitRowsUpdated()
     }
 
     suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {

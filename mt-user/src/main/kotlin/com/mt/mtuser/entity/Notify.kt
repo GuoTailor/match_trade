@@ -8,6 +8,7 @@ import java.util.*
 
 /**
  * @apiDefine Notify
+ * @apiParam {Integer} id
  * @apiParam {String} content 内容
  * @apiParam {String} title 标题
  * @apiParam {String} sendType 发送类型 mass：群发或 assign：指定

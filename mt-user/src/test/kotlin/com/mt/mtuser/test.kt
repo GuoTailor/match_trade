@@ -4,19 +4,21 @@ package com.mt.mtuser
  * Created by gyh on 2020/3/26.
  */
 
-import com.mt.mtcommon.plus
+import com.mt.mtcommon.firstDay
+import com.mt.mtcommon.lastDay
 import com.mt.mtcommon.toEpochMilli
 import com.mt.mtcommon.toLocalDateTime
-import com.mt.mtcommon.toMillisOfDay
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.io.File
+import java.io.FileOutputStream
+import java.lang.StringBuilder
 import java.math.BigDecimal
-import java.sql.Time
+import java.security.MessageDigest
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoField
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -66,14 +68,6 @@ fun main2() = runBlocking<Unit> {
     GlobalScope.launch {
         println("GlobalScope               : I'm working in thread ${Thread.currentThread().name}")
     }
-}
-
-fun testTime() {
-    val time = Time.valueOf("08:00:00")
-    println(time.toLocalTime().toSecondOfDay())
-    val localTime = LocalTime.parse("00:00:01")
-    println(localTime.toMillisOfDay())
-    println(localTime + LocalTime.parse("00:00:01"))
 }
 
 fun foo(): Flow<Int> = flow { // 流构建器
@@ -153,32 +147,51 @@ fun main7() {
     val page = PageQuery(pageNum = 10, pageSize = 10)
     println(page.where().toString())
     println(page.toPageSql())
-    println(BigDecimal("5.5").divide(BigDecimal("45.5"), 4, BigDecimal.ROUND_HALF_EVEN).toPlainString())
+    println(BigDecimal(5.50000001).divide(BigDecimal(45.5000000003), 4, BigDecimal.ROUND_HALF_EVEN).toPlainString())
     println(BigDecimal("0.0").compareTo(BigDecimal(0)) == 0)
-    println(Date(1592233200000))
+    println(Date(1594288965561))
+    println(Date(1594288965561).before(Date(1594288965570)))
 }
 
 fun main8() {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:m:s.SSS")
-    val formattedDateTime = LocalDateTime.parse("2020-12-2 2:3:4", formatter)
-    val instant = Instant.ofEpochMilli(System.currentTimeMillis())
-    val time = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")
+    val formattedDateTime = LocalDateTime.parse("2020-07-17 00:00:00:008", formatter)
     println(formattedDateTime)
-    println(time)
-    val systemZone = ZoneId.systemDefault() // my timezone
-    val currentOffsetForMyZone = systemZone.rules.getOffset(instant)
-    println(currentOffsetForMyZone)
-    println(LocalDateTime.ofEpochSecond(System.currentTimeMillis() / 1000, 0, ZonedDateTime.now(ZoneId.systemDefault()).offset))
-    println(LocalDateTime.of(LocalDate.now(), LocalTime.MIN))
-    println(LocalDateTime.of(LocalDate.now(), LocalTime.MAX))
-    println(LocalDateTime.now().toInstant(currentOffsetForMyZone).toEpochMilli())
-    println(System.currentTimeMillis())
     println(LocalDate.now().atStartOfDay())
-    println(LocalDateTime.now().withYear(2019).withNano(123000000).withMinute(57 / 15 * 15))
-    println(LocalDate.now().withDayOfMonth(1).atStartOfDay())
-    println(LocalDate.of(2020, 2, 1).with(TemporalAdjusters.lastDayOfMonth()).atStartOfDay())
-    println(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
-    println(LocalTime.MIN.toLocalDateTime().toEpochMilli())
+
+    val c = LocalDateTime.now()
+    println(c)
+    val m = c.withMinute(0)
+    println(m)
+    println(m.withMinute(0)
+            .withSecond(0)
+            .withNano(0))
+    println(Date(1595394000000))
+}
+
+fun testTime() {
+    println(firstDay())
+    println(lastDay())
+
+}
+
+fun main9() {
+    println(BigDecimal(0) == BigDecimal.ZERO)
+    println(BigDecimal("0.0") == BigDecimal.ZERO)
+    println(BigDecimal("0.0") == BigDecimal(0))
+}
+
+fun main10() {
+    val m = MessageDigest.getInstance("MD5")
+    val m2 = MessageDigest.getInstance("MD5")
+    m.update("nmka2".toByteArray())
+    m2.update("nmka".toByteArray())
+    val sb = StringBuilder()
+    m.digest().forEach { sb.append(it) }
+    println(sb)
+    sb.clear()
+    m2.digest().forEach { sb.append(it) }
+    println(sb)
 }
 
 fun main() = main8()

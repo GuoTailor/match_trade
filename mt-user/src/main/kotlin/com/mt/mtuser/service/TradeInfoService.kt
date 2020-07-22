@@ -9,18 +9,32 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
+import org.apache.poi.ss.usermodel.HorizontalAlignment
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ZeroCopyHttpOutputMessage
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
+import java.io.File
+import java.io.FileOutputStream
+import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
+import java.util.*
+
 
 /**
  * Created by gyh on 2020/5/7.
@@ -41,9 +55,6 @@ class TradeInfoService {
     @Autowired
     private lateinit var connect: DatabaseClient
 
-    @Autowired
-    private lateinit var roomRecordService: RoomRecordService
-
     /**
      * 获取今天的交易量
      */
@@ -51,13 +62,21 @@ class TradeInfoService {
             tradeInfoDao.countStockByTradeTime(startTime, LocalDateTime.now())
 
     /**
+     * 获取总的交易量
+     */
+    suspend fun countStock() = tradeInfoDao.countStock()
+
+    /**
      * 获取公司今天的交易量
      */
     suspend fun countStockByTradeTimeAndCompanyId(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()): Long {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         //val stockId = stockService.findByCompanyId(companyId).first()// TODO 替换为股票id
-        return tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
+        return countStockByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
     }
+
+    suspend fun countStockByTradeTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int) =
+            tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
 
     /**
      * 获取今天交易额
@@ -66,12 +85,26 @@ class TradeInfoService {
             tradeInfoDao.countMoneyTradeTime(startTime, LocalDateTime.now())
 
     /**
+     * 获取总的交易额
+     */
+    suspend fun countMoney() = tradeInfoDao.countMoney()
+
+    /**
+     * 查询指定日期的活跃用户数
+     */
+    suspend fun countUserByTradeTime(time: LocalDateTime = LocalTime.MIN.toLocalDateTime()) =
+            tradeInfoDao.countUserByTradeTime(time)
+
+    /**
      * 获取公司今天的交易额
      */
     suspend fun countMoneyByTradeTimeAndCompanyId(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()): BigDecimal {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        return tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
+        return countMoneyByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
     }
+
+    suspend fun countMoneyByTradeTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int) =
+            tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
 
     /**
      * 获取昨天的收盘价，也就是今天的开盘价
@@ -234,12 +267,12 @@ class TradeInfoService {
      * 查找指定公司的历史订单
      */
     suspend fun findOrderByCompany(companyId: Int, date: LocalDate, query: PageQuery): PageView<TradeInfo> {
-        val startTime = date.minusDays(1)
-        val where = query.where().and("company_id").`is`(companyId).and("trade_time").between(startTime, date)
+        val endTime = date.plusDays(1)
+        val where = query.where().and("company_id").`is`(companyId).and("trade_time").between(date, endTime)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
         // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
-        val countWhere = query.where().and("company_id").`is`(companyId).and("trade_time").between("'${startTime.format(formatter)}'", "'${date.format(formatter)}'")
+        val countWhere = query.where().and("company_id").`is`(companyId).and("trade_time").between("'${date.format(formatter)}'", "'${endTime.format(formatter)}'")
         return getPage(connect.select()
                 .from<TradeInfo>()
                 .matching(where)
@@ -249,16 +282,20 @@ class TradeInfoService {
                 , connect, query, countWhere)
     }
 
+    suspend fun findOrderByCompanyAndDpId(companyId: Int, date: LocalDate) {
+
+    }
+
     /**
      * 查询指定用户的交易记录
      */
     suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?, date: LocalDate): PageView<TradeInfo> {
-        val startTime = date.minusDays(1)
+        val endTime = date.plusDays(1)
         val where = when {
             isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
             else -> query.where().and(where("seller_id").`is`(userId))
-        }.and(where("trade_time").between(startTime, date))
+        }.and(where("trade_time").between(date, endTime))
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
         // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
@@ -266,7 +303,7 @@ class TradeInfoService {
             isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
             else -> query.where().and(where("seller_id").`is`(userId))
-        }.and(where("trade_time").between("'${startTime.format(formatter)}'", "'${date.format(formatter)}'"))
+        }.and(where("trade_time").between("'${date.format(formatter)}'", "'${endTime.format(formatter)}'"))
 
         return getPage(connect.select()
                 .from<TradeInfo>()
@@ -294,7 +331,7 @@ class TradeInfoService {
                 .map { r, _ ->
                     mapOf("id" to r.get("id", java.lang.Long::class.java),
                             "stockId" to r.get("stock_id", java.lang.Integer::class.java),
-                            "time" to r.get("time", LocalDateTime::class.java)?.toEpochMilli(),
+                            "time" to r.get("time", LocalDateTime::class.java)?.minusDays(1)?.toEpochMilli(),
                             "tradesCapacity" to r.get("trades_capacity", java.lang.Long::class.java),
                             "tradesVolume" to r.get("trades_volume", BigDecimal::class.java),
                             "tradesNumber" to r.get("trades_number", java.lang.Integer::class.java),
@@ -339,5 +376,109 @@ class TradeInfoService {
                 }.awaitOne()
     }
 
+    /**
+     * 获取指定时间内的交易量排名
+     */
+    fun getTradeAmountRank(topNumber: Int, time: LocalDateTime = firstDay()): Mono<List<Map<String, Any?>>> {
+        return connect.execute("SELECT ti.company_id, sum(ti.trade_amount) as amount " +
+                " , (select count(rr.company_id) as openingNumber from mt_room_record rr where rr.company_id = ti.company_id) " +
+                " , (select c.name from mt_company c where c.id = ti.company_id) " +
+                " from mt_trade_info ti " +
+                " where ti.trade_time > :time" +
+                " GROUP BY ti.company_id ORDER BY amount desc limit $topNumber")
+                .bind("time", time)
+                .map { r, _ ->
+                    mapOf("amount" to r.get("amount", java.lang.Long::class.java),
+                            "companyId" to r.get("company_id", java.lang.Integer::class.java),
+                            "name" to r.get("name", java.lang.Integer::class.java),
+                            "openingNumber" to r.get("openingNumber", java.lang.Integer::class.java))
+                }.all().collectList()
+    }
+
+    /**
+     * 获取指定时间内的交易金额排名
+     */
+    fun getTradeMoneyRank(topNumber: Int, time: LocalDateTime = firstDay()): Mono<List<Map<String, Any?>>> {
+        return connect.execute("SELECT ti.company_id, sum(ti.trade_money) as money " +
+                " , (select count(rr.company_id) as openingNumber from mt_room_record rr where rr.company_id = ti.company_id) " +
+                " , (select c.name from mt_company c where c.id = ti.company_id) " +
+                " from mt_trade_info ti " +
+                " where ti.trade_time > :time" +
+                " GROUP BY ti.company_id ORDER BY money desc limit $topNumber")
+                .bind("time", time)
+                .map { r, _ ->
+                    mapOf("money" to r.get("money", java.lang.Long::class.java),
+                            "companyId" to r.get("company_id", java.lang.Integer::class.java),
+                            "name" to r.get("name", java.lang.Integer::class.java),
+                            "openingNumber" to r.get("openingNumber", java.lang.Integer::class.java))
+                }.all().collectList()
+    }
+
+    fun outExcel(companyId: Int, date: LocalDate, response: ServerHttpResponse): Mono<Void> {
+        val startTime = date.withDayOfMonth(1).atStartOfDay()
+        val lastTime = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX)
+        val where = where("company_id").`is`(companyId).and("trade_time").between(startTime, lastTime)
+        val data = connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .fetch()
+                .all()
+                .collectList().block()
+
+        val rowName = arrayOf("时间", "成交状态", "交易模式", "买方", "买方报价", "卖方", "卖方报价", "成交价", "成交数量")
+        // 第一步：定义一个新的工作簿
+        val wb = XSSFWorkbook()
+        val sheet = wb.createSheet()
+        val alignStyle = wb.createCellStyle()
+        alignStyle.alignment = HorizontalAlignment.CENTER
+        sheet.setDefaultColumnStyle(4, alignStyle)
+        val rowTitle = sheet.createRow(0)
+        for (i in rowName.indices) {
+            val cellTitle = rowTitle.createCell(i)
+            cellTitle.setCellValue(rowName[i])
+        }
+        for (i in 0 until data!!.size) {
+            val rows = sheet.createRow(i + 1)
+            for (key in rowName.indices) {
+                val cells = rows.createCell(key)
+                cells.setCellValue(getData(key + 1, data[i]))
+            }
+        }
+        // TODO 也许可以直接获取输出流写出，不要存文件
+        val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
+        val path = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(formatter) + ".xlsx"
+        logger.info(path)
+        val fileExcel = File(path)
+        if (!fileExcel.exists()) {
+            fileExcel.parentFile.mkdirs()
+        }
+        val fileOutputStream = FileOutputStream(fileExcel)
+        wb.write(fileOutputStream)
+        fileOutputStream.close()
+        val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
+        return try {
+            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
+                    URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName()))
+            zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
+        } catch (e: UnsupportedEncodingException) {
+            throw UnsupportedOperationException()
+        }
+    }
+
+    fun getData(index: Int, tradeInfo: TradeInfo): String? {
+        val formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm")
+        return when (index) {
+            1 -> tradeInfo.tradeTime?.format(formatter)
+            2 -> TradeState.getZhName(tradeInfo.tradeState)
+            3 -> RoomEnum.getRoomEnum(tradeInfo.model!!).details
+            4 -> tradeInfo.buyerName
+            5 -> tradeInfo.buyerPrice?.toEngineeringString()
+            6 -> tradeInfo.sellerName
+            7 -> tradeInfo.sellerPrice?.toEngineeringString()
+            8 -> tradeInfo.tradePrice?.toEngineeringString()
+            9 -> tradeInfo.tradeAmount?.toString()
+            else -> error("错误，不支持的行号:$index")
+        }
+    }
 
 }

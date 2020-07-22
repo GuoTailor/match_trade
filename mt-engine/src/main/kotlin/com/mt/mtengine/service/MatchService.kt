@@ -61,7 +61,7 @@ class MatchService {
                     .thenReturn(threadInfo)
         }.doOnSuccess { threadInfo ->
             sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build())
-        }.doOnError { onMatchFailed(roomInfo, buy, sell, it.message ?: "失败", isTopThree) }
+        }.doOnError { onMatchFailed(roomInfo, buy, sell, it.message ?: "失败", isTopThree).subscribe() }
     }
 
     fun <T: MatchStrategy.RoomInfo> onMatchFailed(roomInfo: T, buy: OrderParam?, sell: OrderParam?, failedInfo: String, isTopThree: Boolean = false) = r2dbc.withTransaction {
@@ -82,7 +82,7 @@ class MatchService {
                     .map { sink.outResult().send(MessageBuilder.withPayload(threadInfo.toOrderInfo().toFirstOrder(roomInfo.roomId, roomInfo.mode)).build()) }
                     .thenReturn(threadInfo)
         }.doOnSuccess { threadInfo -> sink.outTrade().send(MessageBuilder.withPayload(threadInfo).build()) }
-                .doOnError { onMatchError(roomInfo, buy, sell, it.message ?: "失败", isTopThree) }
+                .doOnError { onMatchError(roomInfo, buy, sell, it.message ?: "失败", isTopThree).subscribe() }
     }
 
     fun <T: MatchStrategy.RoomInfo> onMatchError(roomInfo: T, buy: OrderParam?, sell: OrderParam?, failedInfo: String, isTopThree: Boolean = false): Mono<TradeInfo> {

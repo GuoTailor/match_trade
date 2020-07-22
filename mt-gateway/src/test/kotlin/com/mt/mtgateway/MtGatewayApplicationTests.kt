@@ -38,6 +38,11 @@ class MtGatewayApplicationTests {
         println(treeSet.size)
     }
 
+    @Test
+    fun testList() {
+        println(listOf("1", "2", "3").joinToString(prefix = "[", postfix = "]") { "\"$it\"" })
+    }
+
     class User(var userName: String, var age: Int) {
         override fun equals(other: Any?): Boolean {
             println("equals")
