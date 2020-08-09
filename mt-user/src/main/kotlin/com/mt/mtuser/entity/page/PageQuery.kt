@@ -40,12 +40,12 @@ class PageQuery(val pageNum: Int = 0,
             val column = if (alias.isBlank()) searchField else "$alias.$searchField"
             with(Criteria.where(column)) {
                 criteria = when (searchOper) {
-                    "eq" -> `is`(searchString)
-                    "ne" -> not(searchString)
-                    "gt" -> greaterThan(searchString)
-                    "gt;=" -> greaterThanOrEquals(searchString)
-                    "lt" -> lessThan(searchString)
-                    "lt;=" -> lessThanOrEquals(searchString)
+                    "eq" -> `is`(searchString.toIntOrNull() ?: searchString)
+                    "ne" -> not(searchString.toIntOrNull() ?: searchString)
+                    "gt" -> greaterThan(searchString.toIntOrNull() ?: searchString)
+                    "gt;=" -> greaterThanOrEquals(searchString.toIntOrNull() ?: searchString)
+                    "lt" -> lessThan(searchString.toIntOrNull() ?: searchString)
+                    "lt;=" -> lessThanOrEquals(searchString.toIntOrNull() ?: searchString)
                     "cn", "bw", "ew" -> buildSubSql(alias)
                     "nc", "bn", "en" -> throw IllegalStateException("暂不支持的查找方式$searchOper")
                     else -> throw IllegalStateException("不支持的查找方式$searchOper")

@@ -29,14 +29,15 @@ class StockService {
 
     suspend fun findByName(stockName: String) = stockDao.findByName(stockName)
 
-    suspend fun findAllByQuery(query: PageQuery): PageView<Stock> {
+    suspend fun findAllByQuery(query: PageQuery, companyId: Int): PageView<Stock> {
+        val where = query.where().and("company_id").`is`(companyId)
         return getPage(connect.select()
                 .from<Stock>()
-                .matching(query.where())
+                .matching(where)
                 .page(query.page())
                 .fetch()
                 .all()
-                , connect, query)
+                , connect, query, where)
     }
 
     internal suspend fun save(stock: Stock) = stockDao.save(stock)

@@ -45,19 +45,23 @@ class DepartmentPostController {
 
     /**
      * @api {put} /department 更新公司部门和职位
-     * @apiDescription  更新公司部门和职位
+     * @apiDescription  更新公司部门和职位,支持增量更新
      * @apiName updateBind
      * @apiVersion 0.0.1
-     * @apiUse DepartmentPostInfo
+     * @apiParam {Integer} id id
+     * @apiParam {String} [departmentName] 部门名字
+     * @apiParam {String} [postName] 职位名字
+     * @apiParamExample {json} 请求-例子:
+     * {"id":3,"postName":"123"}
      * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": {null}
+     * {"code": 0,"msg": "成功","data": 1
      * @apiGroup Department
      * @apiUse tokenMsg
      * @apiPermission admin
      */
     @PutMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun updateBind(@RequestBody dpi: Mono<DepartmentPostInfo>): Mono<ResponseInfo<DepartmentPost>> {
+    fun updateBind(@RequestBody dpi: Mono<DepartmentPostInfo>): Mono<ResponseInfo<Int>> {
         return ResponseInfo.ok(mono { departmentPostService.updateBind(dpi.awaitSingle()) })
     }
 
@@ -92,7 +96,7 @@ class DepartmentPostController {
      * @apiPermission admin
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('ANALYST')")
     fun findAllBind(@PathVariable id: Int): Mono<ResponseInfo<LinkedList<Department>>> {
         return ResponseInfo.ok(mono { departmentPostService.findAllBind(id) })
     }

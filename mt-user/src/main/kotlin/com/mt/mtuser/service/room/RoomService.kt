@@ -95,7 +95,7 @@ class RoomService {
     fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
-        val rest = dao.enableRoomById(roomId, room.isEnable<BaseRoom>(value).enable!!)
+        val rest = dao.enableRoomById(roomId, room.setEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
             var roomRecord = room.toRoomRecord()
             roomEnableMutex.withLock {
@@ -195,7 +195,7 @@ class RoomService {
             throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         if (company!!.getModes().contains(room.flag)) {         // 判断房间模式(权限)
             room.roomId = baseRoomService.getNextRoomId(room)   // 获取全局唯一的房间id
-            room.isEnable<T>(false)
+            room.setEnable<T>(false)
             roomCreateMutex.withLock {
                 if (checkRoomCount(room.companyId!!)) {
                     logger.info(room.toString())
@@ -204,6 +204,11 @@ class RoomService {
                 } else throw IllegalStateException("公司房间已满")
             }
         } else throw IllegalStateException("不能创建该模式${room.flag}的房间")
+    }
+
+    suspend fun deleteRoom(roomId: String, flag: String) {
+        val dao = getBaseRoomDao<BaseRoom>(flag)
+        dao.deleteById(roomId)
     }
 
     /**
@@ -245,6 +250,10 @@ class RoomService {
         val companyList = roleService.getCompanyList(role)
         if (companyList.isEmpty()) throw IllegalStateException("错误：没有绑定公司，没有可用房间")
         // TODO 不支持分页 可以考虑禁止跳页查询
+        getRoomByCompanyId(companyList)
+    }
+
+    suspend fun getRoomByCompanyId(companyList: Iterable<Int>) = coroutineScope {
         val clickList = async { clickRoomDao.findByCompanyIdAll(companyList) }
         val bickerList = async { bickerRoomDao.findByCompanyIdAll(companyList) }
         val doubleList = async { doubleRoomDao.findByCompanyIdAll(companyList) }

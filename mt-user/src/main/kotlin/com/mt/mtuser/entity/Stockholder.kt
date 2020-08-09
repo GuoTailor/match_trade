@@ -60,6 +60,23 @@ class Stockholder(
         const val ANALYST = "ROLE_ANALYST"
         const val ADMIN = "ROLE_ADMIN"
         const val USER = "ROLE_USER"
+
+        enum class Role(val roleName: String, val order: Int) {
+            SUPER_ADMIN(Stockholder.SUPER_ADMIN, 1),
+            ANALYST(Stockholder.ANALYST, 2),
+            ADMIN(Stockholder.ADMIN, 3),
+            USER(Stockholder.USER, 4), ;
+        }
+
+        fun fromName(name: String): Role {
+            return when (name) {
+                SUPER_ADMIN -> Role.SUPER_ADMIN
+                ANALYST -> Role.ANALYST
+                ADMIN -> Role.ADMIN
+                USER -> Role.USER
+                else -> error("不支持的角色")
+            }
+        }
     }
 
 }

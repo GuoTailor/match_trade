@@ -7,6 +7,7 @@ import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
+import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
@@ -16,6 +17,7 @@ import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.from
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
@@ -47,6 +49,9 @@ class CompanyService {
     @Autowired
     private lateinit var fileService: FileService
 
+    @Autowired
+    private lateinit var roomService: RoomService
+
     /**
      * 无赖使用{@link PostgresqlConnection}
      * 由于r2dbc的sql语句中不支持占位符，
@@ -61,9 +66,14 @@ class CompanyService {
 
     /**
      * 创建公司，顺便创建一支和公司名同名的股票
+     * 顺便创建一
      */
     suspend fun registerCompany(company: Company): Company {
         val newCompany = companyDao.save(company)
+        if (company.adminPhone != null) {
+            val stockholderInfo = StockholderInfo(companyId = newCompany.id, phone = company.adminPhone, realName = company.adminName)
+            addCompanyAdmin(stockholderInfo)
+        }
         company.brief?.let { fileService.addCompanyInfo(it, newCompany.id!!).awaitSingle() }
         val stock = Stock(companyId = newCompany.id, name = newCompany.name)
         stockService.save(stock)
@@ -77,6 +87,30 @@ class CompanyService {
      * 删除公司
      */
     suspend fun deleteById(id: Int) {
+        if (roleService.existsByCompanyId(id) > 0) error("公司下存在员工，无法删除")
+        val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
+        val adminRoleId = roleService.getRoles().find { it.name == Stockholder.ADMIN }!!.id!!
+        val userRoleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        roleService.deleteByRoleIdAndCompanyId(roleId, id)
+        val adminUser = roleService.findByRoleIdAndCompanyId(adminRoleId, id)
+        if (adminUser != null) {
+            adminUser.companyId = null
+            adminUser.dpId = null
+            adminUser.money = BigDecimal.ZERO
+            adminUser.realName = null
+            adminUser.roleId = userRoleId
+            roleService.update(adminUser)
+        }
+        roomService.getRoomByCompanyId(listOf(id)).forEach {
+            if (it.isEnable()) {
+                try {
+                    roomService.enableRoom(it.roomId!!, false, it.flag)
+                } catch (e: Throwable) {
+                    logger.info("房间关闭失败 {} {} ", it.roomId, it.flag)
+                }
+            }
+            roomService.deleteRoom(it.roomId!!, it.flag)
+        }
         fileService.deleteCompanyInfo(id)
         return companyDao.deleteById(id)
     }
@@ -134,15 +168,56 @@ class CompanyService {
     /**
      * 查找所有股东
      */
-    suspend fun getAllShareholder(query: PageQuery): PageView<StockholderInfo> {
-        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
-        val where = query.where().and("s.company_id").`is`(companyId)
-        return getPage(connect.execute(
-                "select s.id, s.user_id, s.company_id, s.real_name, s.department, s.position, s.money, sum(p.amount) as amount " +
-                        " from mt_stockholder s" +
-                        " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
-                        " where $where group by s.id" +
-                        query.toPageSql())
+    suspend fun getAllShareholder(query: PageQuery, id: Int?): PageView<StockholderInfo> {
+        val role = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        var where = query.where("s").and("s.role_id").`is`(role)
+        val superAdmin = BaseUser.getcurrentUser().awaitSingle().roles.find { it.authority == Stockholder.SUPER_ADMIN }
+        if (superAdmin != null && id != null) {
+            where = where.and("s.company_id").`is`(id)
+        } else if (superAdmin == null) {
+            val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+            where = where.and("s.company_id").`is`(companyId)
+        }
+        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, sum(p.amount) as amount, " +
+                " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
+                " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
+                " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
+                " from mt_stockholder s" +
+                " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
+                " ${if (where.toString().isBlank()) "" else "where"} $where group by s.id" +
+                query.toPageSql())
+                .`as`(StockholderInfo::class.java)
+                .fetch()
+                .all()
+                , connect, query, "mt_stockholder s", where)
+    }
+
+    /**
+     * 获取股东通过部门
+     */
+    suspend fun getShareholderByDepartment(query: PageQuery, companyId: Int, name: String): PageView<StockholderInfo> {
+        val idList = connect.execute("select mdp.id from mt_department_post mdp, mt_department md " +
+                " where mdp.company_id = :companyId " +
+                "  and mdp.department_id = md.id " +
+                "  and md.name = :name")
+                .bind("companyId", companyId)
+                .bind("name", name)
+                .`as`(java.lang.Integer::class.java)
+                .fetch().all().collectList().awaitSingle()
+        if (idList.isEmpty()) error("公司不存在部门")
+        val role = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        val where = query.where("s")
+                .and("s.company_id").`is`(companyId)
+                .and("s.dp_id").`in`(idList)
+                .and("s.role_id").`is`(role)
+        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, sum(p.amount) as amount, " +
+                " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
+                " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
+                " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
+                " from mt_stockholder s" +
+                " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
+                " where $where group by s.id" +
+                query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
                 .all()
@@ -154,11 +229,52 @@ class CompanyService {
      */
     suspend fun findAllByQuery(query: PageQuery): PageView<Company> {
         val where = query.where("mc")
-        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId " +
+        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId" +
+                " , mu2.phone as adminPhone, ms2.real_name as adminName" +
                 " from mt_company mc " +
                 " LEFT JOIN mt_stockholder ms on ms.company_id = mc.id and ms.role_id = 2 " +
                 " LEFT JOIN mt_user mu on ms.user_id = mu.id" +
+                " LEFT JOIN mt_stockholder ms2 on ms2.company_id = mc.id and ms2.role_id = 3" +
+                " LEFT JOIN mt_user mu2 on ms2.user_id = mu2.id" +
                 " where $where " + query.toPageSql())
+                .map { r, _ ->
+                    val company = Company()
+                    company.id = r.get("id", java.lang.Integer::class.java)?.toInt()
+                    company.name = r.get("name", String::class.java)
+                    company.roomCount = r.get("room_count", java.lang.Integer::class.java)?.toInt()
+                    company.mode = r.get("mode", String::class.java)
+                    company.createTime = r.get("create_time", LocalDateTime::class.java)
+                    company.licenseUrl = r.get("license_url", String::class.java)
+                    company.creditUnionCode = r.get("credit_union_code", String::class.java)
+                    company.legalPerson = r.get("legal_person", String::class.java)
+                    company.unitAddress = r.get("unit_address", String::class.java)
+                    company.unitContactName = r.get("unit_contact_name", String::class.java)
+                    company.unitContactPhone = r.get("unit_contact_phone", String::class.java)
+                    company.analystName = r.get("nick_name", String::class.java)
+                    company.analystId = r.get("analystId", java.lang.Integer::class.java)?.toInt()
+                    company.analystPhone = r.get("phone", String::class.java)
+                    company.adminPhone = r.get("adminPhone", String::class.java)
+                    company.adminName = r.get("adminName", String::class.java)
+                    company
+                }.all()
+                , connect, query, "mt_company")
+    }
+
+    /**
+     * 分析员获取自己管理的公司
+     */
+    suspend fun findByUser(query: PageQuery): PageView<Company> {
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        val where = query.where("mc")
+        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId " +
+                " from mt_company mc, " +
+                " mt_stockholder ms " +
+                " LEFT JOIN mt_user mu on ms.user_id = mu.id " +
+                " where mc.id = ms.company_id " +
+                "  and ms.role_id = 2 " +
+                "  and ms.user_id = :userId" +
+                "  ${if (where.isEmpty) "" else " and $where"} " + query.toPageSql())
+                .bind("userId", userId)
                 .map { r, _ ->
                     val company = Company()
                     company.id = r.get("id", java.lang.Integer::class.java)?.toInt()
@@ -239,32 +355,47 @@ class CompanyService {
     }
 
     /**
-     * 为公司添加一个管理员
+     * 为公司绑定一个管理员
+     * 一个公司只有一个管理员
      */
-    suspend fun addCompanyAdmin(info: StockholderInfo): Stockholder {  // TODO 一个公司只有一个管理员
+    suspend fun addCompanyAdmin(info: StockholderInfo): Stockholder {
         val phone = info.phone ?: throw IllegalStateException("手机号不能为空")
         val user = userDao.findByPhone(phone) ?: throw  IllegalStateException("用户不存在 $phone")
         val userRoleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
         val adminRoleId = roleService.getRoles().find { it.name == Stockholder.ADMIN }!!.id!!
-        val role = roleService.find(user.id!!, info.companyId!!, userRoleId)
-                ?: throw IllegalStateException("用户不是股东")
-        role.roleId = adminRoleId
-        role.realName = info.realName
-        return roleService.save(role)
+        val role = roleService.findNoBinding(user.id!!, userRoleId) ?: error("用户:$phone 不存在或已是股东")
+        val currentAdmin = roleService.findByRoleIdAndCompanyId(adminRoleId, info.companyId!!)
+        return if (currentAdmin == null) {
+            role.roleId = adminRoleId
+            role.realName = info.realName
+            role.companyId = info.companyId
+            roleService.save(role)
+        } else {
+            currentAdmin.roleId = userRoleId
+            role.roleId = adminRoleId
+            role.realName = info.realName
+            roleService.save(currentAdmin)
+            roleService.save(role)
+        }
     }
 
     /**
-     * 为公司添加一个分析员
+     * 为公司绑定一个分析员
+     * 一个公司只有一个分析员
      */
     suspend fun addCompanyAnalyst(userId: Int, companyId: Int) {
         val user = userDao.findById(userId) ?: error("用户不存在 $userId")
-        val userRoleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
-        val stockholder = roleService.find(userId, userRoleId) ?: error("用户：${user.phone}不是分析员")
-        if (roleService.exists(userRoleId, companyId) == 0) {
-            stockholder.id = null
-            stockholder.companyId = companyId
-            roleService.save(stockholder)
-        } else error("该公司：$companyId 已有分析员")
+        val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
+        val analyst = roleService.findByUserIdAndRoleId(userId, roleId) ?: error("用户：${user.phone}不是分析员")
+        val currentAnalyst = roleService.findByRoleIdAndCompanyId(roleId, companyId)
+        if (currentAnalyst == null) {
+            analyst.id = null
+            analyst.companyId = companyId
+            roleService.save(analyst)
+        } else {
+            currentAnalyst.userId = analyst.userId
+            roleService.save(currentAnalyst)
+        }
     }
 
     /**

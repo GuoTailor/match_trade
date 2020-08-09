@@ -9,9 +9,12 @@ import com.mt.mtcommon.lastDay
 import com.mt.mtcommon.toEpochMilli
 import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.common.Util
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.springframework.data.util.ParsingUtils
+import org.springframework.security.core.GrantedAuthority
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.StringBuilder
@@ -166,7 +169,7 @@ fun main8() {
     println(m.withMinute(0)
             .withSecond(0)
             .withNano(0))
-    println(Date(1595394000000))
+    println(Date(1596211200000))
 }
 
 fun testTime() {
@@ -182,16 +185,7 @@ fun main9() {
 }
 
 fun main10() {
-    val m = MessageDigest.getInstance("MD5")
-    val m2 = MessageDigest.getInstance("MD5")
-    m.update("nmka2".toByteArray())
-    m2.update("nmka".toByteArray())
-    val sb = StringBuilder()
-    m.digest().forEach { sb.append(it) }
-    println(sb)
-    sb.clear()
-    m2.digest().forEach { sb.append(it) }
-    println(sb)
+    println(ParsingUtils.reconcatenateCamelCase("companyId", "_"))
 }
 
-fun main() = main8()
+fun main() = main10()

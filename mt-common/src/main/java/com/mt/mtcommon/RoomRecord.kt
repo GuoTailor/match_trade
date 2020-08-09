@@ -7,6 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
@@ -87,7 +89,7 @@ open class RoomRecord(
     open fun computingTime(): RoomRecord {
         duration = startTime?.let { start ->
             endTime?.let { end ->
-                LocalTime.ofSecondOfDay((end.toEpochMilli() - start.toEpochMilli()) / 1000 - (quoteTime ?: LocalTime.MIN).toSecondOfDay())
+                LocalTime.ofSecondOfDay(end.toLocalTime().toSecondOfDay() - start.toLocalTime().toSecondOfDay().toLong() - (quoteTime ?: LocalTime.MIN).toSecondOfDay())
             }
         }
         return this

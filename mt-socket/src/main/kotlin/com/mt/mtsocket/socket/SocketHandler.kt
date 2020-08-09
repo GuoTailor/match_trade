@@ -53,6 +53,7 @@ abstract class SocketHandler : WebSocketHandler {
         val watchDog = WebSocketWatchDog().start(sessionHandler, 5000)
         val queryMap = Util.getQueryMap(sessionHandler.getSession().handshakeInfo.uri.query)
         val connect = sessionHandler.connected().flatMap { onConnect(queryMap, sessionHandler) }
+                .flatMap { sessionHandler.send(ResponseInfo.ok<Unit>("连接成功"), NotifyReq.connectSucceed) }
         val disconnected = sessionHandler.disconnected().flatMap { onDisconnected(queryMap, sessionHandler) }
         val output = sessionHandler.receive()
                 .map {

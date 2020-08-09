@@ -44,9 +44,13 @@ interface BaseRoom : Persistable<String> {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : BaseRoom> isEnable(value: Boolean): T {
+    fun <T : BaseRoom> setEnable(value: Boolean): T {
         this.enable = if (value) "1" else "0"
         return this as T
+    }
+
+    fun isEnable(): Boolean {
+        return enable == "1"
     }
 
     fun getDelayEndTIme(): LocalTime {

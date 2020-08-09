@@ -16,7 +16,9 @@ fun testMono() {
     println(mo.block())
 }
 
-fun main() = testMono()
+fun main() {
+    println(add(2)(3))
+}
 
 fun testNull(i: Int): String? {
     println(add(2)(3))

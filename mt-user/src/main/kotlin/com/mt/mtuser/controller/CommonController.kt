@@ -43,6 +43,9 @@ class CommonController {
     @Autowired
     lateinit var fileService: FileService
 
+    @Autowired
+    lateinit var appUpdateService: AppUpdateService
+
     /**
      * @api {get} /common/check 检查用户是否存在
      * @apiDescription  检查用户是否存在,当companyId参数不为空是同时检查用户是否为公司股东
@@ -223,7 +226,7 @@ class CommonController {
     @PostMapping("/file")
     fun uploadFile(@RequestPart("img") filePart: FilePart): Mono<ResponseInfo<String>> {
         logger.info("{}", filePart.filename())
-        return ResponseInfo.ok(fileService.uploadFile(filePart))
+        return ResponseInfo.ok(fileService.uploadImg(filePart))
     }
 
     /**
@@ -246,36 +249,19 @@ class CommonController {
     }
 
     /**
-     * @api {post} /wgt 上传wgt文件
-     * @apiDescription  上传wgt文件
-     * @apiName uploadWgt
-     * @apiParam {File} file wgt文件
-     * @apiUse AppUpdate
-     * @apiVersion 0.0.1
-     * @apiSuccessExample {json} 成功返回:
-     * {"code": 0,"msg": "成功","data": true}
-     * @apiGroup Common
-     * @apiPermission none
-     */
-    @PostMapping("/wgt")
-    fun uploadWgt(@RequestPart("file") filePart: FilePart, appUpdate: AppUpdate): Mono<ResponseInfo<AppUpdate>> {
-        return ResponseInfo.ok(fileService.uploadWgt(filePart, appUpdate))
-    }
-
-    /**
-     * @api {get} /wgt 查询跟新信息
-     * @apiDescription  查询跟新信息
+     * @api {get} /common/wgt 查询更新信息
+     * @apiDescription  查询更新信息
      * @apiName appVersion
-     * @apiParam {File} file wgt文件
-     * @apiUse AppUpdate
+     * @apiParam {String} version 当前版本
+     * @apiParam {String} type 类型：android，ios
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": true}
      * @apiGroup Common
      * @apiPermission none
      */
-    @GetMapping("/wgt")
-    fun appVersion(@RequestParam version: String, @RequestParam type: String) {
-        ResponseInfo.ok(fileService.appVersion(version, type))
+    @GetMapping("/common/wgt")
+    fun appVersion(@RequestParam version: String, @RequestParam type: String): Mono<ResponseInfo<AppUpdate>> {
+        return ResponseInfo.ok(appUpdateService.appVersion(version, type))
     }
 }

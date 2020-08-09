@@ -66,7 +66,7 @@ class StockController {
      */
     @GetMapping("/company/{id}")
     fun getCompanyStock(@PathVariable id: Int, query: PageQuery): Mono<ResponseInfo<PageView<Stock>>> {
-        return ResponseInfo.ok(mono { stockService.findAllByQuery(query) })
+        return ResponseInfo.ok(mono { stockService.findAllByQuery(query, id) })
     }
 
     /**
@@ -161,6 +161,31 @@ class StockController {
     @GetMapping("kline")
     fun findKline(@RequestParam roomId: String, @RequestParam mode: String, @RequestParam timeline: String, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
         return ResponseInfo.ok(mono { klineService.findKline(roomId, mode, timeline, page) })
+    }
+
+    /**
+     * @api {get} /stock/kline/company 获取一只股票的k线通过公司id
+     * @apiDescription  获取一只股票的k线通过公司id，获取公司的第一支股票
+     * @apiName findKlineByCompanyId
+     * @apiVersion 0.0.1
+     * @apiParam {String} timeline 取值[1m:一分钟的k线；15m:十五分钟的k线；1h:一小时的k线；4h:四小时的k线；1d:日k]
+     * @apiParam {Integer} companyId 房间id
+     * @apiUse PageQuery
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 2,"total": 43,"item": [{"id": 395,"stockId": 1,
+     * "companyId": 1,"time": "2020-05-13T11:23:00.000+00:00","tradesCapacity": 100,"tradesVolume": 25000.0,"tradesNumber"
+     * : 1,"avgPrice": 250.0,"maxPrice": 250.0,"minPrice": 250.0,"openPrice": 250.0,"closePrice": 250.0,"empty": false}
+     * ,{"id": 396,"stockId": 1,"companyId": 1,"time": "2020-05-14T05:11:00.000+00:00","tradesCapacity": 100,"tradesVolume":
+     * 15250.0,"tradesNumber": 1,"avgPrice": 152.5,"maxPrice": 152.5,"minPrice": 152.5,"openPrice": 152.5,"closePrice":
+     * 152.5,"empty": false}]}}
+     * @apiUse Kline
+     * @apiGroup Stock
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("kline/company")
+    fun findKlineByCompanyId(@RequestParam companyId: Int, @RequestParam timeline: String, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
+        return ResponseInfo.ok(mono { klineService.findKlineByCompanyId(companyId, timeline, page) })
     }
 
 }

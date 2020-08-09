@@ -76,7 +76,7 @@ class TradeInfoService {
     }
 
     suspend fun countStockByTradeTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int) =
-            tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
+            tradeInfoDao.countStockByTradeTimeAndCompanyId(startTime, endTime, companyId)
 
     /**
      * 获取今天交易额
@@ -104,7 +104,7 @@ class TradeInfoService {
     }
 
     suspend fun countMoneyByTradeTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int) =
-            tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, LocalDateTime.now(), companyId)
+            tradeInfoDao.countMoneyByTradeTimeAndCompanyId(startTime, endTime, companyId)
 
     /**
      * 获取昨天的收盘价，也就是今天的开盘价
@@ -317,21 +317,20 @@ class TradeInfoService {
     /**
      * 按天统计交易详情
      */
-    suspend fun statisticsOrderByDay(page: PageQuery): PageView<Map<String, Any?>> {
-        val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+    suspend fun statisticsOrderByDay(page: PageQuery, companyId: Int): PageView<Map<String, Any?>> {
         val stockId = stockService.findByCompanyId(companyId).first().id!!
         val where = page.where("k").and("k.stock_id").`is`(stockId)
         val pageSql = page.toPageSql()
         val sql = "select k.*, count(rr.id) as openNumber from mt_1d_kline k " +
                 " left join mt_room_record rr " +
                 " on rr.stock_id = k.stock_id " +
-                " and rr.start_time between k.time - INTERVAL'1 day' and k.time - INTERVAL'1 sec' " +
+                " and rr.start_time between k.time and k.time + INTERVAL'1 day'  " +
                 " where $where group by k.id $pageSql"
         return getPage(connect.execute(sql)
                 .map { r, _ ->
                     mapOf("id" to r.get("id", java.lang.Long::class.java),
                             "stockId" to r.get("stock_id", java.lang.Integer::class.java),
-                            "time" to r.get("time", LocalDateTime::class.java)?.minusDays(1)?.toEpochMilli(),
+                            "time" to r.get("time", LocalDateTime::class.java)?.toEpochMilli(),
                             "tradesCapacity" to r.get("trades_capacity", java.lang.Long::class.java),
                             "tradesVolume" to r.get("trades_volume", BigDecimal::class.java),
                             "tradesNumber" to r.get("trades_number", java.lang.Integer::class.java),
@@ -343,6 +342,40 @@ class TradeInfoService {
                             "companyId" to r.get("company_id", java.lang.Integer::class.java),
                             "openNumber" to r.get("openNumber", java.lang.Integer::class.java))
                 }.all(), connect, page, "mt_1d_kline k", where)
+    }
+
+    /**
+     * 按部门统计交易详情
+     */
+    suspend fun statisticsOrderByDepartment(page: PageQuery, companyId: Int): PageView<Map<String, Any?>> {
+        val startTime = firstDay()
+        val endTime = LocalDateTime.now()
+        val pageSql = page.toPageSql()
+        val where = page.where("mdp").and("mdp.company_id").`is`(companyId)
+        return getPage(connect.execute("select count(1) as tradesNumber," +
+                " COALESCE(sum(mti.trade_amount), 0) as tradesCapacity," +
+                " COALESCE(sum(mti.trade_money), 0)  as tradesVolume," +
+                " COALESCE(avg(mti.trade_price), 0)  as avgPrice," +
+                " COALESCE(min(mti.trade_price), 0)  as minPrice," +
+                " COALESCE(max(mti.trade_price), 0)  as maxPrice," +
+                " (select md.name from mt_department md where mdp.department_id = md.id)" +
+                " from mt_department_post mdp" +
+                " left join mt_stockholder ms on mdp.id = ms.dp_id" +
+                " left join mt_trade_info mti on ((mti.buyer_id = ms.user_id) or (mti.seller_id = ms.user_id)) and" +
+                " mti.trade_time between :startTime and :endTime" +
+                " where $where" +
+                " group by mdp.department_id $pageSql")
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .map { r, _ ->
+                    mapOf("tradesNumber" to r.get("tradesNumber", java.lang.Long::class.java)?.toLong(),
+                            "tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java)?.toLong(),
+                            "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
+                            "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
+                            "minPrice" to r.get("minPrice", BigDecimal::class.java),
+                            "maxPrice" to r.get("maxPrice", BigDecimal::class.java),
+                            "name" to r.get("name", String::class.java))
+                }.all(), connect, page, "mt_department_post mdp", where)
     }
 
     /**

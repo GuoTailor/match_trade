@@ -41,6 +41,13 @@ abstract class BaseUser : UserDetails {
      */
     fun matchesPassword(rawPassword: String) = passwordEncoder.matches(rawPassword, this.password)
 
+    fun findMaxRole(): String {
+        return roles.stream()
+                .map { Stockholder.fromName(it.authority) }
+                .min { o1, o2 -> o1.order.compareTo(o2.order) }
+                .get().roleName
+    }
+
     @JsonIgnore
     override fun getAuthorities(): Collection<GrantedAuthority> {
         return roles

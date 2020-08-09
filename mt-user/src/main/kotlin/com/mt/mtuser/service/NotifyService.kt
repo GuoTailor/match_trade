@@ -57,7 +57,7 @@ class NotifyService {
     suspend fun getUnreadCount(): Long {
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val lastTime = fundReadTime(userId)
-        return notifyDao.countByCreateTime(lastTime) + notifyUserDao.countByUnread(userId)
+        return notifyDao.countByCreateTime(lastTime) + notifyUserDao.countByUnread(userId, NotifyUser.typeMsg)
     }
 
     /**
@@ -66,7 +66,7 @@ class NotifyService {
      */
     suspend fun getAllMsg(query: PageQuery): PageView<Notify> {
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        val notifyUserList = notifyUserDao.findAllByUserId(userId).toList()
+        val notifyUserList = notifyUserDao.findAllByUserId(userId, NotifyUser.typeMsg).toList()
         val msgIdList = notifyUserList.map { it.msgId }
         val idList = notifyUserList.map { it.id!! }
         val lastReadTime = fundReadTime(userId)
@@ -103,7 +103,7 @@ class NotifyService {
         msg.content = HtmlUtils.htmlEscape(msg.content ?: "")
         msg.status = msg.status ?: Notify.statusProgress
         val notify = notifyDao.save(msg)
-        if (msg.sendType == "assign") {
+        if (msg.sendType == Notify.sendTypeAssign) {
             val idList = msg.idList ?: error("请指定用户")
             val jobList = ArrayList<Deferred<*>>(idList.size)
             coroutineScope {
@@ -133,8 +133,7 @@ class NotifyService {
                 .map {
                     it.content = HtmlUtils.htmlUnescape(it.content ?: "")
                     it
-                }
-                .collectList()
+                }.collectList()
                 .awaitSingle()
         // 当公告只有一条时才能设置为已读，
         // 当有多条时不能设置最新的读取时间来标记为已读，因为他实际只读了一条

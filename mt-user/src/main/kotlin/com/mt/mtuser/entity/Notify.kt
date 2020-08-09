@@ -51,6 +51,7 @@ class Notify {
     companion object {
         const val statusProgress = "progress"
         const val statusCancel = "cancel"
+
         const val sendTypeMass = "mass"
         const val sendTypeAssign = "assign"
     }

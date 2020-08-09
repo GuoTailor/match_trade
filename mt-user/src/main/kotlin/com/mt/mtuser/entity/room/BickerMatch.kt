@@ -28,7 +28,7 @@ class BickerMatch(
         override var roomId: String? = null,    // 房间id，四张房间表唯一
         override var companyId: Int? = null,    // 公司id
         override var stockId: Int? = null,      // 股票id
-        override var name: String? = null,      // 房间名字
+        override var name: String? = null,      //
         override var people: Int? = null,       // 人数
         override var time: LocalTime? = null,    // 时长
         override var startTime: LocalTime? = null,     // 房间开启时间

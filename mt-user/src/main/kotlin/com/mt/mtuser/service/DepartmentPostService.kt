@@ -13,7 +13,9 @@ import kotlinx.coroutines.sync.withLock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitOneOrNull
+import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.r2dbc.core.flow
+import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -35,6 +37,9 @@ class DepartmentPostService {
     protected lateinit var connect: DatabaseClient
 
     @Autowired
+    lateinit var r2dbcService: R2dbcService
+
+    @Autowired
     lateinit var roleService: RoleService
     private val bindMutex = Mutex()
 
@@ -49,13 +54,20 @@ class DepartmentPostService {
         }
     }
 
-    suspend fun updateBind(dpi: DepartmentPostInfo): DepartmentPost {
+    suspend fun updateBind(dpi: DepartmentPostInfo): Int {
         bindMutex.withLock {
-            val department = departmentDao.findByName(dpi.departmentName!!)
-                    ?: departmentDao.save(Department(name = dpi.departmentName))
-            val post = dpi.postName?.let { postDao.findByName(it) ?: postDao.save(Post(name = it)) }
-            return exitRelated(department.id!!, post?.id, dpi.companyId!!)
-                    ?: departmentPostDao.save(DepartmentPost(id = dpi.id, departmentId = department.id, postId = post?.id, companyId = dpi.companyId))
+            val dp = findByDpId(dpi.id!!) ?: error("不存在该id：${dpi.id}")
+            if (dp == dpi) error("请至少修改一个属性")
+            val departmentId = dpi.departmentName?.let {
+                departmentDao.findByName(it) ?: departmentDao.save(Department(name = it))
+            }?.id
+            val postId = dpi.postName?.let {
+                postDao.findByName(it) ?: postDao.save(Post(name = it))
+            }?.id
+            val departmentPost = DepartmentPost(departmentId = departmentId, postId = postId)
+            return r2dbcService.dynamicUpdate(departmentPost)
+                    .matching(where("id").`is`(dpi.id!!))
+                    .fetch().awaitRowsUpdated()
         }
     }
 
@@ -65,6 +77,22 @@ class DepartmentPostService {
         } else {
             departmentPostDao.deleteById(id)
         }
+    }
+
+    suspend fun findByDpId(id: Int): DepartmentPostInfo? {
+        return connect.execute("select mdp.id, md.name as departmentName, mp.name as postName " +
+                " from mt_department_post mdp " +
+                " left join mt_department md on mdp.department_id = md.id " +
+                " left join mt_post mp on mdp.post_id = mp.id " +
+                " where mdp.id = :id")
+                .bind("id", id)
+                .map { r, _ ->
+                    val dpi = DepartmentPostInfo()
+                    dpi.id = r.get("id", java.lang.Integer::class.java)?.toInt()
+                    dpi.departmentName = r.get("departmentName", String::class.java)
+                    dpi.postName = r.get("postName", String::class.java)
+                    dpi
+                }.awaitOneOrNull()
     }
 
     suspend fun findAllBind(companyId: Int): LinkedList<Department> {
@@ -84,8 +112,8 @@ class DepartmentPostService {
         val list = LinkedList<Department>()
         dataList.forEach {
             val department = list.find { d -> d.name == it.departmentName }
-                    ?: Department(id = it.id, name = it.departmentName)
-            val post = Post(name = it.postName)
+                    ?: Department(name = it.departmentName)
+            val post = Post(id = it.id, name = it.postName)
             department.postList.add(post)
             if (!list.contains(department)) {
                 list.add(department)

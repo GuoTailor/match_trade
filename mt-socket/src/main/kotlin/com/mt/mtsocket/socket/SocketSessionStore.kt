@@ -20,7 +20,7 @@ object SocketSessionStore {
         return BaseUser.getcurrentUser().flatMap {// TODO 用户多地登陆会存在问题，同一userId会有不同的roomId，导致撤单操作混乱
             val userInfo = UserRoomInfo(session, it.id!!, userName, roomId, model)
             val old = userInfoMap.put(it.id!!, userInfo)
-            logger.info("添加用户 ${it.id}")
+            logger.info("添加用户 ${it.id} ${session.getId()}")
             if (old != null) {
                 logger.info("用户多地登陆 ${it.id}")
                 old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyReq.differentPlaceLogin)

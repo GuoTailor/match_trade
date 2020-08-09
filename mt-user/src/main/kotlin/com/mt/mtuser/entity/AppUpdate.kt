@@ -1,20 +1,17 @@
 package com.mt.mtuser.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 /**
  * @apiDefine AppUpdate
- * @apiParam {Integer} id id
  * @apiParam {String} versionCode 版本号
  * @apiParam {String} versionName 版本名称
  * @apiParam {String} versionInfo 版本信息
  * @apiParam {Boolean} forceUpdate 是否强制更新
- * @apiParam {String} downloadUrlAndroid android版本下载链接
- * @apiParam {String} downloadUrlIos iso下载链接
- * @apiParam {String} downloadUrl 版本下载链接
- * @apiParam {String} time 更新时间
  */
 @Table("mt_app_update")
 class AppUpdate {
@@ -41,9 +38,10 @@ class AppUpdate {
     var downloadUrlIos: String? = null
 
     /*** 版本下载链接*/
+    @Transient
     var downloadUrl: String? = null
 
     /*** 更新时间*/
-    var time: Date? = null
+    var time: LocalDateTime? = null
 
 }

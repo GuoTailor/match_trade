@@ -18,10 +18,6 @@ import java.util.*
 @Service
 class Compute1DKlineService : ComputeKline() {
     override val tableName: String = "mt_1d_kline"
-    override fun handlerRequest(time: LocalDateTime): Boolean {
-        return time.minute == 0 && time.hour == 0 && time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
-    }
-
     val stepOfSeconds = 24 * 60 * 60L
 
     @Autowired
@@ -29,6 +25,10 @@ class Compute1DKlineService : ComputeKline() {
 
     @Autowired
     private lateinit var tradeInfoDao: TradeInfoDao
+
+    override fun handlerRequest(time: LocalDateTime): Boolean {
+        return time.minute == 0 && time.hour == 0 && time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
+    }
 
     override fun formatDate(time: LocalDateTime): LocalDateTime {
         return time.withHour(0)
@@ -51,7 +51,7 @@ class Compute1DKlineService : ComputeKline() {
         val kline = Kline()
         kline.stockId = stockId
         kline.companyId = companyId
-        kline.time = startTime
+        kline.time = time
         kline.openPrice = klineService.getOpenPriceByTableName(startTime, endTime, stockId, "mt_4h_kline")
         kline.closePrice = klineService.getClosePriceByTableName(endTime, stockId, "mt_4h_kline")
         return connect.execute("select" +

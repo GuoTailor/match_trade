@@ -36,6 +36,8 @@ class CompanyController {
      * @apiName registerCompany
      * @apiVersion 0.0.1
      * @apiParam {String} analystId 观察员id
+     * @apiParam {String} adminPhone 管理员电话
+     * @apiParam {String} adminName 管理员名字
      * @apiParamExample {json} 请求-例子:
      * {"name":"15306科技有限公司", "roomCount":2, "mode": "2"}
      * @apiUse Company
@@ -134,8 +136,8 @@ class CompanyController {
     }
 
     /**
-     * @api {post} /company/admin 添加一个公司管理员
-     * @apiDescription  为公司添加一个管理员
+     * @api {post} /company/admin 绑定一个公司管理员
+     * @apiDescription  为公司添加一个管理员，如果公司已存在管理员就更新
      * @apiName addCompanyAdmin
      * @apiVersion 0.0.1
      * @apiParam {Integer} companyId 公司id
@@ -154,8 +156,8 @@ class CompanyController {
     }
 
     /**
-     * @api {post} /company/analyst 为公司添加一个分析员
-     * @apiDescription  为公司添加一个分析员
+     * @api {post} /company/analyst 绑定一个公司分析员
+     * @apiDescription  为公司绑定一个分析员，如果公司已存在分析员就更新
      * @apiName addCompanyAnalyst
      * @apiVersion 0.0.1
      * @apiParam {Integer} companyId 公司id
@@ -218,6 +220,7 @@ class CompanyController {
      * @apiDescription  获取公司所有的股东
      * @apiName getAllShareholder
      * @apiUse PageQuery
+     * @apiParam {Integer} [companyId] 公司id,不传默认获取自己管理的公司
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 4,"item": [{"id": 1,"companyId": 1,"userId":
@@ -230,10 +233,35 @@ class CompanyController {
      * @apiUse tokenMsg
      * @apiPermission admin
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @GetMapping("/stockholder")
-    fun getAllShareholder(query: PageQuery): Mono<ResponseInfo<PageView<StockholderInfo>>> {
-        return ResponseInfo.ok(mono { companyService.getAllShareholder(query) })
+    fun getAllShareholder(query: PageQuery, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<PageView<StockholderInfo>>> {
+        return ResponseInfo.ok(mono { companyService.getAllShareholder(query, companyId) })
+    }
+
+    /**
+     * @api {get} /company/stockholder/department 按部门获取公司所有的股东
+     * @apiDescription  按部门获取公司所有的股东
+     * @apiName getShareholderByDepartment
+     * @apiUse PageQuery
+     * @apiParam {Integer} companyId 公司id,不传默认获取自己管理的公司
+     * @apiParam {String} name 部门名称
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 4,"item": [{"id": 1,"companyId": 1,"userId":
+     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000},{"id": 7,
+     * "companyId": 1,"userId": 1,"amount": null,"realName": null,"department": null,"position": null,"phone": null,"money":
+     * 0.0000},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
+     * "phone": null,"money": -87499.7700},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
+     * "测试","position": "跳舞","phone": null,"money": 10.0000}]}}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @GetMapping("/stockholder/department")
+    fun getShareholderByDepartment(query: PageQuery, companyId: Int, name: String): Mono<ResponseInfo<PageView<StockholderInfo>>> {
+        return ResponseInfo.ok(mono { companyService.getShareholderByDepartment(query, companyId, name) })
     }
 
     /**
@@ -272,6 +300,24 @@ class CompanyController {
     @GetMapping
     fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
         return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })
+    }
+
+    /**
+     * @api {get} /company/analyst 分析员获取自己管理的公司
+     * @apiDescription  分析员获取自己管理的公司
+     * @apiName findByUser
+     * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 10,"total": 1,"item": [{"id": 1,"name": "6105","roomCount": 1,"mode": "4","createTime": "2020-03-18T07:35:45.000+0000"}]}}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission analyst
+     */
+    @PreAuthorize("hasRole('ANALYST')")
+    @GetMapping("/analyst")
+    fun findByUser(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
+        return ResponseInfo.ok(mono { companyService.findByUser(query) })
     }
 
     /**

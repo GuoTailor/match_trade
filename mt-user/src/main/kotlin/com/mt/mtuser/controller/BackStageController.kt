@@ -1,16 +1,20 @@
 package com.mt.mtuser.controller
 
+import com.mt.mtcommon.firstDay
+import com.mt.mtcommon.lastDay
 import com.mt.mtcommon.toLocalDateTime
+import com.mt.mtuser.entity.AppUpdate
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
+import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.*
 import com.mt.mtuser.service.kline.KlineService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalDateTime
@@ -40,6 +44,12 @@ class BackStageController {
 
     @Autowired
     lateinit var klineService: KlineService
+
+    @Autowired
+    lateinit var analysisService: AnalysisService
+
+    @Autowired
+    lateinit var appUpdateService: AppUpdateService
 
     /**
      * @api {get} /system/info 获取系统信息
@@ -151,11 +161,14 @@ class BackStageController {
      * @apiDescription  平台获取公司交易概述
      * @apiName getCompanyTraderInfo
      * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
      * @apiSuccess (返回) {Integer} dayOpeningNumber 今天的开盘数
      * @apiSuccess (返回) {Integer} dayTradesCapacity 今天的交易量
+     * @apiSuccess (返回) {Integer} monthTradesCapacity 本月的交易量
      * @apiSuccess (返回) {Decimal} dayTradesVolume 今天的交易金额
+     * @apiSuccess (返回) {Decimal} monthTradesVolume 本月的交易金额
      * @apiSuccess (返回) {Integer} activeUser 今日参与人数
      * @apiSuccess (返回) {Integer} stockholderNum 股东数量
      * @apiSuccess (返回) {Integer} reportCount 分析报告数
@@ -164,26 +177,30 @@ class BackStageController {
      * @apiPermission superAdmin
      */
     @GetMapping("/company/info")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getCompanyTraderInfo(companyId: Int) {
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
+    fun getCompanyTraderInfo(companyId: Int): Mono<ResponseInfo<Map<String, Any>>> {
         val startTime = LocalTime.MIN.toLocalDateTime()
         val endTime = LocalDateTime.now()
-        val roleId = roleService.roles!!.find { it.name == Stockholder.ANALYST }!!.id!!
-        mono {
+        return ResponseInfo.ok(mono {
+            val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
             mapOf("dayOpeningNumber" to roomRecordService.countByStartTimeAndCompanyId(startTime, companyId),
                     "dayTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(startTime, endTime, companyId),
+                    "monthTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(firstDay(), lastDay(), companyId),
                     "dayTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(startTime, endTime, companyId),
+                    "monthTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(firstDay(), lastDay(), companyId),
                     "activeUser" to tradeInfoService.countUserByTradeTime(),
                     "stockholderNum" to roleService.countByCompanyIdAndRoleId(companyId, roleId),
-                    "reportCount" to 0)
-        }
+                    "reportCount" to analysisService.countByCompanyId(companyId))
+        })
     }
 
     /**
-     * @api {get} /system/company/active 获取今日活跃公司top10
-     * @apiDescription  获取今日活跃公司top10
+     * @api {get} /system/company/active 获取活跃公司top
+     * @apiDescription  获取活跃公司top
      * @apiName getTopCompany
      * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiParam {String} [type] 时间类型：day:代表获取天的活跃公司，month:代表月的活跃公司，默认为天
      * @apiSuccessExample {json} 成功返回:
      * {"code":0,"msg":"成功","data":[]}
      * @apiSuccess (返回) {Integer} companyId 公司id
@@ -196,8 +213,82 @@ class BackStageController {
      * @apiPermission superAdmin
      */
     @GetMapping("/company/active")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
+    fun getTopCompany(query: PageQuery, @RequestParam(required = false) type: String?): Mono<ResponseInfo<MutableList<Map<String, Any?>>>> {
+        return ResponseInfo.ok(mono { roomRecordService.countTopCompany(query, type ?: "day") })
+    }
+
+    /**
+     * @api {post} /system/wgt 上传wgt文件
+     * @apiDescription  上传wgt文件
+     * @apiName uploadWgt
+     * @apiParam {File} file wgt文件
+     * @apiUse AppUpdate
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup BackStage
+     * @apiUse tokenMsg
+     * @apiPermission superAdmin
+     */
+    @PostMapping("/wgt")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getTopCompany(): Mono<ResponseInfo<MutableList<Map<String, Any?>>>> {
-        return ResponseInfo.ok(roomRecordService.countTopCompany())
+    fun uploadWgt(@RequestPart("file") filePart: FilePart, appUpdate: AppUpdate): Mono<ResponseInfo<AppUpdate>> {
+        return ResponseInfo.ok(appUpdateService.uploadWgt(filePart, appUpdate))
+    }
+
+    /**
+     * @api {get} /system/wgt 获取所有更新文件
+     * @apiDescription  获取所有更新文件
+     * @apiName findAllWgt
+     * @apiUse PageQuery
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup BackStage
+     * @apiUse tokenMsg
+     * @apiPermission superAdmin
+     */
+    @GetMapping("/wgt")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun findAllWgt(query: PageQuery): Mono<ResponseInfo<PageView<AppUpdate>>> {
+        return ResponseInfo.ok(mono { appUpdateService.findAll(query) })
+    }
+
+    /**
+     * @api {delete} /system/wgt 删除指定更新文件
+     * @apiDescription  删除指定更新文件
+     * @apiName deleteWgt
+     * @apiParam {String} id 更新日志id
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup BackStage
+     * @apiUse tokenMsg
+     * @apiPermission superAdmin
+     */
+    @DeleteMapping("/wgt")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun deleteWgt(@RequestParam id: Int): Mono<ResponseInfo<Void>> {
+        return ResponseInfo.ok(appUpdateService.deleteById(id))
+    }
+
+    /**
+     * @api {put} /system/wgt 修改更新日志
+     * @apiDescription  修改更新日志，不支持修改更新文件
+     * @apiName updateWgt
+     * @apiUse AppUpdate
+     * @apiParam {String} id 更新日志id
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": true}
+     * @apiGroup BackStage
+     * @apiUse tokenMsg
+     * @apiPermission superAdmin
+     */
+    @PutMapping("/wgt")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    fun updateWgt(appUpdate: AppUpdate): Mono<ResponseInfo<AppUpdate>> {
+        return ResponseInfo.ok(appUpdateService.update(appUpdate))
     }
 }

@@ -30,6 +30,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * Created by gyh on 2020/6/6
@@ -37,6 +38,7 @@ import java.util.concurrent.locks.ReentrantLock
 @Service
 class KlineService : ApplicationRunner {
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
+
     @Autowired
     private lateinit var connect: DatabaseClient
 
@@ -136,6 +138,15 @@ class KlineService : ApplicationRunner {
     suspend fun findKline(roomId: String, mode: String, timeline: String, page: PageQuery): PageView<Kline> {
         val baseDao = roomService.getBaseRoomDao<BaseRoom>(mode)
         val baseRoom = baseDao.findByRoomId(roomId) ?: error("没有该房间号：$roomId-$mode")
+        return findKlineByStockId(baseRoom.stockId!!, timeline, page)
+    }
+
+    suspend fun findKlineByCompanyId(companyId: Int, timeline: String, page: PageQuery): PageView<Kline> {
+        val stockId = stockService.findByCompanyId(companyId).toList()[0]
+        return findKlineByStockId(stockId.id!!, timeline, page)
+    }
+
+    suspend fun findKlineByStockId(stockId: Int, timeline: String, page: PageQuery): PageView<Kline> {
         val table = when (timeline) {
             "1m" -> "mt_1m_kline"
             "15m" -> "mt_15m_kline"
@@ -144,7 +155,7 @@ class KlineService : ApplicationRunner {
             "1d" -> "mt_1d_kline"
             else -> error("不支持的timeline: $timeline")
         }
-        val where = page.where().and("stock_id").`is`(baseRoom.stockId!!)
+        val where = page.where().and("stock_id").`is`(stockId)
         return getPage(connect.select()
                 .from(table)
                 .matching(where)

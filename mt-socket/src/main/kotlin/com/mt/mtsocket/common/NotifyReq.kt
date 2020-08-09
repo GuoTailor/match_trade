@@ -4,6 +4,7 @@ package com.mt.mtsocket.common
  * Created by gyh on 2020/5/15.
  */
 object NotifyReq {
+    const val connectSucceed = -99      // 连接成功通知
     const val rivalResult = -13         // 选择对手结果通知
     const val cancelResult = -12        // 撤单结果通知
     const val offerResult = -11         // 报价结果通知

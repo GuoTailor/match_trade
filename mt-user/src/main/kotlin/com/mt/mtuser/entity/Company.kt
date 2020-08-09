@@ -64,6 +64,10 @@ data class Company(
     var analystName: String? = null
     @Transient
     var analystPhone: String? = null
+    @Transient
+    var adminPhone: String? = null
+    @Transient
+    var adminName: String? = null
 
     fun getModes(): List<String> {
         return ObjectMapper().readValue(mode ?: "[]")

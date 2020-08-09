@@ -14,9 +14,7 @@ import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Update.update
 import org.springframework.stereotype.Service
@@ -118,6 +116,7 @@ class UserService {
      */
     suspend fun addAnalystRole(user: User) {
         user.passwordEncoder()
+        if (userDao.findByPhone(user.phone!!) != null) error("用户已存在：${user.phone}")
         val newUser = userDao.save(user)
         stockholderDao.save(newUser.id!!, roleService.getRoles().find { it.name == Stockholder.ANALYST }?.id!!, null)
     }
@@ -129,10 +128,11 @@ class UserService {
         val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
         val where = query.where("mu").toString()
         val sqlWhere = "mu.id = ms.user_id and ms.role_id = $roleId" + if (where.isNotBlank()) " and $where" else ""
-        val data = connect.execute("select mu.* , count(ms.*) as companyCount " +
+        val sql = "select mu.*, count(ms.*) as companyCount " +
                 " from mt_user mu, mt_stockholder ms " +
                 " where $sqlWhere" +
-                " GROUP BY mu.id ${query.toPageSql()}")
+                " GROUP BY mu.id ${query.toPageSql()}"
+        val data = connect.execute(sql)
                 .map { r, _ ->
                     val analyst = Analyst()
                     analyst.id = r.get("id", java.lang.Integer::class.java)?.toInt()
@@ -141,18 +141,41 @@ class UserService {
                     analyst.idNum = r.get("id_num", String::class.java)
                     analyst.userPhoto = r.get("user_photo", String::class.java)
                     analyst.createTime = r.get("create_time", LocalDateTime::class.java)
-                    // 减一用于去除创建观察员角色时创建的默认的角色信息
+                    // 减一用于去除创建观察员角色时创建的默认的角色信息,且不能用company_id is noe null 应为公司为空也应该查询出来观察员
                     analyst.companyCount = r.get("companyCount", java.lang.Integer::class.java)?.toInt()?.minus(1) ?: 0
                     analyst
                 }.all()
-        return getPage(data, connect, query, "mt_user mu, mt_stockholder ms", sqlWhere)
+        return getPage(data, connect, query, sql, "")
+    }
+
+    suspend fun getAnalystInfo(id: Int?): Analyst {
+        val userId = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
+        val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
+        return connect.execute("select mu.*, count(ms.*) as companyCount " +
+                " from mt_user mu, mt_stockholder ms " +
+                " where mu.id = ms.user_id and ms.role_id = :roleId and ms.user_id = :userId" +
+                " GROUP BY mu.id ")
+                .bind("userId", userId)
+                .bind("roleId", roleId)
+                .map { r, _ ->
+                    val analyst = Analyst()
+                    analyst.id = r.get("id", java.lang.Integer::class.java)?.toInt()
+                    analyst.phone = r.get("phone", String::class.java)
+                    analyst.nickName = r.get("nick_name", String::class.java)
+                    analyst.idNum = r.get("id_num", String::class.java)
+                    analyst.userPhoto = r.get("user_photo", String::class.java)
+                    analyst.createTime = r.get("create_time", LocalDateTime::class.java)
+                    // 减一用于去除创建观察员角色时创建的默认的角色信息,且不能用company_id is noe null 应为公司为空也应该查询出来观察员
+                    analyst.companyCount = r.get("companyCount", java.lang.Integer::class.java)?.toInt()?.minus(1) ?: 0
+                    analyst
+                }.awaitOneOrNull() ?: error("用户不是观察员：$userId")
     }
 
     /**
      * 删除一个观察员
      */
     suspend fun deleteAnalyst(stockholderId: Int) {
-        stockholderDao.deleteById(stockholderId)
+        userDao.deleteById(stockholderId)
     }
 
     /**

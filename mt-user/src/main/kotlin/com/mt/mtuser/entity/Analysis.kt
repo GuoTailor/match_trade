@@ -1,7 +1,9 @@
 package com.mt.mtuser.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -9,6 +11,7 @@ import java.util.*
  * @apiParam {Integer} id
  * @apiParam {Integer} userId 分析员id
  * @apiParam {Integer} companyId 公司id
+ * @apiParam {String} title 标题
  * @apiParam {String} content 内容
  * @apiParam {String} type 报告类型 1：周报，2：月报
  * @apiParam {String} time 时间点
@@ -35,6 +38,11 @@ class Analysis {
     var time: String? = null
 
     /*** 报告提交时间 */
-    var createTime: Date? = null
+    var createTime: LocalDateTime? = null
 
+    /*** 标题 */
+    var title: String? = null
+
+    @Transient
+    var companyName: String? = null
 }

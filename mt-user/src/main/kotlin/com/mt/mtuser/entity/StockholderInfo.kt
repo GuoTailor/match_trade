@@ -20,6 +20,8 @@ class StockholderInfo(
         var amount: Int? = null,        // 数量, 该字段用于绑定股东时添加默认股票
         var realName: String? = null,   // 真实姓名
         var dpId: Int? = null,
+        var department: String? = null, // 所在部门
+        var position: String? = null,   // 职位
         val phone: String? = null,      // 手机号, 该字段用于绑定股东时查找股东
         val money: BigDecimal? = null   // 资金
 ) {

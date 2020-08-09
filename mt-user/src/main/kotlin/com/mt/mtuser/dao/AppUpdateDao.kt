@@ -10,6 +10,6 @@ import reactor.core.publisher.Mono
  */
 interface AppUpdateDao: ReactiveCrudRepository<AppUpdate, Int> {
 
-    @Query("select * from mt_app_update where version_code >= :version ")
+    @Query("select * from mt_app_update where version_code > :version order by id desc limit 1")
     fun getVersionByVersionCode(version: String): Mono<AppUpdate>
 }

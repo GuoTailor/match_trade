@@ -182,6 +182,36 @@ class UserController {
     }
 
     /**
+     * @api {get} /user/role/analyst/info 获取观察员信息
+     * @apiDescription  获取观察员信息
+     * @apiName getAnalystInfo
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} [id] 用户id,不传默认获取自己的信息
+     * @apiSuccessExample {json} 成功返回:
+     * {"code":0,"msg":"成功","data":null}
+     * @apiSuccess (返回) {Integer} id 用户id
+     * @apiSuccess (返回) {String} phone 电话
+     * @apiSuccess (返回) {String} nickName 用户名
+     * @apiSuccess (返回) {String} idNum 身份证号码
+     * @apiSuccess (返回) {String} password 密码
+     * @apiSuccess (返回) {String} userPhoto 头像url地址
+     * @apiSuccess (返回) {List} roles 角色信息
+     * @apiSuccess (返回) {Date} createTime 注册日期
+     * @apiSuccess (返回) {Date} lastTime 注册日期
+     * @apiSuccess (返回) {Date} updateTime 最后修改日期
+     * @apiSuccess (返回) {Integer} companyCount 公司数
+     * @apiSuccess (返回) {Integer} reportCount 报告数
+     * @apiGroup User
+     * @apiUse tokenMsg
+     * @apiPermission analyst
+     */
+    @GetMapping("/role/analyst/info")
+    @PreAuthorize("hasRole('ANALYST')")
+    fun getAnalystInfo(@RequestParam(required = false) id: Int?): Mono<ResponseInfo<Analyst>> {
+        return ResponseInfo.ok(mono { userService.getAnalystInfo(id) })
+    }
+
+    /**
      * @api {delete} /user/role/analyst 删除一个观察员
      * @apiDescription  删除一个观察员
      * @apiName deleteAnalyst

@@ -3,9 +3,11 @@ package com.mt.mtuser.controller
 import com.mt.mtcommon.TradeInfo
 import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.logger
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
+import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +32,8 @@ import java.util.*
 class TradeInfoController {
     @Autowired
     private lateinit var tradeInfoService: TradeInfoService
+    @Autowired
+    lateinit var roleService: RoleService
 
     /**
      * @api {get} /trade 获取一个交易详情
@@ -123,10 +127,40 @@ class TradeInfoController {
     }
 
     /**
+     * @api {get} /trade/statistics/department 按部门统计交易详情
+     * @apiDescription  按部门统计交易详情
+     * @apiName statisticsOrderByDepartment
+     * @apiVersion 0.0.1
+     * @apiUse PageQuery
+     * @apiParam {Int} companyId 公司id
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 5,"item": [{"tradesNumber": 3,"tradesCapacity":
+     * 0,"tradesVolume": 0,"avgPrice": 0,"minPrice": 0,"maxPrice": 0,"name": "技术部"},{"tradesNumber": 1,"tradesCapacity":
+     * 0,"tradesVolume": 0,"avgPrice": 0,"minPrice": 0,"maxPrice": 0,"name": "123"},{"tradesNumber": 1,"tradesCapacity":
+     * 0,"tradesVolume": 0,"avgPrice": 0,"minPrice": 0,"maxPrice": 0,"name": "1234"}]}}
+     * @apiSuccess (返回) {Long} tradesCapacity 交易量
+     * @apiSuccess (返回) {Decimal} tradesVolume 交易金额
+     * @apiSuccess (返回) {Long} tradesNumber 交易次数
+     * @apiSuccess (返回) {Decimal} avgPrice 平均价格
+     * @apiSuccess (返回) {Decimal} maxPrice 最高价
+     * @apiSuccess (返回) {Decimal} minPrice 最低价
+     * @apiSuccess (返回) {String} name 部门名
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     */
+    @GetMapping("/statistics/department")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
+    fun statisticsOrderByDepartment(page: PageQuery, companyId: Int): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
+        return ResponseInfo.ok(mono { tradeInfoService.statisticsOrderByDepartment(page, companyId) })
+    }
+
+    /**
      * @api {get} /trade/statistics 查找房间的每日交易概述
      * @apiDescription  查找房间的每日交易概述
      * @apiName statisticsOrderByDay
      * @apiVersion 0.0.1
+     * @apiParam {Int} [companyId] 公司id
      * @apiUse PageQuery
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 2,"total": 7,"item": [{"id": 3,"stockId": 1,"time":
@@ -135,15 +169,18 @@ class TradeInfoController {
      * 5,"stockId": 1,"time": "2020-05-21 00:00:00","tradesCapacity": 200,"tradesVolume": 38650,"tradesNumber": 2,
      * "avgPrice": 193.25,"maxPrice": 220,"minPrice": 166.5,"openPrice": 220,"closePrice": 166.5,"companyId": 1,"openNumber": 3}]}}
      * @apiUse Kline
-     * @apiSuccess (成功返回) {Integer} openNumber 开盘次数
+     * @apiSuccess (返回) {Integer} openNumber 开盘次数
      * @apiGroup Trade
      * @apiUse tokenMsg
      * @apiPermission admin
      */
     @GetMapping("/statistics")
-    @PreAuthorize("hasRole('ADMIN')")
-    fun statisticsOrderByDay(page: PageQuery): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
-        return ResponseInfo.ok(mono { tradeInfoService.statisticsOrderByDay(page) })
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
+    fun statisticsOrderByDay(page: PageQuery, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
+        return ResponseInfo.ok(mono {
+            val cId = companyId ?: roleService.getCompanyList(Stockholder.ADMIN)[0]
+            tradeInfoService.statisticsOrderByDay(page, cId)
+        })
     }
 
     /**

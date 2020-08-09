@@ -29,7 +29,7 @@ class RoleService {
 
     @Autowired
     protected lateinit var connect: DatabaseClient
-    var roles: List<MtRole>? = null
+    private var roles: List<MtRole>? = null
 
     suspend fun getRoles(): List<MtRole> {
         return roles ?: findAll().toList()
@@ -85,11 +85,11 @@ class RoleService {
 
     suspend fun exists(roleId: Int, companyId: Int) = stockholderDao.exists(roleId, companyId)
 
+    suspend fun existsByCompanyId(companyId: Int) = stockholderDao.existsByCompanyId(companyId)
+
     suspend fun existsByDpId(dpId: Int) = stockholderDao.existsByDpId(dpId)
 
     suspend fun find(userId: Int, roleId: Int, companyId: Int) = stockholderDao.find(userId, roleId, companyId)
-
-    suspend fun find(userId: Int, roleId: Int) = stockholderDao.find(userId, roleId)
 
     suspend fun findById(id: Int) = stockholderDao.findById(id)
 
@@ -101,5 +101,11 @@ class RoleService {
 
     suspend fun findByUserIdAndRoleId(userId: Int, roleId: Int) = stockholderDao.findByUserIdAndRoleId(userId, roleId)
 
+    suspend fun findByRoleIdAndCompanyId(roleId: Int, companyId: Int) = stockholderDao.findByRoleIdAndCompanyId(roleId, companyId)
+
+    suspend fun findNoBinding(userId: Int, roleId: Int) = stockholderDao.findNoBinding(userId, roleId)
+
     suspend fun deleteById(id: Int) = stockholderDao.deleteById(id)
+
+    suspend fun deleteByRoleIdAndCompanyId(roleId: Int, companyId: Int): Int = stockholderDao.deleteByRoleIdAndCompanyId(roleId, companyId)
 }

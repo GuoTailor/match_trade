@@ -22,14 +22,21 @@ class NotifyUser() {
     /*** 状态，read已读| unread未读*/
     var status: String? = null
 
-    constructor(userId: Int, msgId: Int) : this() {
+    /*** 1:真消息，2:分析报告*/
+    var msgType: String? = null
+
+    constructor(userId: Int, msgId: Int, msgType: String = typeMsg) : this() {
         this.userId = userId
         this.msgId = msgId
+        this.msgType = msgType
         status = unread
     }
 
     companion object {
         const val read = "read"
         const val unread = "unread"
+
+        const val typeMsg = "1"
+        const val typeAnalysis = "2"
     }
 }
