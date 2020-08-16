@@ -1,6 +1,6 @@
 package com.mt.mtsocket.socket
 
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
@@ -29,7 +29,7 @@ class PeekSocketHandler : SocketHandler() {
                 .then(sessionHandler.connectionClosed())
         return redisUtil.getRoomRecord(roomId).flatMap {
             SocketSessionStore.addPeek(sessionHandler, it.roomId!!, it.mode!!)  // TODO 缺少权限判断
-        }.switchIfEmpty(sessionHandler.send(ResponseInfo.failed("错误: 房间还没开启"), NotifyReq.errorNotify)
+        }.switchIfEmpty(sessionHandler.send(ResponseInfo.failed("错误: 房间还没开启"), NotifyOrder.errorNotify)
                 .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() })
     }
 

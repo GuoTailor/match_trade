@@ -4,27 +4,26 @@ package com.mt.mtuser
  * Created by gyh on 2020/3/26.
  */
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtcommon.firstDay
 import com.mt.mtcommon.lastDay
-import com.mt.mtcommon.toEpochMilli
-import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
+import io.netty.util.CharsetUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.springframework.data.util.ParsingUtils
-import org.springframework.security.core.GrantedAuthority
-import java.io.File
-import java.io.FileOutputStream
+import java.io.InputStream
 import java.lang.StringBuilder
 import java.math.BigDecimal
-import java.security.MessageDigest
-import java.time.*
+import java.nio.charset.Charset
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import kotlin.system.measureTimeMillis
 
 
@@ -188,4 +187,25 @@ fun main10() {
     println(ParsingUtils.reconcatenateCamelCase("companyId", "_"))
 }
 
-fun main() = main10()
+fun testZip() {
+    val zipFile = ZipFile("F:\\tencent\\WeChat Files\\wxid_obe1hksw84qw21\\FileStorage\\File\\2020-08\\__UNI__470929B.wgt")
+    val e: Enumeration<*> = zipFile.entries()
+    for (zipEntry in e) {
+        val zip = zipEntry as ZipEntry
+        println(zip.name)
+        if (zip.name == "manifest.json") {
+            println("找到")
+            val `is`: InputStream = zipFile.getInputStream(zipEntry)
+            var b : Int
+            val sb = StringBuilder()
+            while(`is`.read().also { b = it } != -1) {
+                sb.append(b.toChar())
+            }
+            println(sb.toString())
+            val json = jacksonObjectMapper()
+            println((json.readValue(sb.toString(), Map::class.java)["version"] as Map<String, Any>)["name"])
+        }
+    }
+}
+
+fun main() = testZip()

@@ -8,14 +8,16 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.socket.WebSocketSession
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.core.publisher.MonoProcessor
-import reactor.core.publisher.ReplayProcessor
+import reactor.core.Disposable
+import reactor.core.publisher.*
+import reactor.core.scheduler.Schedulers
 import reactor.netty.channel.AbortedException
 import java.nio.channels.ClosedChannelException
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by gyh on 2020/4/7.
@@ -28,6 +30,10 @@ class WebSocketSessionHandler {
     private val json = jacksonObjectMapper()
     private var webSocketConnected = false
     private val session: WebSocketSession
+    private val responseCount = AtomicInteger(1)
+    private val responseMap = ConcurrentHashMap<Int, SendInfo>()
+    private var retryCount = 3
+    private var retryTimeout = 2L
 
     constructor(session: WebSocketSession) : this(50, session)
 
@@ -64,21 +70,13 @@ class WebSocketSessionHandler {
                 .doOnError { logger.info("错误 {}", it.message) }
     }
 
-    fun disconnected(): Mono<WebSocketSession> {
-        return disconnectedProcessor
-    }
+    fun disconnected(): Mono<WebSocketSession> = disconnectedProcessor
 
-    fun isConnected(): Boolean {
-        return webSocketConnected
-    }
+    fun isConnected(): Boolean = webSocketConnected
 
-    fun receive(): Flux<String> {
-        return receiveProcessor
-    }
+    fun receive(): Flux<String> = receiveProcessor
 
-    fun getId(): String {
-        return session.id
-    }
+    fun getId(): String = session.id
 
     fun getSession() = session
 
@@ -92,17 +90,60 @@ class WebSocketSessionHandler {
         } else Mono.empty()
     }
 
-    fun <T> send(data:  Mono<T>, req: Int): Mono<String> {
-        return ServiceResponseInfo(data, req).getMono()
+    fun send(message: String, req: Int, confirm: Boolean): Mono<String> {
+        if (confirm) {
+            val processor = EmitterProcessor.create<Int>(8)
+            val cycle = Flux.interval(Duration.ofSeconds(retryTimeout), Schedulers.elastic())
+                    .map {
+                        if (it > retryCount) reqIncrement(req)
+                        processor.onNext(it.toInt() + 1)
+                        it
+                    }.subscribe()
+            val info = SendInfo(req, processor, cycle)
+            responseMap[req] = info
+            processor.onNext(0)
+            return processor.flatMap {
+                if (false != responseMap[req]?.ack || it > retryCount) {
+                    responseMap.remove(req)
+                    cycle.dispose()
+                    processor.onComplete()
+                    Mono.just(message)
+                } else {
+                    send(message)
+                }
+            }.last()
+        }
+        return send(message)
+    }
+
+    fun <T> send(data: Mono<T>, order: Int, confirm: Boolean = false): Mono<String> {
+        val req = responseCount.getAndIncrement()
+        return ServiceResponseInfo(data, req, order).getMono()
                 .map { json.writeValueAsString(it) }
-                .flatMap(::send)
+                .flatMap { send(it, req, confirm) }
     }
 
     fun connectionClosed(): Mono<Void> {
         webSocketConnected = false
-        val result = session.close()
         receiveProcessor.onComplete()
         disconnectedProcessor.onNext(session)
-        return result
+        return session.close()
     }
+
+    fun reqIncrement(req: Int) {
+        val value = responseMap[req]
+        if (value != null) {
+            value.ack = true
+            value.cycle.dispose()
+            value.processor.onComplete()
+            logger.info("取消 {} ", req)
+            responseMap.remove(req)
+        }
+    }
+
+    data class SendInfo(val req: Int,
+                        val processor: FluxProcessor<Int, Int>,
+                        val cycle: Disposable,
+                        var ack: Boolean = false
+    )
 }

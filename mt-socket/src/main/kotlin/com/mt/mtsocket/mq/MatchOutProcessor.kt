@@ -1,7 +1,7 @@
 package com.mt.mtsocket.mq
 
 import com.mt.mtcommon.*
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.service.PeekPushService
 import com.mt.mtsocket.socket.SocketSessionStore
@@ -25,9 +25,9 @@ class MatchOutProcessor {
     fun inTrade(@Payload tradeInfo: TradeInfo) {
         val data = ResponseInfo.ok("交易通知", tradeInfo)
         tradeInfo.buyerId?.let { SocketSessionStore.userInfoMap[it]?.session
-                ?.send(data, NotifyReq.notifyTrade)?.doOnNext { msg -> logger.info(msg) }?.subscribe() }
+                ?.send(data, NotifyOrder.notifyTrade, true)?.doOnNext { msg -> logger.info(msg) }?.subscribe() }
         tradeInfo.sellerId?.let { SocketSessionStore.userInfoMap[it]?.session
-                ?.send(data, NotifyReq.notifyTrade)?.doOnNext { msg -> logger.info(msg) }?.subscribe() }
+                ?.send(data, NotifyOrder.notifyTrade, true)?.doOnNext { msg -> logger.info(msg) }?.subscribe() }
         peekPushService.addTradeInfoEvent(tradeInfo.roomId!!, tradeInfo.model!!)
         peekPushService.addOrderEvent(tradeInfo.roomId!!, tradeInfo.model!!)    // 同时通知报价发生变化
     }
@@ -38,23 +38,23 @@ class MatchOutProcessor {
             SocketSessionStore.userInfoMap.forEach { _, info ->
                 if (info.roomId == notifyResult.roomId) {
                     if (notifyResult.obj == updateTopThree) {
-                        info.session.send(ResponseInfo.ok("前三档报价更新通知", notifyResult.data), NotifyReq.notifyTopThree)
+                        info.session.send(ResponseInfo.ok("前三档报价更新通知", notifyResult.data), NotifyOrder.notifyTopThree, true)
                                 .doOnNext { logger.info(it) }.subscribe()
                     } else {
-                        info.session.send(ResponseInfo.ok("上一笔成交价通知", notifyResult.data), NotifyReq.notifyFirstOrder)
+                        info.session.send(ResponseInfo.ok("上一笔成交价通知", notifyResult.data), NotifyOrder.notifyFirstOrder, true)
                                 .doOnNext { logger.info(it) }.subscribe()
                     }
                 }
             }
         } else {
             notifyResult.userId?.let {
-                val req = when (notifyResult.obj) {
-                    addOrderNotify -> NotifyReq.offerResult
-                    cancelOrderNotify -> NotifyReq.cancelResult
-                    addRivalNotify -> NotifyReq.rivalResult
+                val order = when (notifyResult.obj) {
+                    addOrderNotify -> NotifyOrder.offerResult
+                    cancelOrderNotify -> NotifyOrder.cancelResult
+                    addRivalNotify -> NotifyOrder.rivalResult
                     else -> error("不支持的通知的对象 ${notifyResult.obj}")
                 }
-                SocketSessionStore.userInfoMap[it]?.session?.send(ResponseInfo.ok("操作结果通知", notifyResult), req)
+                SocketSessionStore.userInfoMap[it]?.session?.send(ResponseInfo.ok("操作结果通知", notifyResult), order, true)
                         ?.doOnNext { msg -> logger.info(msg) }?.subscribe()
             }
             if (notifyResult.obj == addOrderNotify || notifyResult.obj == cancelOrderNotify) {

@@ -1,7 +1,7 @@
 package com.mt.mtsocket.service
 
 import com.mt.mtcommon.TradeState
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.entity.PushInfo
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.entity.buyOrderUpdateEvent
@@ -44,7 +44,7 @@ class PeekPushService {
         redisUtil.getTradeInfo(roomId).collectList()
                 .flatMap {
                     Flux.fromStream(idList).flatMap { info ->
-                        info.session.send(ResponseInfo.ok("订单发生变化", it), NotifyReq.pushTradeInfo)
+                        info.session.send(ResponseInfo.ok("订单发生变化", it), NotifyOrder.pushTradeInfo, true)
                     }.then()
                 }.subscribeOn(Schedulers.elastic()).subscribe()
     }
@@ -56,7 +56,7 @@ class PeekPushService {
                 .collectList()
                 .flatMap {
                     Flux.fromStream(idList).flatMap { info ->
-                        info.session.send(ResponseInfo.ok("报价发生变化", it), NotifyReq.pushBuyOrder)
+                        info.session.send(ResponseInfo.ok("报价发生变化", it), NotifyOrder.pushBuyOrder, true)
                     }.then()
                 }.subscribeOn(Schedulers.elastic()).subscribe()
     }

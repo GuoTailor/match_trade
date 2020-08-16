@@ -139,15 +139,13 @@ class MtSocketApplicationTests {
     @Test
     fun testMono() {
         val mono = Mono.just("12")
+                .map { testTime() }
                 .flatMap {
                     println(it)
                     Mono.just("2")
-                }.doOnSuccess { println("success") }
-                .zipWith(nmka()) { t1, t2 ->
-                    println("$t1-$t2")
-                    t1
                 }
         println(mono.block())
+        println(false != null)
     }
 
     @Test

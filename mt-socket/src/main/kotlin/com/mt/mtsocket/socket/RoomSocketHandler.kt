@@ -1,6 +1,6 @@
 package com.mt.mtsocket.socket
 
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.distribute.DispatcherServlet
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
@@ -31,9 +31,9 @@ class RoomSocketHandler : SocketHandler() {
                 .then(sessionHandler.connectionClosed())
         return roomSocketService.enterRoom(roomId)
                 .flatMap { SocketSessionStore.addUser(sessionHandler, it.roomId!!, it.mode!!, userName) }
-                .flatMap { roomSocketService.onNumberChange(roomId) }
+                .map { roomSocketService.onNumberChange(roomId) }
                 .onErrorResume {
-                    sessionHandler.send(ResponseInfo.failed("错误: ${it.message}"), NotifyReq.errorNotify)
+                    sessionHandler.send(ResponseInfo.failed("错误: ${it.message}"), NotifyOrder.errorNotify)
                             .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() }
                 }
     }
@@ -42,7 +42,7 @@ class RoomSocketHandler : SocketHandler() {
         val roomId = queryMap["roomId"].toString()
         return BaseUser.getcurrentUser()
                 .map { SocketSessionStore.removeUser(it.id!!) }
-                .flatMap { roomSocketService.onNumberChange(roomId) }
+                .map { roomSocketService.onNumberChange(roomId) }
     }
 
 }

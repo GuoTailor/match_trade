@@ -1,7 +1,7 @@
 package com.mt.mtsocket.socket
 
 import com.mt.mtcommon.RivalInfo
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
 import org.slf4j.LoggerFactory
@@ -17,13 +17,13 @@ object SocketSessionStore {
     internal val peekInfoMap = ConcurrentHashMap<Int, UserRoomInfo>()
 
     fun addUser(session: WebSocketSessionHandler, roomId: String, model: String, userName: String): Mono<Unit> {
-        return BaseUser.getcurrentUser().flatMap {// TODO 用户多地登陆会存在问题，同一userId会有不同的roomId，导致撤单操作混乱
+        return BaseUser.getcurrentUser().flatMap {
             val userInfo = UserRoomInfo(session, it.id!!, userName, roomId, model)
             val old = userInfoMap.put(it.id!!, userInfo)
             logger.info("添加用户 ${it.id} ${session.getId()}")
             if (old != null) {
                 logger.info("用户多地登陆 ${it.id}")
-                old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyReq.differentPlaceLogin)
+                old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyOrder.differentPlaceLogin)
                         .flatMap { old.session.connectionClosed() }.map { Unit }
             } else Mono.just(Unit)
         }
@@ -49,7 +49,7 @@ object SocketSessionStore {
             logger.info("添加监视 ${it.id}")
             if (old != null) {
                 logger.info("用户多地登陆 ${it.id}")
-                old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyReq.differentPlaceLogin)
+                old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyOrder.differentPlaceLogin)
                         .flatMap { old.session.connectionClosed() }.map { Unit }
             } else Mono.just(Unit)
         }

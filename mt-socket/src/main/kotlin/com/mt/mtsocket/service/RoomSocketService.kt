@@ -2,7 +2,7 @@ package com.mt.mtsocket.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mt.mtcommon.*
-import com.mt.mtsocket.common.NotifyReq
+import com.mt.mtsocket.common.NotifyOrder
 import com.mt.mtsocket.entity.BaseUser
 import com.mt.mtsocket.entity.ResponseInfo
 import com.mt.mtsocket.mq.MatchSink
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.math.BigDecimal
@@ -41,16 +40,19 @@ class RoomSocketService {
 
     /**
      * 当有用户上下线是通知人数变化
+     * note: 不能使用mono返回，必须手动订阅，因为当前用户断开后通道就会产生取消事件，
+     * 于是通知其他用户人数变化的操作就得不到执行
      */
-    fun onNumberChange(roomId: String): Mono<Unit> {
-        return Flux.fromIterable(store.userInfoMap.entries)
-                .filter { it.value.roomId == roomId }
-                .flatMap { entry ->
-                    val size = store.getOnLineSize(roomId)
-                    entry.value.session.send(ResponseInfo.ok("人数变化", size), NotifyReq.notifyNumberChange)
-                            .doOnNext { logger.info(it) }
-                }.then(Mono.just(Unit))
-                .defaultIfEmpty(Unit)
+    fun onNumberChange(roomId: String) {
+        store.userInfoMap.entries.forEach {
+            if (it.value.roomId == roomId) {
+                val size = store.getOnLineSize(roomId)
+                it.value.session.send(ResponseInfo.ok("人数变化", size), NotifyOrder.notifyNumberChange, true)
+                        .doOnNext { i -> logger.info(i) }
+                        .subscribeOn(Schedulers.elastic())
+                        .subscribe()
+            }
+        }
     }
 
     /**
@@ -205,7 +207,7 @@ class RoomSocketService {
             logger.info("收到房间关闭通知 {}", event.roomId)
             val roomCloseNotify = fun(userRoomInfo: SocketSessionStore.UserRoomInfo) {
                 if (event.roomId == userRoomInfo.roomId) {
-                    userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyReq.notifyRoomClose)
+                    userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyOrder.notifyRoomClose, true)
                             .doOnNext { logger.info(it) }
                             .subscribeOn(Schedulers.elastic()).subscribe()
                 }

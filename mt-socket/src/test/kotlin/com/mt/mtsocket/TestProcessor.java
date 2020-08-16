@@ -5,13 +5,14 @@ import com.mt.mtsocket.socket.SocketSessionStore;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Disposable;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.concurrent.Queues;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,6 +67,92 @@ public class TestProcessor {
     }
 
     @Test
+    public void testTime() throws InterruptedException {
+        EmitterProcessor<Integer> directProcessor = EmitterProcessor.create(8);
+        logger.info("start ()");
+
+        Disposable disp = Flux.interval(Duration.ofSeconds(1),Schedulers.elastic())
+                .map(it -> {
+                    directProcessor.onNext(it.intValue() + 1);
+                    logger.info("发布 " + it);
+                    return it;
+                })
+                .doOnCancel(() -> logger.info("取消发布"))
+                .subscribe();
+
+        Mono<Void> flux = directProcessor
+                .map( it -> {
+                    logger.info("接受 " + it);
+                    if (it > 5) {
+                        logger.info("取消");
+                        directProcessor.onComplete();
+                        disp.dispose();
+                    }
+                    return it;
+                }).then()
+                .map(it -> {logger.info("接受>>>> " + it); return it;} )
+                .doOnCancel(() -> logger.info("取消接收"));
+
+        directProcessor.onNext(0);
+        Thread.sleep(10_000);
+        flux.subscribe(it -> logger.info("nmkasubscribe:"));
+
+        logger.info("wangc");
+        directProcessor.blockLast();
+        directProcessor.onComplete();
+    }
+
+    @Test
+    public void testMono() throws InterruptedException {
+        MonoProcessor<Object> connectedProcessor = MonoProcessor.create();
+        Mono<Void> mono = connectedProcessor
+                .map(it -> {
+                    logger.info("1 {} ", it);
+                    return it;
+                })
+                .flatMap(it -> Flux.fromArray(new Integer[]{1, 2, 3})
+                        .map(i -> {
+                            logger.info(">> {}", i);
+                            try {
+                                TimeUnit.SECONDS.sleep(1);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            return i;
+                        }).then());
+        Mono<Object> mono2 = connectedProcessor.map(it -> {
+            logger.info("2 {} ", it);
+            return it;
+        });
+
+        mono.subscribe();
+        logger.info("step 2");
+        TimeUnit.SECONDS.sleep(1);
+        logger.info("step 3");
+        connectedProcessor.onNext("nmka");
+        mono2.subscribe();
+        logger.info("step 4");
+        connectedProcessor.onComplete();
+        logger.info("step 5");
+    }
+
+    @Test
+    public void testTime2() {
+        Disposable disp = Flux.interval(Duration.ofSeconds(1))
+                .map( it -> {
+                    logger.info("{}", it);
+                    return it;
+                })
+                .flatMap( it -> {
+                    if (it < 5) return Mono.just(1);
+                    return Mono.empty();
+                })
+                .subscribe();
+        disp.dispose();
+        logger.info("完成");
+    }
+
+    @Test
     public void testDirectProcessor() {
         DirectProcessor<Integer> directProcessor = DirectProcessor.create();
         Flux<Integer> flux = directProcessor
@@ -85,7 +172,7 @@ public class TestProcessor {
 
     @Test
     public void testUnicastProcessor() throws InterruptedException {
-        UnicastProcessor<Integer> unicastProcessor = UnicastProcessor.create(Queues.<Integer>get(8).get());
+        UnicastProcessor<Integer> unicastProcessor = UnicastProcessor.create(Queues.<Integer>get(18).get());
         Flux<Integer> flux = unicastProcessor
                 .map(e -> e)
                 .doOnError(e -> {

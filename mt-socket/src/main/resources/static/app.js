@@ -7,7 +7,7 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var token = document.getElementById('token').value;
+    const token = document.getElementById('token').value;
     var host = window.location.host;
     log(host.toString());
     var path = document.getElementById('path').value;

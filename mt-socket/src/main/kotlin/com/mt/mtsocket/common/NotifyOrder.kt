@@ -3,7 +3,7 @@ package com.mt.mtsocket.common
 /**
  * Created by gyh on 2020/5/15.
  */
-object NotifyReq {
+object NotifyOrder {
     const val connectSucceed = -99      // 连接成功通知
     const val rivalResult = -13         // 选择对手结果通知
     const val cancelResult = -12        // 撤单结果通知
@@ -18,4 +18,5 @@ object NotifyReq {
     const val notifyNumberChange = -3   // 房间人数变化通知
     const val notifyTrade = -2          // 订单消费通知
     const val errorNotify = -1          // 错误通知
+    const val requestReq = 0            // 正常响应
 }
