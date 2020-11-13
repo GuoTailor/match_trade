@@ -1,18 +1,18 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : localhost_5432
+ Source Server         : qpp
  Source Server Type    : PostgreSQL
- Source Server Version : 120002
+ Source Server Version : 90602
  Source Host           : localhost:5432
  Source Catalog        : match_trade
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 120002
+ Target Server Version : 90602
  File Encoding         : 65001
 
- Date: 22/07/2020 16:03:15
+ Date: 13/11/2020 23:33:12
 */
 
 
@@ -424,8 +424,9 @@ CREATE TABLE "public"."mt_analysis" (
   "company_id" int4 NOT NULL,
   "content" text COLLATE "pg_catalog"."default" NOT NULL,
   "type" varchar(2) COLLATE "pg_catalog"."default" NOT NULL,
-  "time" varchar(8) COLLATE "pg_catalog"."default" NOT NULL,
-  "create_time" timestamp(6) NOT NULL
+  "time" varchar(24) COLLATE "pg_catalog"."default" NOT NULL,
+  "create_time" timestamp(6) NOT NULL DEFAULT now(),
+  "title" varchar(255) COLLATE "pg_catalog"."default" NOT NULL
 )
 ;
 COMMENT ON COLUMN "public"."mt_analysis"."user_id" IS '分析员id';
@@ -434,6 +435,7 @@ COMMENT ON COLUMN "public"."mt_analysis"."content" IS '内容';
 COMMENT ON COLUMN "public"."mt_analysis"."type" IS '报告类型 1：周报，2：月报';
 COMMENT ON COLUMN "public"."mt_analysis"."time" IS '时间点';
 COMMENT ON COLUMN "public"."mt_analysis"."create_time" IS '报告提交时间';
+COMMENT ON COLUMN "public"."mt_analysis"."title" IS '标题';
 
 -- ----------------------------
 -- Table structure for mt_app_update
@@ -473,7 +475,8 @@ CREATE TABLE "public"."mt_company" (
   "legal_person" varchar(255) COLLATE "pg_catalog"."default",
   "unit_address" varchar(255) COLLATE "pg_catalog"."default",
   "unit_contact_name" varchar(255) COLLATE "pg_catalog"."default",
-  "unit_contact_phone" varchar(255) COLLATE "pg_catalog"."default"
+  "unit_contact_phone" varchar(255) COLLATE "pg_catalog"."default",
+  "enable" varchar(2) COLLATE "pg_catalog"."default" NOT NULL DEFAULT 1
 )
 ;
 COMMENT ON COLUMN "public"."mt_company"."name" IS '公司名';
@@ -486,6 +489,7 @@ COMMENT ON COLUMN "public"."mt_company"."legal_person" IS '企业法人';
 COMMENT ON COLUMN "public"."mt_company"."unit_address" IS '单位地址';
 COMMENT ON COLUMN "public"."mt_company"."unit_contact_name" IS '单位联系人姓名';
 COMMENT ON COLUMN "public"."mt_company"."unit_contact_phone" IS '单位联系人电话';
+COMMENT ON COLUMN "public"."mt_company"."enable" IS '使能公司；1:启用；0:禁用';
 COMMENT ON TABLE "public"."mt_company" IS '公司';
 
 -- ----------------------------
@@ -568,13 +572,15 @@ CREATE TABLE "public"."mt_notify_user" (
   "user_id" int4 NOT NULL,
   "read_time" timestamp(0),
   "msg_id" int4 NOT NULL,
-  "status" varchar(6) COLLATE "pg_catalog"."default" NOT NULL
+  "status" varchar(6) COLLATE "pg_catalog"."default" NOT NULL,
+  "msg_type" varchar(2) COLLATE "pg_catalog"."default" NOT NULL
 )
 ;
 COMMENT ON COLUMN "public"."mt_notify_user"."user_id" IS '用户id';
 COMMENT ON COLUMN "public"."mt_notify_user"."read_time" IS '读取时间';
 COMMENT ON COLUMN "public"."mt_notify_user"."msg_id" IS '消息id';
 COMMENT ON COLUMN "public"."mt_notify_user"."status" IS '状态，read已读| unread未读';
+COMMENT ON COLUMN "public"."mt_notify_user"."msg_type" IS '1:真消息，2:分析报告';
 
 -- ----------------------------
 -- Table structure for mt_positions
@@ -585,13 +591,15 @@ CREATE TABLE "public"."mt_positions" (
   "company_id" int4 NOT NULL,
   "stock_id" int4 NOT NULL,
   "user_id" int4 NOT NULL,
-  "amount" int4 NOT NULL
+  "amount" int4 NOT NULL,
+  "limit" int4 NOT NULL DEFAULT 10000
 )
 ;
 COMMENT ON COLUMN "public"."mt_positions"."company_id" IS '股票所属公司id';
 COMMENT ON COLUMN "public"."mt_positions"."stock_id" IS '股票id';
 COMMENT ON COLUMN "public"."mt_positions"."user_id" IS '用户id';
 COMMENT ON COLUMN "public"."mt_positions"."amount" IS '数量';
+COMMENT ON COLUMN "public"."mt_positions"."limit" IS '交易限制';
 COMMENT ON TABLE "public"."mt_positions" IS '持仓';
 
 -- ----------------------------
@@ -847,16 +855,16 @@ CREATE TABLE "public"."mt_stockholder" (
   "role_id" int4 NOT NULL,
   "company_id" int4,
   "real_name" varchar(32) COLLATE "pg_catalog"."default",
-  "dp_id" int4,
-  "money" numeric(11,4) NOT NULL DEFAULT 0
+  "money" numeric(11,4) NOT NULL DEFAULT 0,
+  "dp_id" int4
 )
 ;
 COMMENT ON COLUMN "public"."mt_stockholder"."user_id" IS '用户id';
 COMMENT ON COLUMN "public"."mt_stockholder"."role_id" IS '该用户在公司的角色id';
 COMMENT ON COLUMN "public"."mt_stockholder"."company_id" IS '公司id';
 COMMENT ON COLUMN "public"."mt_stockholder"."real_name" IS '真实姓名';
-COMMENT ON COLUMN "public"."mt_stockholder"."dp_id" IS '职位id';
 COMMENT ON COLUMN "public"."mt_stockholder"."money" IS '资金';
+COMMENT ON COLUMN "public"."mt_stockholder"."dp_id" IS '职位id';
 
 -- ----------------------------
 -- Table structure for mt_trade_info
@@ -930,56 +938,56 @@ COMMENT ON COLUMN "public"."mt_user"."read_time" IS '最后拉取消息时间';
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_15m_kline_id_seq"
 OWNED BY "public"."mt_15m_kline"."id";
-SELECT setval('"public"."mt_15m_kline_id_seq"', 6715, true);
+SELECT setval('"public"."mt_15m_kline_id_seq"', 361, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_1d_kline_id_seq"
 OWNED BY "public"."mt_1d_kline"."id";
-SELECT setval('"public"."mt_1d_kline_id_seq"', 16, true);
+SELECT setval('"public"."mt_1d_kline_id_seq"', 155, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_1h_kline_id_seq"
 OWNED BY "public"."mt_1h_kline"."id";
-SELECT setval('"public"."mt_1h_kline_id_seq"', 1690, true);
+SELECT setval('"public"."mt_1h_kline_id_seq"', 243, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_1m_kline_id_seq"
 OWNED BY "public"."mt_1m_kline"."id";
-SELECT setval('"public"."mt_1m_kline_id_seq"', 4653, true);
+SELECT setval('"public"."mt_1m_kline_id_seq"', 810, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_4h_kline_id_seq"
 OWNED BY "public"."mt_4h_kline"."id";
-SELECT setval('"public"."mt_4h_kline_id_seq"', 14, true);
+SELECT setval('"public"."mt_4h_kline_id_seq"', 183, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_analysis_id_seq"
 OWNED BY "public"."mt_analysis"."id";
-SELECT setval('"public"."mt_analysis_id_seq"', 2, false);
+SELECT setval('"public"."mt_analysis_id_seq"', 22, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_app_update_id_seq"
 OWNED BY "public"."mt_app_update"."id";
-SELECT setval('"public"."mt_app_update_id_seq"', 2, false);
+SELECT setval('"public"."mt_app_update_id_seq"', 15, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_company_id_seq"
 OWNED BY "public"."mt_company"."id";
-SELECT setval('"public"."mt_company_id_seq"', 5, true);
+SELECT setval('"public"."mt_company_id_seq"', 19, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -993,42 +1001,42 @@ SELECT setval('"public"."mt_company_room_id_seq"', 2, false);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_department_id_seq"
 OWNED BY "public"."mt_department"."id";
-SELECT setval('"public"."mt_department_id_seq"', 3, true);
+SELECT setval('"public"."mt_department_id_seq"', 19, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_department_post_id_seq"
 OWNED BY "public"."mt_department_post"."id";
-SELECT setval('"public"."mt_department_post_id_seq"', 5, true);
+SELECT setval('"public"."mt_department_post_id_seq"', 38, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_notify_id_seq"
 OWNED BY "public"."mt_notify"."id";
-SELECT setval('"public"."mt_notify_id_seq"', 11, true);
+SELECT setval('"public"."mt_notify_id_seq"', 26, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_notify_user_id_seq"
 OWNED BY "public"."mt_notify_user"."id";
-SELECT setval('"public"."mt_notify_user_id_seq"', 5, true);
+SELECT setval('"public"."mt_notify_user_id_seq"', 20, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_positions_id_seq"
 OWNED BY "public"."mt_positions"."id";
-SELECT setval('"public"."mt_positions_id_seq"', 58, true);
+SELECT setval('"public"."mt_positions_id_seq"', 151, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_post_id_seq"
 OWNED BY "public"."mt_post"."id";
-SELECT setval('"public"."mt_post_id_seq"', 5, true);
+SELECT setval('"public"."mt_post_id_seq"', 18, true);
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -1042,40 +1050,40 @@ SELECT setval('"public"."mt_role_id_seq"', 3, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_room_record _id_seq"
 OWNED BY "public"."mt_room_record"."id";
-SELECT setval('"public"."mt_room_record _id_seq"', 248, true);
+SELECT setval('"public"."mt_room_record _id_seq"', 891, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."mt_room_seq"', 28, true);
+SELECT setval('"public"."mt_room_seq"', 40, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_stockholder_id_seq"
 OWNED BY "public"."mt_stockholder"."id";
-SELECT setval('"public"."mt_stockholder_id_seq"', 74, true);
+SELECT setval('"public"."mt_stockholder_id_seq"', 219, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."mt_trade_info_id_seq"
 OWNED BY "public"."mt_trade_info"."id";
-SELECT setval('"public"."mt_trade_info_id_seq"', 258, true);
+SELECT setval('"public"."mt_trade_info_id_seq"', 1504, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."stock_id_seq"
 OWNED BY "public"."mt_stock"."id";
-SELECT setval('"public"."stock_id_seq"', 3, true);
+SELECT setval('"public"."stock_id_seq"', 18, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."user_id_seq"
 OWNED BY "public"."mt_user"."id";
-SELECT setval('"public"."user_id_seq"', 35, true);
+SELECT setval('"public"."user_id_seq"', 161, true);
 
 -- ----------------------------
 -- Indexes structure for table mt_15m_kline
@@ -1309,6 +1317,13 @@ CREATE INDEX "mt_trade_info_trade_time_idx" ON "public"."mt_trade_info" USING bt
 ALTER TABLE "public"."mt_trade_info" ADD CONSTRAINT "mt_trade_info_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
+-- Indexes structure for table mt_user
+-- ----------------------------
+CREATE UNIQUE INDEX "mt_user_phone_idx" ON "public"."mt_user" USING btree (
+  "phone" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+-- ----------------------------
 -- Primary Key structure for table mt_user
 -- ----------------------------
 ALTER TABLE "public"."mt_user" ADD CONSTRAINT "user_pkey" PRIMARY KEY ("id");
@@ -1344,6 +1359,12 @@ ALTER TABLE "public"."mt_4h_kline" ADD CONSTRAINT "mt_4h_kline_company_id_fkey" 
 ALTER TABLE "public"."mt_4h_kline" ADD CONSTRAINT "mt_4h_kline_stock_id_fkey" FOREIGN KEY ("stock_id") REFERENCES "public"."mt_stock" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ----------------------------
+-- Foreign Keys structure for table mt_analysis
+-- ----------------------------
+ALTER TABLE "public"."mt_analysis" ADD CONSTRAINT "mt_analysis_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_analysis" ADD CONSTRAINT "mt_analysis_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
 -- Foreign Keys structure for table mt_company_room
 -- ----------------------------
 ALTER TABLE "public"."mt_company_room" ADD CONSTRAINT "mt_company_room_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."mt_company" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1358,12 +1379,11 @@ ALTER TABLE "public"."mt_department_post" ADD CONSTRAINT "mt_department_post_pos
 -- ----------------------------
 -- Foreign Keys structure for table mt_notify
 -- ----------------------------
-ALTER TABLE "public"."mt_notify" ADD CONSTRAINT "mt_notify_send_id_fkey" FOREIGN KEY ("send_id") REFERENCES "public"."mt_user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."mt_notify" ADD CONSTRAINT "mt_notify_send_id_fkey" FOREIGN KEY ("send_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ----------------------------
 -- Foreign Keys structure for table mt_notify_user
 -- ----------------------------
-ALTER TABLE "public"."mt_notify_user" ADD CONSTRAINT "mt_notify_user_msg_id_fkey" FOREIGN KEY ("msg_id") REFERENCES "public"."mt_notify" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "public"."mt_notify_user" ADD CONSTRAINT "mt_notify_user_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."mt_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ----------------------------

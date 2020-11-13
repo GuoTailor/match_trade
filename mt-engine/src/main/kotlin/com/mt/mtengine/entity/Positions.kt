@@ -14,5 +14,11 @@ class Positions(
         /*** 用户id*/
         var userId: Int? = null,
         /*** 数量*/
-        var amount: Int? = null
-)
+        var amount: Int? = null,
+        /** 卖买限制 */
+        var limit: Int? = null
+) {
+        override fun toString(): String {
+                return "Positions(id=$id, companyId=$companyId, stockId=$stockId, userId=$userId, amount=$amount, limit=$limit)"
+        }
+}

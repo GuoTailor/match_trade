@@ -42,7 +42,6 @@ class R2dbcService {
         columns.remove(ids[0]) // do not update the Id column.
         var update: Update? = null
         for (column in columns.keys) {
-            println(column + "" + columns[column])
             if (columns[column]?.value != null) {
                 update = update?.set(dataAccessStrategy.toSql(column), columns[column])
                         ?: Update.update(dataAccessStrategy.toSql(column), columns[column])

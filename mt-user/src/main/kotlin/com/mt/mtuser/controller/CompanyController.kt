@@ -321,6 +321,45 @@ class CompanyController {
     }
 
     /**
+     * @api {put} /company/limit 修改股东的每日交易上限
+     * @apiDescription  修改股东的每日交易上限
+     * @apiName updateLimit
+     * @apiVersion 0.0.1
+     * @apiParam {List} userId 用户id
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {Integer} limit 限制
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": 1}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission supperAdmin
+     */
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PutMapping("/limit")
+    fun updateLimit(@RequestBody data: Map<String, Any>): Mono<ResponseInfo<Int>> {
+        return ResponseInfo.ok(mono { companyService.updateLimit(data["userId"] as ArrayList<Int>, data["limit"] as Int, data["companyId"] as Int) })
+    }
+
+    /**
+     * @api {put} /company/enable 启用/禁用公司
+     * @apiDescription  使能公司；1:启用；0:禁用
+     * @apiName updateEnable
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} id 公司id
+     * @apiParam {String} enable 使能公司；1:启用；0:禁用
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": 1}
+     * @apiGroup Company
+     * @apiUse tokenMsg
+     * @apiPermission supperAdmin
+     */
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PutMapping("/enable")
+    fun updateEnable(@RequestBody map: Map<String, Any>): Mono<ResponseInfo<Int>> {
+        return ResponseInfo.ok(mono { companyService.updateEnable(map["id"] as Int, map["enable"] as String) })
+    }
+
+    /**
      * @api {get} /company/overview 获取交易概述
      * @apiDescription  获取交易概述 day 是今天的交易概述，month 是这个月的交易概述
      * @apiName getOverview

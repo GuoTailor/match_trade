@@ -101,7 +101,7 @@ class TradeInfoController {
      * @apiUse PageQuery
      * @apiParam {String} [userId] 用户id，不传默认为获取自己的历史订单
      * @apiParam {String} [isBuy] 买卖方向,不传为所有方向，true：买；false：卖方向
-     * @apiParam {String} date 日期，查询指定日期的数据，格式 yyyy-MM-dd
+     * @apiParam {String} [date] 日期，查询指定日期的数据，格式 yyyy-MM-dd, 不传默认获取全部
      * @apiParamExample {url} Request-Example:
      * /room/order?pageSize=2&date=2020-05-21&isBuy=
      * @apiSuccessExample {json} 成功返回:
@@ -119,10 +119,16 @@ class TradeInfoController {
     fun findOrderByUserId(@RequestParam(required = false) userId: Int?, query: PageQuery,
                           @RequestParam(required = false) isBuy: Boolean? = null,
                           @DateTimeFormat(pattern = "yyyy-MM-dd")
-                          @RequestParam date: LocalDate): Mono<ResponseInfo<PageView<TradeInfo>>> {
+                          @RequestParam(required = false) date: LocalDate?): Mono<ResponseInfo<PageView<TradeInfo>>> {
         logger.info(" {} {}", isBuy, date)
         return ResponseInfo.ok(BaseUser.getcurrentUser().flatMap {
-            mono { tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy, date) }
+            mono {
+                if (date == null) {
+                    tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy)
+                } else {
+                    tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy, date)
+                }
+            }
         })
     }
 

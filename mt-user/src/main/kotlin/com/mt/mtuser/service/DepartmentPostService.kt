@@ -49,7 +49,7 @@ class DepartmentPostService {
             val department = departmentDao.findByName(dpi.departmentName!!)
                     ?: departmentDao.save(Department(name = dpi.departmentName))
             val post = dpi.postName?.let { postDao.findByName(it) ?: postDao.save(Post(name = it)) }
-            return exitRelated(department.id!!, post?.id, dpi.companyId!!)
+            return existRelated(department.id!!, post?.id, dpi.companyId!!)
                     ?: departmentPostDao.save(DepartmentPost(departmentId = department.id, postId = post?.id, companyId = dpi.companyId))
         }
     }
@@ -122,7 +122,7 @@ class DepartmentPostService {
         return list
     }
 
-    suspend fun exitRelated(departmentId: Int, postId: Int?, companyId: Int): DepartmentPost? {
+    suspend fun existRelated(departmentId: Int, postId: Int?, companyId: Int): DepartmentPost? {
         val subSql = if (postId == null) "post_id is null" else "post_id = $postId"
         return connect.execute("select * from mt_department_post where company_id = :companyId and department_id = :departmentId and $subSql limit 1")
                 .bind("companyId", companyId)

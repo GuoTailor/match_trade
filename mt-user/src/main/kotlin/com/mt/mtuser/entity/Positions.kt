@@ -14,6 +14,7 @@ class Positions(
         /*** 用户id*/
         var userId: Int? = null,
         /*** 数量*/
-        var amount: Int? = null
-
+        var amount: Int? = null,
+        /** 买卖限制 */
+        var limit: Int? = null
 )

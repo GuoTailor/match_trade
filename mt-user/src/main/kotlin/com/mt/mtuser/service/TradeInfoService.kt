@@ -314,6 +314,21 @@ class TradeInfoService {
                 , connect, query, countWhere)
     }
 
+    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?) : PageView<TradeInfo> {
+        val where = when {
+            isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
+            isBuy -> query.where().and(where("buyer_id").`is`(userId))
+            else -> query.where().and(where("seller_id").`is`(userId))
+        }
+        return getPage(connect.select()
+                .from<TradeInfo>()
+                .matching(where)
+                .page(query.page())
+                .fetch()
+                .all()
+                , connect, query, where)
+    }
+
     /**
      * 按天统计交易详情
      */

@@ -31,6 +31,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
     /**
      * Throws MethodArgumentNotValidException if validation fails.
      */
+    @Override
     public Object resolveArgument(MethodParameter parameter, ServiceRequestInfo webRequest) throws Exception {
 
         parameter = parameter.nestedIfOptional();

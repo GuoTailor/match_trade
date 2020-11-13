@@ -95,6 +95,11 @@ class RoomService {
     fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
         val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
+        val enable = companyDao.findEnableById(room.companyId!!)
+        if (enable == "0") {
+            logger.info("房间{}已禁用", room.companyId)
+            return@withTransaction
+        }
         val rest = dao.enableRoomById(roomId, room.setEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
             var roomRecord = room.toRoomRecord()
@@ -159,8 +164,10 @@ class RoomService {
         val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
         if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
             throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
+        val enable = companyDao.findEnableById(room.companyId!!)
+        if (enable == "0") error("房间${room.companyId}已禁用")
         val companyList = roleService.getCompanyList(Stockholder.ADMIN)
-        return if (companyList.contains(room.companyId)) {
+        return if (companyList.contains(room.companyId!!)) {
             if (oldFlag == room.flag) {
                 room.roomId = null
                 room.enable = null
@@ -277,8 +284,8 @@ class RoomService {
         var lowScope = "0"
         if (roomRecord != null) {
             val closePrice = klineService.getClosePriceByTableName(LocalDate.now().atStartOfDay(), roomRecord.stockId!!, "mt_1d_kline")
-            highScope = closePrice.multiply(BigDecimal(2.0)).toPlainString()
-            lowScope = closePrice.multiply(BigDecimal(0.5)).toPlainString()
+            highScope = closePrice.multiply(BigDecimal("1.2")).toPlainString()
+            lowScope = closePrice.multiply(BigDecimal("0.8")).toPlainString()
         }
         return mapOf("highScope" to highScope, "lowScope" to lowScope)
     }

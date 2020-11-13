@@ -20,6 +20,6 @@ interface PositionsDao : ReactiveCrudRepository<Positions, Int> {
     fun updateAmount(id: Int, amount: Int): Mono<Int>
 
     companion object {
-        const val sql = "id,company_id,stock_id,user_id,amount"
+        const val sql = "id,company_id,stock_id,user_id,amount,limit"
     }
 }

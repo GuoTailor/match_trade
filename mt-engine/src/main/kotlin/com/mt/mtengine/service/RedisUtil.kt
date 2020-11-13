@@ -67,6 +67,7 @@ class RedisUtil {
 
     /**
      * 删除匹配的订单
+     * TODO 匹配订单应该用订单号，应该每个订单生成一个唯一订单号
      */
     fun deleteUserOrder(userId: Int, roomId: String): Mono<Void> {
         return getUserOrder(userId, roomId)

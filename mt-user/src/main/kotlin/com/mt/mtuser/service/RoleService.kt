@@ -108,4 +108,5 @@ class RoleService {
     suspend fun deleteById(id: Int) = stockholderDao.deleteById(id)
 
     suspend fun deleteByRoleIdAndCompanyId(roleId: Int, companyId: Int): Int = stockholderDao.deleteByRoleIdAndCompanyId(roleId, companyId)
+
 }

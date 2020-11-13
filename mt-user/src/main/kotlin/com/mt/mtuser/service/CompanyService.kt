@@ -4,6 +4,7 @@ import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.PositionsDao
 import com.mt.mtuser.dao.UserDao
 import com.mt.mtuser.entity.*
+import com.mt.mtuser.entity.department.DepartmentPostInfo
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
@@ -52,6 +53,9 @@ class CompanyService {
     @Autowired
     private lateinit var roomService: RoomService
 
+    @Autowired
+    private lateinit var departmentPostService: DepartmentPostService
+
     /**
      * 无赖使用{@link PostgresqlConnection}
      * 由于r2dbc的sql语句中不支持占位符，
@@ -80,6 +84,7 @@ class CompanyService {
         company.analystId?.let {
             addCompanyAnalyst(it, newCompany.id!!)
         }
+        departmentPostService.bindDepartment(DepartmentPostInfo(null, "股东", "股东", newCompany.id))
         return newCompany
     }
 
@@ -188,8 +193,7 @@ class CompanyService {
                 query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
-                .all()
-                , connect, query, "mt_stockholder s", where)
+                .all(), connect, query, "mt_stockholder s", where)
     }
 
     /**
@@ -220,8 +224,7 @@ class CompanyService {
                 query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
-                .all()
-                , connect, query, "mt_stockholder s", where)
+                .all(), connect, query, "mt_stockholder s", where)
     }
 
     /**
@@ -250,14 +253,14 @@ class CompanyService {
                     company.unitAddress = r.get("unit_address", String::class.java)
                     company.unitContactName = r.get("unit_contact_name", String::class.java)
                     company.unitContactPhone = r.get("unit_contact_phone", String::class.java)
+                    company.enable = r.get("enable", String::class.java)
                     company.analystName = r.get("nick_name", String::class.java)
                     company.analystId = r.get("analystId", java.lang.Integer::class.java)?.toInt()
                     company.analystPhone = r.get("phone", String::class.java)
                     company.adminPhone = r.get("adminPhone", String::class.java)
                     company.adminName = r.get("adminName", String::class.java)
                     company
-                }.all()
-                , connect, query, "mt_company")
+                }.all(), connect, query, "mt_company")
     }
 
     /**
@@ -288,12 +291,12 @@ class CompanyService {
                     company.unitAddress = r.get("unit_address", String::class.java)
                     company.unitContactName = r.get("unit_contact_name", String::class.java)
                     company.unitContactPhone = r.get("unit_contact_phone", String::class.java)
+                    company.enable = r.get("enable", String::class.java)
                     company.analystName = r.get("nick_name", String::class.java)
                     company.analystId = r.get("analystId", java.lang.Integer::class.java)?.toInt()
                     company.analystPhone = r.get("phone", String::class.java)
                     company
-                }.all()
-                , connect, query, "mt_company")
+                }.all(), connect, query, "mt_company")
     }
 
     /**
@@ -307,6 +310,7 @@ class CompanyService {
             val stockholder = roleService.findByUserIdAndRoleId(user.id!!, roleId)
                     ?: roleService.save(Stockholder(userId = user.id!!, roleId = roleId))
             if (stockholder.companyId != info.companyId) {
+                if (stockholder.companyId != null) error("用户以绑定其他公司")
                 val stockId = stockService.findByCompanyId(info.companyId!!).first().id     // 添加公司的默认股票
                 positionsDao.save(Positions(companyId = info.companyId, stockId = stockId, userId = user.id, amount = info.amount))
                 info.toStockholder(stockholder)
@@ -409,4 +413,19 @@ class CompanyService {
                 "month" to tradeInfoService.monthOverview(userId, companyId)
         )
     }
+
+    /**
+     * 修改交易限制
+     */
+    suspend fun updateLimit(userId: List<Int>, limit: Int, companyId: Int): Int {
+        return positionsDao.updateLimit(userId, companyId, limit)
+    }
+
+    /**
+     * 使能一个公司
+     */
+    suspend fun updateEnable(id: Int, enable: String): Int {
+        return companyDao.enable(id, enable)
+    }
+
 }

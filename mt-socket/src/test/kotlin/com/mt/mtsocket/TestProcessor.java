@@ -123,7 +123,10 @@ public class TestProcessor {
         Mono<Object> mono2 = connectedProcessor.map(it -> {
             logger.info("2 {} ", it);
             return it;
-        });
+        }).switchIfEmpty(Mono.defer(() -> {
+            System.out.println("empty");
+            return Mono.just("nmka122");
+        }));
 
         mono.subscribe();
         logger.info("step 2");

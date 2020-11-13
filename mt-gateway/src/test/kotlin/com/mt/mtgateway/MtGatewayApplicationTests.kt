@@ -3,6 +3,7 @@ package com.mt.mtgateway
 import org.junit.jupiter.api.Test
 import java.time.*
 import java.util.*
+import java.util.regex.Pattern
 
 //@SpringBootTest
 class MtGatewayApplicationTests {
@@ -40,7 +41,8 @@ class MtGatewayApplicationTests {
 
     @Test
     fun testList() {
-        println(listOf("1", "2", "3").joinToString(prefix = "[", postfix = "]") { "\"$it\"" })
+        val b = Pattern.compile("/testsocket").matcher("/testsocke").matches()
+        println(b)
     }
 
     class User(var userName: String, var age: Int) {

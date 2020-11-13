@@ -67,8 +67,10 @@ class MatchService {
     fun <T: MatchStrategy.RoomInfo> onMatchFailed(roomInfo: T, buy: OrderParam?, sell: OrderParam?, failedInfo: String, isTopThree: Boolean = false) = r2dbc.withTransaction {
         roomService.findCompanyIdByRoomId(roomInfo.roomId, roomInfo.mode).flatMap { info ->
             val threadInfo = TradeInfo(buy, sell, roomInfo.roomId, info.companyId, info.stockId, roomInfo.mode)
-            if (buy?.price != null && sell?.price != null)
+            if (buy?.price != null && sell?.price != null) {
                 threadInfo.tradePrice = buy.price?.add(sell.price)?.divide(BigDecimal(2))
+                threadInfo.tradeMoney = threadInfo.tradePrice?.multiply(BigDecimal(threadInfo.tradeAmount ?: 0))
+            }
             threadInfo.tradeState = TradeState.FAILED
             threadInfo.stateDetails = failedInfo
             buy?.onTrade(threadInfo)

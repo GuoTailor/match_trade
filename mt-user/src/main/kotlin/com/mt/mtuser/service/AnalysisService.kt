@@ -10,6 +10,7 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
@@ -61,8 +62,9 @@ class AnalysisService {
 
     suspend fun getAllAnalysisByCompany(query: PageQuery): PageView<Analysis> {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val where = query.where().and("company_id").`is`(companyId)
-        return getPage(connect.select()
+        val pageDate = getPage(connect.select()
                 .from<Analysis>()
                 .matching(where)
                 .page(query.page())
@@ -72,6 +74,10 @@ class AnalysisService {
                     it.content = HtmlUtils.htmlUnescape(it.content ?: "")
                     it
                 }, connect, query, where)
+        pageDate.item?.forEach {
+            notifyUserDao.setStatusByUserIdAndMsgId(userId, it.id!!, NotifyUser.read, NotifyUser.typeAnalysis)
+        }
+        return pageDate
     }
 
     suspend fun findAllAnalysis(query: PageQuery, userId: Int?): PageView<Analysis> {

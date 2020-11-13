@@ -60,6 +60,7 @@ class Stockholder(
         const val ANALYST = "ROLE_ANALYST"
         const val ADMIN = "ROLE_ADMIN"
         const val USER = "ROLE_USER"
+        const val LIMIT_DEFAULT = 10000
 
         enum class Role(val roleName: String, val order: Int) {
             SUPER_ADMIN(Stockholder.SUPER_ADMIN, 1),

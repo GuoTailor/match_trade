@@ -13,7 +13,10 @@ import io.netty.util.CharsetUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.springframework.data.util.ParsingUtils
+import java.io.File
 import java.io.InputStream
+import java.io.RandomAccessFile
+import java.lang.IllegalStateException
 import java.lang.StringBuilder
 import java.math.BigDecimal
 import java.nio.charset.Charset
@@ -196,9 +199,9 @@ fun testZip() {
         if (zip.name == "manifest.json") {
             println("找到")
             val `is`: InputStream = zipFile.getInputStream(zipEntry)
-            var b : Int
+            var b: Int
             val sb = StringBuilder()
-            while(`is`.read().also { b = it } != -1) {
+            while (`is`.read().also { b = it } != -1) {
                 sb.append(b.toChar())
             }
             println(sb.toString())
@@ -208,4 +211,26 @@ fun testZip() {
     }
 }
 
-fun main() = testZip()
+fun main() {
+    var counbt = 0
+    for (i in 1..100) {
+        if (i % 2 == 1) {
+            counbt += i
+            println(i)
+        }
+    }
+    println(counbt)
+    try {
+        println("hello")
+        nmka()
+    } catch (e: Exception) {
+        println("nm")
+    } finally {
+        println("nm2")
+    }
+}
+
+fun nmka() {
+    println("nmka")
+    throw IllegalStateException("n")
+}

@@ -140,7 +140,7 @@ class NotifyService {
         if (notifyList.size == 1) {
             userDao.setReadTimeByUserId(userId, LocalDateTime.now())
             if (announceList.contains(notifyList[0].id)) {
-                notifyUserDao.setStatusByUserIdAndMsgId(userId, notifyList[0].id!!, NotifyUser.read)
+                notifyUserDao.setStatusByUserIdAndMsgId(userId, notifyList[0].id!!, NotifyUser.read, NotifyUser.typeMsg)
             }
         }
         return if (notifyList.isEmpty()) null else notifyList[0]

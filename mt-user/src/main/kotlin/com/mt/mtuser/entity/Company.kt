@@ -17,7 +17,7 @@ import java.util.*
  * @apiParam {Integer} id 公司id
  * @apiParam {String} name 公司名字
  * @apiParam {Integer} roomCount 房间数量
- * @apiParam {List} modes 房间模式 列子：["C","B","D","E","I"] 分布对应 点选，抬杠，两两，连续，定时
+ * @apiParam {List} modes 房间模式 列子：["C","B","D","E","I"] 分别对应 点选，抬杠，两两，连续，定时
  * @apiParam {String} licenseUrl 营业执照图片地址
  * @apiParam {String} creditUnionCode 统一信用社代码
  * @apiParam {String} legalPerson 企业法人
@@ -25,6 +25,7 @@ import java.util.*
  * @apiParam {String} unitContactName 单位联系人姓名
  * @apiParam {String} unitContactPhone 单位联系人电话
  * @apiParam {String} [brief] 公司简介
+ * @apiParam {String} enable 使能公司；1:启用；0:禁用
  */
 @Table("mt_company")
 data class Company(
@@ -34,7 +35,7 @@ data class Company(
         var name: String? = null,
         /*** 房间数量*/
         var roomCount: Int? = null,
-        /*** 竞价模式{2：点选、3： 点选+定时、4：及时 +点选+定时}*/
+        /*** 竞价模式["C","B","D","E","I"] 分别对应 点选，抬杠，两两，连续，定时*/
         var mode: String? = null,
         /*** 注册时间*/
         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:SS")
@@ -50,7 +51,9 @@ data class Company(
         /*** 单位联系人姓名*/
         var unitContactName: String? = null,
         /*** 单位联系人电话*/
-        var unitContactPhone: String? = null
+        var unitContactPhone: String? = null,
+        /** 使能公司；1:起用；0:禁用*/
+        var enable: String? = null
 ) {
     @Transient
     var stock: Long? = null

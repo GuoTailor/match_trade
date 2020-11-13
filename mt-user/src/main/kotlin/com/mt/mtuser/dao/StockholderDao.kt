@@ -11,7 +11,7 @@ import java.math.BigDecimal
 /**
  * Created by gyh on 2020/3/17.
  */
-interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
+interface StockholderDao : CoroutineCrudRepository<Stockholder, Int> {
 
     @Modifying
     @Query("insert into mt_stockholder(user_id, role_id, company_id) values(:userId, :roleId, :companyId)")
@@ -27,10 +27,10 @@ interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
     suspend fun countByCompanyIdAndRoleId(companyId: Int, roleId: Int): Long
 
     @Query("select count(*) from mt_stockholder where user_id = :userId and role_id = :roleId and company_id = :companyId limit 1")
-    suspend fun exists(userId: Int, roleId: Int, companyId : Int): Int
+    suspend fun exists(userId: Int, roleId: Int, companyId: Int): Int
 
     @Query("select count(*) from mt_stockholder where company_id = :companyId and role_id = :roleId limit 1")
-    suspend fun exists(roleId: Int, companyId : Int): Int
+    suspend fun exists(roleId: Int, companyId: Int): Int
 
     @Query("select count(*) from mt_stockholder where company_id = :companyId and role_id != 2 and role_id != 3 limit 1")
     suspend fun existsByCompanyId(companyId: Int): Int
@@ -39,10 +39,10 @@ interface StockholderDao: CoroutineCrudRepository<Stockholder, Int> {
     suspend fun existsByDpId(dpId: Int): Int
 
     @Query("select * from mt_stockholder where user_id = :userId and role_id = :roleId and company_id = :companyId")
-    suspend fun find(userId: Int, roleId: Int, companyId : Int): Stockholder?
+    suspend fun find(userId: Int, roleId: Int, companyId: Int): Stockholder?
 
     @Query("select * from mt_stockholder where user_id = :userId and company_id = :companyId")
-    suspend fun findByUserIdAndCompanyId(userId: Int, companyId : Int): Stockholder?
+    suspend fun findByUserIdAndCompanyId(userId: Int, companyId: Int): Stockholder?
 
     @Query("select * from mt_stockholder where user_id = :userId and role_id = :roleId limit 1")
     suspend fun findByUserIdAndRoleId(userId: Int, roleId: Int): Stockholder?

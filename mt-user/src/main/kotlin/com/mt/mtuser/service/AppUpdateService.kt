@@ -31,10 +31,14 @@ class AppUpdateService {
 
     fun uploadWgt(filePart: FilePart, appUpdate: AppUpdate): Mono<AppUpdate> {
         logger.info("{}", appUpdate.forceUpdate)
-        appUpdate.downloadUrlIos = "未知"
         return fileService.uploadFile(filePart)
                 .flatMap {
                     appUpdate.downloadUrlAndroid = it
+                    if (it.substring(it.lastIndexOf('.')) == ".wgt") {
+                        appUpdate.downloadUrlIos = it
+                    } else {
+                        appUpdate.downloadUrlIos = "未知"
+                    }
                     appUpdateDao.save(appUpdate)
                 }
     }

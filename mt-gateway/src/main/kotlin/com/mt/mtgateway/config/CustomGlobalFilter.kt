@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
@@ -69,8 +70,8 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
         headers.add("Access-Control-Expose-Headers", ALLOWED_Expose)
         headers.add("Access-Control-Allow-Credentials", "true")
 
+        log.info("{} >> {}?{}", request.headers.toString(), url, request.uri.query)
         if (!match(url) && request.method != HttpMethod.OPTIONS) {
-            //log.info(request.headers.toString())
             val authHeader = getAuthToken(request)
             //log.info(authHeader)
             if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
@@ -84,11 +85,11 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
                                     .header("roles", it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
                                     .header("Authorization")
                                     .build()
-                            println(it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
                             val build = exchange.mutate().request(host).build()
                             chain.filter(build)
-                        }.switchIfEmpty(authError(exchange, "登录已过期",
-                                if (tokenInfo.time.before(Date())) HttpStatus.UNAUTHORIZED else HttpStatus.FORBIDDEN))
+                        }.switchIfEmpty {
+                            authError(exchange, "登录已过期", if (tokenInfo.time.before(Date())) HttpStatus.UNAUTHORIZED else HttpStatus.FORBIDDEN)
+                        }
             }
             return authError(exchange, "无权访问 $url")
         }
@@ -128,13 +129,15 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
     private fun authError(swe: ServerWebExchange, mess: String, statusCode: HttpStatus = HttpStatus.UNAUTHORIZED): Mono<Void> {
         val resp = swe.response
         resp.statusCode = statusCode
-        resp.headers.add("Content-Type", "application/json;charset=UTF-8")
+        //resp.headers.add("Content-Type", "application/json;charset=UTF-8")
         val returnStr = "{" +
                 "\"code\":1," +
                 "\"msg\":\"$mess\"" +
                 "}"
-        val buffer = resp.bufferFactory().wrap(returnStr.toByteArray(StandardCharsets.UTF_8))
-        return resp.writeWith(Mono.just(buffer))
+        return resp.writeWith(Mono.defer {
+            val buffer = resp.bufferFactory().wrap(returnStr.toByteArray(StandardCharsets.UTF_8))
+            Mono.just(buffer)
+        })
     }
 
     override fun getOrder(): Int {
