@@ -3,6 +3,7 @@ package com.mt.mtengine.service
 import com.mt.mtcommon.toLocalDateTime
 import com.mt.mtengine.dao.PositionsDao
 import com.mt.mtengine.dao.TradeInfoDao
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -13,6 +14,7 @@ import java.time.LocalTime
  */
 @Service
 class PositionsService {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     @Autowired
     private lateinit var positionsDao: PositionsDao
     @Autowired

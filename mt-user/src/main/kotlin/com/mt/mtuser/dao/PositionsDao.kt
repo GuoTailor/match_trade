@@ -17,10 +17,10 @@ interface PositionsDao : CoroutineCrudRepository<Positions, Int> {
     suspend fun countStockByCompanyIdAndUserId(userId: Int, companyId: Int): Long
 
     @Modifying
-    @Query("update mt_positions set limit = :limit where user_id in (:userId) and company_id = :companyId")
+    @Query("update mt_positions set \"limit\" = :limit where user_id in (:userId) and company_id = :companyId")
     suspend fun updateLimit(userId: List<Int>, companyId: Int, limit: Int): Int
 
     companion object {
-        const val sql = "id,company_id,stock_id,user_id,amount,limit"
+        const val sql = "id,company_id,stock_id,user_id,amount,\"limit\""
     }
 }

@@ -18,7 +18,7 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.3.72</kotlin.version>
         <spring-cloud.version>Hoxton.SR7</spring-cloud.version>
-        <spring-cloud-alibaba.verion>2.2.1.RELEASE</spring-cloud-alibaba.verion>
+        <spring-cloud-alibaba.verion>2.2.3.RELEASE</spring-cloud-alibaba.verion>
     </properties>
 
     <dependencies>
