@@ -214,7 +214,7 @@ class BackStageController {
      */
     @GetMapping("/company/active")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun getTopCompany(query: PageQuery, @RequestParam(required = false) type: String?): Mono<ResponseInfo<MutableList<Map<String, Any?>>>> {
+    fun getTopCompany(query: PageQuery, @RequestParam(required = false) type: String?): Mono<ResponseInfo<List<Map<String, Any?>>>> {
         return ResponseInfo.ok(mono { roomRecordService.countTopCompany(query, type ?: "day") })
     }
 

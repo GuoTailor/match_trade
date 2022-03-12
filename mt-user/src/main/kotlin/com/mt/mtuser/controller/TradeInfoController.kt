@@ -11,18 +11,12 @@ import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.server.ServerResponse
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 /**
  * Created by gyh on 2020/5/10.
@@ -190,8 +184,26 @@ class TradeInfoController {
     }
 
     /**
-     * @api {get} /trade/excel 导出excel
-     * @apiDescription  导出excel
+     * @api {get} /trade/limit 获取交易限制和当日交易数量
+     * @apiDescription  查找当前用户的交易限制和当日已交易数量
+     * @apiName getTradeLimit
+     * @apiVersion 0.0.1
+     * @apiSuccessExample {json} 成功返回:
+     * {"code": 0,"msg": "成功","data": null}
+     * @apiSuccess (返回) {Integer} tradeAmount 当日已交易数量
+     * @apiSuccess (返回) {Integer} limit 交易限制
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission user
+     */
+    @GetMapping("/limit")
+    fun getTradeLimit(): Mono<ResponseInfo<Map<String, Any?>>> {
+        return ResponseInfo.ok(mono { tradeInfoService.getTradeLimit() })
+    }
+
+    /**
+     * @api {get} /trade/excel 按月导出excel
+     * @apiDescription 按月导出excel，内容是统计每一个用户的当月交易记录
      * @apiName outExcel
      * @apiVersion 0.0.1
      * @apiParam {Integer} companyId 公司id
@@ -207,5 +219,24 @@ class TradeInfoController {
     //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     fun outExcel(companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate, response: ServerHttpResponse): Mono<Void> {
         return tradeInfoService.outExcel(companyId, data, response)
+    }
+
+    /**
+     * @api {get} /trade/details/excel 导出excel
+     * @apiDescription  按月导出excel，内容为交易详情
+     * @apiName outExcel
+     * @apiVersion 0.0.1
+     * @apiParam {Integer} companyId 公司id
+     * @apiParam {String} data 日期；格式：yyyy-M-d
+     * @apiSuccessExample {json} 成功返回:
+     * 文件
+     * @apiGroup Trade
+     * @apiUse tokenMsg
+     * @apiPermission admin
+     * @apiPermission supperAdmin
+     */
+    @GetMapping("/details/excel")
+    fun detailsExcel(companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate, response: ServerHttpResponse): Mono<Void> {
+        return tradeInfoService.outDetailsExcel(companyId, data, response)
     }
 }

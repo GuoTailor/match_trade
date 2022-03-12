@@ -1,7 +1,9 @@
 package com.mt.mtuser.service
 
 import com.mt.mtcommon.*
+import com.mt.mtuser.dao.PositionsDao
 import com.mt.mtuser.dao.TradeInfoDao
+import com.mt.mtuser.entity.BaseUser
 import com.mt.mtuser.entity.Overview
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
@@ -54,6 +56,9 @@ class TradeInfoService {
 
     @Autowired
     private lateinit var connect: DatabaseClient
+
+    @Autowired
+    private lateinit var positionsDao: PositionsDao
 
     /**
      * 获取今天的交易量
@@ -245,8 +250,7 @@ class TradeInfoService {
                 .matching(where)
                 .page(query.page())
                 .fetch()
-                .all()
-                , connect, query, where)
+                .all(), connect, query, where)
     }
 
     /**
@@ -259,8 +263,7 @@ class TradeInfoService {
                 .matching(where)
                 .page(query.page())
                 .fetch()
-                .all()
-                , connect, query, where)
+                .all(), connect, query, where)
     }
 
     /**
@@ -278,12 +281,16 @@ class TradeInfoService {
                 .matching(where)
                 .page(query.page())
                 .fetch()
-                .all()
-                , connect, query, countWhere)
+                .all(), connect, query, countWhere)
     }
 
-    suspend fun findOrderByCompanyAndDpId(companyId: Int, date: LocalDate) {
-
+    suspend fun getTradeLimit(): Map<String, Any?> {
+        val companyId = roleService.getCompanyList(Stockholder.USER)[0]
+        val userId = BaseUser.getcurrentUser().awaitSingle().id!!
+        val stockId = stockService.findByCompanyId(companyId).first()
+        val tradeAmount = tradeInfoDao.countAmountByTradeTimeAndCompanyIdAndUserId(LocalTime.MIN.toLocalDateTime(), LocalTime.MAX.toLocalDateTime(), companyId, userId)
+        val limit = positionsDao.findLimit(companyId, stockId.id!!, userId).limit
+        return mapOf("tradeAmount" to tradeAmount.toEngineeringString(), "limit" to limit)
     }
 
     /**
@@ -310,11 +317,10 @@ class TradeInfoService {
                 .matching(where)
                 .page(query.page())
                 .fetch()
-                .all()
-                , connect, query, countWhere)
+                .all(), connect, query, countWhere)
     }
 
-    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?) : PageView<TradeInfo> {
+    suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?): PageView<TradeInfo> {
         val where = when {
             isBuy == null -> query.where().and(where("buyer_id").`is`(userId).or("seller_id").`is`(userId))
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
@@ -325,8 +331,7 @@ class TradeInfoService {
                 .matching(where)
                 .page(query.page())
                 .fetch()
-                .all()
-                , connect, query, where)
+                .all(), connect, query, where)
     }
 
     /**
@@ -343,7 +348,7 @@ class TradeInfoService {
                 " where $where group by k.id $pageSql"
         return getPage(connect.execute(sql)
                 .map { r, _ ->
-                    mapOf("id" to r.get("id", java.lang.Long::class.java),
+                    mapOf<String, Any?>("id" to r.get("id", java.lang.Long::class.java),
                             "stockId" to r.get("stock_id", java.lang.Integer::class.java),
                             "time" to r.get("time", LocalDateTime::class.java)?.toEpochMilli(),
                             "tradesCapacity" to r.get("trades_capacity", java.lang.Long::class.java),
@@ -383,7 +388,7 @@ class TradeInfoService {
                 .bind("startTime", startTime)
                 .bind("endTime", endTime)
                 .map { r, _ ->
-                    mapOf("tradesNumber" to r.get("tradesNumber", java.lang.Long::class.java)?.toLong(),
+                    mapOf<String, Any?>("tradesNumber" to r.get("tradesNumber", java.lang.Long::class.java)?.toLong(),
                             "tradesCapacity" to r.get("tradesCapacity", java.lang.Long::class.java)?.toLong(),
                             "tradesVolume" to r.get("tradesVolume", BigDecimal::class.java),
                             "avgPrice" to r.get("avgPrice", BigDecimal::class.java),
@@ -436,7 +441,7 @@ class TradeInfoService {
                 " GROUP BY ti.company_id ORDER BY amount desc limit $topNumber")
                 .bind("time", time)
                 .map { r, _ ->
-                    mapOf("amount" to r.get("amount", java.lang.Long::class.java),
+                    mapOf<String, Any?>("amount" to r.get("amount", java.lang.Long::class.java),
                             "companyId" to r.get("company_id", java.lang.Integer::class.java),
                             "name" to r.get("name", java.lang.Integer::class.java),
                             "openingNumber" to r.get("openingNumber", java.lang.Integer::class.java))
@@ -455,14 +460,14 @@ class TradeInfoService {
                 " GROUP BY ti.company_id ORDER BY money desc limit $topNumber")
                 .bind("time", time)
                 .map { r, _ ->
-                    mapOf("money" to r.get("money", java.lang.Long::class.java),
+                    mapOf<String, Any?>("money" to r.get("money", java.lang.Long::class.java),
                             "companyId" to r.get("company_id", java.lang.Integer::class.java),
                             "name" to r.get("name", java.lang.Integer::class.java),
                             "openingNumber" to r.get("openingNumber", java.lang.Integer::class.java))
                 }.all().collectList()
     }
 
-    fun outExcel(companyId: Int, date: LocalDate, response: ServerHttpResponse): Mono<Void> {
+    fun outDetailsExcel(companyId: Int, date: LocalDate, response: ServerHttpResponse): Mono<Void> {
         val startTime = date.withDayOfMonth(1).atStartOfDay()
         val lastTime = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX)
         val where = where("company_id").`is`(companyId).and("trade_time").between(startTime, lastTime)
@@ -489,7 +494,7 @@ class TradeInfoService {
             val rows = sheet.createRow(i + 1)
             for (key in rowName.indices) {
                 val cells = rows.createCell(key)
-                cells.setCellValue(getData(key + 1, data[i]))
+                cells.setCellValue(getDetailsData(key + 1, data[i]))
             }
         }
         // TODO 也许可以直接获取输出流写出，不要存文件
@@ -513,7 +518,7 @@ class TradeInfoService {
         }
     }
 
-    fun getData(index: Int, tradeInfo: TradeInfo): String? {
+    fun getDetailsData(index: Int, tradeInfo: TradeInfo): String? {
         val formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm")
         return when (index) {
             1 -> tradeInfo.tradeTime?.format(formatter)
@@ -526,6 +531,90 @@ class TradeInfoService {
             8 -> tradeInfo.tradePrice?.toEngineeringString()
             9 -> tradeInfo.tradeAmount?.toString()
             else -> error("错误，不支持的行号:$index")
+        }
+    }
+
+    fun outExcel(companyId: Int, date: LocalDate, response: ServerHttpResponse): Mono<Void> {
+        val startTime = date.withDayOfMonth(1).atStartOfDay()
+        val lastTime = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX)
+        val data = connect.execute("""
+            SELECT ms.real_name as name ,
+            	(select phone from mt_user mu where mu.id = ms.user_id),
+            	(select name from mt_department md where md.id = mdp.post_id) as department,
+            	(select name from mt_post mp where mp.id = mdp.post_id) as post,
+            	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_amount END ) AS buy_amount,
+            	SUM ( CASE seller_id WHEN ms.user_id THEN trade_amount END ) AS sell_amount ,
+            	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_money END ) AS buy_money,
+            	SUM ( CASE seller_id WHEN ms.user_id THEN trade_money END ) AS sell_money 
+            from mt_stockholder ms
+             LEFT JOIN mt_department_post mdp on mdp.id = ms.dp_id
+             LEFT JOIN mt_trade_info mti on mti.company_id = ms.company_id and mti.trade_time
+             BETWEEN :startTime AND :endTime and (mti.buyer_id = ms.user_id or mti.seller_id = ms.user_id)
+            where ms.company_id = :companyId
+            GROUP BY ms.id, mdp.id
+            ORDER BY buy_amount, sell_amount
+        """.trimIndent())
+                .bind("startTime", startTime)
+                .bind("endTime", lastTime)
+                .bind("companyId", companyId)
+                .map { r, _ ->
+                    val buyAmount = r.get("buy_amount", java.lang.Integer::class.java)
+                    val sellAmount = r.get("sell_amount", java.lang.Integer::class.java)
+                    val buyMoney = r.get("buy_money", java.lang.Integer::class.java)
+                    val sellMoney = r.get("sell_money", java.lang.Integer::class.java)
+
+                    mapOf("name" to r.get("name", String::class.java),
+                            "phone" to r.get("phone", String::class.java),
+                            "department" to r.get("department", String::class.java),
+                            "post" to r.get("post", String::class.java),
+                            "buyAmount" to buyAmount,
+                            "sellAmount" to sellAmount,
+                            "netBuyAmount" to buyAmount?.toInt()?.minus(sellAmount?.toInt() ?: 0),
+                            "buyMoney" to buyMoney,
+                            "sellMoney" to sellMoney,
+                            "netBuyMoney" to buyMoney?.toInt()?.minus(sellMoney?.toInt() ?: 0)
+                    )
+                }.all()
+                .collectList().block()
+
+        val rowName = arrayOf("姓名", "手机号", "部门", "职位", "买入股数", "卖出股数", "净买入股数", "买入金额", "卖出金额", "净买入金额")
+        val rowNameEN = arrayOf("name", "phone", "department", "post", "buyAmount", "sellAmount", "netBuyAmount", "buyMoney", "sellMoney", "netBuyMoney")
+        // 第一步：定义一个新的工作簿
+        val wb = XSSFWorkbook()
+        val sheet = wb.createSheet()
+        val alignStyle = wb.createCellStyle()
+        alignStyle.alignment = HorizontalAlignment.CENTER
+        sheet.setDefaultColumnStyle(10, alignStyle)
+        val rowTitle = sheet.createRow(0)
+        for (i in rowName.indices) {
+            val cellTitle = rowTitle.createCell(i)
+            cellTitle.setCellValue(rowName[i])
+        }
+        for (i in 0 until data!!.size) {
+            val rows = sheet.createRow(i + 1)
+            for (key in rowName.indices) {
+                val cells = rows.createCell(key)
+                cells.setCellValue((data[i][rowNameEN[key]] ?: "").toString())
+            }
+        }
+        // TODO 也许可以直接获取输出流写出，不要存文件
+        val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
+        val path = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(formatter) + ".xlsx"
+        logger.info(path)
+        val fileExcel = File(path)
+        if (!fileExcel.exists()) {
+            fileExcel.parentFile.mkdirs()
+        }
+        val fileOutputStream = FileOutputStream(fileExcel)
+        wb.write(fileOutputStream)
+        fileOutputStream.close()
+        val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
+        return try {
+            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
+                    URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName()))
+            zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
+        } catch (e: UnsupportedEncodingException) {
+            throw UnsupportedOperationException()
         }
     }
 

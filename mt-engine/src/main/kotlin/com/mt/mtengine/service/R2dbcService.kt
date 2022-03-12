@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
 import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
+import org.springframework.data.r2dbc.mapping.OutboundRow
 import org.springframework.data.r2dbc.mapping.SettableValue
 import org.springframework.data.relational.core.query.Update
 import org.springframework.data.relational.core.sql.SqlIdentifier
@@ -27,7 +28,7 @@ class R2dbcService {
     protected lateinit var connect: DatabaseClient
 
     fun getUpdate(data: Any): Update {
-        val columns: MutableMap<SqlIdentifier, SettableValue> = dataAccessStrategy.getOutboundRow(data)
+        val columns: OutboundRow = dataAccessStrategy.getOutboundRow(data)
         val ids = dataAccessStrategy.getIdentifierColumns(data.javaClass)
         check(ids.isNotEmpty()) { "No identifier columns in " + data.javaClass.name + "!" }
         columns.remove(ids[0]) // do not update the Id column.

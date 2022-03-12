@@ -3,6 +3,7 @@ package com.mt.mtuser.dao
 import com.mt.mtcommon.TradeInfo
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -89,12 +90,14 @@ interface TradeInfoDao : CoroutineCrudRepository<TradeInfo, Int> {
             " and stock_id = :stockId ")
     suspend fun avgPriceByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): BigDecimal
 
-    @Query("select t.* from $table t " +
-            " where t.id = :id")
+    @Query("select t.* from $table t where t.id = :id")
     suspend fun findDetailsById(id: Int): TradeInfo?
 
     @Query("select count(1) from $table where trade_time between :startTime and :endTime and stock_id = :stockId")
     suspend fun countByStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Long
+
+    @Query("select COALESCE(sum(trade_amount), 0) from mt_trade_info where trade_time between :startTime and :endTime and company_id = :companyId and (buyer_id = :userId or seller_id = :userId)")
+    suspend fun countAmountByTradeTimeAndCompanyIdAndUserId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int, userId: Int): BigDecimal
 
     companion object {
         const val table = "mt_trade_info"

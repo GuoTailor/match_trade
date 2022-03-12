@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 /**
@@ -286,77 +285,4 @@ public class TestProcessor {
 
     int i = 0;
 
-    @Test
-    public void testTopicProcessor() throws InterruptedException {
-        TopicProcessor<Integer> topicProcessor = TopicProcessor.<Integer>builder()
-                .share(true)
-//                .executor(Executors.newSingleThreadExecutor())
-                .build();
-        Flux<Integer> flux1 = topicProcessor
-                .map(e -> e);
-        Flux<Integer> flux2 = topicProcessor
-                .map(e -> e);
-        Flux<Integer> flux3 = topicProcessor
-                .map(e -> e);
-
-        AtomicInteger count = new AtomicInteger(0);
-        flux1.subscribe(e -> {
-            if (e % 10 == 0)
-                logger.info("flux1 subscriber:{}", e);
-            count.incrementAndGet();
-            i++;
-        });
-        flux2.subscribe(e -> {
-            if (e % 10 == 0)
-                logger.info("flux2 subscriber:{}", e);
-        });
-        flux3.subscribe(e -> {
-            if (e % 10 == 0)
-                logger.info("flux3 subscriber:{}", e);
-        });
-
-        IntStream.rangeClosed(1, 100)
-                .parallel()
-                .forEach(e -> {
-                    if (e % 10 == 0)
-                        logger.info("emit:{}", e);
-                    topicProcessor.onNext(e);
-                });
-
-        topicProcessor.onComplete();
-        topicProcessor.blockLast();
-
-        TimeUnit.SECONDS.sleep(10);
-        System.out.println(count.get());
-        System.out.println(i);
-    }
-
-    @Test
-    public void testWorkQueueProcessor() {
-        WorkQueueProcessor<Integer> workQueueProcessor = WorkQueueProcessor.create();
-        Flux<Integer> flux1 = workQueueProcessor
-                .map(e -> e);
-        Flux<Integer> flux2 = workQueueProcessor
-                .map(e -> e);
-        Flux<Integer> flux3 = workQueueProcessor
-                .map(e -> e);
-
-        flux1.subscribe(e -> {
-            logger.info("flux1 subscriber:{}", e);
-        });
-        flux2.subscribe(e -> {
-            logger.info("flux2 subscriber:{}", e);
-        });
-        flux3.subscribe(e -> {
-            logger.info("flux3 subscriber:{}", e);
-        });
-
-        IntStream.range(1, 20)
-                .forEach(e -> {
-                    workQueueProcessor.onNext(e);
-                });
-
-        workQueueProcessor.onComplete();
-        workQueueProcessor.blockLast();
-    }
 }

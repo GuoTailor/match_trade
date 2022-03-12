@@ -212,22 +212,23 @@ fun testZip() {
 }
 
 fun main() {
-    var counbt = 0
-    for (i in 1..100) {
-        if (i % 2 == 1) {
-            counbt += i
-            println(i)
-        }
-    }
-    println(counbt)
-    try {
-        println("hello")
-        nmka()
-    } catch (e: Exception) {
-        println("nm")
-    } finally {
-        println("nm2")
-    }
+    println("""
+        SELECT ms.real_name as name ,
+        	(select phone from mt_user mu where mu.id = ms.user_id),
+        	(select name from mt_department md where md.id = mdp.post_id) as department,
+        	(select name from mt_post mp where mp.id = mdp.post_id) as post,
+        	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_amount END ) AS buy_amount,
+        	SUM ( CASE seller_id WHEN ms.user_id THEN trade_amount END ) AS sell_amount ,
+        	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_money END ) AS buy_money,
+        	SUM ( CASE seller_id WHEN ms.user_id THEN trade_money END ) AS sell_money 
+        from mt_stockholder ms
+         LEFT JOIN mt_department_post mdp on mdp.id = ms.dp_id
+         LEFT JOIN mt_trade_info mti on mti.company_id = ms.company_id and mti.trade_time
+         BETWEEN '2020-10-23' AND '2020-10-24' and (mti.buyer_id = ms.user_id or mti.seller_id = ms.user_id)
+        where ms.company_id = 17
+        GROUP BY ms.id, mdp.id
+        ORDER BY buy_amount, sell_amount
+    """.trimIndent())
 }
 
 fun nmka() {

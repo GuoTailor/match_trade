@@ -6,9 +6,8 @@ import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.StockDao
 import com.mt.mtuser.entity.*
-import com.mt.mtuser.service.FileService
-import com.mt.mtuser.service.R2dbcService
-import com.mt.mtuser.service.RedisUtil
+import com.mt.mtuser.entity.page.PageQuery
+import com.mt.mtuser.service.*
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -51,6 +50,12 @@ class MtUserApplicationTests {
 
     @Autowired
     lateinit var roomService: RoomService
+
+    @Autowired
+    lateinit var companyService: CompanyService
+
+    @Autowired
+    lateinit var departmentPostService: DepartmentPostService
 
     @Test
     fun testRedis() {
@@ -126,7 +131,17 @@ class MtUserApplicationTests {
 
     @Test
     fun testDb() = runBlocking{
-        roomService.deleteRoom("50", "D")
+        val data = companyService.getShareholderByDepartment(PageQuery(), 1, "技术部")
+        data.item?.forEach {
+            println(it.toString())
+        }
+        println("<------------>")
+        val data2 = companyService.findAllByQuery(PageQuery())
+        data2.item?.forEach {
+            println(it.toString())
+        }
+        val data3 = departmentPostService.findByDpId(1)
+        println(data3?.toString())
         delay(10000)
         println(">>>>>>>>>>")
     }

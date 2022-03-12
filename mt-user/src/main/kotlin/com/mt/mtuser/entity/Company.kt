@@ -79,4 +79,10 @@ data class Company(
     fun setModes(modes: List<String>) {
         mode = ObjectMapper().writeValueAsString(modes)
     }
+
+    override fun toString(): String {
+        return "Company(id=$id, name=$name, roomCount=$roomCount, mode=$mode, createTime=$createTime, licenseUrl=$licenseUrl, creditUnionCode=$creditUnionCode, legalPerson=$legalPerson, unitAddress=$unitAddress, unitContactName=$unitContactName, unitContactPhone=$unitContactPhone, enable=$enable, stock=$stock, money=$money, brief=$brief, analystId=$analystId, analystName=$analystName, analystPhone=$analystPhone, adminPhone=$adminPhone, adminName=$adminName)"
+    }
+
+
 }

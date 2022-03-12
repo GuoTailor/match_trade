@@ -15,6 +15,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import kotlin.streams.toList
 
 /**
  * Created by gyh on 2020/5/7.
@@ -50,7 +51,7 @@ class RoomRecordService {
 
     suspend fun count() = roomRecordDao.count()
 
-    suspend fun countTopCompany(query: PageQuery, type: String): MutableList<Map<String, Any?>> {
+    suspend fun countTopCompany(query: PageQuery, type: String): List<Map<String, Any?>> {
         val role = BaseUser.getcurrentUser().awaitSingle().findMaxRole()
         val userId = BaseUser.getcurrentUser().awaitSingle().id
         val sql = if (role == Stockholder.ANALYST) {

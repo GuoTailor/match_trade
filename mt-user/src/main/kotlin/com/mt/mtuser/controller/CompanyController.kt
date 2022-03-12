@@ -224,11 +224,11 @@ class CompanyController {
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 4,"item": [{"id": 1,"companyId": 1,"userId":
-     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000},{"id": 7,
+     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000,"limit":0},{"id": 7,
      * "companyId": 1,"userId": 1,"amount": null,"realName": null,"department": null,"position": null,"phone": null,"money":
-     * 0.0000},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
-     * "phone": null,"money": -87499.7700},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
-     * "测试","position": "跳舞","phone": null,"money": 10.0000}]}}
+     * 0.0000,"limit":0},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
+     * "phone": null,"money": -87499.7700,"limit":0},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
+     * "测试","position": "跳舞","phone": null,"money": 10.0000,"limit":0}]}}
      * @apiGroup Company
      * @apiUse tokenMsg
      * @apiPermission admin
@@ -249,11 +249,11 @@ class CompanyController {
      * @apiVersion 0.0.1
      * @apiSuccessExample {json} 成功返回:
      * {"code": 0,"msg": "成功","data": {"pageNum": 0,"pageSize": 30,"total": 4,"item": [{"id": 1,"companyId": 1,"userId":
-     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000},{"id": 7,
+     * 5,"amount": 1800,"realName": "账务","department": null,"position": null,"phone": null,"money": 87500.0000,"limit":0},{"id": 7,
      * "companyId": 1,"userId": 1,"amount": null,"realName": null,"department": null,"position": null,"phone": null,"money":
-     * 0.0000},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
-     * "phone": null,"money": -87499.7700},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
-     * "测试","position": "跳舞","phone": null,"money": 10.0000}]}}
+     * 0.0000,"limit":0},{"id": 16,"companyId": 1,"userId": 10,"amount": 1300,"realName": "nmka","department": null,"position": null,
+     * "phone": null,"money": -87499.7700,"limit":0},{"id": 18,"companyId": 1,"userId": 18,"amount": 100,"realName": "刘能","department":
+     * "测试","position": "跳舞","phone": null,"money": 10.0000,"limit":0}]}}
      * @apiGroup Company
      * @apiUse tokenMsg
      * @apiPermission admin
@@ -321,8 +321,8 @@ class CompanyController {
     }
 
     /**
-     * @api {put} /company/limit 修改股东的每日交易上限
-     * @apiDescription  修改股东的每日交易上限
+     * @api {put} /company/limit 批量修改股东的每日交易上限
+     * @apiDescription  批量修改股东的每日交易上限
      * @apiName updateLimit
      * @apiVersion 0.0.1
      * @apiParam {List} userId 用户id

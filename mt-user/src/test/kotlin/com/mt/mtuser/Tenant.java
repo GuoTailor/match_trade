@@ -10,11 +10,17 @@ import java.util.*;
 public class Tenant {
 
     public static void main(String[] args) throws FileNotFoundException {
-        nmka3();
-        nmka2();
+        //nmka3();
+        //nmka2();
+        int a = 1, b = 2, c = 3, d = 4;
+        System.out.println(++a * b + c * d--);
+
+
         ///975460423716
         //System.out.println(987654L * 987654);
     }
+
+
 
     private static void nmka3() {
         int n = 987654;

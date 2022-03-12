@@ -195,7 +195,7 @@ class KlineService : ApplicationRunner {
     fun getWeekTraderInfo(): Mono<List<Map<String, Any?>>> {
         return connect.execute("select trades_capacity, trades_volume, time from mt_1d_kline order by time DESC limit 7")
                 .map { r, _ ->
-                    mapOf("capacity" to r.get("trades_capacity", java.lang.Long::class.java),
+                    mapOf<String, Any?>("capacity" to r.get("trades_capacity", java.lang.Long::class.java),
                             "volume" to r.get("trades_volume", BigDecimal::class.java),
                             "time" to r.get("time", LocalDateTime::class.java))
                 }.all().collectList()

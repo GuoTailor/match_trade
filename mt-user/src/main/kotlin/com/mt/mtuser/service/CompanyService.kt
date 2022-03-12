@@ -183,13 +183,13 @@ class CompanyService {
             val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
             where = where.and("s.company_id").`is`(companyId)
         }
-        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, sum(p.amount) as amount, " +
+        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
                 " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
                 " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
                 " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
                 " from mt_stockholder s" +
                 " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
-                " ${if (where.toString().isBlank()) "" else "where"} $where group by s.id" +
+                " ${if (where.toString().isBlank()) "" else "where"} $where" +
                 query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
@@ -214,13 +214,13 @@ class CompanyService {
                 .and("s.company_id").`is`(companyId)
                 .and("s.dp_id").`in`(idList)
                 .and("s.role_id").`is`(role)
-        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, sum(p.amount) as amount, " +
+        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
                 " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
                 " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
                 " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
                 " from mt_stockholder s" +
                 " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
-                " where $where group by s.id" +
+                " where $where " +
                 query.toPageSql())
                 .`as`(StockholderInfo::class.java)
                 .fetch()
@@ -353,6 +353,9 @@ class CompanyService {
             position!!.amount = info.amount
         }
         positionsDao.save(position!!)
+        if (info.limit != null) {
+            positionsDao.updateLimit(stockholder.userId!!, stockholder.companyId!!, info.limit)
+        }
         return r2dbcService.dynamicUpdate(stockholder)
                 .matching(where("id").`is`(stockholder.id!!))
                 .fetch().awaitRowsUpdated() > 0

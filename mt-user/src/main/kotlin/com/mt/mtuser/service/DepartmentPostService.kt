@@ -80,19 +80,14 @@ class DepartmentPostService {
     }
 
     suspend fun findByDpId(id: Int): DepartmentPostInfo? {
-        return connect.execute("select mdp.id, md.name as departmentName, mp.name as postName " +
+        return connect.execute("select mdp.id, md.name as department_name, mp.name as post_name " +
                 " from mt_department_post mdp " +
                 " left join mt_department md on mdp.department_id = md.id " +
                 " left join mt_post mp on mdp.post_id = mp.id " +
                 " where mdp.id = :id")
                 .bind("id", id)
-                .map { r, _ ->
-                    val dpi = DepartmentPostInfo()
-                    dpi.id = r.get("id", java.lang.Integer::class.java)?.toInt()
-                    dpi.departmentName = r.get("departmentName", String::class.java)
-                    dpi.postName = r.get("postName", String::class.java)
-                    dpi
-                }.awaitOneOrNull()
+                .`as`(DepartmentPostInfo::class.java).fetch()
+                .awaitOneOrNull()
     }
 
     suspend fun findAllBind(companyId: Int): LinkedList<Department> {

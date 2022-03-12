@@ -3,22 +3,7 @@ spring:
     # 使用 Nacos 作为配置中心
     nacos:
       config:
-        group: DEFAULT_GROUP
-        server-addr: nacos:8848
-        file-extension: yml
-        prefix: api
-  profiles: prod
-
-
----
-
-spring:
-  cloud:
-    # 使用 Nacos 作为配置中心
-    nacos:
-      config:
-        group: DEFAULT_GROUP
         server-addr: localhost:8848
         file-extension: yml
-        prefix: api
-  profiles: dev
+  application:
+    name: api

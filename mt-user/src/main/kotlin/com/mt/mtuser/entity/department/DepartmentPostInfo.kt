@@ -35,4 +35,10 @@ class DepartmentPostInfo (
         result = 31 * result + (companyId ?: 0)
         return result
     }
+
+    override fun toString(): String {
+        return "DepartmentPostInfo(id=$id, departmentName=$departmentName, postName=$postName, companyId=$companyId)"
+    }
+
+
 }

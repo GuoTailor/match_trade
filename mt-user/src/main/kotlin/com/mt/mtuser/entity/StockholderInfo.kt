@@ -12,6 +12,7 @@ import java.math.BigDecimal
  * @apiParam {Integer} dpId 职位id
  * @apiParam {String} phone 用户手机号
  * @apiParam {Decimal} money 资金
+ * @apiParam {Integer} limit 交易限制
  */
 class StockholderInfo(
         var id: Int? = null,
@@ -23,7 +24,8 @@ class StockholderInfo(
         var department: String? = null, // 所在部门
         var position: String? = null,   // 职位
         val phone: String? = null,      // 手机号, 该字段用于绑定股东时查找股东
-        val money: BigDecimal? = null   // 资金
+        val money: BigDecimal? = null,  // 资金
+        val limit: Int? = null          // 交易限制
 ) {
     fun toStockholder() = Stockholder(
             companyId = companyId,
@@ -43,4 +45,10 @@ class StockholderInfo(
             stockholder.money = money
         }
     }
+
+    override fun toString(): String {
+        return "StockholderInfo(id=$id, companyId=$companyId, userId=$userId, amount=$amount, realName=$realName, dpId=$dpId, department=$department, position=$position, phone=$phone, money=$money, limit=$limit)"
+    }
+
+
 }
