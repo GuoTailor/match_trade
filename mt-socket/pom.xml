@@ -18,10 +18,14 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.6.10</kotlin.version>
         <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
-        <spring-cloud-alibaba.verion>2021.0.1.0</spring-cloud-alibaba.verion>
+        <spring-cloud-alibaba.verion>2.2.6.RELEASE</spring-cloud-alibaba.verion>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
@@ -53,6 +57,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-security</artifactId>
+            <version>2.2.5.RELEASE</version>
         </dependency>
 
         <dependency>
