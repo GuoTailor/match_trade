@@ -11,7 +11,6 @@ package com.mt.mtsocket.distribute.exception;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-@SuppressWarnings("serial")
 public class ServletRequestBindingException extends Exception {
 
     /**

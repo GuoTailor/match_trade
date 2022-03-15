@@ -16,15 +16,15 @@ object SocketSessionStore {
     internal val userInfoMap = ConcurrentHashMap<Int, UserRoomInfo>()
     internal val peekInfoMap = ConcurrentHashMap<Int, UserRoomInfo>()
 
-    fun addUser(session: WebSocketSessionHandler, roomId: String, model: String, userName: String): Mono<Unit> {
+    fun addUser(session: SessionHandler, roomId: String, model: String, userName: String): Mono<Unit> {
         return BaseUser.getcurrentUser().flatMap {
             val userInfo = UserRoomInfo(session, it.id!!, userName, roomId, model)
             val old = userInfoMap.put(it.id!!, userInfo)
-            logger.info("添加用户 ${it.id} ${session.getId()}")
+            logger.info("添加用户 ${it.id} ${session.getSessionId()}")
             if (old != null) {
                 logger.info("用户多地登陆 ${it.id}")
                 old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyOrder.differentPlaceLogin)
-                        .flatMap { old.session.connectionClosed() }.map { Unit }
+                        .map { old.session.tryEmitComplete() }.map { Unit }
             } else Mono.just(Unit)
         }
     }
@@ -42,7 +42,7 @@ object SocketSessionStore {
         return userInfoMap.count { entry -> entry.value.roomId == roomId }
     }
 
-    fun addPeek(session: WebSocketSessionHandler, roomId: String, model: String): Mono<Unit> {
+    fun addPeek(session: SessionHandler, roomId: String, model: String): Mono<Unit> {
         return BaseUser.getcurrentUser().flatMap {
             val userInfo = UserRoomInfo(session, it.id!!, "", roomId, model)
             val old = peekInfoMap.put(it.id!!, userInfo)
@@ -50,7 +50,7 @@ object SocketSessionStore {
             if (old != null) {
                 logger.info("用户多地登陆 ${it.id}")
                 old.session.send(ResponseInfo.ok<Unit>("用户账号在其他地方登陆"), NotifyOrder.differentPlaceLogin)
-                        .flatMap { old.session.connectionClosed() }.map { Unit }
+                        .map { old.session.tryEmitComplete() }.map { Unit }
             } else Mono.just(Unit)
         }
     }
@@ -64,7 +64,7 @@ object SocketSessionStore {
         logger.info("移除监视 $userId")
     }
 
-    data class UserRoomInfo(val session: WebSocketSessionHandler,
+    data class UserRoomInfo(val session: SessionHandler,
                             val userId: Int,
                             val userName: String,
                             val roomId: String,

@@ -1,24 +1,20 @@
 package com.mt.mtsocket.distribute;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import com.mt.mtcommon.KotlinUtilKt;
+import com.mt.mtcommon.UtilKt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * Abstract base class for Jackson based and content type independent
@@ -40,20 +36,7 @@ public class AbstractJackson2NettyMessageConverter {
 
     protected AbstractJackson2NettyMessageConverter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
-        javaTimeModule.addSerializer(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
-            public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                long timestamp = value.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                gen.writeNumber(timestamp);
-            }
-        });
-        javaTimeModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-            public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                long timestamp = p.getLongValue();
-                return KotlinUtilKt.toLocalDateTime(timestamp);
-            }
-        });
-        this.objectMapper.registerModule(javaTimeModule);
+        this.objectMapper.registerModule(UtilKt.getJavaTimeModule());
         this.objectMapper.registerModule(new KotlinModule());
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -98,15 +81,13 @@ public class AbstractJackson2NettyMessageConverter {
         }
     }
 
-    public Object read(Type type, @Nullable Class<?> contextClass, ServiceRequestInfo inputMessage)
-            throws IOException {
-
+    public Object read(Type type, @Nullable Class<?> contextClass, ServiceRequestInfo inputMessage) {
         JavaType javaType = getJavaType(type, contextClass);
         return readJavaType(javaType, inputMessage);
     }
 
-    private Object readJavaType(JavaType javaType, ServiceRequestInfo inputMessage) throws IOException {
-        return this.objectMapper.readValue(inputMessage.getBody(), javaType);
+    private Object readJavaType(JavaType javaType, ServiceRequestInfo inputMessage) {
+        return objectMapper.convertValue(inputMessage.getBody(), javaType);
     }
 
     /**

@@ -48,9 +48,9 @@ class RoomSocketService {
             if (it.value.roomId == roomId) {
                 val size = store.getOnLineSize(roomId)
                 it.value.session.send(ResponseInfo.ok("人数变化", size), NotifyOrder.notifyNumberChange, true)
-                        .doOnNext { i -> logger.info(i) }
-                        .subscribeOn(Schedulers.elastic())
-                        .subscribe()
+                    .doOnNext { logger.info(size.toString()) }
+                    .subscribeOn(Schedulers.elastic())
+                    .subscribe()
             }
         }
     }
@@ -63,7 +63,7 @@ class RoomSocketService {
             BaseUser.getcurrentUser().flatMap {
                 price.userId = it.id
                 val userRoomInfo = store.getRoomInfo(it.id!!)
-                        ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
+                    ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
                 price.userName = userRoomInfo.userName
                 logger.info(userRoomInfo.roomId)
                 redisUtil.getRoomRecord(userRoomInfo.roomId)
@@ -103,11 +103,11 @@ class RoomSocketService {
             val rival = userRoomInfo.toRivalInfo()
             if (RoomEnum.getRoomEnum(userRoomInfo.mode) == RoomEnum.CLICK) {
                 redisUtil.getUserRival(it.id!!, userRoomInfo.roomId)
-                        .switchIfEmpty(Mono.just(arrayListOf()))
-                        .map { rivals ->
-                            rival.rivals = rivals
-                            rival
-                        }
+                    .switchIfEmpty(Mono.just(arrayListOf()))
+                    .map { rivals ->
+                        rival.rivals = rivals
+                        rival
+                    }
             } else error("错误，点选成交才能选择对手")
         }
     }
@@ -121,8 +121,8 @@ class RoomSocketService {
             val lostOrder = redisUtil.getLastUserOrder(user.id!!, userRoomInfo.roomId)
             val orderList = fun(price: BigDecimal, isBuy: Boolean): Mono<MutableList<OrderParam>> {
                 return redisUtil.getUserOrder(userRoomInfo.roomId)
-                        .filter { it.isBuy != isBuy && if (isBuy) price > it.price else price < it.price }
-                        .collectList()
+                    .filter { it.isBuy != isBuy && if (isBuy) price > it.price else price < it.price }
+                    .collectList()
             }
             lostOrder.flatMap { orderList(it.price ?: BigDecimal(0), it.isBuy!!) }
         }
@@ -136,7 +136,7 @@ class RoomSocketService {
         return BaseUser.getcurrentUser().flatMap {
             cancelOrder.userId = it.id!!
             val userRoomInfo = store.getRoomInfo(it.id!!)
-                    ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
+                ?: return@flatMap Mono.error<RoomRecord>(IllegalStateException("错误，用户没有加入房间"))
             redisUtil.getRoomRecord(userRoomInfo.roomId)
         }.map {
             if (it.mode == RoomEnum.CLICK.mode || it.mode == RoomEnum.TIMING.mode || it.mode == RoomEnum.BICKER.mode) {
@@ -156,7 +156,7 @@ class RoomSocketService {
     fun getOrderRecord(): Mono<List<OrderParam>> {
         return BaseUser.getcurrentUser().flatMap {
             val userRoomInfo = store.getRoomInfo(it.id!!)
-                    ?: return@flatMap Mono.error<List<OrderParam>>(IllegalStateException("错误，用户没有加入房间"))
+                ?: return@flatMap Mono.error<List<OrderParam>>(IllegalStateException("错误，用户没有加入房间"))
             val roomId = userRoomInfo.roomId
             redisUtil.getUserOrder(it.id!!, roomId).collectList()
         }
@@ -167,8 +167,8 @@ class RoomSocketService {
      */
     fun getOnLineSize(): Mono<Int> {
         return BaseUser.getcurrentUser()
-                .map { store.getRoomInfo(it.id!!) ?: error(IllegalStateException("错误，用户没有加入房间")) }
-                .map { store.getOnLineSize(it.roomId) }
+            .map { store.getRoomInfo(it.id!!) ?: error(IllegalStateException("错误，用户没有加入房间")) }
+            .map { store.getOnLineSize(it.roomId) }
     }
 
     /**
@@ -176,11 +176,11 @@ class RoomSocketService {
      */
     fun getTopThree(): Mono<TopThree> {
         return BaseUser.getcurrentUser()
-                .flatMap {
-                    val roomInfo = store.getRoomInfo(it.id!!)
-                            ?: return@flatMap Mono.error<TopThree>(IllegalStateException("错误，用户没有加入房间"))
-                    redisUtil.getRoomTopThree(roomInfo.roomId).defaultIfEmpty(TopThree(roomInfo.roomId, roomInfo.mode))
-                }
+            .flatMap {
+                val roomInfo = store.getRoomInfo(it.id!!)
+                    ?: return@flatMap Mono.error<TopThree>(IllegalStateException("错误，用户没有加入房间"))
+                redisUtil.getRoomTopThree(roomInfo.roomId).defaultIfEmpty(TopThree(roomInfo.roomId, roomInfo.mode))
+            }
     }
 
     /**
@@ -188,13 +188,12 @@ class RoomSocketService {
      */
     fun getLastOrderInfo(): Mono<OrderInfo> {
         return BaseUser.getcurrentUser()
-                .flatMap {
-                    val roomInfo = store.getRoomInfo(it.id!!)
-                            ?: return@flatMap Mono.error<OrderInfo>(IllegalStateException("错误，用户没有加入房间"))
-                    redisUtil.getRoomLastOrder(roomInfo.roomId)
-                            .defaultIfEmpty(OrderInfo(it.id!!, roomInfo.roomId, BigDecimal.ZERO, 0, LocalDateTime.now()))
-                }
-
+            .flatMap {
+                val roomInfo = store.getRoomInfo(it.id!!)
+                    ?: return@flatMap Mono.error<OrderInfo>(IllegalStateException("错误，用户没有加入房间"))
+                redisUtil.getRoomLastOrder(roomInfo.roomId)
+                    .defaultIfEmpty(OrderInfo(it.id!!, roomInfo.roomId, BigDecimal.ZERO, 0, LocalDateTime.now()))
+            }
     }
 
     fun onRoomEvent(event: RoomEvent) {
@@ -208,8 +207,8 @@ class RoomSocketService {
             val roomCloseNotify = fun(userRoomInfo: SocketSessionStore.UserRoomInfo) {
                 if (event.roomId == userRoomInfo.roomId) {
                     userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyOrder.notifyRoomClose, true)
-                            .doOnNext { logger.info(it) }
-                            .subscribeOn(Schedulers.elastic()).subscribe()
+                        .doOnNext { logger.info("房间将于一分钟后关闭。{}", event) }
+                        .subscribeOn(Schedulers.elastic()).subscribe()
                 }
             }
             SocketSessionStore.userInfoMap.forEach { _, userRoomInfo -> roomCloseNotify(userRoomInfo) }

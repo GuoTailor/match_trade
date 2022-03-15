@@ -48,7 +48,7 @@ public abstract class AbstractWebSocketHandlerMethodMapping<T> extends Applicati
      */
     private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
 
-    private boolean detectHandlerMethodsInAncestorContexts = false;
+    private final boolean detectHandlerMethodsInAncestorContexts = false;
 
     @Nullable
     private HandlerMethodMappingNamingStrategy<T> namingStrategy;

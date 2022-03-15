@@ -83,7 +83,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
                             val host = request.mutate()
                                     .header("id", it.id?.toString())
                                     .header("roles", it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
-                                    .header("Authorization")
+                                    .header(HttpHeaders.AUTHORIZATION)
                                     .build()
                             val build = exchange.mutate().request(host).build()
                             chain.filter(build)

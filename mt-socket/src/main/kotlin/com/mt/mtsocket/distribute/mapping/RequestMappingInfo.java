@@ -1,7 +1,7 @@
 package com.mt.mtsocket.distribute.mapping;
 
-import com.mt.mtsocket.distribute.condition.PatternsRequestCondition;
 import com.mt.mtsocket.distribute.ServiceRequestInfo;
+import com.mt.mtsocket.distribute.condition.PatternsRequestCondition;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 

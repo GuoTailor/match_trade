@@ -1,5 +1,6 @@
 package com.mt.mtsocket.distribute.mapping;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -27,7 +28,7 @@ public class RequestMappingWebSocketHandlerMapping extends RequestMappingInfoWeb
     private StringValueResolver embeddedValueResolver;
 
     @Override
-    public void setEmbeddedValueResolver(StringValueResolver resolver) {
+    public void setEmbeddedValueResolver(@NotNull StringValueResolver resolver) {
         this.embeddedValueResolver = resolver;
     }
 

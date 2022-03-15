@@ -1,6 +1,7 @@
 package com.mt.mtsocket.distribute;
 
 import com.mt.mtsocket.distribute.mapping.AbstractWebSocketHandlerMethodMapping;
+import com.mt.mtsocket.distribute.mapping.RequestMappingInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -69,7 +70,7 @@ public class DispatcherServlet {
     @Nullable
     private InvocableHandlerMethod getHandler(ServiceRequestInfo request) {
         if (this.handlerMappings != null) {
-            for (AbstractWebSocketHandlerMethodMapping mapping : this.handlerMappings) {
+            for (AbstractWebSocketHandlerMethodMapping<RequestMappingInfo> mapping : this.handlerMappings) {
                 HandlerMethod handler = mapping.getHandlerInternal(request);
                 if (handler != null) {
                     return new InvocableHandlerMethod(handler);
