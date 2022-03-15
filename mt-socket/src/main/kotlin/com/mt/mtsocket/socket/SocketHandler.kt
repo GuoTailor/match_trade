@@ -81,7 +81,7 @@ abstract class SocketHandler : WebSocketHandler {
     }
 
     private fun printLog(info: ServiceRequestInfo): ServiceRequestInfo {
-        if (info.order != "/echo")
+//        if (info.order != "/echo")
             logger.info("接收到数据order:{} req:{} data:{}", info.order, info.req, info.body)
         return info
     }

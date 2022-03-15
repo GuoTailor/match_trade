@@ -18,7 +18,7 @@ class ServerHttpBearerAuthenticationConverter : ServerAuthenticationConverter {
     private val json = jacksonObjectMapper()
 
     override fun convert(exchange: ServerWebExchange): Mono<Authentication> {
-        return Mono.justOrEmpty(exchange).map<Authentication> {
+        return Mono.justOrEmpty(exchange).map {
             val request: ServerHttpRequest = exchange.request
             val id: String? = request.headers.getFirst("id")
             val role: String = request.headers.getFirst("roles") ?: "[]"

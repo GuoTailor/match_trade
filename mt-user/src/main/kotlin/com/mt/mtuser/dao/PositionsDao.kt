@@ -28,6 +28,10 @@ interface PositionsDao : CoroutineCrudRepository<Positions, Int> {
     @Query("update mt_positions set \"limit\" = :limit where user_id = :userId and company_id = :companyId")
     suspend fun updateLimit(userId: Int, companyId: Int, limit: Int): Int
 
+    @Modifying
+    @Query("UPDATE mt_positions SET company_id = :#{[0].companyId}, stock_id = :#{[0].stockId}, user_id = :#{[0].userId}, amount = :#{[0].amount}, \"limit\" = :#{[0].limit} WHERE mt_positions.id = :#{[0].id}")
+    suspend fun save(entity: Positions): Positions
+
     companion object {
         const val sql = "id,company_id,stock_id,user_id,amount,\"limit\""
     }
