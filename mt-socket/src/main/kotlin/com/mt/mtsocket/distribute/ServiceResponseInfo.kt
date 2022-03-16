@@ -11,5 +11,5 @@ class ServiceResponseInfo (var data: Mono<*> = Mono.empty<Any>(), var req: Int, 
         return data.map { DataResponse(it, req, order) }
     }
 
-    data class DataResponse(val body: Any, val req: Int, val order: Int)
+    data class DataResponse(val data: Any, val req: Int, val order: Int)
 }

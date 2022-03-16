@@ -1,7 +1,7 @@
 package com.mt.mtsocket.distribute;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mt.mtsocket.distribute.HandlerMethodArgumentResolver;import com.mt.mtsocket.distribute.ServiceRequestInfo;import org.apache.commons.logging.Log;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -49,7 +49,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
         Class<?> contextClass = parameter.getContainingClass();
         Object body = NO_VALUE;
         if (messageConverter.canRead(targetType, contextClass)) {
-            if (!ObjectUtils.isEmpty(inputMessage.getBody())) {
+            if (!ObjectUtils.isEmpty(inputMessage.getData())) {
                 body = messageConverter.read(targetType, contextClass, inputMessage);
             }
         }

@@ -16,6 +16,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
 import java.time.Duration
+import java.util.concurrent.TimeoutException
 
 /**
  * Created by gyh on 2020/5/19.
@@ -37,7 +38,8 @@ abstract class SocketHandler : WebSocketHandler {
         sessionHandler.setSessionId(session.id)
         val queryMap = Util.getQueryMap(session.handshakeInfo.uri.query)
         val input = session.receive()
-            .timeout(Duration.ofMillis(5000))
+            .timeout(Duration.ofMillis(8000))
+            .doOnError(TimeoutException::class.java) { logger.info("超时 " + session.id) }
             .map { it.payloadAsText }
             .map(::toServiceRequestInfo)
             .filter { it.order != "/ping" }
@@ -59,7 +61,6 @@ abstract class SocketHandler : WebSocketHandler {
             .doOnTerminate { onDisconnected(queryMap, sessionHandler); sessionHandler.tryEmitComplete() }
             .then()//.log()
         val output = session.send(sessionHandler.asFlux()
-            .map { json.writeValueAsString(it) }
             .doOnError { logger.info("错误 {}", it.message) }
             .map { session.textMessage(it) })
         val onCon = onConnect(queryMap, sessionHandler)
@@ -81,8 +82,8 @@ abstract class SocketHandler : WebSocketHandler {
     }
 
     private fun printLog(info: ServiceRequestInfo): ServiceRequestInfo {
-//        if (info.order != "/echo")
-            logger.info("接收到数据order:{} req:{} data:{}", info.order, info.req, info.body)
+        if (info.order != "/echo")
+            logger.info("接收到数据order:{} req:{} data:{}", info.order, info.req, info.data)
         return info
     }
 

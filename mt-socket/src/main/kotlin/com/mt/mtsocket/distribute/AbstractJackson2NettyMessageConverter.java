@@ -87,7 +87,7 @@ public class AbstractJackson2NettyMessageConverter {
     }
 
     private Object readJavaType(JavaType javaType, ServiceRequestInfo inputMessage) {
-        return objectMapper.convertValue(inputMessage.getBody(), javaType);
+        return objectMapper.convertValue(inputMessage.getData(), javaType);
     }
 
     /**

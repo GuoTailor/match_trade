@@ -1,5 +1,8 @@
 package com.mt.mtsocket.socket
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.mt.mtcommon.getJavaTimeModule
 import com.mt.mtsocket.distribute.ServiceResponseInfo
 import org.slf4j.LoggerFactory
 import reactor.core.Disposable
@@ -20,13 +23,18 @@ class SessionHandler {
     private val responseMap = ConcurrentHashMap<Int, SendInfo>()
     private var retryCount = 3
     private var retryTimeout = 1L
-    private val source: EmitterProcessor<ServiceResponseInfo.DataResponse> = EmitterProcessor.create()
+    private val source: EmitterProcessor<String> = EmitterProcessor.create()
+    private val json = jacksonObjectMapper()
     val dataMap = HashMap<String, Any>()
-
+    init {
+        json.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        json.registerModule(getJavaTimeModule())
+    }
     /**
      * 被动回应调用
      */
-    fun send(message: ServiceResponseInfo.DataResponse, confirm: Boolean = false) {
+    fun send(message: ServiceResponseInfo.DataResponse, confirm: Boolean = false):String {
+        val jsonValue = json.writeValueAsString(message)
         if (confirm) {
             val cycle = Flux.interval(Duration.ofSeconds(retryTimeout))
                 .map {
@@ -36,26 +44,27 @@ class SessionHandler {
                         reqIncrement(message.req)
                         message
                     } else {
-                        source.onNext(message)
+                        source.onNext(jsonValue)
                     }
                 }.subscribeOn(Schedulers.boundedElastic())
                 .subscribe()
             responseMap[message.req] = SendInfo(message.req, cycle)
         }
-        source.onNext(message)
+        source.onNext(jsonValue)
+        return jsonValue
     }
 
     /**
      * 主动发送请调用该方法
      */
-    fun <T> send(data: Mono<T>, order: Int, confirm: Boolean = false): Mono<Unit> {
+    fun <T> send(data: Mono<T>, order: Int, confirm: Boolean = false): Mono<String> {
         val req = responseCount.getAndIncrement()
         return ServiceResponseInfo(data, req, order).getMono()
             .map { send(it, confirm) }
     }
 
     fun tryEmitComplete() = source.onComplete()
-    fun asFlux(): Flux<ServiceResponseInfo.DataResponse> = source
+    fun asFlux(): Flux<String> = source
     fun getSessionId(): String = dataMap["sessionId"].toString()
 
     fun setSessionId(sessionId: String) {
