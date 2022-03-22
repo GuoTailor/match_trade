@@ -35,7 +35,10 @@ class RoomSocketService {
      * 进入房间
      */
     fun enterRoom(roomId: String): Mono<RoomRecord> {
-        return redisUtil.getRoomRecord(roomId).switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
+        return redisUtil.getRoomRecord(roomId).map {
+            logger.info(json.writeValueAsString(it))
+            it
+        }.switchIfEmpty(Mono.error(IllegalStateException("房间未开启")))
     }
 
     /**
