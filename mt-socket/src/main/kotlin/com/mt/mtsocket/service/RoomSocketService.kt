@@ -214,8 +214,8 @@ class RoomSocketService {
                         .subscribeOn(Schedulers.elastic()).subscribe()
                 }
             }
-            SocketSessionStore.userInfoMap.forEach { _, userRoomInfo -> roomCloseNotify(userRoomInfo) }
-            SocketSessionStore.peekInfoMap.forEach { _, userRoomInfo -> roomCloseNotify(userRoomInfo) }
+            SocketSessionStore.userInfoMap.forEach { (_, userRoomInfo) -> roomCloseNotify(userRoomInfo) }
+            SocketSessionStore.peekInfoMap.forEach { (_, userRoomInfo) -> roomCloseNotify(userRoomInfo) }
         }
     }
 

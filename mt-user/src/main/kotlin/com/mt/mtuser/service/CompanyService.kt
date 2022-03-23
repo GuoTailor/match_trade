@@ -109,7 +109,7 @@ class CompanyService {
         roomService.getRoomByCompanyId(listOf(id)).forEach {
             if (it.isEnable()) {
                 try {
-                    roomService.enableRoom(it.roomId!!, false, it.flag)
+                    roomService.enableRoom(it.roomId!!, false, it.flag).awaitSingle()
                 } catch (e: Throwable) {
                     logger.info("房间关闭失败 {} {} ", it.roomId, it.flag)
                 }

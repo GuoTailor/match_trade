@@ -284,8 +284,8 @@ class RoomService {
         var lowScope = "0"
         if (roomRecord != null) {
             val closePrice = klineService.getClosePriceByTableName(LocalDate.now().atStartOfDay(), roomRecord.stockId!!, "mt_1d_kline")
-            highScope = closePrice.multiply(BigDecimal("1.2")).toPlainString()
-            lowScope = closePrice.multiply(BigDecimal("0.8")).toPlainString()
+            highScope = closePrice.multiply(BigDecimal("1.5")).toPlainString()
+            lowScope = closePrice.multiply(BigDecimal("0.5")).toPlainString()
         }
         return mapOf("highScope" to highScope, "lowScope" to lowScope)
     }
