@@ -352,7 +352,7 @@ class CompanyService {
         if (info.amount != null) {
             position!!.amount = info.amount
         }
-        positionsDao.save(position!!)
+        positionsDao.update(position!!)
         if (info.limit != null) {
             positionsDao.updateLimit(stockholder.userId!!, stockholder.companyId!!, info.limit)
         }

@@ -1,9 +1,57 @@
+server:
+  port: 83
+
 spring:
+  application:
+    name: socket
   cloud:
-    # 使用 Nacos 作为配置中心
     nacos:
+      discovery:
+        server-addr: localhost:8848
       config:
         server-addr: localhost:8848
         file-extension: yml
-  application:
-    name: mt-socket
+    stream:
+      rocketmq:
+        binder:
+          name-server: 182.92.6.183:9876
+          group: rocketmq
+      # default-binder: rocketmq
+      bindings:
+        in-trade:
+          destination: trade-topic
+          group: service-order
+        in-result:
+          destination: result-topic
+          group: service-result
+        out-order:
+          destination: order-topic
+          content-type: application/json
+        out-rival:
+          destination: rival-topic
+          content-type: application/json
+        out-cancel:
+          destination: cancel-topic
+          content-type: application/json
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000
+
+logging:
+  level:
+    com:
+      alibaba:
+        nacos:
+          client:
+            config:
+              impl:
+                ClientWorker: WARN
+  file:
+    max-size: 20MB
+    max-history: 60
+    path: ./static/logger
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    file: "${FILE_LOG_PATTERN:%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"

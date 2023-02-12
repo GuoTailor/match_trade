@@ -34,7 +34,7 @@ class RoomSocketHandler : SocketHandler() {
             .map { roomSocketService.onNumberChange(roomId) }
             .onErrorResume {
                 sessionHandler.send(ResponseInfo.failed("错误: ${it.message}"), NotifyOrder.errorNotify)
-                    .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty<Unit>() }
+                    .doOnNext { msg -> logger.info("send $msg") }.flatMap { Mono.empty() }
             }
     }
 

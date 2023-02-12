@@ -16,7 +16,6 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
@@ -77,7 +76,6 @@ class BackStageController {
      */
     @GetMapping("/info")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    //@Cacheable(cacheNames = ["getSystemInfo"])
     fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Number>>> {
         return ResponseInfo.ok(mono {
             val data: MutableMap<String, Number> = HashMap()
@@ -90,7 +88,7 @@ class BackStageController {
             data["totalMoney"] = tradeInfoService.countMoney()                      // 总交易金额
             data["activeUser"] = tradeInfoService.countUserByTradeTime()            // 参与交易总人数
             data
-        }.cache(Duration.ofMinutes(1)))
+        })
     }
 
     /**
@@ -183,14 +181,28 @@ class BackStageController {
         val endTime = LocalDateTime.now()
         return ResponseInfo.ok(mono {
             val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
-            mapOf("dayOpeningNumber" to roomRecordService.countByStartTimeAndCompanyId(startTime, companyId),
-                    "dayTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(startTime, endTime, companyId),
-                    "monthTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(firstDay(), lastDay(), companyId),
-                    "dayTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(startTime, endTime, companyId),
-                    "monthTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(firstDay(), lastDay(), companyId),
-                    "activeUser" to tradeInfoService.countUserByTradeTime(),
-                    "stockholderNum" to roleService.countByCompanyIdAndRoleId(companyId, roleId),
-                    "reportCount" to analysisService.countByCompanyId(companyId))
+            mapOf(
+                "dayOpeningNumber" to roomRecordService.countByStartTimeAndCompanyId(startTime, companyId),
+                "dayTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(
+                    startTime,
+                    endTime,
+                    companyId
+                ),
+                "monthTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(
+                    firstDay(),
+                    lastDay(),
+                    companyId
+                ),
+                "dayTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(startTime, endTime, companyId),
+                "monthTradesVolume" to tradeInfoService.countMoneyByTradeTimeAndCompanyId(
+                    firstDay(),
+                    lastDay(),
+                    companyId
+                ),
+                "activeUser" to tradeInfoService.countUserByTradeTime(),
+                "stockholderNum" to roleService.countByCompanyIdAndRoleId(companyId, roleId),
+                "reportCount" to analysisService.countByCompanyId(companyId)
+            )
         })
     }
 
@@ -214,7 +226,10 @@ class BackStageController {
      */
     @GetMapping("/company/active")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun getTopCompany(query: PageQuery, @RequestParam(required = false) type: String?): Mono<ResponseInfo<List<Map<String, Any?>>>> {
+    fun getTopCompany(
+        query: PageQuery,
+        @RequestParam(required = false) type: String?
+    ): Mono<ResponseInfo<List<Map<String, Any?>>>> {
         return ResponseInfo.ok(mono { roomRecordService.countTopCompany(query, type ?: "day") })
     }
 

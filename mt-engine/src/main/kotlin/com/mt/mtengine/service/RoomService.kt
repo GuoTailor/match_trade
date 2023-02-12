@@ -1,16 +1,13 @@
 package com.mt.mtengine.service
 
-import com.mt.mtcommon.*
+import com.mt.mtcommon.RoomEnum
 import com.mt.mtengine.dao.RoomRecordDao
 import com.mt.mtengine.dao.room.*
 import com.mt.mtengine.entity.room.BaseRoom
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import java.time.Duration
-import java.util.*
 
 /**
  * Created by gyh on 2020/5/2.
@@ -43,12 +40,10 @@ class RoomService {
     // 必须open
     open class CompanyStockId(val companyId: Int, val stockId: Int)
 
-    @Cacheable("companyAndStockId")
     fun findCompanyIdByRoomId(roomId: String, flag: String): Mono<CompanyStockId> {
         val dao = getBaseRoomDao(flag)
         return dao.findBaseByRoomId(roomId)
-                .map { CompanyStockId(it.companyId!!, it.stockId!!) }
-                .cache(Duration.ofHours(12))
+            .map { CompanyStockId(it.companyId!!, it.stockId!!) }
     }
 
     /**
