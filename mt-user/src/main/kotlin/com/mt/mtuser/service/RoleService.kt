@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.flow
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -28,7 +28,7 @@ class RoleService {
     private lateinit var roleDao: RoleDao
 
     @Autowired
-    protected lateinit var connect: DatabaseClient
+    protected lateinit var template: R2dbcEntityTemplate
     private var roles: List<MtRole>? = null
 
     suspend fun getRoles(): List<MtRole> {
@@ -36,7 +36,7 @@ class RoleService {
     }
 
     fun selectRolesByUserId(userId: Int): Flow<Stockholder> {
-        return connect.execute("select" +
+        return template.databaseClient.sql("select" +
                 " ur.id, ur.real_name, ur.dp_id, ur.money, user_id, role_id, company_id, name, name_zh" +
                 " from mt_stockholder ur" +
                 " left join mt_role r on ur.role_id = r.id" +

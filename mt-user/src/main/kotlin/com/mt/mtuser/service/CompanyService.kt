@@ -11,12 +11,12 @@ import com.mt.mtuser.entity.page.getPage
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.core.from
-import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.r2dbc.convert.EntityRowMapper
+import org.springframework.data.r2dbc.core.*
+import org.springframework.data.relational.core.query.Query
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -56,13 +56,8 @@ class CompanyService {
     @Autowired
     private lateinit var departmentPostService: DepartmentPostService
 
-    /**
-     * 无赖使用{@link PostgresqlConnection}
-     * 由于r2dbc的sql语句中不支持占位符，
-     * 故如果要代码动态生成sql语句只能使用代码形式手动拼接字符串
-     */
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     suspend fun count(): Long {
         return companyDao.count()
@@ -109,7 +104,7 @@ class CompanyService {
         roomService.getRoomByCompanyId(listOf(id)).forEach {
             if (it.isEnable()) {
                 try {
-                    roomService.enableRoom(it.roomId!!, false, it.flag).awaitSingle()
+                    roomService.enableRoom(it.roomId!!, false, it.flag)
                 } catch (e: Throwable) {
                     logger.info("房间关闭失败 {} {} ", it.roomId, it.flag)
                 }
@@ -148,11 +143,8 @@ class CompanyService {
             return PageView()
         }
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
-        val result = connect.select()
-                .from<Company>()
-                .matching(query.where().and("id").`in`(roles))
-                .page(query.page())
-                .fetch()
+        val result = template.select<Company>()
+                .matching(Query.query(query.where().and("id").`in`(roles)).with(query.page()))
                 .all()
                 .flatMap { company ->
                     val stock = mono { positionsDao.countStockByCompanyIdAndUserId(userId, company.id!!) }
@@ -167,7 +159,7 @@ class CompanyService {
                         c
                     }
                 }
-        return getPage(result, connect, query, query.where().and("id").`in`(roles))
+        return getPage(result, template, query, query.where().and("id").`in`(roles))
     }
 
     /**
@@ -183,7 +175,7 @@ class CompanyService {
             val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
             where = where.and("s.company_id").`is`(companyId)
         }
-        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
+        return getPage(template.databaseClient.sql("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
                 " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
                 " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
                 " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
@@ -191,30 +183,29 @@ class CompanyService {
                 " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
                 " ${if (where.toString().isBlank()) "" else "where"} $where" +
                 query.toPageSql())
-                .`as`(StockholderInfo::class.java)
-                .fetch()
-                .all(), connect, query, "mt_stockholder s", where)
+                .map(EntityRowMapper(StockholderInfo::class.java, template.converter))
+                .all(), template, query, "mt_stockholder s", where)
     }
 
     /**
      * 获取股东通过部门
      */
     suspend fun getShareholderByDepartment(query: PageQuery, companyId: Int, name: String): PageView<StockholderInfo> {
-        val idList = connect.execute("select mdp.id from mt_department_post mdp, mt_department md " +
+        val idList = template.databaseClient.sql("select mdp.id from mt_department_post mdp, mt_department md " +
                 " where mdp.company_id = :companyId " +
                 "  and mdp.department_id = md.id " +
                 "  and md.name = :name")
                 .bind("companyId", companyId)
                 .bind("name", name)
-                .`as`(java.lang.Integer::class.java)
-                .fetch().all().collectList().awaitSingle()
+            .map(EntityRowMapper(StockholderInfo::class.java, template.converter))
+            .all().collectList().awaitSingle()
         if (idList.isEmpty()) error("公司不存在部门")
         val role = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
         val where = query.where("s")
                 .and("s.company_id").`is`(companyId)
                 .and("s.dp_id").`in`(idList)
                 .and("s.role_id").`is`(role)
-        return getPage(connect.execute("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
+        return getPage(template.databaseClient.sql("select s.id, s.user_id, s.company_id, s.real_name, s.dp_id, s.money, p.amount, p.\"limit\", " +
                 " (select md.name as department from mt_department_post mdp LEFT JOIN mt_department md on md.id = mdp.department_id where mdp.id = s.dp_id)," +
                 " (select mp.name as position from mt_department_post mdp LEFT JOIN mt_post mp on mp.id = mdp.post_id where mdp.id = s.dp_id), " +
                 " (select mu.phone from mt_user mu where s.user_id = mu.id) " +
@@ -222,9 +213,8 @@ class CompanyService {
                 " LEFT JOIN mt_positions p on p.company_id = s.company_id and p.user_id = s.user_id " +
                 " where $where " +
                 query.toPageSql())
-                .`as`(StockholderInfo::class.java)
-                .fetch()
-                .all(), connect, query, "mt_stockholder s", where)
+            .map(EntityRowMapper(StockholderInfo::class.java, template.converter))
+                .all(), template, query, "mt_stockholder s", where)
     }
 
     /**
@@ -232,7 +222,7 @@ class CompanyService {
      */
     suspend fun findAllByQuery(query: PageQuery): PageView<Company> {
         val where = query.where("mc")
-        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId" +
+        return getPage(template.databaseClient.sql("select mc.*, mu.phone, mu.nick_name, mu.id as analystId" +
                 " , mu2.phone as adminPhone, ms2.real_name as adminName" +
                 " from mt_company mc " +
                 " LEFT JOIN mt_stockholder ms on ms.company_id = mc.id and ms.role_id = 2 " +
@@ -260,7 +250,7 @@ class CompanyService {
                     company.adminPhone = r.get("adminPhone", String::class.java)
                     company.adminName = r.get("adminName", String::class.java)
                     company
-                }.all(), connect, query, "mt_company")
+                }.all(), template, query, "mt_company")
     }
 
     /**
@@ -269,7 +259,7 @@ class CompanyService {
     suspend fun findByUser(query: PageQuery): PageView<Company> {
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val where = query.where("mc")
-        return getPage(connect.execute("select mc.*, mu.phone, mu.nick_name, mu.id as analystId " +
+        return getPage(template.databaseClient.sql("select mc.*, mu.phone, mu.nick_name, mu.id as analystId " +
                 " from mt_company mc, " +
                 " mt_stockholder ms " +
                 " LEFT JOIN mt_user mu on ms.user_id = mu.id " +
@@ -296,7 +286,7 @@ class CompanyService {
                     company.analystId = r.get("analystId", java.lang.Integer::class.java)?.toInt()
                     company.analystPhone = r.get("phone", String::class.java)
                     company
-                }.all(), connect, query, "mt_company")
+                }.all(), template, query, "mt_company")
     }
 
     /**
@@ -318,8 +308,7 @@ class CompanyService {
                 stockholder.roleId = roleId
                 stockholder.companyId = info.companyId
                 r2dbcService.dynamicUpdate(stockholder)
-                        .matching(where("id").`is`(stockholder.id!!))
-                        .fetch().awaitRowsUpdated()
+                        .awaitSingle()
                 return stockholder
             } else throw IllegalStateException("用户已经是股东 ${stockholder.realName}")
         } else throw IllegalStateException("不能为公司 ${info.companyId} 添加股东，没有权限")
@@ -357,8 +346,7 @@ class CompanyService {
             positionsDao.updateLimit(stockholder.userId!!, stockholder.companyId!!, info.limit)
         }
         return r2dbcService.dynamicUpdate(stockholder)
-                .matching(where("id").`is`(stockholder.id!!))
-                .fetch().awaitRowsUpdated() > 0
+                .awaitSingle() > 0
     }
 
     /**

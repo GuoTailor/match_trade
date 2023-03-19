@@ -22,7 +22,7 @@ class RoomTask : Job {
         val roomId = context.mergedJobDataMap[roomIdKey].toString()
         val roomFlag = context.mergedJobDataMap[roomFlagKey].toString()
         log.info("开始定时任务 {} {}", enable, roomId)
-        val result = roomService.enableRoom(roomId, enable, roomFlag)
+        val result = mono { roomService.enableRoom(roomId, enable, roomFlag) }
         result.block()
     }
 

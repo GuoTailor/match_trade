@@ -4,7 +4,9 @@ import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.awaitOne
+import org.springframework.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -20,7 +22,7 @@ class Compute1MKlineService : ComputeKline() {
     val stepOfSeconds = 60L
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     private lateinit var tradeInfoDao: TradeInfoDao
@@ -45,7 +47,7 @@ class Compute1MKlineService : ComputeKline() {
     }
 
     override suspend fun getMinComputeTime(): LocalDateTime? {
-        return connect.execute("select min(trade_time) as tradeTime from mt_trade_info")
+        return template.databaseClient.sql("select min(trade_time) as tradeTime from mt_trade_info")
                 .map { t, _ -> Optional.ofNullable(t.get("tradeTime", LocalDateTime::class.java)) }
                 .awaitOne().orElse(null)
     }
@@ -55,7 +57,7 @@ class Compute1MKlineService : ComputeKline() {
     override suspend fun isExist(time: LocalDateTime, stockId: Int, companyId: Int): Boolean = false
 
     suspend fun selectMinuteKline(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Kline {
-        return connect.execute("select count(1) as tradesNumber," +
+        return template.databaseClient.sql("select count(1) as tradesNumber," +
                 " COALESCE(sum(trade_amount), 0) as tradesCapacity, " +
                 " COALESCE(sum(trade_money), 0) as tradesVolume," +
                 " COALESCE(avg(trade_price), 0) as avgPrice," +

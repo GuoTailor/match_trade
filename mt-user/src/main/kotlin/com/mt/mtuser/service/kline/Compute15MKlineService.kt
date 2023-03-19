@@ -3,7 +3,9 @@ package com.mt.mtuser.service.kline
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.awaitOne
+import org.springframework.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -18,7 +20,7 @@ class Compute15MKlineService : ComputeKline() {
     val stepOfSeconds = 15 * 60L
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     override fun handlerRequest(time: LocalDateTime): Boolean {
         return time.minute % 15 == 0 && time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
@@ -31,7 +33,7 @@ class Compute15MKlineService : ComputeKline() {
     }
 
     override suspend fun getMinComputeTime(): LocalDateTime? {
-        return connect.execute("select min(time) as time from mt_1m_kline")
+        return template.databaseClient.sql("select min(time) as time from mt_1m_kline")
                 .map { t, _ -> Optional.ofNullable(t.get("time", LocalDateTime::class.java)) }
                 .awaitOne().orElse(null)
     }
@@ -49,7 +51,7 @@ class Compute15MKlineService : ComputeKline() {
         // TODO 也许获取开盘价和收盘价有更好的方法
         kline.openPrice = klineService.getOpenPriceByTableName(startTime, endTime, stockId, "mt_1m_kline")
         kline.closePrice = klineService.getClosePriceByTableName(endTime, stockId, "mt_1m_kline")
-        return connect.execute("select" +
+        return template.databaseClient.sql("select" +
                 " COALESCE(sum(trades_capacity), 0) as tradesCapacity," +
                 " COALESCE(sum(trades_volume), 0) as tradesVolume," +
                 " COALESCE(sum(trades_number), 0) as tradesNumber," +

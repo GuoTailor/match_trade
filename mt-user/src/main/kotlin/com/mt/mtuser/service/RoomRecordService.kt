@@ -8,14 +8,12 @@ import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import kotlin.streams.toList
 
 /**
  * Created by gyh on 2020/5/7.
@@ -29,7 +27,7 @@ class RoomRecordService {
     private lateinit var roleService: RoleService
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     suspend fun countByStartTime(time: LocalDateTime = LocalTime.MIN.toLocalDateTime()) = roomRecordDao.countByStartTime(time)
 
@@ -75,7 +73,7 @@ class RoomRecordService {
                     " ${query.toPageSql()}"
         }
         val time = if (type == "day") LocalDate.now() else firstDay().toLocalDate()
-        return connect.execute(sql)
+        return template.databaseClient.sql(sql)
                 .bind("time", time)
                 .map { r, _ ->
                     mapOf("companyId" to r.get("company_id", java.lang.Integer::class.java),

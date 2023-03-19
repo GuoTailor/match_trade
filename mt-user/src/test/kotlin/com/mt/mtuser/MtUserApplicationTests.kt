@@ -1,6 +1,7 @@
 package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.RoomRecordDao
@@ -8,6 +9,7 @@ import com.mt.mtuser.dao.StockDao
 import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.service.*
+import com.mt.mtuser.service.kline.KlineService
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -37,9 +39,6 @@ class MtUserApplicationTests {
     private lateinit var roomRecordDao: RoomRecordDao
 
     @Autowired
-    protected lateinit var connect: DatabaseClient
-
-    @Autowired
     private lateinit var redisUtil: RedisUtil
 
     @Autowired
@@ -56,6 +55,36 @@ class MtUserApplicationTests {
 
     @Autowired
     lateinit var departmentPostService: DepartmentPostService
+    @Autowired
+    lateinit var klineService: KlineService
+    @Autowired
+    lateinit var json: ObjectMapper
+    @Autowired
+    lateinit var userService: UserService
+
+    @Test
+    fun testTransactional() {
+        runBlocking {
+            val user = User()
+            user.phone = "123"
+            user.password = "123"
+            userService.register(user)
+        }
+    }
+
+    @Test
+    fun testQuery() {
+        mono {
+            val findKlineByStockId = klineService.findKlineByStockId(19, "1m", PageQuery())
+            findKlineByStockId.item?.forEach {
+                println(json.writeValueAsString(it))
+                if (it.id == 811L) {
+                    it.id = null
+                    klineService.saveKline(it, "mt_1m_kline")
+                }
+            }
+        }.block()
+    }
 
     @Test
     fun testRedis() {
@@ -63,24 +92,6 @@ class MtUserApplicationTests {
             val record = redisUtil.deleteAndGetRoomRecord("1")
             println(record?.toString())
         }.block()
-    }
-
-    fun nmka2(user: Mono<User>): Mono<Stockholder> {
-        return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
-                .switchIfEmpty(Mono.error(IllegalStateException("请正确填写用户名或密码")))
-                .flatMap { println("nmka");Mono.just(0) }
-                .filter { it == 0 }
-                .switchIfEmpty(Mono.error(IllegalStateException("用户已存在")))
-                .flatMap { user }
-                .flatMap { ur ->
-                    ur.passwordEncoder()
-                    ur.id = 2
-                    Mono.just(ur)
-                }.flatMap { newUser ->
-                    val role = Stockholder()
-                    role.userId = newUser.id
-                    Mono.just(role)
-                }
     }
 
     @Test

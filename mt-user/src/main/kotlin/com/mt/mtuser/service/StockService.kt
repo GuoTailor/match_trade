@@ -6,9 +6,9 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.annotation.Id
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.r2dbc.core.select
+import org.springframework.data.relational.core.query.Query.query
 import org.springframework.stereotype.Service
 
 /**
@@ -19,7 +19,7 @@ class StockService {
     @Autowired
     private lateinit var stockDao: StockDao
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     suspend fun findById(id: Int) = stockDao.findById(id)
 
@@ -31,13 +31,10 @@ class StockService {
 
     suspend fun findAllByQuery(query: PageQuery, companyId: Int): PageView<Stock> {
         val where = query.where().and("company_id").`is`(companyId)
-        return getPage(connect.select()
-                .from<Stock>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
+        return getPage(template.select<Stock>()
+                .matching(query(where).with(query.page()))
                 .all()
-                , connect, query, where)
+                , template, query, where)
     }
 
     internal suspend fun save(stock: Stock) = stockDao.save(stock)

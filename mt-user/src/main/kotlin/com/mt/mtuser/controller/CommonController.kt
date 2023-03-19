@@ -103,7 +103,7 @@ class CommonController {
             }.filter { localCode -> localCode != null && code == localCode }
                     .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
                     .flatMap { mono { redisUtil.deleteCode(user.phone!!) } }
-                    .flatMap { userService.register(user) }
+                    .flatMap { mono { userService.register(user) } }
         }
         return ResponseInfo.ok(result)
     }

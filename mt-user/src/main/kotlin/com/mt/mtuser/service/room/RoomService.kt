@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.awaitRowsUpdated
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -92,13 +93,14 @@ class RoomService {
      * 使能一个房间
      * @param value true：启用一个房间 false:关闭一个房间
      */
-    fun enableRoom(roomId: String, value: Boolean, flag: String) = r2dbc.withTransaction {
+    @Transactional(rollbackFor = [Exception::class])
+    suspend fun enableRoom(roomId: String, value: Boolean, flag: String) {
         val dao = getBaseRoomDao<BaseRoom>(flag)
         val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
         val enable = companyDao.findEnableById(room.companyId!!)
         if (enable == "0") {
             logger.info("房间{}已禁用", room.companyId)
-            return@withTransaction
+            return
         }
         val rest = dao.enableRoomById(roomId, room.setEnable<BaseRoom>(value).enable!!)
         if (rest > 0) {
@@ -127,8 +129,7 @@ class RoomService {
                                 ?: tradeInfoService.getOpenPriceByRoomId(roomRecord.startTime!!, roomRecord.endTime!!, roomId)
                     }
                     r2dbc.dynamicUpdate(roomRecord)
-                            .matching(where("id").`is`(roomRecord.id!!))
-                            .fetch().awaitRowsUpdated()
+                            .awaitSingle()
                     compute1DKlineService.computeCurrent(roomRecord.stockId!!, roomRecord.companyId!!)
                 }
                 redisUtil.publishRoomEvent(RoomEvent(roomId, value))
@@ -169,11 +170,9 @@ class RoomService {
         val companyList = roleService.getCompanyList(Stockholder.ADMIN)
         return if (companyList.contains(room.companyId!!)) {
             if (oldFlag == room.flag) {
-                room.roomId = null
                 room.enable = null
                 val result = r2dbc.dynamicUpdate(room)
-                        .matching(where("room_id").`is`(roomId))
-                        .fetch().awaitRowsUpdated()
+                        .awaitSingle()
                 logger.info("更新结果 {}", result)
                 val newRoom = getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
                 // 修改定时任务开始和结束的时间
@@ -305,10 +304,10 @@ class RoomService {
         if (room.enable == BaseRoom.DISABLED
                 && room.startTime!! <= LocalTime.now()
                 && (room.startTime!! + room.time!!) > LocalTime.now()) {
-            enableRoom(room.roomId!!, true, room.flag).awaitSingle()
+            enableRoom(room.roomId!!, true, room.flag)
         }
         if (room.enable == BaseRoom.ENABLE && room.startTime!! + room.time!! <= LocalTime.now()) {
-            enableRoom(room.roomId!!, false, room.flag).awaitSingle()
+            enableRoom(room.roomId!!, false, room.flag)
         }
         quartzManager.addJob(RoomStartJobInfo(room))
         quartzManager.addJob(RoomEndJobInfo(room))

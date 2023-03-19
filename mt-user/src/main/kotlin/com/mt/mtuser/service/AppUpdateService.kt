@@ -8,7 +8,10 @@ import com.mt.mtuser.entity.page.getPage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.core.select
+import org.springframework.data.relational.core.query.Query
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -27,7 +30,7 @@ class AppUpdateService {
     lateinit var appUpdateDao: AppUpdateDao
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     fun uploadWgt(filePart: FilePart, appUpdate: AppUpdate): Mono<AppUpdate> {
         logger.info("{}", appUpdate.forceUpdate)
@@ -49,12 +52,9 @@ class AppUpdateService {
     }
 
     suspend fun findAll(query: PageQuery): PageView<AppUpdate> {
-        return getPage(connect.select()
-                .from<AppUpdate>()
-                .matching(query.where())
-                .page(query.page())
-                .fetch()
-                .all(), connect, query)
+        return getPage(template.select<AppUpdate>()
+                .matching(Query.query(query.where()).with(query.page()))
+                .all(), template, query)
     }
 
     fun deleteById(id: Int): Mono<Void> {

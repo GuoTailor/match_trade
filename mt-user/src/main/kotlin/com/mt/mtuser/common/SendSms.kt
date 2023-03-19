@@ -23,7 +23,7 @@ object SendSms {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     private const val DEF_CONN_TIMEOUT = 5000
     private const val DEF_READ_TIMEOUT = 5000L
-    private const val appKey = "xxx"
+    private const val appKey = "b077b8e7ee064924895a182a225fb89b"
     private const val url = "http://api.smsbao.com/sms"
     private val resultMap = mapOf(
         0 to "成功",

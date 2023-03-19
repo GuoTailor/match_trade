@@ -43,14 +43,13 @@ class UserController {
      * @apiPermission user
      */
     @GetMapping("/info")
-    fun getUserInfo(@RequestParam(required = false) id: Int?): Mono<ResponseInfo<User>> {
-        return mono {
-            val userId = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
-            val user = userService.findById(userId) ?: return@mono ResponseInfo<User>(1, "用户不存在")
-            val roles = roleService.selectRolesByUserId(user.id!!).toList()
-            user.roles = roles
-            ResponseInfo(0, "成功", user)
-        }
+    suspend fun getUserInfo(@RequestParam(required = false) id: Int?): ResponseInfo<User> {
+        val userId = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
+        val user = userService.findById(userId) ?: return ResponseInfo(1, "用户不存在")
+        val roles = roleService.selectRolesByUserId(user.id!!).toList()
+        user.roles = roles
+        return ResponseInfo(0, "成功", user)
+
     }
 
     /**
@@ -146,8 +145,10 @@ class UserController {
     fun updatePassword(@RequestBody data: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
         return ResponseInfo.ok(mono {
             val map = data.awaitSingle()
-            userService.updatePassword(map["oldPassword"] ?: error("oldPassword 不能为空"),
-                    map["newPassword"] ?: error("newPassword 不能为空"))
+            userService.updatePassword(
+                map["oldPassword"] ?: error("oldPassword 不能为空"),
+                map["newPassword"] ?: error("newPassword 不能为空")
+            )
         })
     }
 

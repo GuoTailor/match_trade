@@ -7,3 +7,9 @@ spring:
         file-extension: yml
   application:
     name: api
+  config:
+    import:
+      - optional:nacos:api.yml
+
+  main:
+    allow-circular-references: true

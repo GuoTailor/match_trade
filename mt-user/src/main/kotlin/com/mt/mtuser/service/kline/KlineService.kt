@@ -12,17 +12,18 @@ import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitOne
-import org.springframework.data.r2dbc.core.awaitOneOrNull
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
+import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Query
+import org.springframework.r2dbc.core.awaitOne
+import org.springframework.r2dbc.core.awaitOneOrNull
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -30,7 +31,6 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 /**
  * Created by gyh on 2020/6/6
@@ -40,7 +40,7 @@ class KlineService : ApplicationRunner {
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     private lateinit var stockService: StockService
@@ -71,10 +71,10 @@ class KlineService : ApplicationRunner {
 
     override fun run(args: ApplicationArguments?) {
         compute1MKlineService
-                .setNext(compute15MKlineService)
-                .setNext(compute1HKlineService)
-                .setNext(compute4HKlineService)
-                .setNext(compute1DKlineService)
+            .setNext(compute15MKlineService)
+            .setNext(compute1HKlineService)
+            .setNext(compute4HKlineService)
+            .setNext(compute1DKlineService)
         kLineChain = compute1MKlineService
         logger.info(kLineChain.tableName)
     }
@@ -103,36 +103,25 @@ class KlineService : ApplicationRunner {
     }
 
     suspend fun getLastTimeByKline(tableName: String): LocalDateTime? {
-        return connect.execute("select max(time) as time from $tableName")
-                .map { t, _ -> Optional.ofNullable(t.get("time", LocalDateTime::class.java)) }
-                .awaitOne().orElse(null)
+        return template.databaseClient.sql("select max(time) as time from $tableName")
+            .map { t, _ -> Optional.ofNullable(t.get("time", LocalDateTime::class.java)) }
+            .awaitOne().orElse(null)
     }
 
-    suspend fun saveKline(kline: Kline, tableName: String): Int {
-        return connect.insert().into(tableName)
-                .value("stock_id", kline.stockId!!)
-                .value("company_id", kline.companyId!!)
-                .value("time", kline.time!!)
-                .value("trades_capacity", kline.tradesCapacity!!)
-                .value("trades_volume", kline.tradesVolume!!)
-                .value("trades_number", kline.tradesNumber!!)
-                .value("avg_price", kline.avgPrice!!)
-                .value("max_price", kline.maxPrice!!)
-                .value("min_price", kline.minPrice!!)
-                .value("open_price", kline.openPrice!!)
-                .value("close_price", kline.closePrice!!)
-                .fetch()
-                .awaitRowsUpdated()
+    suspend fun saveKline(kline: Kline, tableName: String): Kline {
+        return template.insert(Kline::class.java).into(tableName)
+                .using(kline)
+                .awaitSingle()
     }
 
     suspend fun updateKline(kline: Kline, tableName: String): Int {
-        return connect.update()
-                .table(tableName)
-                .using(r2dbcService.getUpdate(kline))
-                .matching(where("time").`is`(kline.time!!)
+        return template.update(Kline::class.java).inTable(tableName)
+                .matching(
+                    Query.query(where("time").`is`(kline.time!!)
                         .and("stock_id").`is`(kline.stockId!!)
-                        .and("company_id").`is`(kline.companyId!!))
-                .fetch().awaitRowsUpdated()
+                        .and("company_id").`is`(kline.companyId!!)))
+                .apply(r2dbcService.getUpdate(kline))
+                .awaitSingle()
     }
 
     suspend fun findKline(roomId: String, mode: String, timeline: String, page: PageQuery): PageView<Kline> {
@@ -156,21 +145,18 @@ class KlineService : ApplicationRunner {
             else -> error("不支持的timeline: $timeline")
         }
         val where = page.where().and("stock_id").`is`(stockId)
-        return getPage(connect.select()
+        return getPage(template.select(Kline::class.java)
                 .from(table)
-                .matching(where)
-                .page(page.page())
-                .`as`(Kline::class.java)
-                .fetch()
-                .all()
-                , connect, page, table, where)
+                .matching(Query.query(where).with(page.page()))
+                .all(), template, page, table, where
+        )
     }
 
     /**
      * 获取开盘价
      */
     suspend fun getOpenPriceByTableName(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int, tableName: String): BigDecimal {
-        return connect.execute("select open_price from $tableName where time between :startTime and :endTime and stock_id = :stockId order by time asc limit 1")
+        return template.databaseClient.sql("select open_price from $tableName where time between :startTime and :endTime and stock_id = :stockId order by time asc limit 1")
                 .bind("startTime", startTime)
                 .bind("endTime", endTime)
                 .bind("stockId", stockId)
@@ -182,7 +168,7 @@ class KlineService : ApplicationRunner {
      * 获取收盘价
      */
     suspend fun getClosePriceByTableName(endTime: LocalDateTime, stockId: Int, tableName: String): BigDecimal {
-        return connect.execute("select close_price from $tableName where time < :endTime and stock_id = :stockId order by time desc limit 1")
+        return template.databaseClient.sql("select close_price from $tableName where time < :endTime and stock_id = :stockId order by time desc limit 1")
                 .bind("endTime", endTime)
                 .bind("stockId", stockId)
                 .map { r, _ -> r.get("close_price", BigDecimal::class.java) }
@@ -193,7 +179,7 @@ class KlineService : ApplicationRunner {
      * 获取开盘价
      */
     fun getWeekTraderInfo(): Mono<List<Map<String, Any?>>> {
-        return connect.execute("select trades_capacity, trades_volume, time from mt_1d_kline order by time DESC limit 7")
+        return template.databaseClient.sql("select trades_capacity, trades_volume, time from mt_1d_kline order by time DESC limit 7")
                 .map { r, _ ->
                     mapOf<String, Any?>("capacity" to r.get("trades_capacity", java.lang.Long::class.java),
                             "volume" to r.get("trades_volume", BigDecimal::class.java),

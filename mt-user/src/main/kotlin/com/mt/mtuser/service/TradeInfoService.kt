@@ -15,13 +15,13 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitOne
-import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Query.query
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ZeroCopyHttpOutputMessage
 import org.springframework.http.server.reactive.ServerHttpResponse
+import org.springframework.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.io.File
@@ -55,7 +55,7 @@ class TradeInfoService {
     private lateinit var stockService: StockService
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     private lateinit var positionsDao: PositionsDao
@@ -155,7 +155,7 @@ class TradeInfoService {
     }
 
     suspend fun buyOverview(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int, buyerId: Int): Overview {
-        return connect.execute("select COALESCE(sum(trade_amount), 0) as buyStock," +
+        return template.databaseClient.sql("select COALESCE(sum(trade_amount), 0) as buyStock," +
                 " COALESCE(sum(trade_money), 0) as buyMoney," +
                 " COALESCE(avg(trade_price), 0) as avgBuyMoney " +
                 " from ${TradeInfoDao.table} " +
@@ -177,7 +177,7 @@ class TradeInfoService {
     }
 
     suspend fun sellOverview(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int, sellId: Int): Overview {
-        return connect.execute("select COALESCE(sum(trade_amount), 0) as sellStock," +
+        return template.databaseClient.sql("select COALESCE(sum(trade_amount), 0) as sellStock," +
                 " COALESCE(sum(trade_money), 0) as sellMoney," +
                 " COALESCE(avg(trade_price), 0) as avgSellMoney " +
                 " from ${TradeInfoDao.table} " +
@@ -245,12 +245,9 @@ class TradeInfoService {
         val where = query.where()
                 .and("room_id").`is`(roomId)
                 .and("trade_time").lessThan(endTime)
-        return getPage(connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, where)
+        return getPage(template.select<TradeInfo>()
+                .matching(query(where).with(query.page()))
+                .all(), template, query, where)
     }
 
     /**
@@ -258,12 +255,9 @@ class TradeInfoService {
      */
     suspend fun findOrder(roomId: String, query: PageQuery): PageView<TradeInfo> {
         val where = query.where().and("room_id").`is`(roomId)
-        return getPage(connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, where)
+        return getPage(template.select<TradeInfo>()
+                .matching(query( where).with(query.page()))
+                .all(), template, query, where)
     }
 
     /**
@@ -276,12 +270,9 @@ class TradeInfoService {
         // 无赖之举，使用connect.execute无法使用matching，只能手动拼接字符串，就必须格式化时间，
         // 而使用connect.select格式化时间后会抱怨：操作符不存在: timestamp without time zone >= character varying
         val countWhere = query.where().and("company_id").`is`(companyId).and("trade_time").between("'${date.format(formatter)}'", "'${endTime.format(formatter)}'")
-        return getPage(connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, countWhere)
+        return getPage(template.select<TradeInfo>()
+                .matching(query(where).with(query.page()))
+                .all(), template, query, countWhere)
     }
 
     suspend fun getTradeLimit(): Map<String, Any?> {
@@ -312,12 +303,9 @@ class TradeInfoService {
             else -> query.where().and(where("seller_id").`is`(userId))
         }.and(where("trade_time").between("'${date.format(formatter)}'", "'${endTime.format(formatter)}'"))
 
-        return getPage(connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, countWhere)
+        return getPage(template.select<TradeInfo>()
+                .matching(query(where).with(query.page()))
+                .all(), template, query, countWhere)
     }
 
     suspend fun findOrderByUserId(userId: Int, query: PageQuery, isBuy: Boolean?): PageView<TradeInfo> {
@@ -326,12 +314,9 @@ class TradeInfoService {
             isBuy -> query.where().and(where("buyer_id").`is`(userId))
             else -> query.where().and(where("seller_id").`is`(userId))
         }
-        return getPage(connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
-                .all(), connect, query, where)
+        return getPage(template.select<TradeInfo>()
+                .matching(query(where).with(query.page()))
+                .all(), template, query, where)
     }
 
     /**
@@ -341,12 +326,11 @@ class TradeInfoService {
         val stockId = stockService.findByCompanyId(companyId).first().id!!
         val where = page.where("k").and("k.stock_id").`is`(stockId)
         val pageSql = page.toPageSql()
-        val sql = "select k.*, count(rr.id) as openNumber from mt_1d_kline k " +
+        return getPage(template.databaseClient.sql("select k.*, count(rr.id) as openNumber from mt_1d_kline k " +
                 " left join mt_room_record rr " +
                 " on rr.stock_id = k.stock_id " +
                 " and rr.start_time between k.time and k.time + INTERVAL'1 day'  " +
-                " where $where group by k.id $pageSql"
-        return getPage(connect.execute(sql)
+                " where $where group by k.id $pageSql")
                 .map { r, _ ->
                     mapOf<String, Any?>("id" to r.get("id", java.lang.Long::class.java),
                             "stockId" to r.get("stock_id", java.lang.Integer::class.java),
@@ -361,7 +345,7 @@ class TradeInfoService {
                             "closePrice" to r.get("close_price", BigDecimal::class.java),
                             "companyId" to r.get("company_id", java.lang.Integer::class.java),
                             "openNumber" to r.get("openNumber", java.lang.Integer::class.java))
-                }.all(), connect, page, "mt_1d_kline k", where)
+                }.all(), template, page, "mt_1d_kline k", where)
     }
 
     /**
@@ -372,7 +356,7 @@ class TradeInfoService {
         val endTime = LocalDateTime.now()
         val pageSql = page.toPageSql()
         val where = page.where("mdp").and("mdp.company_id").`is`(companyId)
-        return getPage(connect.execute("select count(1) as tradesNumber," +
+        return getPage(template.databaseClient.sql("select count(1) as tradesNumber," +
                 " COALESCE(sum(mti.trade_amount), 0) as tradesCapacity," +
                 " COALESCE(sum(mti.trade_money), 0)  as tradesVolume," +
                 " COALESCE(avg(mti.trade_price), 0)  as avgPrice," +
@@ -395,14 +379,14 @@ class TradeInfoService {
                             "minPrice" to r.get("minPrice", BigDecimal::class.java),
                             "maxPrice" to r.get("maxPrice", BigDecimal::class.java),
                             "name" to r.get("name", String::class.java))
-                }.all(), connect, page, "mt_department_post mdp", where)
+                }.all(), template, page, "mt_department_post mdp", where)
     }
 
     /**
      * 获取指定时间范围的最大和最小报价
      */
     suspend fun findMaxMinPriceByTradeTimeAndRoomId(roomId: String, startTime: LocalDateTime, endTime: LocalDateTime): Map<String, BigDecimal> {
-        return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
+        return template.databaseClient.sql("select COALESCE(min(trade_price), 0) as minPrice," +
                 " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
                 " where trade_time between :startTime and :endTime " +
                 " and room_id = :roomId ")
@@ -416,7 +400,7 @@ class TradeInfoService {
     }
 
     suspend fun findMaxMinPriceByTradeTimeAndStockId(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Map<String, BigDecimal> {
-        return connect.execute("select COALESCE(min(trade_price), 0) as minPrice," +
+        return template.databaseClient.sql("select COALESCE(min(trade_price), 0) as minPrice," +
                 " COALESCE(max(trade_price), 0) as maxPrice from ${TradeInfoDao.table} " +
                 " where trade_time between :startTime and :endTime " +
                 " and stock_id = :stockId ")
@@ -433,7 +417,7 @@ class TradeInfoService {
      * 获取指定时间内的交易量排名
      */
     fun getTradeAmountRank(topNumber: Int, time: LocalDateTime = firstDay()): Mono<List<Map<String, Any?>>> {
-        return connect.execute("SELECT ti.company_id, sum(ti.trade_amount) as amount " +
+        return template.databaseClient.sql("SELECT ti.company_id, sum(ti.trade_amount) as amount " +
                 " , (select count(rr.company_id) as openingNumber from mt_room_record rr where rr.company_id = ti.company_id) " +
                 " , (select c.name from mt_company c where c.id = ti.company_id) " +
                 " from mt_trade_info ti " +
@@ -452,7 +436,7 @@ class TradeInfoService {
      * 获取指定时间内的交易金额排名
      */
     fun getTradeMoneyRank(topNumber: Int, time: LocalDateTime = firstDay()): Mono<List<Map<String, Any?>>> {
-        return connect.execute("SELECT ti.company_id, sum(ti.trade_money) as money " +
+        return template.databaseClient.sql("SELECT ti.company_id, sum(ti.trade_money) as money " +
                 " , (select count(rr.company_id) as openingNumber from mt_room_record rr where rr.company_id = ti.company_id) " +
                 " , (select c.name from mt_company c where c.id = ti.company_id) " +
                 " from mt_trade_info ti " +
@@ -471,51 +455,66 @@ class TradeInfoService {
         val startTime = date.withDayOfMonth(1).atStartOfDay()
         val lastTime = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX)
         val where = where("company_id").`is`(companyId).and("trade_time").between(startTime, lastTime)
-        val data = connect.select()
-                .from<TradeInfo>()
-                .matching(where)
-                .fetch()
+        return template.select<TradeInfo>()
+                .matching(query(where))
                 .all()
-                .collectList().block()
+                .collectList()
+            .flatMap { data ->
 
-        val rowName = arrayOf("时间", "成交状态", "交易模式", "买方", "买方报价", "卖方", "卖方报价", "成交价", "成交数量")
-        // 第一步：定义一个新的工作簿
-        val wb = XSSFWorkbook()
-        val sheet = wb.createSheet()
-        val alignStyle = wb.createCellStyle()
-        alignStyle.alignment = HorizontalAlignment.CENTER
-        sheet.setDefaultColumnStyle(4, alignStyle)
-        val rowTitle = sheet.createRow(0)
-        for (i in rowName.indices) {
-            val cellTitle = rowTitle.createCell(i)
-            cellTitle.setCellValue(rowName[i])
-        }
-        for (i in 0 until data!!.size) {
-            val rows = sheet.createRow(i + 1)
-            for (key in rowName.indices) {
-                val cells = rows.createCell(key)
-                cells.setCellValue(getDetailsData(key + 1, data[i]))
+                val rowName = arrayOf(
+                    "时间",
+                    "成交状态",
+                    "交易模式",
+                    "买方",
+                    "买方报价",
+                    "卖方",
+                    "卖方报价",
+                    "成交价",
+                    "成交数量"
+                )
+                // 第一步：定义一个新的工作簿
+                val wb = XSSFWorkbook()
+                val sheet = wb.createSheet()
+                val alignStyle = wb.createCellStyle()
+                alignStyle.alignment = HorizontalAlignment.CENTER
+                sheet.setDefaultColumnStyle(4, alignStyle)
+                val rowTitle = sheet.createRow(0)
+                for (i in rowName.indices) {
+                    val cellTitle = rowTitle.createCell(i)
+                    cellTitle.setCellValue(rowName[i])
+                }
+                for (i in 0 until data!!.size) {
+                    val rows = sheet.createRow(i + 1)
+                    for (key in rowName.indices) {
+                        val cells = rows.createCell(key)
+                        cells.setCellValue(getDetailsData(key + 1, data[i]))
+                    }
+                }
+                // TODO 也许可以直接获取输出流写出，不要存文件
+                val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
+                val path =
+                    System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(
+                        formatter
+                    ) + ".xlsx"
+                logger.info(path)
+                val fileExcel = File(path)
+                if (!fileExcel.exists()) {
+                    fileExcel.parentFile.mkdirs()
+                }
+                val fileOutputStream = FileOutputStream(fileExcel)
+                wb.write(fileOutputStream)
+                fileOutputStream.close()
+                val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
+                try {
+                    response.getHeaders().set(
+                        HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
+                                URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName())
+                    )
+                    zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
+                } catch (e: UnsupportedEncodingException) {
+                    return@flatMap Mono.error(UnsupportedOperationException())
+                }
             }
-        }
-        // TODO 也许可以直接获取输出流写出，不要存文件
-        val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
-        val path = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(formatter) + ".xlsx"
-        logger.info(path)
-        val fileExcel = File(path)
-        if (!fileExcel.exists()) {
-            fileExcel.parentFile.mkdirs()
-        }
-        val fileOutputStream = FileOutputStream(fileExcel)
-        wb.write(fileOutputStream)
-        fileOutputStream.close()
-        val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
-        return try {
-            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
-                    URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName()))
-            zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
-        } catch (e: UnsupportedEncodingException) {
-            throw UnsupportedOperationException()
-        }
     }
 
     fun getDetailsData(index: Int, tradeInfo: TradeInfo): String? {
@@ -537,7 +536,7 @@ class TradeInfoService {
     fun outExcel(companyId: Int, date: LocalDate, response: ServerHttpResponse): Mono<Void> {
         val startTime = date.withDayOfMonth(1).atStartOfDay()
         val lastTime = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX)
-        val data = connect.execute("""
+        return template.databaseClient.sql("""
             SELECT ms.real_name as name ,
             	(select phone from mt_user mu where mu.id = ms.user_id),
             	(select name from mt_department md where md.id = mdp.post_id) as department,
@@ -575,47 +574,77 @@ class TradeInfoService {
                             "netBuyMoney" to buyMoney?.toInt()?.minus(sellMoney?.toInt() ?: 0)
                     )
                 }.all()
-                .collectList().block()
+                .collectList()
+            .flatMap { data ->
 
-        val rowName = arrayOf("姓名", "手机号", "部门", "职位", "买入股数", "卖出股数", "净买入股数", "买入金额", "卖出金额", "净买入金额")
-        val rowNameEN = arrayOf("name", "phone", "department", "post", "buyAmount", "sellAmount", "netBuyAmount", "buyMoney", "sellMoney", "netBuyMoney")
-        // 第一步：定义一个新的工作簿
-        val wb = XSSFWorkbook()
-        val sheet = wb.createSheet()
-        val alignStyle = wb.createCellStyle()
-        alignStyle.alignment = HorizontalAlignment.CENTER
-        sheet.setDefaultColumnStyle(10, alignStyle)
-        val rowTitle = sheet.createRow(0)
-        for (i in rowName.indices) {
-            val cellTitle = rowTitle.createCell(i)
-            cellTitle.setCellValue(rowName[i])
-        }
-        for (i in 0 until data!!.size) {
-            val rows = sheet.createRow(i + 1)
-            for (key in rowName.indices) {
-                val cells = rows.createCell(key)
-                cells.setCellValue((data[i][rowNameEN[key]] ?: "").toString())
+
+                val rowName = arrayOf(
+                    "姓名",
+                    "手机号",
+                    "部门",
+                    "职位",
+                    "买入股数",
+                    "卖出股数",
+                    "净买入股数",
+                    "买入金额",
+                    "卖出金额",
+                    "净买入金额"
+                )
+                val rowNameEN = arrayOf(
+                    "name",
+                    "phone",
+                    "department",
+                    "post",
+                    "buyAmount",
+                    "sellAmount",
+                    "netBuyAmount",
+                    "buyMoney",
+                    "sellMoney",
+                    "netBuyMoney"
+                )
+                // 第一步：定义一个新的工作簿
+                val wb = XSSFWorkbook()
+                val sheet = wb.createSheet()
+                val alignStyle = wb.createCellStyle()
+                alignStyle.alignment = HorizontalAlignment.CENTER
+                sheet.setDefaultColumnStyle(10, alignStyle)
+                val rowTitle = sheet.createRow(0)
+                for (i in rowName.indices) {
+                    val cellTitle = rowTitle.createCell(i)
+                    cellTitle.setCellValue(rowName[i])
+                }
+                for (i in 0 until data!!.size) {
+                    val rows = sheet.createRow(i + 1)
+                    for (key in rowName.indices) {
+                        val cells = rows.createCell(key)
+                        cells.setCellValue((data[i][rowNameEN[key]] ?: "").toString())
+                    }
+                }
+                // TODO 也许可以直接获取输出流写出，不要存文件
+                val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
+                val path =
+                    System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(
+                        formatter
+                    ) + ".xlsx"
+                logger.info(path)
+                val fileExcel = File(path)
+                if (!fileExcel.exists()) {
+                    fileExcel.parentFile.mkdirs()
+                }
+                val fileOutputStream = FileOutputStream(fileExcel)
+                wb.write(fileOutputStream)
+                fileOutputStream.close()
+                val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
+                try {
+                    response.getHeaders().set(
+                        HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
+                                URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName())
+                    )
+                    zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
+                } catch (e: UnsupportedEncodingException) {
+                    return@flatMap Mono.error(UnsupportedOperationException())
+                }
             }
-        }
-        // TODO 也许可以直接获取输出流写出，不要存文件
-        val formatter = DateTimeFormatter.ofPattern("yyy-MM-ddHHmmss")
-        val path = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID() + File.separator + companyId + "-" + lastTime.format(formatter) + ".xlsx"
-        logger.info(path)
-        val fileExcel = File(path)
-        if (!fileExcel.exists()) {
-            fileExcel.parentFile.mkdirs()
-        }
-        val fileOutputStream = FileOutputStream(fileExcel)
-        wb.write(fileOutputStream)
-        fileOutputStream.close()
-        val zeroCopyHttpOutputMessage = response as ZeroCopyHttpOutputMessage
-        return try {
-            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
-                    URLEncoder.encode(fileExcel.name, StandardCharsets.UTF_8.displayName()))
-            zeroCopyHttpOutputMessage.writeWith(fileExcel, 0, fileExcel.length())
-        } catch (e: UnsupportedEncodingException) {
-            throw UnsupportedOperationException()
-        }
     }
 
 }

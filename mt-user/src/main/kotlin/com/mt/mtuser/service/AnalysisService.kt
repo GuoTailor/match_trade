@@ -9,13 +9,11 @@ import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
-import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.core.from
-import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.r2dbc.core.select
+import org.springframework.data.relational.core.query.Query
 import org.springframework.stereotype.Service
 import org.springframework.web.util.HtmlUtils
 import java.time.LocalDateTime
@@ -29,7 +27,7 @@ class AnalysisService {
     lateinit var analysisDao: AnalysisDao
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     private lateinit var notifyUserDao: NotifyUserDao
@@ -64,16 +62,13 @@ class AnalysisService {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
         val userId = BaseUser.getcurrentUser().awaitSingle().id!!
         val where = query.where().and("company_id").`is`(companyId)
-        val pageDate = getPage(connect.select()
-                .from<Analysis>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
+        val pageDate = getPage(template.select<Analysis>()
+                .matching(Query.query(where).with(query.page()))
                 .all()
                 .map {
                     it.content = HtmlUtils.htmlUnescape(it.content ?: "")
                     it
-                }, connect, query, where)
+                }, template, query, where)
         pageDate.item?.forEach {
             notifyUserDao.setStatusByUserIdAndMsgId(userId, it.id!!, NotifyUser.read, NotifyUser.typeAnalysis)
         }
@@ -83,7 +78,7 @@ class AnalysisService {
     suspend fun findAllAnalysis(query: PageQuery, userId: Int?): PageView<Analysis> {
         val id = userId ?: BaseUser.getcurrentUser().awaitSingle().id
         val where = if (id != null) query.where("ma").and("ma.user_id").`is`(id) else query.where()
-        return getPage(connect.execute("select ma.*, mc.name from mt_analysis ma left join mt_company mc on ma.company_id = mc.id where $where ${query.toPageSql()}")
+        return getPage(template.databaseClient.sql("select ma.*, mc.name from mt_analysis ma left join mt_company mc on ma.company_id = mc.id where $where ${query.toPageSql()}")
                 .map { r, _ ->
                     val analysis = Analysis()
                     analysis.id = r.get("id", java.lang.Integer::class.java)?.toInt()
@@ -96,15 +91,14 @@ class AnalysisService {
                     analysis.title = r.get("title", String::class.java)
                     analysis.companyName = r.get("name", String::class.java)
                     analysis
-                }.all(), connect, query, "mt_analysis ma", where)
+                }.all(), template, query, "mt_analysis ma", where)
     }
 
     suspend fun updateAnalysis(analysis: Analysis): Int {
         analysis.content = HtmlUtils.htmlEscape(analysis.content ?: "")
         analysis.userId = BaseUser.getcurrentUser().awaitSingle().id
         return r2dbcService.dynamicUpdate(analysis)
-                .matching(where("id").`is`(analysis.id!!))
-                .fetch().awaitRowsUpdated()
+                .awaitSingle()
     }
 
     suspend fun deleteAnalysis(id: Int) {

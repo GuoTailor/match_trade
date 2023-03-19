@@ -13,19 +13,17 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitOne
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.core.from
+import org.springframework.data.r2dbc.convert.EntityRowMapper
+import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Query
+import org.springframework.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import org.springframework.web.util.HtmlUtils
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Created by gyh on 2020/5/26.
@@ -42,13 +40,13 @@ class NotifyService {
     private lateinit var userDao: UserDao
 
     @Autowired
-    private lateinit var connect: DatabaseClient
+    private lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     lateinit var r2dbcService: R2dbcService
 
     suspend fun fundReadTime(userId: Int): LocalDateTime {
-        return connect.execute("select read_time from mt_user where id = :userId")
+        return template.databaseClient.sql("select read_time from mt_user where id = :userId")
                 .bind("userId", userId)
                 .map { row, _ -> row.get("read_time", LocalDateTime::class.java) }
                 .awaitOne()!!
@@ -76,11 +74,8 @@ class NotifyService {
         } else {
             where.and(where("send_type").`is`("mass"))
         }
-        val pageDate = getPage(connect.select()
-                .from<Notify>()
-                .matching(where)
-                .page(query.page())
-                .fetch()
+        val pageDate = getPage(template.select<Notify>()
+                .matching(Query.query(where).with(query.page()))
                 .all()
                 .map { notify ->
                     notify.content = HtmlUtils.htmlUnescape(notify.content ?: "")
@@ -89,7 +84,7 @@ class NotifyService {
                         notify.readStatus = NotifyUser.unread
                     } else notify.readStatus = NotifyUser.read
                     notify
-                }, connect, query, where)
+                }, template, query, where)
         userDao.setReadTimeByUserId(userId, LocalDateTime.now())
         if (idList.isNotEmpty()) {
             notifyUserDao.setStatusById(idList, NotifyUser.read)
@@ -124,11 +119,10 @@ class NotifyService {
                 " where ((create_time > :createTime and send_type = 'mass')" +
                 if (announceList.isEmpty()) ") " else " or id in (:idList))" +
                 " and msg_type = 'announce' order by create_time desc limit 2"
-        val notifyList = connect.execute(sql)
+        val notifyList = template.databaseClient.sql(sql)
                 .bind("createTime", lastReadTime)
                 .run { if (announceList.isNotEmpty()) this.bind("idList", announceList) else this }
-                .`as`(Notify::class.java)
-                .fetch()
+                .map(EntityRowMapper(Notify::class.java, template.converter))
                 .all()
                 .map {
                     it.content = HtmlUtils.htmlUnescape(it.content ?: "")
@@ -150,8 +144,7 @@ class NotifyService {
 
     suspend fun updateMsg(msg: Notify): Int {
         return r2dbcService.dynamicUpdate(msg)
-                .matching(where("id").`is`(msg.id!!))
-                .fetch().awaitRowsUpdated()
+                .awaitSingle()
 
     }
 }

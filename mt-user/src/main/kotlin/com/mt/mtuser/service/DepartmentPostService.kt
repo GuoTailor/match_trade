@@ -7,15 +7,18 @@ import com.mt.mtuser.entity.department.Department
 import com.mt.mtuser.entity.department.DepartmentPost
 import com.mt.mtuser.entity.department.DepartmentPostInfo
 import com.mt.mtuser.entity.department.Post
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.awaitOneOrNull
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.r2dbc.core.flow
+import org.springframework.data.r2dbc.convert.EntityRowMapper
+import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.r2dbc.core.awaitOneOrNull
+import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -34,7 +37,7 @@ class DepartmentPostService {
     lateinit var departmentPostDao: DepartmentPostDao
 
     @Autowired
-    protected lateinit var connect: DatabaseClient
+    protected lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     lateinit var r2dbcService: R2dbcService
@@ -64,10 +67,9 @@ class DepartmentPostService {
             val postId = dpi.postName?.let {
                 postDao.findByName(it) ?: postDao.save(Post(name = it))
             }?.id
-            val departmentPost = DepartmentPost(departmentId = departmentId, postId = postId)
+            val departmentPost = DepartmentPost(id = dpi.id!!, departmentId = departmentId, postId = postId)
             return r2dbcService.dynamicUpdate(departmentPost)
-                    .matching(where("id").`is`(dpi.id!!))
-                    .fetch().awaitRowsUpdated()
+                    .awaitSingle()
         }
     }
 
@@ -80,18 +82,18 @@ class DepartmentPostService {
     }
 
     suspend fun findByDpId(id: Int): DepartmentPostInfo? {
-        return connect.execute("select mdp.id, md.name as department_name, mp.name as post_name " +
+        return template.databaseClient.sql("select mdp.id, md.name as department_name, mp.name as post_name " +
                 " from mt_department_post mdp " +
                 " left join mt_department md on mdp.department_id = md.id " +
                 " left join mt_post mp on mdp.post_id = mp.id " +
                 " where mdp.id = :id")
                 .bind("id", id)
-                .`as`(DepartmentPostInfo::class.java).fetch()
+            .map(EntityRowMapper(DepartmentPostInfo::class.java, template.converter))
                 .awaitOneOrNull()
     }
 
     suspend fun findAllBind(companyId: Int): LinkedList<Department> {
-        val dataList = connect.execute("select mdp.id, md.name as dname, mp.name as pname " +
+        val dataList = template.databaseClient.sql("select mdp.id, md.name as dname, mp.name as pname " +
                 " from mt_department_post mdp " +
                 " left join mt_department md on mdp.department_id = md.id " +
                 " left join mt_post mp on mdp.post_id = mp.id " +
@@ -103,9 +105,9 @@ class DepartmentPostService {
                     dpi.departmentName = r.get("dname", String::class.java)
                     dpi.postName = r.get("pname", String::class.java)
                     dpi
-                }.flow().toList()
+                }.flow()
         val list = LinkedList<Department>()
-        dataList.forEach {
+        dataList.collect {
             val department = list.find { d -> d.name == it.departmentName }
                     ?: Department(name = it.departmentName)
             val post = Post(id = it.id, name = it.postName)
@@ -119,11 +121,10 @@ class DepartmentPostService {
 
     suspend fun existRelated(departmentId: Int, postId: Int?, companyId: Int): DepartmentPost? {
         val subSql = if (postId == null) "post_id is null" else "post_id = $postId"
-        return connect.execute("select * from mt_department_post where company_id = :companyId and department_id = :departmentId and $subSql limit 1")
+        return template.databaseClient.sql("select * from mt_department_post where company_id = :companyId and department_id = :departmentId and $subSql limit 1")
                 .bind("companyId", companyId)
                 .bind("departmentId", departmentId)
-                .`as`(DepartmentPost::class.java)
-                .fetch()
+                .map(EntityRowMapper(DepartmentPost::class.java, template.converter))
                 .awaitOneOrNull()
     }
 

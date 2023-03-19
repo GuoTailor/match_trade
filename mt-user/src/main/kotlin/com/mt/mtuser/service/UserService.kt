@@ -10,13 +10,16 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Query
 import org.springframework.data.relational.core.query.Update.update
+import org.springframework.r2dbc.core.awaitOneOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
@@ -31,7 +34,7 @@ class UserService {
     val logger: Logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
     @Autowired
-    protected lateinit var connect: DatabaseClient
+    protected lateinit var template: R2dbcEntityTemplate
 
     @Autowired
     private lateinit var userDao: UserDao
@@ -45,49 +48,28 @@ class UserService {
     @Autowired
     lateinit var roleService: RoleService
 
-    fun register(user: User): Mono<Unit> = r2dbc.withTransaction {
+    @Transactional(rollbackFor = [Exception::class])
+    suspend fun register(user: User)  {
         logger.info("register" + user.phone + user.password)
-        if (!StringUtils.isEmpty(user.phone) && !StringUtils.isEmpty(user.password)) {
+        if (StringUtils.hasLength(user.phone) && StringUtils.hasLength(user.password)) {
             if (userDao.existsUserByPhone(user.phone!!) == 0) {
                 user.passwordEncoder()
                 user.id = null
                 val newUser = userDao.save(user)
+                if (user.phone == "123") {
+                    throw IllegalStateException("用户已存在")
+                }
                 stockholderDao.save(Stockholder(userId = newUser.id, roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id))
-                Unit
             } else throw IllegalStateException("用户已存在")
         } else throw IllegalStateException("请正确填写用户名或密码")
-    }
-
-    /**
-     * 此方法仅用于实验，对应注册的响应式写法，可能后期替换全部协程。
-     * 关于使用协程的不便请看README的注意部分
-     */
-    @Transactional
-    fun registerMono(user: Mono<User>): Mono<Stockholder> {
-        return user.filter { !StringUtils.isEmpty(it.phone) && !StringUtils.isEmpty(it.password) }
-                .switchIfEmpty(Mono.error(IllegalStateException("请正确填写用户名或密码")))
-                .flatMap { mono { userDao.existsUserByPhone(it.phone!!) } }
-                .filter { it == 0 }
-                .switchIfEmpty(Mono.error(IllegalStateException("用户已存在")))
-                .flatMap { user }
-                .flatMap { ur ->
-                    ur.passwordEncoder()
-                    ur.id = null
-                    mono { userDao.save(ur) }
-                }.flatMap { newUser ->
-                    mono { stockholderDao.save(Stockholder(newUser.id, roleService.getRoles().find { it.name == Stockholder.USER }!!.id, null)) }
-                }
     }
 
     suspend fun findById(id: Int) = userDao.findById(id)
 
     suspend fun save(user: User): Int {
-        return connect.update()
-                .table(r2dbc.getTable(User::class.java))
-                .using(r2dbc.getUpdate(user))
-                .matching(where("id").`is`(user.id!!))
-                .fetch()
-                .rowsUpdated()
+        return template.update<User>()
+                .matching(Query.query(where("id").`is`(user.id!!)))
+                .apply(r2dbc.getUpdate(user))
                 .awaitSingle()
     }
 
@@ -103,12 +85,9 @@ class UserService {
     suspend fun findByIdIn(ids: List<Int>) = userDao.findByIdIn(ids)
 
     suspend fun findAllUser(query: PageQuery): PageView<User> {
-        return getPage(connect.select()
-                .from<User>()
-                .matching(query.where())
-                .page(query.page())
-                .fetch()
-                .all(), connect, query)
+        return getPage(template.select<User>()
+                .matching(Query.query(query.where()).with(query.page()))
+                .all(), template, query)
     }
 
     /**
@@ -132,7 +111,7 @@ class UserService {
                 " from mt_user mu, mt_stockholder ms " +
                 " where $sqlWhere" +
                 " GROUP BY mu.id ${query.toPageSql()}"
-        val data = connect.execute(sql)
+        val data = template.databaseClient.sql(sql)
                 .map { r, _ ->
                     val analyst = Analyst()
                     analyst.id = r.get("id", java.lang.Integer::class.java)?.toInt()
@@ -145,13 +124,13 @@ class UserService {
                     analyst.companyCount = r.get("companyCount", java.lang.Integer::class.java)?.toInt()?.minus(1) ?: 0
                     analyst
                 }.all()
-        return getPage(data, connect, query, sql, "")
+        return getPage(data, template, query, sql, "")
     }
 
     suspend fun getAnalystInfo(id: Int?): Analyst {
         val userId = id ?: BaseUser.getcurrentUser().awaitSingle().id!!
         val roleId = roleService.getRoles().find { it.name == Stockholder.ANALYST }!!.id!!
-        return connect.execute("select mu.*, count(ms.*) as companyCount " +
+        return template.databaseClient.sql("select mu.*, count(ms.*) as companyCount " +
                 " from mt_user mu, mt_stockholder ms " +
                 " where mu.id = ms.user_id and ms.role_id = :roleId and ms.user_id = :userId" +
                 " GROUP BY mu.id ")
@@ -184,8 +163,7 @@ class UserService {
     suspend fun updateAnalyst(user: User) {
         user.passwordEncoder()
         r2dbc.dynamicUpdate(user)
-                .matching(where("id").`is`(user.id!!))
-                .fetch().awaitRowsUpdated()
+                .awaitSingle()
     }
 
     suspend fun updatePassword(oldPassword: String, newPassword: String): Boolean {
@@ -193,20 +171,18 @@ class UserService {
         val user = findById(userId)!!
         if (user.matchesPassword(oldPassword)) {
             user.password = user.passwordEncoder(newPassword)
-            return connect.update()
-                    .table(r2dbc.getTable(User::class.java))
-                    .using(update("password", user.password))
-                    .matching(where("id").`is`(user.id!!))
-                    .fetch().awaitRowsUpdated() > 0
+            return template.update<User>()
+                    .matching(Query.query(where("id").`is`(user.id!!)))
+                    .apply(update("password", user.password))
+                    .awaitSingle() > 0
         } else throw IllegalStateException("密码错误")
     }
 
     suspend fun forgetPassword(user: User): Boolean {
-        return connect.update()
-                .table(r2dbc.getTable(User::class.java))
-                .using(update("password", user.password))
-                .matching(where("phone").`is`(user.phone!!))
-                .fetch().awaitRowsUpdated() > 0
+        return template.update<User>()
+                .matching(Query.query(where("phone").`is`(user.phone!!)))
+                .apply(update("password", user.password))
+                .awaitSingle() > 0
     }
 
 }
