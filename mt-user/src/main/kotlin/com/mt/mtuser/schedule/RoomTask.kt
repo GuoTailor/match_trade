@@ -6,14 +6,13 @@ import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
-import org.springframework.transaction.reactive.TransactionalOperator
 
 /**
  * Created by gyh on 2020/4/2.
  */
 class RoomTask : Job {
     private val log = LoggerFactory.getLogger(this.javaClass.simpleName)
+
     @Autowired
     private lateinit var roomService: RoomService
 

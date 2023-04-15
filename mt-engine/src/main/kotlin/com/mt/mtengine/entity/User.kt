@@ -49,7 +49,7 @@ class User {
     /**
      * 密码
      */
-    private var password: String? = null
+    var password: String? = null
 
     /**
      * 头像

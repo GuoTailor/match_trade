@@ -1,34 +1,29 @@
 package com.mt.mtengine.service
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
-import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
 import org.springframework.data.r2dbc.mapping.OutboundRow
-import org.springframework.data.r2dbc.mapping.SettableValue
+import org.springframework.data.relational.core.query.Criteria
+import org.springframework.data.relational.core.query.Query
 import org.springframework.data.relational.core.query.Update
 import org.springframework.data.relational.core.sql.SqlIdentifier
 import org.springframework.stereotype.Service
-import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.util.CollectionUtils
 import reactor.core.publisher.Mono
-import reactor.core.publisher.MonoSink
 
 /**
  * Created by gyh on 2020/3/25.
  */
 @Service
 class R2dbcService {
-    @Autowired
-    lateinit var dataAccessStrategy: ReactiveDataAccessStrategy
 
     @Autowired
-    lateinit var transactionManager: R2dbcTransactionManager
-
-    @Autowired
-    protected lateinit var connect: DatabaseClient
+    protected lateinit var template: R2dbcEntityTemplate
 
     fun getUpdate(data: Any): Update {
-        val columns: OutboundRow = dataAccessStrategy.getOutboundRow(data)
+        val dataAccessStrategy: ReactiveDataAccessStrategy = template.dataAccessStrategy
+        val columns: OutboundRow = template.dataAccessStrategy.getOutboundRow(data)
         val ids = dataAccessStrategy.getIdentifierColumns(data.javaClass)
         check(ids.isNotEmpty()) { "No identifier columns in " + data.javaClass.name + "!" }
         columns.remove(ids[0]) // do not update the Id column.
@@ -36,32 +31,41 @@ class R2dbcService {
         for (column in columns.keys) {
             if (columns[column]?.value != null) {
                 update = update?.set(dataAccessStrategy.toSql(column), columns[column])
-                        ?: Update.update(dataAccessStrategy.toSql(column), columns[column])
+                    ?: Update.update(dataAccessStrategy.toSql(column), columns[column])
             }
         }
         return update ?: throw IllegalStateException("没有可更新的字段")
     }
 
     fun getTable(type: Class<*>): SqlIdentifier {
-        return dataAccessStrategy
-                .converter
-                .mappingContext
-                .getRequiredPersistentEntity(type)
-                .tableName
+        return template.dataAccessStrategy
+            .converter
+            .mappingContext
+            .getRequiredPersistentEntity(type)
+            .tableName
     }
 
-    fun dynamicUpdate(data: Any): DatabaseClient.UpdateMatchingSpec {
-        return connect.update()
-                .table(getTable(data.javaClass))
-                .using(getUpdate(data))
+    fun getQueryById(data: Any): Query {
+        val dataAccessStrategy = template.dataAccessStrategy
+        val outboundRow = dataAccessStrategy.getOutboundRow(data)
+        val identifierColumns = dataAccessStrategy.getIdentifierColumns(data.javaClass)
+        if (CollectionUtils.isEmpty(identifierColumns)) {
+            throw IllegalStateException("No identifier columns in " + data.javaClass.name + "!")
+        }
+        val sqlIdentifier = identifierColumns[0]
+        val parameter = outboundRow[sqlIdentifier] ?: throw IllegalStateException("主键不能未空")
+        return Query.query(
+            Criteria.where(dataAccessStrategy.toSql(sqlIdentifier)).`is`(
+                parameter.value!!
+            )
+        )
     }
 
-    /**
-     * 创建用事务包装的冷[mono][Mono]，它将在协程中运行给定的[block]并发出其结果
-     * 如果[block]结果为null，则不带任何值调用[MonoSink.success]。取消订阅将取消运行协程。
-     */
-    fun <T> withTransaction(block: () -> Mono<T>): Mono<T> {
-        val operator = TransactionalOperator.create(transactionManager)
-        return operator.transactional(block())
+    fun dynamicUpdate(data: Any): Mono<Int> {
+        return template.update(data.javaClass)
+            .inTable(getTable(data.javaClass))
+            .matching(getQueryById(data))
+            .apply(getUpdate(data))
     }
+
 }

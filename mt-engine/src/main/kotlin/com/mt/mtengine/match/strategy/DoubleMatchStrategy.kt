@@ -48,13 +48,13 @@ class DoubleMatchStrategy : MatchStrategy<DoubleMatchStrategy.DoubleRoomInfo>() 
             } else {
                 matchService.onMatchError(roomInfo, order1, order2, "失败:" + MatchUtil.getVerifyInfo(order1, order2), i++ == 0)
             }
-            result.subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
+            result.subscribeOn(Schedulers.boundedElastic()).subscribe()    // 弹性线程池可能会创建大量线程，但对I/O密集型的任务来说很友好
         }
         return isMatch
     }
 
     class DoubleRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.cycle!!.toMillisOfDay(), record.endTime
+            RoomInfo(record.roomId!!, record.mode!!, record.cycle!!.toMillisOfDay(), record.endTime
                     ?: LocalTime.MAX.toLocalDateTime()) {
         private var nextCycleTime = System.currentTimeMillis() + cycle
         val orderList = TreeSet(MatchUtil.sortTime)

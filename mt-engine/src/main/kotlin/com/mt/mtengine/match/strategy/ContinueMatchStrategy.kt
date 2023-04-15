@@ -41,7 +41,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             if (MatchUtil.verify(buyOrder, sellOrder)) {
                 if (buyOrder.price!! >= sellOrder.price) {          // 特殊需求，报价相同也成交
                     matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder, pushTopThree)
-                            .subscribeOn(Schedulers.elastic()).subscribe()
+                            .subscribeOn(Schedulers.boundedElastic()).subscribe()
                     isMatch = true
                     pushTopThree = false
                 } else {
@@ -51,7 +51,7 @@ class ContinueMatchStrategy : MatchStrategy<ContinueMatchStrategy.ContinueRoomIn
             } else {
                 matchService.onMatchError(roomInfo, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder), pushTopThree)
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
                 isMatch = true
                 pushTopThree = false
             }

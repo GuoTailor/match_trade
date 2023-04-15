@@ -1,6 +1,9 @@
 package com.mt.mtuser.service.room
 
-import com.mt.mtcommon.*
+import com.mt.mtcommon.RoomEnum
+import com.mt.mtcommon.RoomEvent
+import com.mt.mtcommon.TradeInfo
+import com.mt.mtcommon.plus
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.room.*
@@ -8,13 +11,15 @@ import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.BaseRoom
-import com.mt.mtuser.schedule.*
+import com.mt.mtuser.schedule.QuartzManager
+import com.mt.mtuser.schedule.RoomEndJobInfo
+import com.mt.mtuser.schedule.RoomStartJobInfo
+import com.mt.mtuser.schedule.RoomTask
 import com.mt.mtuser.service.*
 import com.mt.mtuser.service.kline.Compute1DKlineService
 import com.mt.mtuser.service.kline.KlineService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.sync.Mutex
@@ -22,8 +27,6 @@ import kotlinx.coroutines.sync.withLock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.awaitRowsUpdated
-import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -115,7 +118,8 @@ class RoomService {
                     val previousRecord = roomRecordDao.findLastRecordByRoomId(roomRecord.startTime!!, roomId)
                     roomRecord.endTime = LocalDateTime.now()
                     roomRecord.computingTime()
-                    roomRecord.closePrice = tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
+                    roomRecord.closePrice =
+                        tradeInfoService.getClosingPriceByRoomId(roomId, roomRecord.startTime!!, roomRecord.endTime!!)
                     if (roomRecord.closePrice == null) {
                         roomRecord.maxPrice = previousRecord?.maxPrice ?: BigDecimal.ZERO
                         roomRecord.minPrice = previousRecord?.minPrice ?: BigDecimal.ZERO
@@ -126,10 +130,14 @@ class RoomService {
                         roomRecord.maxPrice = map["maxPrice"]
                         roomRecord.minPrice = map["minPrice"]
                         roomRecord.openPrice = previousRecord?.closePrice
-                                ?: tradeInfoService.getOpenPriceByRoomId(roomRecord.startTime!!, roomRecord.endTime!!, roomId)
+                            ?: tradeInfoService.getOpenPriceByRoomId(
+                                roomRecord.startTime!!,
+                                roomRecord.endTime!!,
+                                roomId
+                            )
                     }
                     r2dbc.dynamicUpdate(roomRecord)
-                            .awaitSingle()
+                        .awaitSingle()
                     compute1DKlineService.computeCurrent(roomRecord.stockId!!, roomRecord.companyId!!)
                 }
                 redisUtil.publishRoomEvent(RoomEvent(roomId, value))
@@ -172,7 +180,7 @@ class RoomService {
             if (oldFlag == room.flag) {
                 room.enable = null
                 val result = r2dbc.dynamicUpdate(room)
-                        .awaitSingle()
+                    .awaitSingle()
                 logger.info("更新结果 {}", result)
                 val newRoom = getBaseRoomDao<T>(room.flag).findByRoomId(roomId)!!
                 // 修改定时任务开始和结束的时间
@@ -229,19 +237,22 @@ class RoomService {
 
     suspend fun getHomepageData(roomId: String): Map<String, Any> {
         val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, LocalDateTime.now())
-                ?: return mapOf("minPrice" to 0, "maxPrice" to 0, "closePrice" to 0,
-                        "tradesNumber" to 0, "difference" to 0)
+            ?: return mapOf(
+                "minPrice" to 0, "maxPrice" to 0, "closePrice" to 0,
+                "tradesNumber" to 0, "difference" to 0
+            )
         val secondRecord = roomRecordDao.findSecondRecordByRoomId(roomId, LocalDateTime.now())
-        val closePrice = if (roomRecord.closePrice == null || roomRecord.closePrice?.compareTo(BigDecimal(0)) == 0) null else roomRecord.closePrice
+        val closePrice =
+            if (roomRecord.closePrice == null || roomRecord.closePrice?.compareTo(BigDecimal(0)) == 0) null else roomRecord.closePrice
         val tradesNumber = roomRecordService.countByCompanyId(roomRecord.companyId!!)
         val secondClosingPrice = secondRecord?.closePrice ?: BigDecimal(0)
         return mutableMapOf(
-                "closePrice" to (closePrice ?: BigDecimal(0)).toPlainString(),
-                "tradesNumber" to tradesNumber,
-                "difference" to (closePrice?.subtract(secondClosingPrice)?.divide(closePrice, 4, BigDecimal.ROUND_HALF_EVEN)
-                        ?: BigDecimal(0)).toPlainString(),
-                "minPrice" to (roomRecord.minPrice ?: BigDecimal(0)).toPlainString(),
-                "maxPrice" to (roomRecord.maxPrice ?: BigDecimal(0)).toPlainString()
+            "closePrice" to (closePrice ?: BigDecimal(0)).toPlainString(),
+            "tradesNumber" to tradesNumber,
+            "difference" to (closePrice?.subtract(secondClosingPrice)?.divide(closePrice, 4, BigDecimal.ROUND_HALF_EVEN)
+                ?: BigDecimal(0)).toPlainString(),
+            "minPrice" to (roomRecord.minPrice ?: BigDecimal(0)).toPlainString(),
+            "maxPrice" to (roomRecord.maxPrice ?: BigDecimal(0)).toPlainString()
         )
     }
 
@@ -282,7 +293,11 @@ class RoomService {
         var highScope = "0"
         var lowScope = "0"
         if (roomRecord != null) {
-            val closePrice = klineService.getClosePriceByTableName(LocalDate.now().atStartOfDay(), roomRecord.stockId!!, "mt_1d_kline")
+            val closePrice = klineService.getClosePriceByTableName(
+                LocalDate.now().atStartOfDay(),
+                roomRecord.stockId!!,
+                "mt_1d_kline"
+            )
             highScope = closePrice.multiply(BigDecimal("1.5")).toPlainString()
             lowScope = closePrice.multiply(BigDecimal("0.5")).toPlainString()
         }
@@ -302,8 +317,9 @@ class RoomService {
 
     suspend fun addTimingTask(room: BaseRoom) {
         if (room.enable == BaseRoom.DISABLED
-                && room.startTime!! <= LocalTime.now()
-                && (room.startTime!! + room.time!!) > LocalTime.now()) {
+            && room.startTime!! <= LocalTime.now()
+            && (room.startTime!! + room.time!!) > LocalTime.now()
+        ) {
             enableRoom(room.roomId!!, true, room.flag)
         }
         if (room.enable == BaseRoom.ENABLE && room.startTime!! + room.time!! <= LocalTime.now()) {

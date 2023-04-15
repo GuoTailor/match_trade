@@ -45,21 +45,21 @@ class ClickMatchStrategy : MatchStrategy<ClickMatchStrategy.ClickRoomInfo>() {
                 } else {
                     matchService.onMatchError(roomInfo, buyOrder, sellOrder,
                             "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
-                }.subscribeOn(Schedulers.elastic()).subscribe()
+                }.subscribeOn(Schedulers.boundedElastic()).subscribe()
             } else {
                 matchService.onMatchError(roomInfo, buyOrder, null,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, null))
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
             }
         }
         roomInfo.rivalList.clear()
         roomInfo.buyOrderList.forEach {
             matchService.onMatchError(roomInfo, it, null, "失败: 没有可以匹配的报价")
-                    .subscribeOn(Schedulers.elastic()).subscribe()
+                    .subscribeOn(Schedulers.boundedElastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
             matchService.onMatchError(roomInfo, null, it, "失败: 没有可以匹配的报价")
-                    .subscribeOn(Schedulers.elastic()).subscribe()
+                    .subscribeOn(Schedulers.boundedElastic()).subscribe()
         }
         roomInfo.buyOrderList.clear()
         roomInfo.sellOrderList.clear()

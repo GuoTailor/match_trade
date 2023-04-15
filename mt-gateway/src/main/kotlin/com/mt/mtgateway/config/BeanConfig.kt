@@ -30,10 +30,5 @@ class BeanConfig {
 
     }
 
-    @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
-
 
 }

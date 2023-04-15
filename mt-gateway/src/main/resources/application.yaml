@@ -8,3 +8,6 @@ spring:
         file-extension: yml
   application:
     name: mt-gateway
+  config:
+    import:
+      - optional:nacos:mt-gateway.yml

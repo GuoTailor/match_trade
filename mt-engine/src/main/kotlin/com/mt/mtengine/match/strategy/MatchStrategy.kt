@@ -45,7 +45,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                 // 更新前三档报价
                 redisUtil.setRoomTopThree(roomInfo.topThree)
                         .map { sink.outResult().send(MessageBuilder.withPayload(roomInfo.topThree.toNotifyResult()).build()) }
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
             }
         }
     }
@@ -54,7 +54,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         var roomInfo = roomMap[order.roomId]
         if (roomInfo == null) {
             synchronized(this) {
-                if (roomInfo == null) {
+                if (roomMap[order.roomId] == null) {
                     // 房间只有第一次创建才会被锁
                     val roomRecord = redisUtil.getRoomRecord(order.roomId!!).block()
                     if (roomRecord == null) {
@@ -75,7 +75,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         var roomInfo = roomMap[order.roomId]
         if (roomInfo == null) {
             synchronized(this) {
-                if (roomInfo == null) {
+                if (roomMap[order.roomId] == null) {
                     // 房间只有第一次创建才会被锁
                     val roomRecord = redisUtil.getRoomRecord(order.roomId!!).block()
                     if (roomRecord == null) {
@@ -96,7 +96,7 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
         var roomInfo = roomMap[rival.roomId]
         if (roomInfo == null) {
             synchronized(this) {
-                if (roomInfo == null) {
+                if (roomMap[rival.roomId] == null) {
                     // 房间只有第一次创建才会被锁
                     val roomRecord = redisUtil.getRoomRecord(rival.roomId!!).block()
                     if (roomRecord == null) {
@@ -167,11 +167,11 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                 if (data is OrderParam) {
                     val result = addOrder(data)
                     if (result) {
-                        redisUtil.putUserOrder(data, endTime).subscribeOn(Schedulers.elastic()).subscribe()
+                        redisUtil.putUserOrder(data, endTime).subscribeOn(Schedulers.boundedElastic()).subscribe()
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
                         if (updateTopThree(data)) {
                             sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                            redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                            redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.boundedElastic()).subscribe()
                         }
                     } else {
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())
@@ -179,17 +179,17 @@ abstract class MatchStrategy<T : MatchStrategy.RoomInfo> {
                     result
                 } else if (data is CancelOrder) {
                     val result = cancelOrder(data)
-                    redisUtil.deleteUserOrder(data).subscribeOn(Schedulers.elastic()).subscribe()
+                    redisUtil.deleteUserOrder(data).subscribeOn(Schedulers.boundedElastic()).subscribe()
                     if (updateTopThree(data)) {
                         sink.outResult().send(MessageBuilder.withPayload(data.toTopThreeNotify(topThree)).build())
-                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.elastic()).subscribe()
+                        redisUtil.setRoomTopThree(topThree).subscribeOn(Schedulers.boundedElastic()).subscribe()
                     }
                     sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(result)).build())
                     result
                 } else if (data is RivalInfo) {
                     val result = addRival(data)
                     if (result) {
-                        redisUtil.putUserRival(data).subscribeOn(Schedulers.elastic()).subscribe()
+                        redisUtil.putUserRival(data).subscribeOn(Schedulers.boundedElastic()).subscribe()
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(true)).build())
                     } else {
                         sink.outResult().send(MessageBuilder.withPayload(data.toNotifyResult(false)).build())

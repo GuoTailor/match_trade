@@ -38,16 +38,16 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
             sellOrder.isBuy = false
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price != sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder)
-                        .subscribeOn(Schedulers.elastic()).subscribe()    // 弹性线程池可能会创建大量线程
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()    // 弹性线程池可能会创建大量线程
             } else {
                 matchService.onMatchError(roomInfo, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
             }
         }
         roomInfo.orderList.forEach {
             matchService.onMatchError(roomInfo, it, null, "失败: 没有可以匹配的报价")
-                    .subscribeOn(Schedulers.elastic()).subscribe()
+                    .subscribeOn(Schedulers.boundedElastic()).subscribe()
         }
         roomInfo.orderList.clear()
         return isMatch

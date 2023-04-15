@@ -1,31 +1,23 @@
 package com.mt.mtuser
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jsonMapper
-import com.mt.mtcommon.RoomRecord
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.StockDao
-import com.mt.mtuser.entity.*
+import com.mt.mtuser.entity.Kline
+import com.mt.mtuser.entity.ResponseInfo
+import com.mt.mtuser.entity.User
 import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.service.*
 import com.mt.mtuser.service.kline.KlineService
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.from
-import org.springframework.data.relational.core.query.Criteria
 import org.springframework.data.util.ParsingUtils
-import org.springframework.util.StringUtils
-import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 import java.util.*
 
@@ -55,10 +47,13 @@ class MtUserApplicationTests {
 
     @Autowired
     lateinit var departmentPostService: DepartmentPostService
+
     @Autowired
     lateinit var klineService: KlineService
+
     @Autowired
     lateinit var json: ObjectMapper
+
     @Autowired
     lateinit var userService: UserService
 
@@ -105,11 +100,11 @@ class MtUserApplicationTests {
     fun testMono() {
         val m = mono { nmka() }
         val r = ResponseInfo.ok(m)
-                .map {
-                    println("nmka")
-                    it
-                }.doOnError { println("error") }
-                .doOnCancel { println("cancel") }
+            .map {
+                println("nmka")
+                it
+            }.doOnError { println("error") }
+            .doOnCancel { println("cancel") }
         println(r.block())
     }
 
@@ -135,13 +130,14 @@ class MtUserApplicationTests {
     @Test
     fun testNm() {
         val json = ObjectMapper()
-        val string = "{\"Message\":\"账户余额不足\",\"RequestId\":\"F84EDD77-C09F-45CC-A850-25CD982B3C98\",\"Code\":\"isv.AMOUNT_NOT_ENOUGH\"}"
+        val string =
+            "{\"Message\":\"账户余额不足\",\"RequestId\":\"F84EDD77-C09F-45CC-A850-25CD982B3C98\",\"Code\":\"isv.AMOUNT_NOT_ENOUGH\"}"
         val info = json.readValue(string, Map::class.java)
         println(info)
     }
 
     @Test
-    fun testDb() = runBlocking{
+    fun testDb() = runBlocking {
         val data = companyService.getShareholderByDepartment(PageQuery(), 1, "技术部")
         data.item?.forEach {
             println(it.toString())

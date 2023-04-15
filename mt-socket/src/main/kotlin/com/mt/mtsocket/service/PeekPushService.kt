@@ -46,7 +46,7 @@ class PeekPushService {
                     Flux.fromStream(idList).flatMap { info ->
                         info.session.send(ResponseInfo.ok("订单发生变化", it), NotifyOrder.pushTradeInfo, true)
                     }.then()
-                }.subscribeOn(Schedulers.elastic()).subscribe()
+                }.subscribeOn(Schedulers.boundedElastic()).subscribe()
     }
 
     private fun pushOrder(roomId: String) {
@@ -58,7 +58,7 @@ class PeekPushService {
                     Flux.fromStream(idList).flatMap { info ->
                         info.session.send(ResponseInfo.ok("报价发生变化", it), NotifyOrder.pushBuyOrder, true)
                     }.then()
-                }.subscribeOn(Schedulers.elastic()).subscribe()
+                }.subscribeOn(Schedulers.boundedElastic()).subscribe()
     }
 
     class PushThread : Thread() {

@@ -1,0 +1,17 @@
+
+spring:
+  application:
+    name: socket
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yml
+  config:
+    import:
+      - optional:nacos:mt-socket.yml
+
+  main:
+    allow-circular-references: true

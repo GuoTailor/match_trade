@@ -35,20 +35,20 @@ class TimingMatchStrategy : MatchStrategy<TimingMatchStrategy.TimingRoomInfo>() 
             val sellOrder = roomInfo.sellOrderList.pollFirst()!!
             if (MatchUtil.verify(buyOrder, sellOrder) && buyOrder.price!! >= sellOrder.price) {
                 matchService.onMatchSuccess(roomInfo, buyOrder, sellOrder)
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
             } else {
                 matchService.onMatchError(roomInfo, buyOrder, sellOrder,
                         "失败:" + MatchUtil.getVerifyInfo(buyOrder, sellOrder))
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
             }
         }
         roomInfo.buyOrderList.forEach {
             matchService.onMatchError(roomInfo, it, null, "失败:" + MatchUtil.getVerifyInfo(it, null))
-                    .subscribeOn(Schedulers.elastic()).subscribe()
+                    .subscribeOn(Schedulers.boundedElastic()).subscribe()
         }
         roomInfo.sellOrderList.forEach {
             matchService.onMatchError(roomInfo, null, it, "失败:" + MatchUtil.getVerifyInfo(null, it))
-                    .subscribeOn(Schedulers.elastic()).subscribe()
+                    .subscribeOn(Schedulers.boundedElastic()).subscribe()
         }
         return isMatch
     }

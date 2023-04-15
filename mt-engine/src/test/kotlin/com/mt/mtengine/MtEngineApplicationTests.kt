@@ -1,22 +1,19 @@
 package com.mt.mtengine
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.mt.mtcommon.OrderParam
 import com.mt.mtcommon.RoomRecord
-import com.mt.mtcommon.TradeInfo
-import com.mt.mtengine.common.Util
+import com.mt.mtengine.entity.User
 import com.mt.mtengine.mq.MatchSink
+import com.mt.mtengine.service.MatchService
 import com.mt.mtengine.service.RedisUtil
-import org.apache.rocketmq.common.message.MessageConst
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.redis.core.ReactiveRedisTemplate
-import org.springframework.messaging.support.MessageBuilder
-import java.math.BigDecimal
-import java.util.*
+import reactor.core.scheduler.Schedulers
+import java.time.LocalDateTime
 
-//@SpringBootTest
+@SpringBootTest
 class MtEngineApplicationTests {
     @Autowired
     lateinit var redisTemplate: ReactiveRedisTemplate<String, Any>
@@ -27,8 +24,17 @@ class MtEngineApplicationTests {
     @Autowired
     lateinit var redisUtil: RedisUtil
 
+    @Autowired
+    lateinit var matchService: MatchService
+
     @Test
     fun contextLoads() {
+        val user = User()
+        user.phone = "nmka"
+        user.password = "nmka"
+        user.createTime = LocalDateTime.now()
+        var subscribeOn = matchService.saveUser(user).subscribeOn(Schedulers.boundedElastic()).subscribe()
+        Thread.sleep(10_000)
     }
 
     @Test
@@ -38,8 +44,8 @@ class MtEngineApplicationTests {
     @Test
     fun testTack() {
         val s = redisTemplate.opsForList().range("nmka_12:1", -1, -1)
-                .cast(Integer::class.java)
-                .next().block()
+            .cast(Integer::class.java)
+            .next().block()
         println(s)
     }
 

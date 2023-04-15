@@ -52,7 +52,7 @@ class RoomSocketService {
                 val size = store.getOnLineSize(roomId)
                 it.value.session.send(ResponseInfo.ok("人数变化", size), NotifyOrder.notifyNumberChange, true)
                     .doOnNext { logger.info(size.toString()) }
-                    .subscribeOn(Schedulers.elastic())
+                    .subscribeOn(Schedulers.boundedElastic())
                     .subscribe()
             }
         }
@@ -211,7 +211,7 @@ class RoomSocketService {
                 if (event.roomId == userRoomInfo.roomId) {
                     userRoomInfo.session.send(ResponseInfo.ok("房间将于一分钟后关闭。", event), NotifyOrder.notifyRoomClose, true)
                         .doOnNext { logger.info("房间将于一分钟后关闭。{}", event) }
-                        .subscribeOn(Schedulers.elastic()).subscribe()
+                        .subscribeOn(Schedulers.boundedElastic()).subscribe()
                 }
             }
             SocketSessionStore.userInfoMap.forEach { (_, userRoomInfo) -> roomCloseNotify(userRoomInfo) }
