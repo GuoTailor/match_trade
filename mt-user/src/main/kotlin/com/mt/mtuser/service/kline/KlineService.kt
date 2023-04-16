@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.data.r2dbc.core.*
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Query
 import org.springframework.r2dbc.core.awaitOne
@@ -110,18 +110,21 @@ class KlineService : ApplicationRunner {
 
     suspend fun saveKline(kline: Kline, tableName: String): Kline {
         return template.insert(Kline::class.java).into(tableName)
-                .using(kline)
-                .awaitSingle()
+            .using(kline)
+            .awaitSingle()
     }
 
     suspend fun updateKline(kline: Kline, tableName: String): Int {
         return template.update(Kline::class.java).inTable(tableName)
-                .matching(
-                    Query.query(where("time").`is`(kline.time!!)
+            .matching(
+                Query.query(
+                    where("time").`is`(kline.time!!)
                         .and("stock_id").`is`(kline.stockId!!)
-                        .and("company_id").`is`(kline.companyId!!)))
-                .apply(r2dbcService.getUpdate(kline))
-                .awaitSingle()
+                        .and("company_id").`is`(kline.companyId!!)
+                )
+            )
+            .apply(r2dbcService.getUpdate(kline))
+            .awaitSingle()
     }
 
     suspend fun findKline(roomId: String, mode: String, timeline: String, page: PageQuery): PageView<Kline> {
@@ -145,7 +148,8 @@ class KlineService : ApplicationRunner {
             else -> error("不支持的timeline: $timeline")
         }
         val where = page.where().and("stock_id").`is`(stockId)
-        return getPage(template.select(Kline::class.java)
+        return getPage(
+            template.select(Kline::class.java)
                 .from(table)
                 .matching(Query.query(where).with(page.page()))
                 .all(), template, page, table, where
@@ -155,13 +159,18 @@ class KlineService : ApplicationRunner {
     /**
      * 获取开盘价
      */
-    suspend fun getOpenPriceByTableName(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int, tableName: String): BigDecimal {
+    suspend fun getOpenPriceByTableName(
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        stockId: Int,
+        tableName: String
+    ): BigDecimal {
         return template.databaseClient.sql("select open_price from $tableName where time between :startTime and :endTime and stock_id = :stockId order by time asc limit 1")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("stockId", stockId)
-                .map { r, _ -> r.get("open_price", BigDecimal::class.java) }
-                .awaitOneOrNull() ?: BigDecimal.ZERO
+            .bind("startTime", startTime)
+            .bind("endTime", endTime)
+            .bind("stockId", stockId)
+            .map { r, _ -> r.get("open_price", BigDecimal::class.java) }
+            .awaitOneOrNull() ?: BigDecimal.ZERO
     }
 
     /**
@@ -169,10 +178,10 @@ class KlineService : ApplicationRunner {
      */
     suspend fun getClosePriceByTableName(endTime: LocalDateTime, stockId: Int, tableName: String): BigDecimal {
         return template.databaseClient.sql("select close_price from $tableName where time < :endTime and stock_id = :stockId order by time desc limit 1")
-                .bind("endTime", endTime)
-                .bind("stockId", stockId)
-                .map { r, _ -> r.get("close_price", BigDecimal::class.java) }
-                .awaitOneOrNull() ?: BigDecimal.ZERO
+            .bind("endTime", endTime)
+            .bind("stockId", stockId)
+            .map { r, _ -> r.get("close_price", BigDecimal::class.java) }
+            .awaitOneOrNull() ?: BigDecimal.ZERO
     }
 
     /**
@@ -180,11 +189,13 @@ class KlineService : ApplicationRunner {
      */
     fun getWeekTraderInfo(): Mono<List<Map<String, Any?>>> {
         return template.databaseClient.sql("select trades_capacity, trades_volume, time from mt_1d_kline order by time DESC limit 7")
-                .map { r, _ ->
-                    mapOf<String, Any?>("capacity" to r.get("trades_capacity", java.lang.Long::class.java),
-                            "volume" to r.get("trades_volume", BigDecimal::class.java),
-                            "time" to r.get("time", LocalDateTime::class.java))
-                }.all().collectList()
+            .map { r, _ ->
+                mapOf<String, Any?>(
+                    "capacity" to r.get("trades_capacity", java.lang.Long::class.java),
+                    "volume" to r.get("trades_volume", BigDecimal::class.java),
+                    "time" to r.get("time", LocalDateTime::class.java)
+                )
+            }.all().collectList()
     }
 
 }

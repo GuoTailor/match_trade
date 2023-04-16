@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service
 class StockService {
     @Autowired
     private lateinit var stockDao: StockDao
+
     @Autowired
     private lateinit var template: R2dbcEntityTemplate
 
@@ -31,10 +32,11 @@ class StockService {
 
     suspend fun findAllByQuery(query: PageQuery, companyId: Int): PageView<Stock> {
         val where = query.where().and("company_id").`is`(companyId)
-        return getPage(template.select<Stock>()
+        return getPage(
+            template.select<Stock>()
                 .matching(query(where).with(query.page()))
-                .all()
-                , template, query, where)
+                .all(), template, query, where
+        )
     }
 
     internal suspend fun save(stock: Stock) = stockDao.save(stock)

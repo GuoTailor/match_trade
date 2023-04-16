@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -201,6 +202,7 @@ class RoomService {
     /**
      * 创建房间
      */
+    @Transactional(rollbackFor = [Exception::class])
     suspend fun <T : BaseRoom> createRoom(room: T): T {
         val company = companyDao.findById(room.companyId!!)
         val dao = getBaseRoomDao<T>(room.flag)
@@ -249,7 +251,7 @@ class RoomService {
         return mutableMapOf(
             "closePrice" to (closePrice ?: BigDecimal(0)).toPlainString(),
             "tradesNumber" to tradesNumber,
-            "difference" to (closePrice?.subtract(secondClosingPrice)?.divide(closePrice, 4, BigDecimal.ROUND_HALF_EVEN)
+            "difference" to (closePrice?.subtract(secondClosingPrice)?.divide(closePrice, 4,  RoundingMode.HALF_EVEN )
                 ?: BigDecimal(0)).toPlainString(),
             "minPrice" to (roomRecord.minPrice ?: BigDecimal(0)).toPlainString(),
             "maxPrice" to (roomRecord.maxPrice ?: BigDecimal(0)).toPlainString()
@@ -288,6 +290,7 @@ class RoomService {
     /**
      * 获取房间报价范围
      */
+    @Transactional(rollbackFor = [Exception::class])
     suspend fun getRoomScope(roomId: String): Map<String, String> {
         val roomRecord = roomRecordDao.findLastRecordByRoomIdAndEndTime(roomId, LocalDateTime.now())
         var highScope = "0"
@@ -307,6 +310,7 @@ class RoomService {
     /**
      * 服务启动的时候调用
      */
+    @Transactional(rollbackFor = [Exception::class])
     suspend fun loadTimingTask() {
         clickRoomDao.findTimeAll().collect(::addTimingTask)
         bickerRoomDao.findTimeAll().collect(::addTimingTask)
@@ -315,6 +319,7 @@ class RoomService {
         timingRoomDao.findTimeAll().collect(::addTimingTask)
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     suspend fun addTimingTask(room: BaseRoom) {
         if (room.enable == BaseRoom.DISABLED
             && room.startTime!! <= LocalTime.now()

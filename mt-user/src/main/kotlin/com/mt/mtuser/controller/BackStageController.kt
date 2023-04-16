@@ -10,7 +10,6 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.*
 import com.mt.mtuser.service.kline.KlineService
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.access.prepost.PreAuthorize
@@ -76,19 +75,17 @@ class BackStageController {
      */
     @GetMapping("/info")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getSystemInfo(): Mono<ResponseInfo<MutableMap<String, Number>>> {
-        return ResponseInfo.ok(mono {
-            val data: MutableMap<String, Number> = HashMap()
-            data["companyCount"] = companyService.count()
-            data["userCount"] = userService.count()
-            data["activeCompany"] = roomRecordService.countCompanyIdByStartTime() ?: 0// 今日活跃公司数
-            data["tradesCapacity"] = tradeInfoService.countStockByTradeTime()       // 交易量
-            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTime()         // 交易金额
-            data["totalVolume"] = tradeInfoService.countStock()                     // 总交易金额
-            data["totalMoney"] = tradeInfoService.countMoney()                      // 总交易金额
-            data["activeUser"] = tradeInfoService.countUserByTradeTime()            // 参与交易总人数
-            data
-        })
+    suspend fun getSystemInfo(): ResponseInfo<MutableMap<String, Number>> {
+        val data: MutableMap<String, Number> = HashMap()
+        data["companyCount"] = companyService.count()
+        data["userCount"] = userService.count()
+        data["activeCompany"] = roomRecordService.countCompanyIdByStartTime() ?: 0// 今日活跃公司数
+        data["tradesCapacity"] = tradeInfoService.countStockByTradeTime()       // 交易量
+        data["tradesVolume"] = tradeInfoService.countMoneyByTradeTime()         // 交易金额
+        data["totalVolume"] = tradeInfoService.countStock()                     // 总交易金额
+        data["totalMoney"] = tradeInfoService.countMoney()                      // 总交易金额
+        data["activeUser"] = tradeInfoService.countUserByTradeTime()            // 参与交易总人数
+        return ResponseInfo.ok(data)
     }
 
     /**
@@ -176,11 +173,11 @@ class BackStageController {
      */
     @GetMapping("/company/info")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun getCompanyTraderInfo(companyId: Int): Mono<ResponseInfo<Map<String, Any>>> {
+    suspend fun getCompanyTraderInfo(companyId: Int): ResponseInfo<Map<String, Any>> {
         val startTime = LocalTime.MIN.toLocalDateTime()
         val endTime = LocalDateTime.now()
-        return ResponseInfo.ok(mono {
-            val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+        return ResponseInfo.ok(
             mapOf(
                 "dayOpeningNumber" to roomRecordService.countByStartTimeAndCompanyId(startTime, companyId),
                 "dayTradesCapacity" to tradeInfoService.countStockByTradeTimeAndCompanyId(
@@ -203,7 +200,7 @@ class BackStageController {
                 "stockholderNum" to roleService.countByCompanyIdAndRoleId(companyId, roleId),
                 "reportCount" to analysisService.countByCompanyId(companyId)
             )
-        })
+        )
     }
 
     /**
@@ -226,11 +223,11 @@ class BackStageController {
      */
     @GetMapping("/company/active")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun getTopCompany(
+    suspend fun getTopCompany(
         query: PageQuery,
         @RequestParam(required = false) type: String?
-    ): Mono<ResponseInfo<List<Map<String, Any?>>>> {
-        return ResponseInfo.ok(mono { roomRecordService.countTopCompany(query, type ?: "day") })
+    ): ResponseInfo<List<Map<String, Any?>>> {
+        return ResponseInfo.ok(roomRecordService.countTopCompany(query, type ?: "day"))
     }
 
     /**
@@ -266,8 +263,8 @@ class BackStageController {
      */
     @GetMapping("/wgt")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun findAllWgt(query: PageQuery): Mono<ResponseInfo<PageView<AppUpdate>>> {
-        return ResponseInfo.ok(mono { appUpdateService.findAll(query) })
+    suspend fun findAllWgt(query: PageQuery): ResponseInfo<PageView<AppUpdate>> {
+        return ResponseInfo.ok(appUpdateService.findAll(query))
     }
 
     /**

@@ -7,12 +7,10 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.room.*
 import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
 import java.util.*
 
 /**
@@ -38,11 +36,9 @@ class RoomController {
      */
     @PostMapping("/click")
     @PreAuthorize("hasRole('ADMIN')")
-    // @Valid 和 @Validated 注解均不起作用，不知道为什么
-    fun createClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
-        return ResponseInfo.ok(mono {
-            roomService.createRoom(clickRoom.awaitSingle())
-        })
+    // @Valid 和 @Validated 注解均不起作用，不知道为什么 也许现在可以了
+    suspend fun createClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): ResponseInfo<ClickMatch> {
+        return ResponseInfo.ok(roomService.createRoom(clickRoom.awaitSingle()))
     }
 
     /**
@@ -59,10 +55,8 @@ class RoomController {
      */
     @PostMapping("/bicker")
     @PreAuthorize("hasRole('ADMIN')")
-    fun createBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
-        return ResponseInfo.ok(mono {
-            roomService.createRoom(bickerRoom.awaitSingle())
-        })
+    suspend fun createBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): ResponseInfo<BickerMatch> {
+        return ResponseInfo.ok(roomService.createRoom(bickerRoom.awaitSingle()))
     }
 
     /**
@@ -79,10 +73,8 @@ class RoomController {
      */
     @PostMapping("/double")
     @PreAuthorize("hasRole('ADMIN')")
-    fun createDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<DoubleMatch>> {
-        return ResponseInfo.ok(mono {
-            roomService.createRoom(doubleRoom.awaitSingle())
-        })
+    suspend fun createDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): ResponseInfo<DoubleMatch> {
+        return ResponseInfo.ok(roomService.createRoom(doubleRoom.awaitSingle()))
     }
 
     /**
@@ -99,10 +91,8 @@ class RoomController {
      */
     @PostMapping("/continue")
     @PreAuthorize("hasRole('ADMIN')")
-    fun createTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
-        return ResponseInfo.ok(mono {
-            roomService.createRoom(continueRoom.awaitSingle())
-        })
+    suspend fun createTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): ResponseInfo<ContinueMatch> {
+        return ResponseInfo.ok(roomService.createRoom(continueRoom.awaitSingle()))
     }
 
     /**
@@ -119,10 +109,8 @@ class RoomController {
      */
     @PostMapping("/timing")
     @PreAuthorize("hasRole('ADMIN')")
-    fun createTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<TimingMatch>> {
-        return ResponseInfo.ok(mono {
-            roomService.createRoom(timingRoom.awaitSingle())
-        })
+    suspend fun createTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): ResponseInfo<TimingMatch> {
+        return ResponseInfo.ok(roomService.createRoom(timingRoom.awaitSingle()))
     }
 
     /**
@@ -140,11 +128,9 @@ class RoomController {
      */
     @PutMapping("/click")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): Mono<ResponseInfo<ClickMatch>> {
-        return ResponseInfo.ok(mono {
-            val room = clickRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
-        })
+    suspend fun updateClickRoom(@RequestBody clickRoom: Mono<ClickMatch>): ResponseInfo<ClickMatch> {
+        val room = clickRoom.awaitSingle()
+        return ResponseInfo.ok(roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag))
     }
 
     /**
@@ -162,11 +148,9 @@ class RoomController {
      */
     @PutMapping("/bicker")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): Mono<ResponseInfo<BickerMatch>> {
-        return ResponseInfo.ok(mono {
-            val room = bickerRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
-        })
+    suspend fun updateBickerRoom(@RequestBody bickerRoom: Mono<BickerMatch>): ResponseInfo<BickerMatch> {
+        val room = bickerRoom.awaitSingle()
+        return ResponseInfo.ok(roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag))
     }
 
     /**
@@ -184,11 +168,9 @@ class RoomController {
      */
     @PutMapping("/double")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): Mono<ResponseInfo<DoubleMatch>> {
-        return ResponseInfo.ok(mono {
-            val room = doubleRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
-        })
+    suspend fun updateDoubleRoom(@RequestBody doubleRoom: Mono<DoubleMatch>): ResponseInfo<DoubleMatch> {
+        val room = doubleRoom.awaitSingle()
+        return ResponseInfo.ok(roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag))
     }
 
     /**
@@ -206,11 +188,9 @@ class RoomController {
      */
     @PutMapping("/continue")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): Mono<ResponseInfo<ContinueMatch>> {
-        return ResponseInfo.ok(mono {
-            val room = continueRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
-        })
+    suspend fun updateTimelyMatch(@RequestBody continueRoom: Mono<ContinueMatch>): ResponseInfo<ContinueMatch> {
+        val room = continueRoom.awaitSingle()
+        return ResponseInfo.ok(roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag))
     }
 
     /**
@@ -228,11 +208,9 @@ class RoomController {
      */
     @PutMapping("/timing")
     @PreAuthorize("hasRole('ADMIN')")
-    fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): Mono<ResponseInfo<TimingMatch>> {
-        return ResponseInfo.ok(mono {
-            val room = timingRoom.awaitSingle()
-            roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag)
-        })
+    suspend fun updateTimingMatch(@RequestBody timingRoom: Mono<TimingMatch>): ResponseInfo<TimingMatch> {
+        val room = timingRoom.awaitSingle()
+        return ResponseInfo.ok(roomService.updateRoomByRoomId(room, room.oldFlag ?: room.flag))
     }
 
     /**
@@ -248,10 +226,8 @@ class RoomController {
      */
     @GetMapping("/editable")
     @PreAuthorize("hasRole('ADMIN')")
-    fun getEditableRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
-        return ResponseInfo.ok(mono {
-            roomService.getEditableRoomList()
-        })
+    suspend fun getEditableRoomList(): ResponseInfo<LinkedList<BaseRoom>> {
+        return ResponseInfo.ok(roomService.getEditableRoomList())
     }
 
     //--------------------------------不需要管理员权限-------------------------------------
@@ -269,8 +245,8 @@ class RoomController {
      * @apiPermission user
      */
     @GetMapping("/scope")
-    fun getRoomScope(roomId: String): Mono<ResponseInfo<Map<String, String>>> {
-        return ResponseInfo.ok(mono { roomService.getRoomScope(roomId) })
+    suspend fun getRoomScope(roomId: String): ResponseInfo<Map<String, String>> {
+        return ResponseInfo.ok(roomService.getRoomScope(roomId))
     }
 
     /**
@@ -290,10 +266,8 @@ class RoomController {
      * @apiPermission user
      */
     @GetMapping
-    fun getAllRoomList(): Mono<ResponseInfo<LinkedList<BaseRoom>>> {
-        return ResponseInfo.ok(mono {
-            roomService.getAllRoomList()
-        })
+    suspend fun getAllRoomList(): ResponseInfo<LinkedList<BaseRoom>> {
+        return ResponseInfo.ok(roomService.getAllRoomList())
     }
 
     /**
@@ -314,8 +288,8 @@ class RoomController {
      * @apiPermission user
      */
     @GetMapping("/homepage")
-    fun getHomepageData(roomId: String): Mono<ResponseInfo<Map<String, Any>>> {
-        return ResponseInfo.ok(mono { roomService.getHomepageData(roomId) })
+    suspend fun getHomepageData(roomId: String): ResponseInfo<Map<String, Any>> {
+        return ResponseInfo.ok(roomService.getHomepageData(roomId))
     }
 
     /**
@@ -334,10 +308,8 @@ class RoomController {
      * @apiPermission user
      */
     @GetMapping("/order")
-    fun findOrder(roomId: String, query: PageQuery): Mono<ResponseInfo<PageView<TradeInfo>>> {
-        return ResponseInfo.ok(mono {
-            roomService.findOrder(roomId, query)
-        })
+    suspend fun findOrder(roomId: String, query: PageQuery): ResponseInfo<PageView<TradeInfo>> {
+        return ResponseInfo.ok(roomService.findOrder(roomId, query))
     }
 
 }

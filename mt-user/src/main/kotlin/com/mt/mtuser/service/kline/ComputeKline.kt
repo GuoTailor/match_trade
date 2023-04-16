@@ -61,7 +61,7 @@ abstract class ComputeKline {
 
     suspend fun handler(stockId: Int, companyId: Int, offset: Long = 0) {
         val lastTime = redisUtil.getKlineLastTime(tableName, stockId)
-                ?: klineService.getLastTimeByKline(tableName) ?: getMinComputeTime()
+            ?: klineService.getLastTimeByKline(tableName) ?: getMinComputeTime()
         if (lastTime != null) {
             val formatTime = formatDate(lastTime)
             val now = LocalDateTime.now()

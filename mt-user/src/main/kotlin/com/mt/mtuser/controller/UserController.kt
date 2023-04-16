@@ -8,7 +8,6 @@ import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.UserService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -67,19 +66,18 @@ class UserController {
      * @apiPermission user
      */
     @PutMapping
-    fun alter(@RequestBody monoUser: Mono<User>): Mono<ResponseInfo<Int>> {
-        return mono {
-            val user = monoUser.awaitSingle()
-            if (!Util.isEmpty(user)) {
-                val currentUser = BaseUser.getcurrentUser().awaitSingle()
-                user.id = currentUser.id
-                user.phone = null
-                user.password = null
-                ResponseInfo<Int>(userService.save(user), "修改成功")
-            } else {
-                ResponseInfo<Int>(userService.save(user), "请至少更新一个属性")
-            }
+    suspend fun alter(@RequestBody monoUser: Mono<User>): ResponseInfo<Int> {
+        val user = monoUser.awaitSingle()
+        return if (!Util.isEmpty(user)) {
+            val currentUser = BaseUser.getcurrentUser().awaitSingle()
+            user.id = currentUser.id
+            user.phone = null
+            user.password = null
+            ResponseInfo(userService.save(user), "修改成功")
+        } else {
+            ResponseInfo(userService.save(user), "请至少更新一个属性")
         }
+
     }
 
     /**
@@ -98,8 +96,8 @@ class UserController {
      * @apiPermission user
      */
     @GetMapping
-    fun getAllUser(query: PageQuery): Mono<ResponseInfo<PageView<User>>> {
-        return ResponseInfo.ok(mono { userService.findAllUser(query) })
+    suspend fun getAllUser(query: PageQuery): ResponseInfo<PageView<User>> {
+        return ResponseInfo.ok(userService.findAllUser(query))
     }
 
     /**
@@ -120,10 +118,8 @@ class UserController {
      */
     @PostMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun addAnalystRoleTest(@RequestBody user: Mono<User>): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(user.flatMap {
-            mono { userService.addAnalystRole(it) }
-        })
+    suspend fun addAnalystRoleTest(@RequestBody user: Mono<User>): ResponseInfo<Unit> {
+        return ResponseInfo.ok(userService.addAnalystRole(user.awaitSingle()))
     }
 
     /**
@@ -142,14 +138,14 @@ class UserController {
      * @apiPermission user
      */
     @PutMapping("/password")
-    fun updatePassword(@RequestBody data: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(mono {
-            val map = data.awaitSingle()
+    suspend fun updatePassword(@RequestBody data: Mono<Map<String, String>>): ResponseInfo<Boolean> {
+        val map = data.awaitSingle()
+        return ResponseInfo.ok(
             userService.updatePassword(
                 map["oldPassword"] ?: error("oldPassword 不能为空"),
                 map["newPassword"] ?: error("newPassword 不能为空")
             )
-        })
+        )
     }
 
     /**
@@ -178,8 +174,8 @@ class UserController {
      */
     @GetMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun getAllAnalystRole(query: PageQuery): Mono<ResponseInfo<PageView<Analyst>>> {
-        return ResponseInfo.ok(mono { userService.getAllAnalystRole(query) })
+    suspend fun getAllAnalystRole(query: PageQuery): ResponseInfo<PageView<Analyst>> {
+        return ResponseInfo.ok(userService.getAllAnalystRole(query))
     }
 
     /**
@@ -208,8 +204,8 @@ class UserController {
      */
     @GetMapping("/role/analyst/info")
     @PreAuthorize("hasRole('ANALYST')")
-    fun getAnalystInfo(@RequestParam(required = false) id: Int?): Mono<ResponseInfo<Analyst>> {
-        return ResponseInfo.ok(mono { userService.getAnalystInfo(id) })
+    suspend fun getAnalystInfo(@RequestParam(required = false) id: Int?): ResponseInfo<Analyst> {
+        return ResponseInfo.ok(userService.getAnalystInfo(id))
     }
 
     /**
@@ -226,8 +222,8 @@ class UserController {
      */
     @DeleteMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun deleteAnalyst(stockholderId: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { userService.deleteAnalyst(stockholderId) })
+    suspend fun deleteAnalyst(stockholderId: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(userService.deleteAnalyst(stockholderId))
     }
 
     /**
@@ -250,7 +246,7 @@ class UserController {
      */
     @PutMapping("/role/analyst")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun updateAnalyst(@RequestBody user: Mono<User>): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(user.flatMap { mono { userService.updateAnalyst(it) } })
+    suspend fun updateAnalyst(@RequestBody user: Mono<User>): ResponseInfo<Unit> {
+        return ResponseInfo.ok(userService.updateAnalyst(user.awaitSingle()))
     }
 }

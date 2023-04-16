@@ -23,7 +23,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 
 /**
@@ -32,6 +31,7 @@ import java.time.format.DateTimeFormatter
 @Configuration
 class ReactiveRedisConfiguration {
     private val json = jacksonObjectMapper()
+
     @Autowired
     private lateinit var roomSocketService: RoomSocketService
 
@@ -46,7 +46,11 @@ class ReactiveRedisConfiguration {
         //om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         //om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        om.activateDefaultTyping(om.polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
+        om.activateDefaultTyping(
+            om.polymorphicTypeValidator,
+            ObjectMapper.DefaultTyping.NON_FINAL,
+            JsonTypeInfo.As.PROPERTY
+        )
         om.registerModule(KotlinModule())
         val jackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(om)
         val stringRedisSerializer = StringRedisSerializer()
@@ -65,11 +69,11 @@ class ReactiveRedisConfiguration {
         })
         om.registerModule(javaTimeModule)
         val context = RedisSerializationContext.newSerializationContext<String, Any>()
-                .key(stringRedisSerializer)             // key采用String的序列化方式
-                .value(jackson2JsonRedisSerializer)     // value序列化方式采用jackson
-                .hashKey(stringRedisSerializer)         // hash的key也采用String的序列化方式
-                .hashValue(jackson2JsonRedisSerializer) // hash的value序列化方式采用jackson
-                .build()
+            .key(stringRedisSerializer)             // key采用String的序列化方式
+            .value(jackson2JsonRedisSerializer)     // value序列化方式采用jackson
+            .hashKey(stringRedisSerializer)         // hash的key也采用String的序列化方式
+            .hashValue(jackson2JsonRedisSerializer) // hash的value序列化方式采用jackson
+            .build()
         return ReactiveRedisTemplate(factory, context)
     }
 

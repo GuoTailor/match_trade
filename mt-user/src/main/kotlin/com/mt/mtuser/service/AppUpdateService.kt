@@ -7,9 +7,7 @@ import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.entity.page.getPage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
-import org.springframework.data.r2dbc.core.from
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Query
 import org.springframework.http.codec.multipart.FilePart
@@ -35,32 +33,34 @@ class AppUpdateService {
     fun uploadWgt(filePart: FilePart, appUpdate: AppUpdate): Mono<AppUpdate> {
         logger.info("{}", appUpdate.forceUpdate)
         return fileService.uploadFile(filePart)
-                .flatMap {
-                    appUpdate.downloadUrlAndroid = it
-                    if (it.substring(it.lastIndexOf('.')) == ".wgt") {
-                        appUpdate.downloadUrlIos = it
-                    } else {
-                        appUpdate.downloadUrlIos = "未知"
-                    }
-                    appUpdateDao.save(appUpdate)
+            .flatMap {
+                appUpdate.downloadUrlAndroid = it
+                if (it.substring(it.lastIndexOf('.')) == ".wgt") {
+                    appUpdate.downloadUrlIos = it
+                } else {
+                    appUpdate.downloadUrlIos = "未知"
                 }
+                appUpdateDao.save(appUpdate)
+            }
     }
 
     fun appVersion(version: String, type: String): Mono<AppUpdate> {
         return appUpdateDao.getVersionByVersionCode(version)
-                .map { it.downloadUrl = if (type == "ios") it.downloadUrlIos else it.downloadUrlAndroid; it }
+            .map { it.downloadUrl = if (type == "ios") it.downloadUrlIos else it.downloadUrlAndroid; it }
     }
 
     suspend fun findAll(query: PageQuery): PageView<AppUpdate> {
-        return getPage(template.select<AppUpdate>()
+        return getPage(
+            template.select<AppUpdate>()
                 .matching(Query.query(query.where()).with(query.page()))
-                .all(), template, query)
+                .all(), template, query
+        )
     }
 
     fun deleteById(id: Int): Mono<Void> {
         return appUpdateDao.findById(id)
-                .map { fileService.deleteFile(it.downloadUrlAndroid) }
-                .flatMap { appUpdateDao.deleteById(id) }
+            .map { fileService.deleteFile(it.downloadUrlAndroid) }
+            .flatMap { appUpdateDao.deleteById(id) }
     }
 
     fun update(appUpdate: AppUpdate) = appUpdateDao.save(appUpdate)

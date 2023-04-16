@@ -1,7 +1,6 @@
 package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.entity.Company
 import com.mt.mtuser.entity.Kline
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stock
@@ -9,12 +8,9 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.StockService
 import com.mt.mtuser.service.kline.KlineService
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
-import java.math.BigDecimal
 
 /**
  * Created by gyh on 2020/3/22.
@@ -44,8 +40,8 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("/{id}")
-    fun getStock(@PathVariable id: Int): Mono<ResponseInfo<Stock?>> {
-        return ResponseInfo.ok<Stock?>(mono { stockService.findById(id) })
+    suspend fun getStock(@PathVariable id: Int): ResponseInfo<Stock?> {
+        return ResponseInfo.ok(stockService.findById(id))
     }
 
     /**
@@ -65,8 +61,8 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("/company/{id}")
-    fun getCompanyStock(@PathVariable id: Int, query: PageQuery): Mono<ResponseInfo<PageView<Stock>>> {
-        return ResponseInfo.ok(mono { stockService.findAllByQuery(query, id) })
+    suspend fun getCompanyStock(@PathVariable id: Int, query: PageQuery): ResponseInfo<PageView<Stock>> {
+        return ResponseInfo.ok(stockService.findAllByQuery(query, id))
     }
 
     /**
@@ -85,9 +81,9 @@ class StockController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun addStock(@RequestBody stock: Stock): Mono<ResponseInfo<Stock>> {
+    suspend fun addStock(@RequestBody stock: Stock): ResponseInfo<Stock> {
         stock.id = null
-        return ResponseInfo.ok(mono { stockService.save(stock) })
+        return ResponseInfo.ok(stockService.save(stock))
     }
 
     /**
@@ -106,14 +102,12 @@ class StockController {
      */
     @PutMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun updateStock(@RequestBody stock: Stock): Mono<ResponseInfo<Stock>> {
-        return mono {
-            if (!Util.isEmpty(stock)) {
-                stock.id = null
-                ResponseInfo(0, "成功", stockService.save(stock))
-            } else {
-                ResponseInfo<Stock>(1, "请填写id属性")
-            }
+    suspend fun updateStock(@RequestBody stock: Stock): ResponseInfo<Stock> {
+        return if (!Util.isEmpty(stock)) {
+            stock.id = null
+            ResponseInfo(0, "成功", stockService.save(stock))
+        } else {
+            ResponseInfo(1, "请填写id属性")
         }
     }
 
@@ -133,8 +127,8 @@ class StockController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun deleteStock(@PathVariable id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { stockService.deleteById(id) })
+    suspend fun deleteStock(@PathVariable id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(stockService.deleteById(id))
     }
 
     /**
@@ -159,8 +153,13 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("kline")
-    fun findKline(@RequestParam roomId: String, @RequestParam mode: String, @RequestParam timeline: String, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
-        return ResponseInfo.ok(mono { klineService.findKline(roomId, mode, timeline, page) })
+    suspend fun findKline(
+        @RequestParam roomId: String,
+        @RequestParam mode: String,
+        @RequestParam timeline: String,
+        page: PageQuery
+    ): ResponseInfo<PageView<Kline>> {
+        return ResponseInfo.ok(klineService.findKline(roomId, mode, timeline, page))
     }
 
     /**
@@ -184,8 +183,12 @@ class StockController {
      * @apiPermission user
      */
     @GetMapping("kline/company")
-    fun findKlineByCompanyId(@RequestParam companyId: Int, @RequestParam timeline: String, page: PageQuery): Mono<ResponseInfo<PageView<Kline>>> {
-        return ResponseInfo.ok(mono { klineService.findKlineByCompanyId(companyId, timeline, page) })
+    suspend fun findKlineByCompanyId(
+        @RequestParam companyId: Int,
+        @RequestParam timeline: String,
+        page: PageQuery
+    ): ResponseInfo<PageView<Kline>> {
+        return ResponseInfo.ok(klineService.findKlineByCompanyId(companyId, timeline, page))
     }
 
 }

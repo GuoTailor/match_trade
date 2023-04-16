@@ -46,8 +46,8 @@ class RedisUtil {
      */
     suspend fun getRoomRecord(roomId: String): RoomRecord? {
         return redisTemplate
-                .opsForHash<String, RoomRecord>()
-                .getAndAwait(roomKey + roomId, roomInfo)
+            .opsForHash<String, RoomRecord>()
+            .getAndAwait(roomKey + roomId, roomInfo)
     }
 
     /**
@@ -55,8 +55,8 @@ class RedisUtil {
      */
     suspend fun deleteRoomRecord(roomId: String) {
         redisTemplate
-                .opsForHash<String, RoomRecord>()
-                .deleteAndAwait(roomKey + roomId)
+            .opsForHash<String, RoomRecord>()
+            .deleteAndAwait(roomKey + roomId)
     }
 
     /**

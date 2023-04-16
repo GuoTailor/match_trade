@@ -11,13 +11,13 @@ import org.springframework.messaging.SubscribableChannel
 interface MatchSink {
 
     @Output(OUT_ORDER)
-    fun outOrder():  MessageChannel
+    fun outOrder(): MessageChannel
 
     @Output(OUT_RIVAL)
-    fun outRival():  MessageChannel
+    fun outRival(): MessageChannel
 
     @Output(OUT_CANCEL)
-    fun outCancel():  MessageChannel
+    fun outCancel(): MessageChannel
 
     @Input(IN_TRADE)
     fun inTrade(): SubscribableChannel

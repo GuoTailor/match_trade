@@ -1,7 +1,5 @@
 package com.mt.mtsocket.common
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory
@@ -11,7 +9,6 @@ import java.beans.Introspector
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.net.URLDecoder
-import java.net.URLEncoder
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,7 +26,7 @@ object Util {
      */
     fun getParameterMap(json: String?): Map<String, Any> {
         var map: Map<String, Any> = HashMap()
-        if (!StringUtils.isEmpty(json)) {
+        if (StringUtils.hasLength(json)) {
             try {
                 map = jacksonObjectMapper().readValue(json!!)
             } catch (e: IOException) {
@@ -193,7 +190,7 @@ object Util {
 
     fun getQueryMap(queryStr: String): Map<String, String> {
         val queryMap: MutableMap<String, String> = HashMap()
-        if (!StringUtils.isEmpty(queryStr)) {
+        if (StringUtils.hasLength(queryStr)) {
             val queryParam = queryStr.split("&")
             queryParam.forEach { s: String ->
                 val kv = s.split("=".toRegex(), 2)

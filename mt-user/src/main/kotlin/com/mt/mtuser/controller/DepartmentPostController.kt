@@ -6,7 +6,6 @@ import com.mt.mtuser.entity.department.DepartmentPost
 import com.mt.mtuser.entity.department.DepartmentPostInfo
 import com.mt.mtuser.service.DepartmentPostService
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -39,8 +38,8 @@ class DepartmentPostController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun bindDepartment(@RequestBody dpi: Mono<DepartmentPostInfo>): Mono<ResponseInfo<DepartmentPost>> {
-        return ResponseInfo.ok(mono { departmentPostService.bindDepartment(dpi.awaitSingle()) })
+    suspend fun bindDepartment(@RequestBody dpi: Mono<DepartmentPostInfo>): ResponseInfo<DepartmentPost> {
+        return ResponseInfo.ok(departmentPostService.bindDepartment(dpi.awaitSingle()))
     }
 
     /**
@@ -61,8 +60,8 @@ class DepartmentPostController {
      */
     @PutMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun updateBind(@RequestBody dpi: Mono<DepartmentPostInfo>): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(mono { departmentPostService.updateBind(dpi.awaitSingle()) })
+    suspend fun updateBind(@RequestBody dpi: Mono<DepartmentPostInfo>): ResponseInfo<Int> {
+        return ResponseInfo.ok(departmentPostService.updateBind(dpi.awaitSingle()))
     }
 
     /**
@@ -79,8 +78,8 @@ class DepartmentPostController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun deleteBind(@PathVariable id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { departmentPostService.deleteBind(id) })
+    suspend fun deleteBind(@PathVariable id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(departmentPostService.deleteBind(id))
     }
 
     /**
@@ -97,7 +96,7 @@ class DepartmentPostController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('ANALYST')")
-    fun findAllBind(@PathVariable id: Int): Mono<ResponseInfo<LinkedList<Department>>> {
-        return ResponseInfo.ok(mono { departmentPostService.findAllBind(id) })
+    suspend fun findAllBind(@PathVariable id: Int): ResponseInfo<LinkedList<Department>> {
+        return ResponseInfo.ok(departmentPostService.findAllBind(id))
     }
 }

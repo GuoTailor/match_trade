@@ -29,7 +29,8 @@ class RoomRecordService {
     @Autowired
     private lateinit var template: R2dbcEntityTemplate
 
-    suspend fun countByStartTime(time: LocalDateTime = LocalTime.MIN.toLocalDateTime()) = roomRecordDao.countByStartTime(time)
+    suspend fun countByStartTime(time: LocalDateTime = LocalTime.MIN.toLocalDateTime()) =
+        roomRecordDao.countByStartTime(time)
 
     suspend fun countByStartTimeAndCompanyId(time: LocalDateTime = LocalTime.MIN.toLocalDateTime()): Int {
         val companyId = roleService.getCompanyList(Stockholder.ADMIN)[0]
@@ -37,15 +38,19 @@ class RoomRecordService {
     }
 
     suspend fun countByStartTimeAndCompanyId(time: LocalDateTime, companyId: Int) =
-            roomRecordDao.countByStartTimeAndCompanyId(time, companyId)
+        roomRecordDao.countByStartTimeAndCompanyId(time, companyId)
 
-    suspend fun countByStartTimeAndEndTimeAndCompanyId(startTime: LocalDateTime, endTime: LocalDateTime, companyId: Int) =
-            roomRecordDao.countByStartTimeAndEndTimeAndCompanyId(startTime, endTime, companyId)
+    suspend fun countByStartTimeAndEndTimeAndCompanyId(
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        companyId: Int
+    ) =
+        roomRecordDao.countByStartTimeAndEndTimeAndCompanyId(startTime, endTime, companyId)
 
     suspend fun countByCompanyId(companyId: Int) = roomRecordDao.countByCompanyId(companyId)
 
     suspend fun countCompanyIdByStartTime(startTime: LocalDateTime = LocalTime.MIN.toLocalDateTime()) =
-            roomRecordDao.countCompanyIdByStartTime(startTime)
+        roomRecordDao.countCompanyIdByStartTime(startTime)
 
     suspend fun count() = roomRecordDao.count()
 
@@ -74,14 +79,16 @@ class RoomRecordService {
         }
         val time = if (type == "day") LocalDate.now() else firstDay().toLocalDate()
         return template.databaseClient.sql(sql)
-                .bind("time", time)
-                .map { r, _ ->
-                    mapOf("companyId" to r.get("company_id", java.lang.Integer::class.java),
-                            "openNumber" to r.get("count", java.lang.Integer::class.java),
-                            "name" to r.get("name", String::class.java),
-                            "money" to r.get("money", BigDecimal::class.java),
-                            "amount" to r.get("amount", java.lang.Integer::class.java))
-                }.all().collectList().awaitSingle()
+            .bind("time", time)
+            .map { r, _ ->
+                mapOf(
+                    "companyId" to r.get("company_id", java.lang.Integer::class.java),
+                    "openNumber" to r.get("count", java.lang.Integer::class.java),
+                    "name" to r.get("name", String::class.java),
+                    "money" to r.get("money", BigDecimal::class.java),
+                    "amount" to r.get("amount", java.lang.Integer::class.java)
+                )
+            }.all().collectList().awaitSingle()
     }
 
 }

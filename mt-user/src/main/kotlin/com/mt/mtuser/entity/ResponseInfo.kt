@@ -22,6 +22,16 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
 
     companion object {
         @JvmStatic
+        fun <T> ok(monoBody: T): ResponseInfo<T> {
+            return ResponseInfo(0, "成功", monoBody)
+        }
+
+        @JvmStatic
+        fun <T> ok(): ResponseInfo<T> {
+            return ResponseInfo(0, "成功")
+        }
+
+        @JvmStatic
         fun <T> ok(monoBody: Mono<T>): Mono<ResponseInfo<T>> {
             return responseBodyCreate(monoBody, 0, "成功")
         }

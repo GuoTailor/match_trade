@@ -33,7 +33,7 @@ class MtEngineApplicationTests {
         user.phone = "nmka"
         user.password = "nmka"
         user.createTime = LocalDateTime.now()
-        var subscribeOn = matchService.saveUser(user).subscribeOn(Schedulers.boundedElastic()).subscribe()
+//        var subscribeOn = matchService.saveUser(user).subscribeOn(Schedulers.boundedElastic()).subscribe()
         Thread.sleep(10_000)
     }
 

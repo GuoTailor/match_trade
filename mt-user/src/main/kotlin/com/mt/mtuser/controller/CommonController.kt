@@ -2,26 +2,19 @@ package com.mt.mtuser.controller
 
 import com.mt.mtuser.common.SendSms
 import com.mt.mtuser.common.Util
-import com.mt.mtuser.dao.RoomRecordDao
 import com.mt.mtuser.dao.entity.MtRole
 import com.mt.mtuser.entity.AppUpdate
 import com.mt.mtuser.entity.ResponseInfo
 import com.mt.mtuser.entity.Stockholder
 import com.mt.mtuser.entity.User
 import com.mt.mtuser.service.*
-import com.mt.mtuser.service.room.RoomService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Duration
 import java.util.*
 
 /**
@@ -61,16 +54,17 @@ class CommonController {
      * @apiPermission none
      */
     @GetMapping("/common/check")
-    fun checkingPhone(@RequestParam phone: String, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<Map<String, Boolean>>> {
-        return ResponseInfo.ok(mono {
-            val user = userService.findByPhone(phone)
-            var role = 0
-            if (user != null && companyId != null) {
-                val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
-                role = roleService.exists(user.id!!, roleId, companyId)
-            }
-            mapOf("user" to (user != null), "stockholder" to (role == 1))
-        })
+    suspend fun checkingPhone(
+        @RequestParam phone: String,
+        @RequestParam(required = false) companyId: Int?
+    ): ResponseInfo<Map<String, Boolean>> {
+        val user = userService.findByPhone(phone)
+        var role = 0
+        if (user != null && companyId != null) {
+            val roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id!!
+            role = roleService.exists(user.id!!, roleId, companyId)
+        }
+        return ResponseInfo.ok(mapOf("user" to (user != null), "stockholder" to (role == 1)))
     }
 
     /**
@@ -101,9 +95,9 @@ class CommonController {
                     redisUtil.getCode(user.phone!!)
                 } else error("用户已存在")
             }.filter { localCode -> localCode != null && code == localCode }
-                    .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
-                    .flatMap { mono { redisUtil.deleteCode(user.phone!!) } }
-                    .flatMap { mono { userService.register(user) } }
+                .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
+                .flatMap { mono { redisUtil.deleteCode(user.phone!!) } }
+                .flatMap { mono { userService.register(user) } }
         }
         return ResponseInfo.ok(result)
     }
@@ -122,15 +116,13 @@ class CommonController {
      * @apiPermission none
      */
     @GetMapping("/common/sendCode")
-    fun sendCode(@RequestParam phone: String): Mono<ResponseInfo<String>> {
-        return ResponseInfo.ok(mono {
-            val smsCode = Util.getRandomInt(4)
-            val (code, msg) = SendSms.send(phone, smsCode, 5)
-            if (code == "0") {
-                redisUtil.saveCode(phone, smsCode)
-                msg
-            } else throw IllegalStateException(msg)
-        })
+    suspend fun sendCode(@RequestParam phone: String): ResponseInfo<String?> {
+        val smsCode = Util.getRandomInt(4)
+        val (code, msg) = SendSms.send(phone, smsCode, 5)
+        if (code == "0") {
+            redisUtil.saveCode(phone, smsCode)
+        } else throw IllegalStateException(msg)
+        return ResponseInfo.ok(msg)
     }
 
     /**
@@ -150,13 +142,14 @@ class CommonController {
      * @apiPermission none
      */
     @GetMapping("/common/verifyCode")
-    fun verifyCode(@RequestParam phone: String, @RequestParam code: String): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { redisUtil.getCode(phone) }
-                .filter { localCode -> localCode != null && code == localCode }
-                .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
-                .flatMap { mono { redisUtil.deleteCode(phone) } }
-                .flatMap { mono { redisUtil.saveVerifyResult(phone) } }
-        )
+    suspend fun verifyCode(@RequestParam phone: String, @RequestParam code: String): ResponseInfo<Unit> {
+        val localCode = redisUtil.getCode(phone)
+        if (localCode != null && code == localCode) {
+            throw IllegalStateException("验证码错误")
+        }
+        redisUtil.deleteCode(phone)
+        redisUtil.saveVerifyResult(phone)
+        return ResponseInfo.ok()
     }
 
     /**
@@ -174,23 +167,15 @@ class CommonController {
      * @apiPermission none
      */
     @PutMapping("/common/password")
-    fun forgetPassword(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Boolean>> {
-        val result = map.flatMap {
-            val user = User()
-            user.phone = it["phone"] ?: return@flatMap Mono.error<Boolean>(IllegalStateException("请输入手机号"))
-            user.password = it["password"] ?: return@flatMap Mono.error<Boolean>(IllegalStateException("请输入密码"))
-            user.passwordEncoder()
-            mono { redisUtil.getVerify(user.phone!!) }
-                    .filter { any -> any != null }
-                    .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
-                    .flatMap {
-                        mono {
-                            redisUtil.deleteCode(user.phone!!)
-                            redisUtil.deleteVerify(user.phone!!)
-                            userService.forgetPassword(user)
-                        }
-                    }
-        }
+    suspend fun forgetPassword(@RequestBody map: Map<String, String>): ResponseInfo<Boolean> {
+        val user = User()
+        user.phone = map["phone"] ?: throw IllegalStateException("请输入手机号")
+        user.password = map["password"] ?: throw IllegalStateException("请输入密码")
+        user.passwordEncoder()
+        redisUtil.getVerify(user.phone!!) ?: throw IllegalStateException("验证码错误")
+        redisUtil.deleteCode(user.phone!!)
+        redisUtil.deleteVerify(user.phone!!)
+        val result = userService.forgetPassword(user)
         return ResponseInfo.ok(result)
     }
 
@@ -207,8 +192,8 @@ class CommonController {
      * @apiPermission none
      */
     @GetMapping("/common/getRoles")
-    fun getRoles(): Mono<ResponseInfo<List<MtRole>>> {
-        return ResponseInfo.ok(mono { roleService.findAll().toList() })
+    suspend fun getRoles(): ResponseInfo<List<MtRole>> {
+        return ResponseInfo.ok(roleService.findAll().toList())
     }
 
     /**

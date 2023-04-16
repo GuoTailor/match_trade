@@ -6,12 +6,13 @@ import io.netty.handler.timeout.WriteTimeoutHandler
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import reactor.netty.Connection
 import reactor.netty.http.client.HttpClient
-import reactor.netty.tcp.TcpClient
 import java.io.UnsupportedEncodingException
 import java.util.concurrent.TimeUnit
 
@@ -51,21 +52,27 @@ object SendSms {
 
 
     private suspend fun net(strUrl: String, params: Map<String, String>): Int {
-        val tcpClient = TcpClient
+        val tcpClient = HttpClient
             .create()
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, DEF_CONN_TIMEOUT)
             .doOnConnected { connection: Connection ->
                 connection.addHandlerLast(ReadTimeoutHandler(DEF_READ_TIMEOUT, TimeUnit.MILLISECONDS))
                 connection.addHandlerLast(WriteTimeoutHandler(DEF_READ_TIMEOUT, TimeUnit.MILLISECONDS))
             }
+
         val client = WebClient.builder()
-            .clientConnector(ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+            .clientConnector(ReactorClientHttpConnector(tcpClient))
             .baseUrl("$strUrl?${urlEncode(params)}")
             .build()
         return client.get()
             .accept(MediaType.ALL)
-            .exchange()
-            .flatMap { it.bodyToMono(String::class.java) }
+            .exchangeToMono { response ->
+                if (response.statusCode().equals(HttpStatus.OK)) {
+                    response.bodyToMono(String::class.java)
+                } else {
+                    response.createException().flatMap { Mono.error(it) }
+                }
+            }
             .map { it.toInt() }
             .awaitSingle()
     }

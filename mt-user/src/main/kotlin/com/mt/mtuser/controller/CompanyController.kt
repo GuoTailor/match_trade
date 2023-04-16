@@ -8,12 +8,10 @@ import com.mt.mtuser.service.CompanyService
 import com.mt.mtuser.service.RoomRecordService
 import com.mt.mtuser.service.TradeInfoService
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import java.util.HashMap
 
 /**
  * Created by gyh on 2020/3/18.
@@ -49,14 +47,12 @@ class CompanyController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    fun register(@RequestBody company: Company): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(mono {
-            if (!Util.isEmpty(company)) {
-                companyService.registerCompany(company)
-            } else {
-                throw IllegalStateException("请填写属性")
-            }
-        })
+    suspend fun register(@RequestBody company: Company): ResponseInfo<Company> {
+        if (!Util.isEmpty(company)) {
+            return ResponseInfo.ok(companyService.registerCompany(company))
+        } else {
+            throw IllegalStateException("请填写属性")
+        }
     }
 
     /**
@@ -73,8 +69,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { companyService.deleteById(id) })
+    suspend fun delete(@PathVariable id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(companyService.deleteById(id))
     }
 
     /**
@@ -95,8 +91,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping
-    fun update(@RequestBody company: Mono<Company>): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(mono { companyService.update(company.awaitSingle()) })
+    suspend fun update(@RequestBody company: Mono<Company>): ResponseInfo<Company> {
+        return ResponseInfo.ok(companyService.update(company.awaitSingle()))
     }
 
     /**
@@ -113,8 +109,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/stockholder")
-    fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
-        return ResponseInfo.ok(mono { companyService.addStockholder(stockholderInfo.awaitSingle()) })
+    suspend fun addStockholder(@RequestBody stockholderInfo: Mono<StockholderInfo>): ResponseInfo<Stockholder> {
+        return ResponseInfo.ok(companyService.addStockholder(stockholderInfo.awaitSingle()))
     }
 
     /**
@@ -131,8 +127,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/stockholder")
-    fun deleteStockholder(id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { companyService.deleteStockholder(id) })
+    suspend fun deleteStockholder(id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(companyService.deleteStockholder(id))
     }
 
     /**
@@ -151,8 +147,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/admin")
-    fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): Mono<ResponseInfo<Stockholder>> {
-        return ResponseInfo.ok(mono { companyService.addCompanyAdmin(stockholderInfo.awaitSingle()) })
+    suspend fun addCompanyAdmin(@RequestBody stockholderInfo: Mono<StockholderInfo>): ResponseInfo<Stockholder> {
+        return ResponseInfo.ok(companyService.addCompanyAdmin(stockholderInfo.awaitSingle()))
     }
 
     /**
@@ -170,8 +166,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/analyst")
-    fun addCompanyAnalyst(userId: Int, companyId: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { companyService.addCompanyAnalyst(userId, companyId) })
+    suspend fun addCompanyAnalyst(userId: Int, companyId: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(companyService.addCompanyAnalyst(userId, companyId))
     }
 
     /**
@@ -189,8 +185,8 @@ class CompanyController {
      * @apiPermission user
      */
     @GetMapping("/{id}")
-    fun getCompany(@PathVariable id: Int): Mono<ResponseInfo<Company>> {
-        return ResponseInfo.ok(mono { companyService.findCompany(id) })
+    suspend fun getCompany(@PathVariable id: Int): ResponseInfo<Company?> {
+        return ResponseInfo.ok(companyService.findCompany(id))
     }
 
     /**
@@ -211,8 +207,8 @@ class CompanyController {
      * @apiPermission user
      */
     @GetMapping("/self")
-    fun getCompanys(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
-        return ResponseInfo.ok(mono { companyService.findCompany(query) })
+    suspend fun getCompanys(query: PageQuery): ResponseInfo<PageView<Company>> {
+        return ResponseInfo.ok(companyService.findCompany(query))
     }
 
     /**
@@ -235,8 +231,11 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @GetMapping("/stockholder")
-    fun getAllShareholder(query: PageQuery, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<PageView<StockholderInfo>>> {
-        return ResponseInfo.ok(mono { companyService.getAllShareholder(query, companyId) })
+    suspend fun getAllShareholder(
+        query: PageQuery,
+        @RequestParam(required = false) companyId: Int?
+    ): ResponseInfo<PageView<StockholderInfo>> {
+        return ResponseInfo.ok(companyService.getAllShareholder(query, companyId))
     }
 
     /**
@@ -260,8 +259,12 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @GetMapping("/stockholder/department")
-    fun getShareholderByDepartment(query: PageQuery, companyId: Int, name: String): Mono<ResponseInfo<PageView<StockholderInfo>>> {
-        return ResponseInfo.ok(mono { companyService.getShareholderByDepartment(query, companyId, name) })
+    suspend fun getShareholderByDepartment(
+        query: PageQuery,
+        companyId: Int,
+        name: String
+    ): ResponseInfo<PageView<StockholderInfo>> {
+        return ResponseInfo.ok(companyService.getShareholderByDepartment(query, companyId, name))
     }
 
     /**
@@ -278,8 +281,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/stockholder")
-    fun updateStockholder(@RequestBody info: Mono<StockholderInfo>): Mono<ResponseInfo<Boolean>> {
-        return ResponseInfo.ok(mono { companyService.updateStockholder(info.awaitSingle()) })
+    suspend fun updateStockholder(@RequestBody info: Mono<StockholderInfo>): ResponseInfo<Boolean> {
+        return ResponseInfo.ok(companyService.updateStockholder(info.awaitSingle()))
     }
 
     /**
@@ -298,8 +301,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping
-    fun getAllCompany(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
-        return ResponseInfo.ok(mono { companyService.findAllByQuery(query) })
+    suspend fun getAllCompany(query: PageQuery): ResponseInfo<PageView<Company>> {
+        return ResponseInfo.ok(companyService.findAllByQuery(query))
     }
 
     /**
@@ -316,8 +319,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ANALYST')")
     @GetMapping("/analyst")
-    fun findByUser(query: PageQuery): Mono<ResponseInfo<PageView<Company>>> {
-        return ResponseInfo.ok(mono { companyService.findByUser(query) })
+    suspend fun findByUser(query: PageQuery): ResponseInfo<PageView<Company>> {
+        return ResponseInfo.ok(companyService.findByUser(query))
     }
 
     /**
@@ -336,8 +339,14 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/limit")
-    fun updateLimit(@RequestBody data: Map<String, Any>): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(mono { companyService.updateLimit(data["userId"] as ArrayList<Int>, data["limit"] as Int, data["companyId"] as Int) })
+    suspend fun updateLimit(@RequestBody data: Map<String, Any>): ResponseInfo<Int> {
+        return ResponseInfo.ok(
+            companyService.updateLimit(
+                data["userId"] as ArrayList<Int>,
+                data["limit"] as Int,
+                data["companyId"] as Int
+            )
+        )
     }
 
     /**
@@ -355,8 +364,8 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/enable")
-    fun updateEnable(@RequestBody map: Map<String, Any>): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(mono { companyService.updateEnable(map["id"] as Int, map["enable"] as String) })
+    suspend fun updateEnable(@RequestBody map: Map<String, Any>): ResponseInfo<Int> {
+        return ResponseInfo.ok(companyService.updateEnable(map["id"] as Int, map["enable"] as String))
     }
 
     /**
@@ -382,8 +391,8 @@ class CompanyController {
      * @apiPermission user
      */
     @GetMapping("/overview")
-    fun getOverview(companyId: Int): Mono<ResponseInfo<Map<String, Overview>>> {
-        return ResponseInfo.ok(mono { companyService.getOverview(companyId) })
+    suspend fun getOverview(companyId: Int): ResponseInfo<Map<String, Overview>> {
+        return ResponseInfo.ok(companyService.getOverview(companyId))
     }
 
     /**
@@ -405,18 +414,16 @@ class CompanyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @GetMapping("/data")
-    fun getTodayData(): Mono<ResponseInfo<HashMap<String, Any>>> {
-        return ResponseInfo.ok(mono {
-            val data = HashMap<String, Any>()   // TODO 想办法为每个公司加缓存，可以考虑替换协程为Mono
-            // TODO 使用一次查询获取所有指标
-            data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId()   // 交易量
-            data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId()     // 交易金额
-            data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId()         // 开盘次数
-            data["closingPrice"] = tradeInfoService.getTodayOpeningPriceByCompanyId()       // 收盘价
-            data["openingPrice"] = tradeInfoService.getYesterdayClosingPriceByCompanyId()   // 开盘价
-            data["avgPrice"] = tradeInfoService.getAvgPriceByCompanyId()                    // 平均价
-            data
-        })
+    suspend fun getTodayData(): ResponseInfo<HashMap<String, Any>> {
+        val data = HashMap<String, Any>()   // TODO 想办法为每个公司加缓存，可以考虑替换协程为Mono
+        // TODO 使用一次查询获取所有指标
+        data["tradesCapacity"] = tradeInfoService.countStockByTradeTimeAndCompanyId()   // 交易量
+        data["tradesVolume"] = tradeInfoService.countMoneyByTradeTimeAndCompanyId()     // 交易金额
+        data["tradesNumber"] = roomRecordService.countByStartTimeAndCompanyId()         // 开盘次数
+        data["closingPrice"] = tradeInfoService.getTodayOpeningPriceByCompanyId()       // 收盘价
+        data["openingPrice"] = tradeInfoService.getYesterdayClosingPriceByCompanyId()   // 开盘价
+        data["avgPrice"] = tradeInfoService.getAvgPriceByCompanyId()                    // 平均价
+        return ResponseInfo.ok(data)
     }
 
 }

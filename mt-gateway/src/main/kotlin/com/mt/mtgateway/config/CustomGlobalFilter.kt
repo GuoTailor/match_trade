@@ -13,7 +13,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
-import org.springframework.web.cors.reactive.CorsUtils
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -28,7 +27,8 @@ import java.util.regex.Pattern
  */
 @Component
 class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<String>) : WebFilter, Ordered {
-    private val ALLOWED_HEADERS = "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN,token,username,client"
+    private val ALLOWED_HEADERS =
+        "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN,token,username,client"
     private val ALLOWED_METHODS = "*"
     private val ALLOWED_ORIGIN = "*"
     private val ALLOWED_Expose = "*"
@@ -78,18 +78,24 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
                 val authToken = authHeader.replaceFirst(TOKEN_PREFIX, "")
                 val tokenInfo = tokenManger.parseToken(authToken)
                 return redisService.getUserByToken(tokenInfo.id)
-                        .filter { it.toke == authToken }
-                        .flatMap {
-                            val host = request.mutate()
-                                    .header("id", it.id?.toString())
-                                    .header("roles", it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
-                                    .header(HttpHeaders.AUTHORIZATION)
-                                    .build()
-                            val build = exchange.mutate().request(host).build()
-                            chain.filter(build)
-                        }.switchIfEmpty {
-                            authError(exchange, "登录已过期", if (tokenInfo.time.before(Date())) HttpStatus.UNAUTHORIZED else HttpStatus.FORBIDDEN)
-                        }
+                    .filter { it.toke == authToken }
+                    .flatMap {
+                        val host = request.mutate()
+                            .header("id", it.id?.toString())
+                            .header(
+                                "roles",
+                                it.roles.joinToString(prefix = "[", postfix = "]") { s -> "\"${s.name}\"" })
+                            .header(HttpHeaders.AUTHORIZATION)
+                            .build()
+                        val build = exchange.mutate().request(host).build()
+                        chain.filter(build)
+                    }.switchIfEmpty {
+                        authError(
+                            exchange,
+                            "登录已过期",
+                            if (tokenInfo.time.before(Date())) HttpStatus.UNAUTHORIZED else HttpStatus.FORBIDDEN
+                        )
+                    }
             }
             return authError(exchange, "无权访问 $url")
         }
@@ -101,7 +107,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
         if (headers.getFirst(HttpHeaders.CONNECTION) == "Upgrade") {
             if (headers.getFirst(HttpHeaders.UPGRADE) == "websocket") {
                 val queryMap = getQueryMap(request.uri.query)
-                return TOKEN_PREFIX + queryMap[TOKEN_PREFIX.trim().toLowerCase()]
+                return TOKEN_PREFIX + queryMap[TOKEN_PREFIX.trim().lowercase(Locale.getDefault())]
             }
         }
         return headers.getFirst(HttpHeaders.AUTHORIZATION)
@@ -109,7 +115,7 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
 
     private fun getQueryMap(queryStr: String): Map<String, String> {
         val queryMap: MutableMap<String, String> = HashMap()
-        if (!StringUtils.isEmpty(queryStr)) {
+        if (StringUtils.hasLength(queryStr)) {
             val queryParam = queryStr.split("&")
             queryParam.forEach { s: String ->
                 val kv = s.split("=".toRegex(), 2)
@@ -122,11 +128,14 @@ class CustomGlobalFilter(@Value("\${skipAuthUrls}") val skipAuthUrls: List<Strin
 
     /**
      * 认证错误输出
-     * @param resp 响应对象
      * @param mess 错误信息
      * @return
      */
-    private fun authError(swe: ServerWebExchange, mess: String, statusCode: HttpStatus = HttpStatus.UNAUTHORIZED): Mono<Void> {
+    private fun authError(
+        swe: ServerWebExchange,
+        mess: String,
+        statusCode: HttpStatus = HttpStatus.UNAUTHORIZED
+    ): Mono<Void> {
         val resp = swe.response
         resp.statusCode = statusCode
         //resp.headers.add("Content-Type", "application/json;charset=UTF-8")

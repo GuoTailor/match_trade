@@ -3,9 +3,7 @@ package com.mt.mtuser.service.kline
 import com.mt.mtuser.dao.TradeInfoDao
 import com.mt.mtuser.entity.Kline
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.r2dbc.core.DatabaseClient
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
-import org.springframework.data.r2dbc.core.awaitOne
 import org.springframework.r2dbc.core.awaitOne
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -29,10 +27,11 @@ class Compute1MKlineService : ComputeKline() {
 
     override fun formatDate(time: LocalDateTime): LocalDateTime {
         return time.withSecond(0)
-                .withNano(0)
+            .withNano(0)
     }
 
-    override fun handlerRequest(time: LocalDateTime): Boolean = time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
+    override fun handlerRequest(time: LocalDateTime): Boolean =
+        time.plusSeconds(stepOfSeconds).isBefore(LocalDateTime.now())
 
     override suspend fun compute(stockId: Int, companyId: Int, time: LocalDateTime, offset: Long): Kline {
         val startTime = time.plusNanos(1)       // 不包含开头
@@ -48,8 +47,8 @@ class Compute1MKlineService : ComputeKline() {
 
     override suspend fun getMinComputeTime(): LocalDateTime? {
         return template.databaseClient.sql("select min(trade_time) as tradeTime from mt_trade_info")
-                .map { t, _ -> Optional.ofNullable(t.get("tradeTime", LocalDateTime::class.java)) }
-                .awaitOne().orElse(null)
+            .map { t, _ -> Optional.ofNullable(t.get("tradeTime", LocalDateTime::class.java)) }
+            .awaitOne().orElse(null)
     }
 
     override fun step() = stepOfSeconds
@@ -57,27 +56,29 @@ class Compute1MKlineService : ComputeKline() {
     override suspend fun isExist(time: LocalDateTime, stockId: Int, companyId: Int): Boolean = false
 
     suspend fun selectMinuteKline(startTime: LocalDateTime, endTime: LocalDateTime, stockId: Int): Kline {
-        return template.databaseClient.sql("select count(1) as tradesNumber," +
-                " COALESCE(sum(trade_amount), 0) as tradesCapacity, " +
-                " COALESCE(sum(trade_money), 0) as tradesVolume," +
-                " COALESCE(avg(trade_price), 0) as avgPrice," +
-                " COALESCE(min(trade_price), 0) as minPrice," +
-                " COALESCE(max(trade_price), 0) as maxPrice" +
-                " from ${TradeInfoDao.table} " +
-                " where trade_time between :startTime and :endTime " +
-                " and stock_id = :stockId ")
-                .bind("startTime", startTime)
-                .bind("endTime", endTime)
-                .bind("stockId", stockId)
-                .map { r, _ ->
-                    val kline = Kline()
-                    kline.tradesNumber = r.get("tradesNumber", java.lang.Long::class.java)?.toLong()
-                    kline.tradesCapacity = r.get("tradesCapacity", java.lang.Long::class.java)?.toLong()
-                    kline.tradesVolume = r.get("tradesVolume", BigDecimal::class.java)
-                    kline.avgPrice = r.get("avgPrice", BigDecimal::class.java)
-                    kline.minPrice = r.get("minPrice", BigDecimal::class.java)
-                    kline.maxPrice = r.get("maxPrice", BigDecimal::class.java)
-                    kline
-                }.awaitOne()
+        return template.databaseClient.sql(
+            "select count(1) as tradesNumber," +
+                    " COALESCE(sum(trade_amount), 0) as tradesCapacity, " +
+                    " COALESCE(sum(trade_money), 0) as tradesVolume," +
+                    " COALESCE(avg(trade_price), 0) as avgPrice," +
+                    " COALESCE(min(trade_price), 0) as minPrice," +
+                    " COALESCE(max(trade_price), 0) as maxPrice" +
+                    " from ${TradeInfoDao.table} " +
+                    " where trade_time between :startTime and :endTime " +
+                    " and stock_id = :stockId "
+        )
+            .bind("startTime", startTime)
+            .bind("endTime", endTime)
+            .bind("stockId", stockId)
+            .map { r, _ ->
+                val kline = Kline()
+                kline.tradesNumber = r.get("tradesNumber", java.lang.Long::class.java)?.toLong()
+                kline.tradesCapacity = r.get("tradesCapacity", java.lang.Long::class.java)?.toLong()
+                kline.tradesVolume = r.get("tradesVolume", BigDecimal::class.java)
+                kline.avgPrice = r.get("avgPrice", BigDecimal::class.java)
+                kline.minPrice = r.get("minPrice", BigDecimal::class.java)
+                kline.maxPrice = r.get("maxPrice", BigDecimal::class.java)
+                kline
+            }.awaitOne()
     }
 }

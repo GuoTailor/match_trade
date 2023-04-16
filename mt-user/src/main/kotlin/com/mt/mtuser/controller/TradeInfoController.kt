@@ -9,7 +9,7 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.RoleService
 import com.mt.mtuser.service.TradeInfoService
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -26,6 +26,7 @@ import java.time.LocalDate
 class TradeInfoController {
     @Autowired
     private lateinit var tradeInfoService: TradeInfoService
+
     @Autowired
     lateinit var roleService: RoleService
 
@@ -42,8 +43,8 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping
-    fun findDetailsById(id: Int): Mono<ResponseInfo<TradeInfo>> {
-        return ResponseInfo.ok(mono { tradeInfoService.findDetailsById(id) })
+    suspend fun findDetailsById(id: Int): ResponseInfo<TradeInfo?> {
+        return ResponseInfo.ok(tradeInfoService.findDetailsById(id))
     }
 
     /**
@@ -62,8 +63,8 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping("/order/{roomId}")
-    fun findOrder(@PathVariable roomId: String, query: PageQuery): Mono<ResponseInfo<PageView<TradeInfo>>> {
-        return ResponseInfo.ok(mono { tradeInfoService.findOrder(roomId, query) })
+    suspend fun findOrder(@PathVariable roomId: String, query: PageQuery): ResponseInfo<PageView<TradeInfo>> {
+        return ResponseInfo.ok(tradeInfoService.findOrder(roomId, query))
     }
 
     /**
@@ -83,8 +84,12 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping("/order/company/{companyId}")
-    fun findOrderByCompany(@PathVariable companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") date: LocalDate, query: PageQuery): Mono<ResponseInfo<PageView<TradeInfo>>> {
-        return ResponseInfo.ok(mono { tradeInfoService.findOrderByCompany(companyId, date, query) })
+    suspend fun findOrderByCompany(
+        @PathVariable companyId: Int,
+        @DateTimeFormat(pattern = "yyyy-M-d") date: LocalDate,
+        query: PageQuery
+    ): ResponseInfo<PageView<TradeInfo>> {
+        return ResponseInfo.ok(tradeInfoService.findOrderByCompany(companyId, date, query))
     }
 
     /**
@@ -110,20 +115,20 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping("/order")
-    fun findOrderByUserId(@RequestParam(required = false) userId: Int?, query: PageQuery,
-                          @RequestParam(required = false) isBuy: Boolean? = null,
-                          @DateTimeFormat(pattern = "yyyy-MM-dd")
-                          @RequestParam(required = false) date: LocalDate?): Mono<ResponseInfo<PageView<TradeInfo>>> {
+    suspend fun findOrderByUserId(
+        @RequestParam(required = false) userId: Int?, query: PageQuery,
+        @RequestParam(required = false) isBuy: Boolean? = null,
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        @RequestParam(required = false) date: LocalDate?
+    ): ResponseInfo<PageView<TradeInfo>> {
         logger.info(" {} {}", isBuy, date)
-        return ResponseInfo.ok(BaseUser.getcurrentUser().flatMap {
-            mono {
-                if (date == null) {
-                    tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy)
-                } else {
-                    tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy, date)
-                }
-            }
-        })
+        val it = BaseUser.getcurrentUser().awaitSingle()
+        val result = if (date == null) {
+            tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy)
+        } else {
+            tradeInfoService.findOrderByUserId(userId ?: it.id!!, query, isBuy, date)
+        }
+        return ResponseInfo.ok(result)
     }
 
     /**
@@ -151,8 +156,11 @@ class TradeInfoController {
      */
     @GetMapping("/statistics/department")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun statisticsOrderByDepartment(page: PageQuery, companyId: Int): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
-        return ResponseInfo.ok(mono { tradeInfoService.statisticsOrderByDepartment(page, companyId) })
+    suspend fun statisticsOrderByDepartment(
+        page: PageQuery,
+        companyId: Int
+    ): ResponseInfo<PageView<Map<String, Any?>>> {
+        return ResponseInfo.ok(tradeInfoService.statisticsOrderByDepartment(page, companyId))
     }
 
     /**
@@ -176,11 +184,12 @@ class TradeInfoController {
      */
     @GetMapping("/statistics")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN') or hasRole('ANALYST')")
-    fun statisticsOrderByDay(page: PageQuery, @RequestParam(required = false) companyId: Int?): Mono<ResponseInfo<PageView<Map<String, Any?>>>> {
-        return ResponseInfo.ok(mono {
-            val cId = companyId ?: roleService.getCompanyList(Stockholder.ADMIN)[0]
-            tradeInfoService.statisticsOrderByDay(page, cId)
-        })
+    suspend fun statisticsOrderByDay(
+        page: PageQuery,
+        @RequestParam(required = false) companyId: Int?
+    ): ResponseInfo<PageView<Map<String, Any?>>> {
+        val cId = companyId ?: roleService.getCompanyList(Stockholder.ADMIN)[0]
+        return ResponseInfo.ok(tradeInfoService.statisticsOrderByDay(page, cId))
     }
 
     /**
@@ -197,8 +206,8 @@ class TradeInfoController {
      * @apiPermission user
      */
     @GetMapping("/limit")
-    fun getTradeLimit(): Mono<ResponseInfo<Map<String, Any?>>> {
-        return ResponseInfo.ok(mono { tradeInfoService.getTradeLimit() })
+    suspend fun getTradeLimit(): ResponseInfo<Map<String, Any?>> {
+        return ResponseInfo.ok(tradeInfoService.getTradeLimit())
     }
 
     /**
@@ -217,7 +226,11 @@ class TradeInfoController {
      */
     @GetMapping("/excel")
     //@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    fun outExcel(companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate, response: ServerHttpResponse): Mono<Void> {
+    fun outExcel(
+        companyId: Int,
+        @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate,
+        response: ServerHttpResponse
+    ): Mono<Void> {
         return tradeInfoService.outExcel(companyId, data, response)
     }
 
@@ -236,7 +249,11 @@ class TradeInfoController {
      * @apiPermission supperAdmin
      */
     @GetMapping("/details/excel")
-    fun detailsExcel(companyId: Int, @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate, response: ServerHttpResponse): Mono<Void> {
+    fun detailsExcel(
+        companyId: Int,
+        @DateTimeFormat(pattern = "yyyy-M-d") data: LocalDate,
+        response: ServerHttpResponse
+    ): Mono<Void> {
         return tradeInfoService.outDetailsExcel(companyId, data, response)
     }
 }

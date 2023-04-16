@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Util {
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(Util.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Util.class);
     private static final Random random = new Random();
 
     /**
@@ -29,7 +29,7 @@ public class Util {
      */
     public static Map<String, Object> getParameterMap(String json) {
         Map<String, Object> map = new HashMap<>();
-        if (!StringUtils.isEmpty(json)) {
+        if (StringUtils.hasLength(json)) {
             try {
                 map = new ObjectMapper().readValue(json, new TypeReference<Map<String, Object>>() {
                 });

@@ -41,6 +41,7 @@ class FileService {
                 }
                 "$headPath$separator$year$separator$month$pattern$separator$id-$uuid$suffixName"
             }
+
             document -> "$headPath$separator$year$separator$month$pattern$separator$id.html"
             else -> error("")
         }
@@ -54,10 +55,11 @@ class FileService {
     fun uploadImg(filePart: FilePart): Mono<String> {
         return if (filePart.filename().isNotBlank()) {
             BaseUser.getcurrentUser()
-                    .map { getFile(picture, it.id!!, filePart.filename()) }
-                    .flatMap { newFile ->
-                        filePart.transferTo(newFile).then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
-                    }
+                .map { getFile(picture, it.id!!, filePart.filename()) }
+                .flatMap { newFile ->
+                    filePart.transferTo(newFile)
+                        .then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
+                }
         } else Mono.error(IllegalStateException("请选择一个文件"))
     }
 
@@ -96,10 +98,11 @@ class FileService {
     fun uploadFile(filePart: FilePart): Mono<String> {
         return if (filePart.filename().isNotBlank()) {
             BaseUser.getcurrentUser()
-                    .map { getFile(file, it.id!!, filePart.filename()) }
-                    .flatMap { newFile ->
-                        filePart.transferTo(newFile).then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
-                    }
+                .map { getFile(file, it.id!!, filePart.filename()) }
+                .flatMap { newFile ->
+                    filePart.transferTo(newFile)
+                        .then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
+                }
         } else Mono.error(IllegalStateException("请选择一个文件"))
     }
 

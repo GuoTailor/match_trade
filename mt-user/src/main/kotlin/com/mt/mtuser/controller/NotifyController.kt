@@ -6,7 +6,6 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.NotifyService
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -33,8 +32,8 @@ class NotifyController {
      * @apiPermission user
      */
     @GetMapping("/count")
-    fun getUnreadCount(): Mono<ResponseInfo<Long>> {
-        return ResponseInfo.ok(mono { notifyService.getUnreadCount() })
+    suspend fun getUnreadCount(): ResponseInfo<Long> {
+        return ResponseInfo.ok(notifyService.getUnreadCount())
     }
 
     /**
@@ -55,8 +54,8 @@ class NotifyController {
      * @apiPermission user
      */
     @GetMapping
-    fun getAllMsg(query: PageQuery): Mono<ResponseInfo<PageView<Notify>>> {
-        return ResponseInfo.ok(mono { notifyService.getAllMsg(query) })
+    suspend fun getAllMsg(query: PageQuery): ResponseInfo<PageView<Notify>> {
+        return ResponseInfo.ok(notifyService.getAllMsg(query))
     }
 
     /**
@@ -75,8 +74,8 @@ class NotifyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PostMapping
-    fun addMsg(@RequestBody msg: Mono<Notify>): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { notifyService.addMsg(msg.awaitSingle()) })
+    suspend fun addMsg(@RequestBody msg: Mono<Notify>): ResponseInfo<Unit> {
+        return ResponseInfo.ok(notifyService.addMsg(msg.awaitSingle()))
     }
 
     /**
@@ -91,8 +90,8 @@ class NotifyController {
      * @apiPermission admin
      */
     @GetMapping("/announce")
-    fun getAnnounce(): Mono<ResponseInfo<Notify>> {
-        return ResponseInfo.ok(mono { notifyService.getAnnounce() })
+    suspend fun getAnnounce(): ResponseInfo<Notify?> {
+        return ResponseInfo.ok(notifyService.getAnnounce())
     }
 
     /**
@@ -109,8 +108,8 @@ class NotifyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @DeleteMapping
-    fun deleteMsg(id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { notifyService.deleteMsg(id) })
+    suspend fun deleteMsg(id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(notifyService.deleteMsg(id))
     }
 
     /**
@@ -127,8 +126,8 @@ class NotifyController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @PutMapping
-    fun updateMsg(@RequestBody msg: Notify): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(mono { notifyService.updateMsg(msg) })
+    suspend fun updateMsg(@RequestBody msg: Notify): ResponseInfo<Int> {
+        return ResponseInfo.ok(notifyService.updateMsg(msg))
     }
 
 }

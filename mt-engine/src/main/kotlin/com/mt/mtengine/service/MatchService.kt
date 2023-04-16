@@ -1,10 +1,6 @@
 package com.mt.mtengine.service
 
 import com.mt.mtcommon.*
-import com.mt.mtengine.dao.StockholderDao
-import com.mt.mtengine.dao.UserDao
-import com.mt.mtengine.entity.Stockholder
-import com.mt.mtengine.entity.User
 import com.mt.mtengine.match.strategy.MatchStrategy
 import com.mt.mtengine.mq.MatchSink
 import org.slf4j.LoggerFactory
@@ -14,7 +10,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
-import javax.annotation.Resource
 
 /**
  * Created by gyh on 2020/5/6.
@@ -37,24 +32,9 @@ class MatchService {
 
     @Autowired
     private lateinit var stockholderService: StockholderService
-    @Resource
-    private lateinit var userDao: UserDao
-    @Autowired
-    private lateinit var stockholderDao: StockholderDao
     @Autowired
     private lateinit var redisUtil: RedisUtil
 
-    @Transactional(rollbackFor = [Exception::class])
-    fun saveUser(user: User): Mono<Stockholder> {
-        return userDao.save(user)
-            .flatMap {
-                val s = Stockholder()
-                s.userId = 168
-                s.roleId = 4
-                s.companyId = 20
-                stockholderDao.save(s)
-            }
-    }
 
     @Transactional(rollbackFor = [Exception::class])
     fun <T : MatchStrategy.RoomInfo> onMatchSuccess(

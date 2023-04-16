@@ -6,7 +6,6 @@ import com.mt.mtuser.entity.page.PageQuery
 import com.mt.mtuser.entity.page.PageView
 import com.mt.mtuser.service.AnalysisService
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -35,8 +34,8 @@ class AnalysisController {
      */
     @PostMapping
     @PreAuthorize("hasRole('ANALYST')")
-    fun addAnalysis(@RequestBody analysis: Mono<Analysis>): Mono<ResponseInfo<Analysis>> {
-        return ResponseInfo.ok(mono { analysisService.addAnalysis(analysis.awaitSingle()) })
+    suspend fun addAnalysis(@RequestBody analysis: Mono<Analysis>): ResponseInfo<Analysis> {
+        return ResponseInfo.ok(analysisService.addAnalysis(analysis.awaitSingle()))
     }
 
     /**
@@ -54,8 +53,11 @@ class AnalysisController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ANALYST') or hasRole('SUPER_ADMIN')")
-    fun findAllAnalysis(query: Mono<PageQuery>, @RequestParam(required = false) userId: Int?): Mono<ResponseInfo<PageView<Analysis>>> {
-        return ResponseInfo.ok(mono { analysisService.findAllAnalysis(query.awaitSingle(), userId) })
+    suspend fun findAllAnalysis(
+        query: Mono<PageQuery>,
+        @RequestParam(required = false) userId: Int?
+    ): ResponseInfo<PageView<Analysis>> {
+        return ResponseInfo.ok(analysisService.findAllAnalysis(query.awaitSingle(), userId))
     }
 
     /**
@@ -72,8 +74,8 @@ class AnalysisController {
      */
     @GetMapping("/company")
     @PreAuthorize("hasRole('ANALYST') or hasRole('ADMIN')")
-    fun getAllAnalysisByCompany(query: Mono<PageQuery>): Mono<ResponseInfo<PageView<Analysis>>> {
-        return ResponseInfo.ok(mono { analysisService.getAllAnalysisByCompany(query.awaitSingle()) })
+    suspend fun getAllAnalysisByCompany(query: Mono<PageQuery>): ResponseInfo<PageView<Analysis>> {
+        return ResponseInfo.ok(analysisService.getAllAnalysisByCompany(query.awaitSingle()))
     }
 
     /**
@@ -90,8 +92,8 @@ class AnalysisController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ANALYST') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    fun findAnalysisById(@PathVariable id: Int): Mono<ResponseInfo<Analysis>> {
-        return ResponseInfo.ok(mono { analysisService.findAnalysisById(id) })
+    suspend fun findAnalysisById(@PathVariable id: Int): ResponseInfo<Analysis?> {
+        return ResponseInfo.ok(analysisService.findAnalysisById(id))
     }
 
     /**
@@ -107,8 +109,8 @@ class AnalysisController {
      */
     @GetMapping("/unread")
     @PreAuthorize("hasRole('ANALYST') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    fun findUnreadCount(): Mono<ResponseInfo<Long>> {
-        return ResponseInfo.ok(mono { analysisService.findUnreadCount() })
+    suspend fun findUnreadCount(): ResponseInfo<Long> {
+        return ResponseInfo.ok(analysisService.findUnreadCount())
     }
 
     /**
@@ -124,8 +126,8 @@ class AnalysisController {
      */
     @PutMapping
     @PreAuthorize("hasRole('ANALYST') or hasRole('SUPER_ADMIN')")
-    fun updateAnalysis(@RequestBody analysis: Mono<Analysis>): Mono<ResponseInfo<Int>> {
-        return ResponseInfo.ok(mono { analysisService.updateAnalysis(analysis.awaitSingle()) })
+    suspend fun updateAnalysis(@RequestBody analysis: Mono<Analysis>): ResponseInfo<Int> {
+        return ResponseInfo.ok(analysisService.updateAnalysis(analysis.awaitSingle()))
     }
 
     /**
@@ -141,8 +143,8 @@ class AnalysisController {
      */
     @DeleteMapping
     @PreAuthorize("hasRole('ANALYST') or hasRole('SUPER_ADMIN')")
-    fun deleteAnalysis(@RequestParam id: Int): Mono<ResponseInfo<Unit>> {
-        return ResponseInfo.ok(mono { analysisService.deleteAnalysis(id) })
+    suspend fun deleteAnalysis(@RequestParam id: Int): ResponseInfo<Unit> {
+        return ResponseInfo.ok(analysisService.deleteAnalysis(id))
     }
 
 }
