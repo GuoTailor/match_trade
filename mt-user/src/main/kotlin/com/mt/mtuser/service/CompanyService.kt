@@ -119,9 +119,11 @@ class CompanyService {
      * 更新公司信息
      */
     suspend fun update(company: Company): Company {
+        companyDao.findById(company.id!!) ?: throw IllegalStateException("公司不存在")
         // TODO 判断公司房间模式
         company.brief?.let { fileService.addCompanyInfo(it, company.id!!).awaitSingle() }
         company.analystId?.let { addCompanyAnalyst(it, company.id!!) }
+        company.enable = company.enable ?: "1"
         return companyDao.save(company)
     }
 

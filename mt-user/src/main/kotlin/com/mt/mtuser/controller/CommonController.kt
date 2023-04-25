@@ -144,7 +144,7 @@ class CommonController {
     @GetMapping("/common/verifyCode")
     suspend fun verifyCode(@RequestParam phone: String, @RequestParam code: String): ResponseInfo<Unit> {
         val localCode = redisUtil.getCode(phone)
-        if (localCode != null && code == localCode) {
+        if (localCode == null || code != localCode) {
             throw IllegalStateException("验证码错误")
         }
         redisUtil.deleteCode(phone)

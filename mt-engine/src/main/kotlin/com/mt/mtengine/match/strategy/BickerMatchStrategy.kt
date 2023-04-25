@@ -54,7 +54,7 @@ class BickerMatchStrategy : MatchStrategy<BickerMatchStrategy.BickerRoomInfo>() 
     }
 
     class BickerRoomInfo(record: RoomRecord) :
-            MatchStrategy.RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.toEpochMilli(), record.endTime
+            RoomInfo(record.roomId!!, record.mode!!, record.endTime!!.toEpochMilli(), record.endTime
                     ?: LocalTime.MAX.toLocalDateTime()) {
         val orderList = TreeSet(MatchUtil.sortPriceAndTime)
         private var count = 0

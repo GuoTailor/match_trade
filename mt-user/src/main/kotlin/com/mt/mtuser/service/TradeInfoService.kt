@@ -539,16 +539,16 @@ class TradeInfoService {
         return template.databaseClient.sql("""
             SELECT ms.real_name as name ,
             	(select phone from mt_user mu where mu.id = ms.user_id),
-            	(select name from mt_department md where md.id = mdp.post_id) as department,
+            	(select name from mt_department md where md.id = mdp.department_id) as department,
             	(select name from mt_post mp where mp.id = mdp.post_id) as post,
             	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_amount END ) AS buy_amount,
             	SUM ( CASE seller_id WHEN ms.user_id THEN trade_amount END ) AS sell_amount ,
             	SUM ( CASE buyer_id WHEN ms.user_id THEN trade_money END ) AS buy_money,
             	SUM ( CASE seller_id WHEN ms.user_id THEN trade_money END ) AS sell_money 
-            from mt_stockholder ms
-             LEFT JOIN mt_department_post mdp on mdp.id = ms.dp_id
-             LEFT JOIN mt_trade_info mti on mti.company_id = ms.company_id and mti.trade_time
+            from mt_trade_info mti 
+             LEFT JOIN mt_stockholder ms on mti.company_id = ms.company_id and mti.trade_time
              BETWEEN :startTime AND :endTime and (mti.buyer_id = ms.user_id or mti.seller_id = ms.user_id)
+             LEFT JOIN mt_department_post mdp on mdp.id = ms.dp_id
             where ms.company_id = :companyId
             GROUP BY ms.id, mdp.id
             ORDER BY buy_amount, sell_amount
@@ -576,7 +576,6 @@ class TradeInfoService {
                 }.all()
                 .collectList()
             .flatMap { data ->
-
 
                 val rowName = arrayOf(
                     "姓名",
