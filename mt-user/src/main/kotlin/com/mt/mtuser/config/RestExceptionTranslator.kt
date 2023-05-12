@@ -30,7 +30,7 @@ class RestExceptionTranslator {
         val list = ex.allErrors
         val errorMsg = StringJoiner(",")
         for (objectError in list) {
-            var defaultMessage = objectError.defaultMessage
+            var defaultMessage = objectError.defaultMessage!!
             if (objectError is FieldError) {
                 val filed = objectError.field
                 defaultMessage = if (defaultMessage.contains("%s")) {
