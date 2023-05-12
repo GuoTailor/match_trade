@@ -1,5 +1,6 @@
 package com.mt.mtuser.controller
 
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.*
 import com.mt.mtuser.entity.page.PageQuery
@@ -51,7 +52,7 @@ class CompanyController {
         if (!Util.isEmpty(company)) {
             return ResponseInfo.ok(companyService.registerCompany(company))
         } else {
-            throw IllegalStateException("请填写属性")
+            throw BusinessException("请填写属性")
         }
     }
 

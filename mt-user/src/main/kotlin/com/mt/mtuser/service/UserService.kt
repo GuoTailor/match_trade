@@ -1,5 +1,6 @@
 package com.mt.mtuser.service
 
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtuser.dao.StockholderDao
 import com.mt.mtuser.dao.UserDao
 import com.mt.mtuser.entity.Analyst
@@ -56,7 +57,7 @@ class UserService {
                 user.id = null
                 val newUser = userDao.save(user)
                 if (user.phone == "123") {
-                    throw IllegalStateException("用户已存在")
+                    throw BusinessException("用户已存在")
                 }
                 stockholderDao.save(
                     Stockholder(
@@ -64,8 +65,8 @@ class UserService {
                         roleId = roleService.getRoles().find { it.name == Stockholder.USER }!!.id
                     )
                 )
-            } else throw IllegalStateException("用户已存在")
-        } else throw IllegalStateException("请正确填写用户名或密码")
+            } else throw BusinessException("用户已存在")
+        } else throw BusinessException("请正确填写用户名或密码")
     }
 
     suspend fun findById(id: Int) = userDao.findById(id)
@@ -183,7 +184,7 @@ class UserService {
                 .matching(Query.query(where("id").`is`(user.id!!)))
                 .apply(update("password", user.password))
                 .awaitSingle() > 0
-        } else throw IllegalStateException("密码错误")
+        } else throw BusinessException("密码错误")
     }
 
     suspend fun forgetPassword(user: User): Boolean {

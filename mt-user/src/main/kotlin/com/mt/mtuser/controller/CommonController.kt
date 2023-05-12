@@ -1,5 +1,6 @@
 package com.mt.mtuser.controller
 
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtuser.common.SendSms
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.dao.entity.MtRole
@@ -121,7 +122,7 @@ class CommonController {
         val (code, msg) = SendSms.send(phone, smsCode, 5)
         if (code == "0") {
             redisUtil.saveCode(phone, smsCode)
-        } else throw IllegalStateException(msg)
+        } else throw BusinessException(msg ?: "失败")
         return ResponseInfo.ok(msg)
     }
 
@@ -145,7 +146,7 @@ class CommonController {
     suspend fun verifyCode(@RequestParam phone: String, @RequestParam code: String): ResponseInfo<Unit> {
         val localCode = redisUtil.getCode(phone)
         if (localCode == null || code != localCode) {
-            throw IllegalStateException("验证码错误")
+            throw BusinessException("验证码错误")
         }
         redisUtil.deleteCode(phone)
         redisUtil.saveVerifyResult(phone)
@@ -169,10 +170,10 @@ class CommonController {
     @PutMapping("/common/password")
     suspend fun forgetPassword(@RequestBody map: Map<String, String>): ResponseInfo<Boolean> {
         val user = User()
-        user.phone = map["phone"] ?: throw IllegalStateException("请输入手机号")
-        user.password = map["password"] ?: throw IllegalStateException("请输入密码")
+        user.phone = map["phone"] ?: throw BusinessException("请输入手机号")
+        user.password = map["password"] ?: throw BusinessException("请输入密码")
         user.passwordEncoder()
-        redisUtil.getVerify(user.phone!!) ?: throw IllegalStateException("验证码错误")
+        redisUtil.getVerify(user.phone!!) ?: throw BusinessException("验证码错误")
         redisUtil.deleteCode(user.phone!!)
         redisUtil.deleteVerify(user.phone!!)
         val result = userService.forgetPassword(user)

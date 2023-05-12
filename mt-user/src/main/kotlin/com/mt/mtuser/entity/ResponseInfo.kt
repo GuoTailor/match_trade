@@ -52,6 +52,11 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
         }
 
         @JvmStatic
+        fun failed(monoBody: String): ResponseInfo<Unit> {
+            return ResponseInfo(1, monoBody)
+        }
+
+        @JvmStatic
         fun <T> failed(monoBody: Mono<T>, msg: String): Mono<ResponseInfo<T>> {
             return responseBodyCreate(monoBody, 1, msg)
         }

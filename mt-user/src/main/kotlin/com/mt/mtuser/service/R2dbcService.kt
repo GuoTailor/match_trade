@@ -1,5 +1,6 @@
 package com.mt.mtuser.service
 
+import com.mt.mtcommon.exception.BusinessException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy
@@ -34,7 +35,7 @@ class R2dbcService {
                     ?: Update.update(dataAccessStrategy.toSql(column), columns[column])
             }
         }
-        return update ?: throw IllegalStateException("没有可更新的字段")
+        return update ?: throw BusinessException("没有可更新的字段")
     }
 
     fun getTable(type: Class<*>): SqlIdentifier {
@@ -50,10 +51,10 @@ class R2dbcService {
         val outboundRow = dataAccessStrategy.getOutboundRow(data)
         val identifierColumns = dataAccessStrategy.getIdentifierColumns(data.javaClass)
         if (CollectionUtils.isEmpty(identifierColumns)) {
-            throw IllegalStateException("No identifier columns in " + data.javaClass.name + "!")
+            throw BusinessException("No identifier columns in " + data.javaClass.name + "!")
         }
         val sqlIdentifier = identifierColumns[0]
-        val parameter = outboundRow[sqlIdentifier] ?: throw IllegalStateException("主键不能未空")
+        val parameter = outboundRow[sqlIdentifier] ?: throw BusinessException("主键不能未空")
         return Query.query(
             Criteria.where(dataAccessStrategy.toSql(sqlIdentifier)).`is`(
                 parameter.value!!

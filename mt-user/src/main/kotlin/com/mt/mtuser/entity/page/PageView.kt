@@ -1,5 +1,6 @@
 package com.mt.mtuser.entity.page
 
+import com.mt.mtcommon.exception.BusinessException
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +32,7 @@ val logger: Logger = LoggerFactory.getLogger(PageView::class.java)
  */
 suspend inline fun <reified T : Any> getPage(data: Flux<T>, template: R2dbcEntityTemplate, pageQuery: PageQuery, where: Criteria? = null): PageView<T> {
     val tableName = T::class.findAnnotation<Table>()?.value ?: T::class.simpleName
-    ?: throw IllegalStateException("不支持的匿名类 ${T::class}")
+    ?: throw BusinessException("不支持的匿名类 ${T::class}")
     return getPage(data, template, pageQuery, tableName, where)
 }
 

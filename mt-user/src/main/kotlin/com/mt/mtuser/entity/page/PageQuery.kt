@@ -1,12 +1,11 @@
 package com.mt.mtuser.entity.page
 
+import com.mt.mtcommon.exception.BusinessException
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.relational.core.query.Criteria
-import org.springframework.util.StringUtils
-import java.lang.StringBuilder
 
 /**
  * Created by gyh on 2020/3/20.
@@ -20,19 +19,22 @@ import java.lang.StringBuilder
  * @apiParam {String} [order] 排序字段,如: id
  * @apiParam {String} [direction] 排序规则,如: DESC, ASC
  */
-class PageQuery(val pageNum: Int = 0,
-                val pageSize: Int = 30,
-                val searchField: String? = null,    // 查找字段 :name
-                val searchOper: String? = null,     // 查找方式 :"[['cn', '包含'], ['eq', '等于'], ['nc', '不包含'], ['ne', '不等于'], ['gt', '大于'], ['lt', '小于'], ['bw', '开始于'], ['bn', '不开始于'], ['ew', '结束于'], ['en', '不结束于']]")
-                val searchString: String? = null,   // 查找的字符 :张
-                var order: String? = null,          // 排序字段 :id
-                var direction: String? = null       // 排序方向 :asc
+class PageQuery(
+    val pageNum: Int = 0,
+    val pageSize: Int = 30,
+    val searchField: String? = null,    // 查找字段 :name
+    val searchOper: String? = null,     // 查找方式 :"[['cn', '包含'], ['eq', '等于'], ['nc', '不包含'], ['ne', '不等于'], ['gt', '大于'], ['lt', '小于'], ['bw', '开始于'], ['bn', '不开始于'], ['ew', '结束于'], ['en', '不结束于']]")
+    val searchString: String? = null,   // 查找的字符 :张
+    var order: String? = null,          // 排序字段 :id
+    var direction: String? = null       // 排序方向 :asc
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    private val oper = arrayOf(arrayOf("cn", "like", "%%%s%%"), arrayOf("eq", "=", "%s"),
-            arrayOf("nc", "not like", "%%%s%%"), arrayOf("ne", "<>", "%s"), arrayOf("gt", ">", "%s"),
-            arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
-            arrayOf("ew", "like", "%%%s"), arrayOf("en", "not like", "%%%s"))
+    private val oper = arrayOf(
+        arrayOf("cn", "like", "%%%s%%"), arrayOf("eq", "=", "%s"),
+        arrayOf("nc", "not like", "%%%s%%"), arrayOf("ne", "<>", "%s"), arrayOf("gt", ">", "%s"),
+        arrayOf("lt", "<", "%s"), arrayOf("bw", "like", "%s%%"), arrayOf("bn", "not like", "%s%%"),
+        arrayOf("ew", "like", "%%%s"), arrayOf("en", "not like", "%%%s")
+    )
 
     fun where(alias: String = ""): Criteria {
         var criteria = Criteria.empty()
@@ -47,8 +49,8 @@ class PageQuery(val pageNum: Int = 0,
                     "lt" -> lessThan(searchString.toIntOrNull() ?: searchString)
                     "lt;=" -> lessThanOrEquals(searchString.toIntOrNull() ?: searchString)
                     "cn", "bw", "ew" -> buildSubSql(alias)
-                    "nc", "bn", "en" -> throw IllegalStateException("暂不支持的查找方式$searchOper")
-                    else -> throw IllegalStateException("不支持的查找方式$searchOper")
+                    "nc", "bn", "en" -> throw BusinessException("暂不支持的查找方式$searchOper")
+                    else -> throw BusinessException("不支持的查找方式$searchOper")
                 }
             }
         }
@@ -58,7 +60,11 @@ class PageQuery(val pageNum: Int = 0,
     fun page(): Pageable {
         var pageable = PageRequest.of(pageNum, pageSize)
         if (order != null) {
-            pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.fromString(direction ?: Sort.Direction.ASC.name), order))
+            pageable = PageRequest.of(
+                pageNum,
+                pageSize,
+                Sort.by(Sort.Direction.fromString(direction ?: Sort.Direction.ASC.name), order)
+            )
         }
         return pageable
     }

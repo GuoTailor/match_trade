@@ -3,6 +3,7 @@ package com.mt.mtuser.entity.room
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomRecord
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtcommon.plus
 import com.mt.mtcommon.toLocalDateTime
 import org.springframework.data.domain.Persistable
@@ -83,7 +84,7 @@ interface BaseRoom : Persistable<String> {
             RoomEnum.DOUBLE.mode -> LocalTime.ofSecondOfDay(1)
             RoomEnum.CONTINUE.mode -> LocalTime.ofSecondOfDay(1)
             RoomEnum.TIMING.mode -> LocalTime.MIN
-            else -> throw IllegalStateException("不支持的房间号模式${roomId}")
+            else -> throw BusinessException("不支持的房间号模式${roomId}")
         }
         return record
     }

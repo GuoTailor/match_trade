@@ -3,6 +3,7 @@ package com.mt.mtuser.service.room
 import com.mt.mtcommon.RoomEnum
 import com.mt.mtcommon.RoomEvent
 import com.mt.mtcommon.TradeInfo
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtcommon.plus
 import com.mt.mtuser.dao.CompanyDao
 import com.mt.mtuser.dao.RoomRecordDao
@@ -100,7 +101,7 @@ class RoomService {
     @Transactional(rollbackFor = [Exception::class])
     suspend fun enableRoom(roomId: String, value: Boolean, flag: String) {
         val dao = getBaseRoomDao<BaseRoom>(flag)
-        val room: BaseRoom = dao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在")
+        val room: BaseRoom = dao.findByRoomId(roomId) ?: throw BusinessException("房间号不存在")
         val enable = companyDao.findEnableById(room.companyId!!)
         if (enable == "0") {
             logger.info("房间{}已禁用", room.companyId)
@@ -156,8 +157,8 @@ class RoomService {
         val oldDao = getBaseRoomDao<T>(oldFlag)
         val newDao = getBaseRoomDao<T>(room.flag)
         roomEnableMutex.withLock {
-            val oldRoom = oldDao.findByRoomId(roomId) ?: throw IllegalStateException("房间号不存在: $roomId")
-            if (oldRoom.enable == BaseRoom.ENABLE) throw IllegalStateException("房间正在交易，不能切换模式")
+            val oldRoom = oldDao.findByRoomId(roomId) ?: throw BusinessException("房间号不存在: $roomId")
+            if (oldRoom.enable == BaseRoom.ENABLE) throw BusinessException("房间正在交易，不能切换模式")
             return coroutineScope {
                 val one = async { oldDao.deleteById(roomId) }
                 val tew = async { newDao.save(room) }
@@ -171,9 +172,9 @@ class RoomService {
      * 通过房间id更新一个房间的配置
      */
     suspend fun <T : BaseRoom> updateRoomByRoomId(room: T, oldFlag: String): T {
-        val roomId = room.roomId ?: throw IllegalStateException("请指定房间id")
+        val roomId = room.roomId ?: throw BusinessException("请指定房间id")
         if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
-            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
+            throw BusinessException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         val enable = companyDao.findEnableById(room.companyId!!)
         if (enable == "0") error("房间${room.companyId}已禁用")
         val companyList = roleService.getCompanyList(Stockholder.ADMIN)
@@ -196,7 +197,7 @@ class RoomService {
                 quartzManager.modifyJob(RoomEndJobInfo(newRoom), RoomTask.jobEndGroup, roomId)
                 newRoom
             }
-        } else throw IllegalStateException("没有该房间的修改权限")
+        } else throw BusinessException("没有该房间的修改权限")
     }
 
     /**
@@ -208,7 +209,7 @@ class RoomService {
         val dao = getBaseRoomDao<T>(room.flag)
         room.validNull()
         if ((room.startTime!!.toSecondOfDay() + room.time!!.toSecondOfDay()) > LocalTime.MAX.toSecondOfDay())
-            throw IllegalStateException("时长${room.time}超过今天结束时间：23:59:59.999999999")
+            throw BusinessException("时长${room.time}超过今天结束时间：23:59:59.999999999")
         if (company!!.getModes().contains(room.flag)) {         // 判断房间模式(权限)
             room.roomId = baseRoomService.getNextRoomId(room)   // 获取全局唯一的房间id
             room.setEnable<T>(false)
@@ -217,9 +218,9 @@ class RoomService {
                     logger.info(room.toString())
                     addTimingTask(room)
                     return dao.save(room)
-                } else throw IllegalStateException("公司房间已满")
+                } else throw BusinessException("公司房间已满")
             }
-        } else throw IllegalStateException("不能创建该模式${room.flag}的房间")
+        } else throw BusinessException("不能创建该模式${room.flag}的房间")
     }
 
     suspend fun deleteRoom(roomId: String, flag: String) {
@@ -267,7 +268,7 @@ class RoomService {
 
     suspend fun getRoomList(role: String? = null) = coroutineScope {
         val companyList = roleService.getCompanyList(role)
-        if (companyList.isEmpty()) throw IllegalStateException("错误：没有绑定公司，没有可用房间")
+        if (companyList.isEmpty()) throw BusinessException("错误：没有绑定公司，没有可用房间")
         // TODO 不支持分页 可以考虑禁止跳页查询
         getRoomByCompanyId(companyList)
     }
@@ -344,7 +345,7 @@ class RoomService {
         val countDouble = async { doubleRoomDao.countByCompanyId(companyId) }
         val countTimely = async { continueRoomDao.countByCompanyId(companyId) }
         val countTiming = async { timingRoomDao.countByCompanyId(companyId) }
-        company.await() ?: throw IllegalStateException("公司不存在：$companyId")
+        company.await() ?: throw BusinessException("公司不存在：$companyId")
         company.await()?.roomCount!! > (countClick.await() + bickerClick.await() + countDouble.await() + countTimely.await() + countTiming.await())
     }
 
@@ -371,7 +372,7 @@ class RoomService {
             RoomEnum.DOUBLE.mode -> doubleRoomDao as BaseRoomDao<T, String>
             RoomEnum.CONTINUE.mode -> continueRoomDao as BaseRoomDao<T, String>
             RoomEnum.TIMING.mode -> timingRoomDao as BaseRoomDao<T, String>
-            else -> throw IllegalStateException("不支持的房间号")
+            else -> throw BusinessException("不支持的房间号")
         }
     }
 
