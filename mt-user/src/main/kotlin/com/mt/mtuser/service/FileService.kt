@@ -1,5 +1,6 @@
 package com.mt.mtuser.service
 
+import com.mt.mtcommon.exception.BusinessException
 import com.mt.mtuser.common.Util
 import com.mt.mtuser.entity.BaseUser
 import org.slf4j.LoggerFactory
@@ -60,7 +61,7 @@ class FileService {
                     filePart.transferTo(newFile)
                         .then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
                 }
-        } else Mono.error(IllegalStateException("请选择一个文件"))
+        } else Mono.error(BusinessException("请选择一个文件"))
     }
 
     fun deleteFile(path: String?): Boolean {
@@ -103,7 +104,7 @@ class FileService {
                     filePart.transferTo(newFile)
                         .then(Mono.just(fileHost + newFile.absolutePath.replaceFirst(headPath, "").trim()))
                 }
-        } else Mono.error(IllegalStateException("请选择一个文件"))
+        } else Mono.error(BusinessException("请选择一个文件"))
     }
 
 }

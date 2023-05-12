@@ -86,17 +86,17 @@ class CommonController {
     @PostMapping("/register")
     fun register(@RequestBody map: Mono<Map<String, String>>): Mono<ResponseInfo<Unit>> {
         val result = map.flatMap {
-            val code = it["code"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入验证码"))
+            val code = it["code"] ?: return@flatMap Mono.error<Unit>(BusinessException("请输入验证码"))
             val user = User()
-            user.phone = it["phone"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入手机号"))
-            user.password = it["password"] ?: return@flatMap Mono.error<Unit>(IllegalStateException("请输入密码"))
+            user.phone = it["phone"] ?: return@flatMap Mono.error<Unit>(BusinessException("请输入手机号"))
+            user.password = it["password"] ?: return@flatMap Mono.error<Unit>(BusinessException("请输入密码"))
             logger.info(code)
             mono {
                 if (!userService.existsUserByPhone(user.phone!!)) {
                     redisUtil.getCode(user.phone!!)
                 } else error("用户已存在")
             }.filter { localCode -> localCode != null && code == localCode }
-                .switchIfEmpty(Mono.error(IllegalStateException("验证码错误")))
+                .switchIfEmpty(Mono.error(BusinessException("验证码错误")))
                 .flatMap { mono { redisUtil.deleteCode(user.phone!!) } }
                 .flatMap { mono { userService.register(user) } }
         }
