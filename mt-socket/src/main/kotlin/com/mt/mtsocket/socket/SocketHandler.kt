@@ -48,7 +48,10 @@ abstract class SocketHandler : WebSocketHandler {
             .flatMap {
                 val resp = ServiceResponseInfo(req = it.req, order = NotifyOrder.requestReq)
                 dispatcherServlet.doDispatch(it, resp)
-                resp.getMono().onErrorResume { e ->
+                logger.info("{}", resp.data)
+                resp.getMono()
+                    .map { d -> logger.info("响应 {}", d.data.toString()); d }
+                    .onErrorResume { e ->
                     logger.info("错误 {}", e.message)
                     ServiceResponseInfo(
                         ResponseInfo.failed("错误 ${e.message}"),
@@ -64,6 +67,7 @@ abstract class SocketHandler : WebSocketHandler {
             .doOnError { logger.info("错误 {}", it.message) }
             .map { session.textMessage(it) })
         val onCon = onConnect(queryMap, sessionHandler)
+            .flatMap { sessionHandler.send(ResponseInfo.ok<Unit>("连接成功"), NotifyOrder.connectSucceed, true) }
         return Mono.zip(onCon, input, output).then()
     }
 

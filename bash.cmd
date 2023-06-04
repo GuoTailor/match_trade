@@ -1,4 +1,4 @@
-call mvnd clean kotlin:compile package -Dmaven.test.skip=true
+call mvnd clean kotlin:compile package -Dmaven.test.skip=true -pl %1 -am
 
 @rem call copy mt-user\target\mt-user-0.0.1-SNAPSHOT.jar docker
 @rem call copy mt-gateway\target\mt-gateway-0.0.1-SNAPSHOT.jar docker

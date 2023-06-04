@@ -17,6 +17,10 @@ class ResponseInfo<T>(var code: Int, var msg: String) : Serializable {
         this.data = data
     }
 
+    override fun toString(): String {
+        return "{code: $code, msg: $msg, data: $data}"
+    }
+
     companion object {
         @JvmStatic
         fun <T> ok(monoBody: Mono<T>): Mono<ResponseInfo<T>> {

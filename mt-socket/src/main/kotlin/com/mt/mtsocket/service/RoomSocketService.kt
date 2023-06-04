@@ -182,7 +182,8 @@ class RoomSocketService {
             .flatMap {
                 val roomInfo = store.getRoomInfo(it.id!!)
                     ?: return@flatMap Mono.error<TopThree>(IllegalStateException("错误，用户没有加入房间"))
-                redisUtil.getRoomTopThree(roomInfo.roomId).defaultIfEmpty(TopThree(roomInfo.roomId, roomInfo.mode))
+                redisUtil.getRoomTopThree(roomInfo.roomId)
+                    .defaultIfEmpty(TopThree(roomInfo.roomId, roomInfo.mode))
             }
     }
 
